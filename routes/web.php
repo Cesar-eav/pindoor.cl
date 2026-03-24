@@ -15,6 +15,14 @@ Route::get('/buscar', [PuntoInteresController::class, 'index'])->name('puntos.in
 Route::get('/lugar/{slug}', [PuntoInteresController::class, 'show'])->name('puntos.show');
 
 
+Route::get('/labrujula', [PuntoInteresController::class, 'index'])->name('atractivos.index');
+Route::get('/atractivos/{atractivo}', [PuntoInteresController::class, 'show'])->name('atractivos.show');
+Route::get('/atractivos/categoria/{categoria}', [PuntoInteresController::class, 'filtrarPorCategoria'])->name('atractivos.categoria');
+Route::get('/atractivos/ciudad/{ciudad}', [PuntoInteresController::class, 'filtrarPorCiudad'])->name('atractivos.ciudad');
+Route::get('/panoramas', [PuntoInteresController::class, 'panoramas'])->name('atractivos.panoramas');
+
+
+
 /* --- RUTAS PROTEGIDAS (BREEZE) --- */
 Route::get('/dashboard', function () {
     return view('dashboard');

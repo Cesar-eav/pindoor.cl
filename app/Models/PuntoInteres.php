@@ -38,4 +38,7 @@ class PuntoInteres extends Model
         {
             return $this->hasMany(ImagenPunto::class, 'punto_interes_id');
         }
-}
+
+    public function categoria(){
+        return $this->belongsTo(Categoria::class);        }
+    }

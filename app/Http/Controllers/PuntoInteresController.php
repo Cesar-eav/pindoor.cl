@@ -9,6 +9,66 @@ use Illuminate\Support\Facades\Auth;
 
 class PuntoInteresController extends Controller
 {
+
+  public function index(Request $request)
+{
+    try {
+        $query = PuntoInteres::query();
+
+        // --- Filtros existentes ---
+        if ($request->filled('category')) {
+            $query->whereHas('categoria', function ($q) use ($request) {
+                $q->where('slug', $request->category);
+            });
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // --- NUEVO: Filtro por GPS ---
+        if ($request->filled(['lat', 'lng', 'rango'])) {
+            $lat = $request->lat;
+            $lng = $request->lng;
+            $rango = $request->rango;
+
+            // 1. Calculamos la distancia y la filtramos
+            $query->whereRaw(
+                "ST_Distance_Sphere(POINT(lng, lat), POINT(?, ?)) <= ?", 
+                [$lng, $lat, $rango]
+            );
+
+            // 2. Agregamos la distancia como un campo para mostrarla en la vista
+            $query->selectRaw("*, ST_Distance_Sphere(POINT(lng, lat), POINT(?, ?)) as distancia", [$lng, $lat]);
+            
+            // 3. Ordenamos por el más cercano (en lugar de Random)
+            $query->orderBy('distancia', 'asc');
+        } else {
+            $query->inRandomOrder();
+        }
+
+        $atractivos = $query->with('categoria')->paginate(40)->withQueryString();
+        $categorias = Categoria::all();
+
+        if ($request->ajax() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return view('labrujula.partials.atractivos-container', compact('atractivos'))->render();
+        }
+
+        return view('labrujula.index', compact('atractivos', 'categorias'));
+        
+    } catch (\Exception $e) {
+        Log::error('Error en index: ' . $e->getMessage());
+        return back()->with('error', 'Ocurrió un error al buscar.');
+    }
+}
+
+
+
+
     /**
      * Muestra el listado de locales que pertenecen al cliente logueado.
      */
