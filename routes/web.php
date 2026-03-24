@@ -30,8 +30,14 @@ Route::middleware('auth')->group(function () {
 /* --- RUTAS ADMINISTRADOR --- */
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/stats', [AdminController::class, 'index'])->name('stats');
+    
+    // Gestión de Usuarios
+    Route::get('/usuarios', [AdminController::class, 'usuarios'])->name('usuarios');
+    
+    // Puntos de Interés General (Creados por Admin)
+    Route::get('/puntos/crear', [AdminController::class, 'createPunto'])->name('puntos.create');
+    Route::post('/puntos/guardar', [AdminController::class, 'storePunto'])->name('puntos.store');
 });
-
 
 /* --- RUTAS CLIENTES (NEGOCIOS) --- */
 Route::middleware(['auth', 'role:cliente'])->prefix('cliente')->name('cliente.')->group(function () {

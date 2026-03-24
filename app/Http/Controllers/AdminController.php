@@ -38,4 +38,41 @@ class AdminController extends Controller
             'ultimosClientes'
         ));
     }
+
+    public function usuarios()
+    {
+        $usuarios = User::latest()->paginate(10);
+        return view('admin.usuarios', compact('usuarios'));
+    }
+
+    public function createPunto()
+    {
+        return view('admin.puntos-create');
+    }
+
+    public function storePunto(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|max:255',
+            'category' => 'required',
+            'sector' => 'required',
+            'description' => 'required',
+        ]);
+
+        PuntoInteres::create([
+            'user_id' => auth()->id(), // El admin es el dueño de estos puntos
+            'title' => $request->title,
+            'slug' => Str::slug($request->title) . '-' . rand(100, 999),
+            'category' => $request->category,
+            'sector' => $request->sector,
+            'description' => $request->description,
+            'lat' => $request->lat,
+            'lng' => $request->lng,
+            'activo' => true,
+            'eliminado' => false,
+            // Podríamos añadir una marca de "Lugar Público" si quisieras más adelante
+        ]);
+
+        return redirect()->route('admin.stats')->with('success', 'Punto de interés general creado.');
+    }
 }
