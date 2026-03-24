@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PuntoInteres;
+use App\Models\Categoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -58,7 +59,7 @@ class PuntoInteresController extends Controller
             return view('labrujula.partials.atractivos-container', compact('atractivos'))->render();
         }
 
-        return view('labrujula.index', compact('atractivos', 'categorias'));
+        return view('puntos.index_puntos', compact('atractivos', 'categorias'));
         
     } catch (\Exception $e) {
         Log::error('Error en index: ' . $e->getMessage());

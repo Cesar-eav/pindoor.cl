@@ -6,9 +6,7 @@ use App\Http\Controllers\AdminController;        // Importante crearlo luego
 use Illuminate\Support\Facades\Route;
 
 /* --- RUTAS PÚBLICAS (TURISTAS) --- */
-Route::get('/', function () {
-    return view('welcome'); // Aquí irá tu mapa de Valpo
-})->name('home');
+Route::get('/', [PuntoInteresController::class, 'index'])->name('puntos.index');
 
 // El turista busca y ve, pero no edita
 Route::get('/buscar', [PuntoInteresController::class, 'index'])->name('puntos.index');
