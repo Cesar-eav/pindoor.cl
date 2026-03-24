@@ -43,7 +43,7 @@
                         <textarea name="description" rows="4" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-pindoor-accent"></textarea>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    {{-- <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <div>
                             <x-input-label for="lat" :value="__('Latitud (Para el mapa)')" />
                             <x-text-input name="lat" class="block mt-1 w-full" placeholder="-33.047..." />
@@ -52,8 +52,12 @@
                             <x-input-label for="lng" :value="__('Longitud (Para el mapa)')" />
                             <x-text-input name="lng" class="block mt-1 w-full" placeholder="-71.629..." />
                         </div>
+                    </div> --}}
+                    <div class="mb-6">
+                        <x-input-label :value="__('Ubicación Geográfica')" class="mb-2" />
+                        <div id="app"> <selector-mapa></selector-mapa>
+                        </div>
                     </div>
-
                     <div class="flex justify-end">
                         <x-primary-button class="bg-gray-800">
                             {{ __('Guardar Punto Público') }}
