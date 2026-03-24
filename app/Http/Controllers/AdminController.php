@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PuntoInteres;
+use App\Models\Categoria;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -50,12 +51,13 @@ class AdminController extends Controller
     {
 
     // Traemos los puntos creados por el admin (puntos públicos)
+        $categorias = Categoria::orderBy('nombre')->get();
         $puntos = PuntoInteres::where('user_id', auth()->id())
                             ->where('eliminado', false)
                             ->latest()
                             ->get();
 
-        return view('admin.puntos-create', compact('puntos'));
+        return view('admin.puntos-create', compact('puntos', 'categorias'));
 
     }
 
