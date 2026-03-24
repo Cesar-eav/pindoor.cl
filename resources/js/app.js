@@ -2,11 +2,11 @@ import './bootstrap';
 import { createApp } from 'vue';
 import PindoorTest from './components/PindoorTest.vue';
 
-// import Alpine from 'alpinejs';
+import Alpine from 'alpinejs';
 
-// window.Alpine = Alpine;
+window.Alpine = Alpine;
 
-// Alpine.start();
+Alpine.start();
 
 const app = createApp({});
 
