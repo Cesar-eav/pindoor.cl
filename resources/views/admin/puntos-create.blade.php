@@ -39,12 +39,11 @@
                             </div>
                             <div>
                                 <x-input-label for="category" :value="__('Categoría')" />
-                                <select name="category" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm">
-                                    <option value="Mirador">Mirador 🚠</option>
-                                    <option value="Mural">Mural / Street Art 🎨</option>
-                                    <option value="Escalera">Escalera Icónica 🪜</option>
-                                    <option value="Plaza">Plaza / Parque 🌳</option>
-                                    <option value="Monumento">Monumento Histórico 🏛️</option>
+                                <select name="categoria_id" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-pindoor-accent">
+                                    <option value="">Selecciona una categoría</option>
+                                    @foreach($categorias as $cat)
+                                        <option value="{{ $cat->id }}">{{ $cat->nombre }} {{ $cat->icono ? '—' : '' }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
@@ -63,11 +62,53 @@
                         <div class="mb-6">
                             <x-input-label for="sector" :value="__('Sector / Cerro')" />
                             <select name="sector" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm">
+                                <option value="Cerro Alegre">Plan</option>
                                 <option value="Cerro Alegre">Cerro Alegre</option>
                                 <option value="Cerro Concepción">Cerro Concepción</option>
+                                <option value="Cerro Alegre">Cerro San Juan de Dios</option>
+                                <option value="Cerro Alegre">Cerro Bellavista</option>
+                                <option value="Cerro Alegre">Cerro Monjas</option>
+                                <option value="Cerro Alegre">Cerro Mariposas</option>
+                                <option value="Cerro Alegre">Cerro Florida</option>
                                 <option value="Playa Ancha">Playa Ancha</option>
                                 <option value="Cerro Artillería">Cerro Artillería</option>
-                                <option value="Cerro Cordillera">Cerro Cordillera</option>
+
+
+
+                                <option value="Cerro Alegre">Cerro Esperanza</option>
+                                <option value="Cerro Alegre">Cerro Placeres</option>
+                                <option value="Cerro Alegre">Cerro Barón</option>
+                                <option value="Cerro Alegre">Cerro Lecheros</option>
+                                <option value="Cerro Alegre">Cerro Larraín</option>
+                                <option value="Cerro Alegre">Cerro Polanco</option>
+                                <option value="Cerro Alegre">Cerro Molino</option>
+                                <option value="Cerro Alegre">Cerro Rodríguez</option>
+                                <option value="Cerro Alegre">Cerro Rocuant</option>
+                                <option value="Cerro Alegre">Cerro Delicias</option>
+                                <option value="Cerro Alegre">Cerro O'Higgins</option>
+                                <option value="Cerro Alegre">Cerro San Roque</option>
+                                 <option value="Cerro Alegre">Cerro Rodríguez</option>
+                                <option value="Cerro Alegre">Cerro Ramaditas</option>                               
+                                 <option value="Cerro Alegre">Cerro Merced</option>
+                                <option value="Cerro Alegre">Cerro Las Cañas</option>                           
+                                <option value="Cerro Alegre">Cerro El Litre</option>
+                                <option value="Cerro Alegre">Cerro La Cruz</option>
+
+
+                                <option value="Cerro Alegre">Cerro Jiménez</option>
+                                <option value="Cerro Alegre">Cerro La Loma</option>
+                                <option value="Cerro Alegre">Cerro Yungay</option>
+                                <option value="Cerro Alegre">Cerro Panteón</option>
+                                <option value="Cerro Alegre">Cerro Cárcel</option>
+
+
+                                <option value="Cerro Cordillera">Cerro Mesilla</option>
+                                <option value="Cerro Cordillera">Cerro Toro</option>
+                                <option value="Cerro Cordillera">Cerro Santo Domingo</option>
+                                <option value="Cerro Cordillera">Cerro Arrayán</option>
+                                <option value="Cerro Cordillera">Cerro Perdices</option>
+                                <option value="Cerro Cordillera">Placilla</option>
+                                <option value="Cerro Cordillera">Laguna Verde</option>
                             </select>
                         </div>
 
