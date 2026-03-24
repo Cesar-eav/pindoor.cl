@@ -13,9 +13,13 @@ class CheckRole
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
-    {
+public function handle(Request $request, Closure $next, string $role): Response    {
     if (!$request->user() || $request->user()->type !== $role) {
+            
+        if ($request->user() && $request->user()->type === 'cliente') {
+                        return redirect()->route('cliente.mis-puntos');
+                    }
+
         return redirect('/dashboard'); // O a donde prefieras mandarlos
     }
         return $next($request);

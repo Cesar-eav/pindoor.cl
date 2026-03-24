@@ -18,6 +18,24 @@
                 </div>
             </div>
 
+            @if(Auth::user()->type === 'admin')
+                    <x-nav-link :href="route('admin.stats')" :active="request()->routeIs('admin.stats')" class="text-red-600 font-bold">
+                        {{ __('Estadísticas Globales') }}
+                    </x-nav-link>
+                    <x-nav-link href="/admin/usuarios">
+                        {{ __('Gestionar Clientes') }}
+                    </x-nav-link>
+                @endif
+                
+                @if(Auth::user()->type === 'cliente')
+                        <x-nav-link :href="route('cliente.mis-puntos')" :active="request()->routeIs('cliente.mis-puntos')">
+                            {{ __('Mis Locales') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('cliente.create')" :active="request()->routeIs('cliente.create')">
+                            {{ __('Registrar Local') }}
+                        </x-nav-link>
+                    @endif
+
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">

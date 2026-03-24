@@ -34,7 +34,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 
 /* --- RUTAS CLIENTES (NEGOCIOS) --- */
-Route::middleware(['auth', 'role:negocio'])->prefix('business')->name('business.')->group(function () {
+Route::middleware(['auth', 'role:cliente'])->prefix('cliente')->name('cliente.')->group(function () {
     // Aquí el cliente gestiona sus propios puntos
     Route::get('/mis-puntos', [PuntoInteresController::class, 'misPuntos'])->name('mis-puntos');
     Route::get('/nuevo-punto', [PuntoInteresController::class, 'create'])->name('create');
