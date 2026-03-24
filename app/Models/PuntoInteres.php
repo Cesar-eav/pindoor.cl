@@ -11,6 +11,29 @@ class PuntoInteres extends Model
 
     protected $table = 'puntosinteres';
 
+    protected $fillable = [
+        'user_id',      
+        'title',
+        'slug',
+        'category',
+        'sector',
+        'description',
+        'direccion',
+        'lat',
+        'lng',
+        'video_url',
+        'horario',
+        'autor',
+        'tags',
+        'activo',
+        'eliminado',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function imagenes()
         {
             return $this->hasMany(ImagenPunto::class, 'punto_interes_id');

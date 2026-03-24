@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PuntoInteres;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -47,7 +48,21 @@ class AdminController extends Controller
 
     public function createPunto()
     {
-        return view('admin.puntos-create');
+
+    // Traemos los puntos creados por el admin (puntos públicos)
+        $puntos = PuntoInteres::where('user_id', auth()->id())
+                            ->where('eliminado', false)
+                            ->latest()
+                            ->get();
+
+        return view('admin.puntos-create', compact('puntos'));
+
+    }
+
+    public function togglePunto(PuntoInteres $punto)
+    {
+        $punto->update(['activo' => !$punto->activo]);
+        return back()->with('success', 'Estado actualizado correctamente.');
     }
 
     public function storePunto(Request $request)

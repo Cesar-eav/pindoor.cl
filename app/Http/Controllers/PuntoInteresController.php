@@ -55,6 +55,8 @@ class PuntoInteresController extends Controller
             'sector'      => $request->sector,
             'description' => $request->description,
             'direccion'   => $request->direccion,
+            'autor'       => $request->autor, // <--- GUARDAR
+            'tags'        => $request->tags,
             'lat'         => $request->lat,
             'lng'         => $request->lng,
             'video_url'   => $request->video_url,
@@ -62,6 +64,20 @@ class PuntoInteresController extends Controller
             'activo'      => true,    // Por defecto nace visible
             'eliminado'   => false,   // Por defecto no está borrado
         ]);
+
+        // Procesar Imágenes
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $file) {
+                // Guardar archivo físicamente
+                $path = $file->store('puntos', 'public');
+
+                // Guardar en base de datos
+                $punto->imagenes()->create([
+                    'ruta' => $path,
+                    'es_principal' => $request->ordered_images[$index]['is_main'] == 1,
+                ]);
+            }
+        }
 
         // 3. Redirigir con mensaje de éxito
         return redirect()->route('cliente.mis-puntos')
