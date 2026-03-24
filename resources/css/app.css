@@ -1,3 +1,13 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+
+@import "tailwindcss";
+
+/* ⚠️ MUCHA ATENCIÓN A LAS RUTAS ⚠️ */
+/* Desde resources/css/, tenemos que subir (..) para entrar a views o js */
+
+
+@source "../views/**/*.blade.php";
+@source "../js/**/*.vue";
+
+@theme {
+  --color-pindoor-accent: #ff5a5f;
+}
