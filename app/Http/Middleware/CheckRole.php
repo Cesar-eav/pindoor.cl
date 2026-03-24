@@ -15,8 +15,8 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->user()->type !== $role) {
-        return redirect('/dashboard'); // Si no es el rol correcto, lo mandas a su casa
+    if (!$request->user() || $request->user()->type !== $role) {
+        return redirect('/dashboard'); // O a donde prefieras mandarlos
     }
         return $next($request);
     }

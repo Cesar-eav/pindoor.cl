@@ -1,23 +1,21 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PuntoInteresController; // Importante crearlo luego
+use App\Http\Controllers\AdminController;        // Importante crearlo luego
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
+/* --- RUTAS PÚBLICAS (TURISTAS) --- */
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('welcome'); // Aquí irá tu mapa de Valpo
+})->name('home');
 
+// El turista busca y ve, pero no edita
+Route::get('/buscar', [PuntoInteresController::class, 'index'])->name('puntos.index');
+Route::get('/lugar/{slug}', [PuntoInteresController::class, 'show'])->name('puntos.show');
+
+
+/* --- RUTAS PROTEGIDAS (BREEZE) --- */
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -26,6 +24,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+
+/* --- RUTAS ADMINISTRADOR --- */
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/stats', [AdminController::class, 'index'])->name('stats');
+});
+
+
+/* --- RUTAS CLIENTES (NEGOCIOS) --- */
+Route::middleware(['auth', 'role:negocio'])->prefix('business')->name('business.')->group(function () {
+    // Aquí el cliente gestiona sus propios puntos
+    Route::get('/mis-puntos', [PuntoInteresController::class, 'misPuntos'])->name('mis-puntos');
+    Route::get('/nuevo-punto', [PuntoInteresController::class, 'create'])->name('create');
+    Route::post('/guardar-punto', [PuntoInteresController::class, 'store'])->name('store');
 });
 
 require __DIR__.'/auth.php';
