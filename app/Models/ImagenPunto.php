@@ -13,7 +13,14 @@ class ImagenPunto extends Model
 
         protected $guarded = [];
 
-        public function lugar()
+        protected $fillable = [
+        'punto_interes_id',
+        'ruta',
+        'es_principal',
+        'orden',
+    ];
+
+        public function puntoInteres()
         {
             return $this->belongsTo(PuntoInteres::class, 'punto_interes_id');
         }

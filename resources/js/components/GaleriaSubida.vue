@@ -60,7 +60,7 @@ export default {
             images: [],
             isUploading: false,
             uploadProgress: 0,
-            endpoint: '/cliente/guardar-punto'
+            endpoint: '/admin/puntos/guardar'
         };
     },
     mounted() {
@@ -100,15 +100,17 @@ export default {
             this.uploadProgress = 0;
 
             const formData = new FormData();
+            
+            // 1. Capturamos los datos del formulario (título, categoria_id, sector, etc.)
             const mainForm = document.querySelector('#main-form');
             const otherData = new FormData(mainForm);
-            
             for (let [key, value] of otherData.entries()) {
                 formData.append(key, value);
             }
 
+            // 2. Añadimos las fotos con el nombre 'photos[]' que espera el controlador
             this.images.forEach((img, index) => {
-                formData.append(`photos[${index}]`, img.file);
+                formData.append(`photos[${index}]`, img.file); // El nombre debe ser 'photos'
                 formData.append(`metadata[${index}][is_main]`, img.is_main ? 1 : 0);
             });
 
@@ -120,11 +122,14 @@ export default {
                     }
                 });
 
+                // 3. Manejamos la respuesta JSON del controlador
                 if (response.data.success) {
-                    window.location.href = response.data.url;
+                    // Usamos la URL que nos manda el controlador para redirigir
+                    window.location.href = response.data.url + '?success=1';
                 }
             } catch (error) {
-                alert("Error al subir los datos. Revisa el tamaño de las imágenes.");
+                console.error(error);
+                alert("Error al subir los datos. Revisa que todos los campos obligatorios estén llenos.");
             } finally {
                 this.isUploading = false;
             }

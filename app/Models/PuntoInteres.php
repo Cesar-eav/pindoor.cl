@@ -11,8 +11,13 @@ class PuntoInteres extends Model
 
     protected $table = 'puntosinteres';
 
+    protected $casts = [
+        'tags' => 'array',
+    ];
+
     protected $fillable = [
-        'user_id',      
+        'user_id',
+        'categoria_id',
         'title',
         'slug',
         'category',
@@ -40,5 +45,14 @@ class PuntoInteres extends Model
         }
 
     public function categoria(){
-        return $this->belongsTo(Categoria::class);        }
+        return $this->belongsTo(Categoria::class);        
+        }
+
+
+    public function imagenPrincipal()
+    {
+        return $this->hasOne(ImagenPunto::class, 'punto_interes_id')
+                    ->where('es_principal', true);
+    }
+
     }

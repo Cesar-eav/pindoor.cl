@@ -72,9 +72,6 @@
                                 <option value="Cerro Alegre">Cerro Florida</option>
                                 <option value="Playa Ancha">Playa Ancha</option>
                                 <option value="Cerro Artillería">Cerro Artillería</option>
-
-
-
                                 <option value="Cerro Alegre">Cerro Esperanza</option>
                                 <option value="Cerro Alegre">Cerro Placeres</option>
                                 <option value="Cerro Alegre">Cerro Barón</option>

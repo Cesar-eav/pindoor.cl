@@ -71,18 +71,21 @@ class AdminController extends Controller
     {
         $request->validate([
             'title' => 'required|max:255',
-            'category' => 'required',
-            'sector' => 'required',
+            'categoria_id' => 'required|exists:categorias,id', // Validamos que el ID exista            'sector' => 'required',
             'description' => 'required',
+            'photos'       => 'required|array',       // Debe venir al menos una foto
+            'photos.*'     => 'image|mimes:jpeg,png,jpg|max:2048', // Reglas por cada imagen
         ]);
 
-        PuntoInteres::create([
+        $punto = PuntoInteres::create([
             'user_id' => auth()->id(), // El admin es el dueño de estos puntos
+            'categoria_id' => $request->categoria_id,            
             'title' => $request->title,
             'slug' => Str::slug($request->title) . '-' . rand(100, 999),
-            'category' => $request->category,
             'sector' => $request->sector,
             'description' => $request->description,
+            'tags'         => $request->tags ? array_map('trim', explode(',', $request->tags)) : [],
+            'autor'        => $request->autor,
             'lat' => $request->lat,
             'lng' => $request->lng,
             'activo' => true,
@@ -90,6 +93,28 @@ class AdminController extends Controller
             // Podríamos añadir una marca de "Lugar Público" si quisieras más adelante
         ]);
 
-        return redirect()->route('admin.stats')->with('success', 'Punto de interés general creado.');
+        // 3. Procesar y guardar las imágenes
+    if ($request->hasFile('photos')) {
+        foreach ($request->file('photos') as $index => $file) {
+            
+            // Guardar el archivo en storage/app/public/puntos
+            $path = $file->store('puntos', 'public');
+
+            // Leer la metadata que envió Vue (is_main)
+            $esPrincipal = $request->input("metadata.{$index}.is_main") == 1;
+
+            // Crear el registro en la tabla imagenes_punto
+            $punto->imagenes()->create([
+                'ruta'         => $path,
+                'es_principal' => $esPrincipal,
+                'orden'        => $index, // Guardamos el orden del drag & drop
+            ]);
+        }
+    }
+
+        return response()->json([
+            'success' => true,
+            'url'     => route('admin.puntos.create'),
+        ]);
     }
 }
