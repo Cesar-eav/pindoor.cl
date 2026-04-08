@@ -89,7 +89,8 @@ class PuntoInteresController extends Controller
      */
     public function create()
     {
-        return view('cliente.create');
+        $categorias = Categoria::orderBy('nombre')->get();
+        return view('cliente.create', compact('categorias'));
     }
 
     /**
@@ -100,7 +101,6 @@ class PuntoInteresController extends Controller
         // 1. Validar la entrada
         $request->validate([
             'title'       => 'required|string|max:255',
-            'category'    => 'required|string',
             'sector'      => 'required|string',
             'description' => 'required|string',
             'lat'         => 'nullable|numeric',
@@ -112,7 +112,6 @@ class PuntoInteresController extends Controller
             'user_id'     => Auth::id(),
             'title'       => $request->title,
             'slug'        => Str::slug($request->title) . '-' . rand(100, 999), // Evita duplicados de slug
-            'category'    => $request->category,
             'sector'      => $request->sector,
             'description' => $request->description,
             'direccion'   => $request->direccion,

@@ -23,7 +23,7 @@
                         @foreach($puntos as $punto)
                             <div class="border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition">
                                 <div class="p-4">
-                                    <span class="text-xs font-bold text-gray-400 uppercase">{{ $punto->category }}</span>
+                                    <span class="text-xs font-bold text-gray-400 uppercase">{{ $punto->categoria->nombre ?? '—' }}</span>
                                     <h3 class="text-lg font-bold text-gray-900">{{ $punto->title }}</h3>
                                     <p class="text-sm text-gray-500 italic">📍 {{ $punto->sector }}</p>
                                     

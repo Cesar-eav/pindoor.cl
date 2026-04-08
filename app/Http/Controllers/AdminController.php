@@ -81,7 +81,6 @@ class AdminController extends Controller
 
         $punto->update([
             'categoria_id' => $request->categoria_id,
-            'category'     => $categoria->nombre,
             'title'        => $request->title,
             'sector'       => $request->sector,
             'description'  => $request->description,
@@ -162,7 +161,6 @@ class AdminController extends Controller
         $punto = PuntoInteres::create([
             'user_id'      => auth()->id(),
             'categoria_id' => $request->categoria_id,
-            'category'     => $categoria->nombre,
             'title'        => $request->title,
             'slug' => Str::slug($request->title) . '-' . rand(100, 999),
             'sector' => $request->sector,

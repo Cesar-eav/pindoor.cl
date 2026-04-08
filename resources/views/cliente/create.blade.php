@@ -18,13 +18,12 @@
                             <x-text-input id="title" class="block mt-1 w-full" type="text" name="title" required autofocus placeholder="Ej: Café del Cerro" />
                         </div>
                         <div>
-                            <x-input-label for="category" :value="__('Categoría')" />
-                            <select name="category" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <option value="Cafetería">Cafetería</option>
-                                <option value="Restaurante">Restaurante</option>
-                                <option value="Hostal">Hostal/Hotel</option>
-                                <option value="Tienda">Tienda de Diseño</option>
-                                <option value="Museo">Cultura/Museo</option>
+                            <x-input-label for="categoria_id" :value="__('Categoría')" />
+                            <select name="categoria_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <option value="">Selecciona una categoría</option>
+                                @foreach($categorias as $cat)
+                                    <option value="{{ $cat->id }}">{{ $cat->icono }} {{ $cat->nombre }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>

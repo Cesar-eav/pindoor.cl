@@ -20,7 +20,6 @@ class PuntoInteres extends Model
         'categoria_id',
         'title',
         'slug',
-        'category',
         'sector',
         'description',
         'direccion',
