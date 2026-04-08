@@ -52,7 +52,7 @@ class PuntoInteresController extends Controller
             $query->inRandomOrder();
         }
 
-        $atractivos = $query->with('categoria')->paginate(40)->withQueryString();
+        $atractivos = $query->with(['categoria', 'imagenPrincipal'])->paginate(40)->withQueryString();
         $categorias = Categoria::all();
 
         if ($request->ajax() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
@@ -166,7 +166,8 @@ class PuntoInteresController extends Controller
      */
     public function show($slug)
     {
-        $punto = PuntoInteres::where('slug', $slug)
+        $punto = PuntoInteres::with(['categoria', 'imagenes'])
+                             ->where('slug', $slug)
                              ->where('activo', true)
                              ->where('eliminado', false)
                              ->firstOrFail();
