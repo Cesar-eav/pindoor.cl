@@ -23,14 +23,20 @@ import { onMounted, ref } from 'vue';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const lat = ref(-33.0472); // Coordenada central de Valparaíso
-const lng = ref(-71.6297);
+const props = defineProps({
+  initialLat: { type: Number, default: -33.0472 },
+  initialLng: { type: Number, default: -71.6297 },
+});
+
+const lat = ref(props.initialLat);
+const lng = ref(props.initialLng);
 let map = null;
 let marker = null;
 
 onMounted(() => {
-  // Inicializar mapa
   map = L.map('map').setView([lat.value, lng.value], 14);
+  // Corrige el render cuando el contenedor estaba oculto (x-show, tabs, etc.)
+  setTimeout(() => map.invalidateSize(), 300);
 
   // Capa de OpenStreetMap (Gratuita)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

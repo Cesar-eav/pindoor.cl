@@ -27,6 +27,7 @@ class PuntoInteres extends Model
         'lat',
         'lng',
         'video_url',
+        'enlace',
         'horario',
         'autor',
         'tags',

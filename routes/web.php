@@ -43,6 +43,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Puntos de Interés General (Creados por Admin)
     Route::get('/puntos/crear', [AdminController::class, 'createPunto'])->name('puntos.create');
     Route::post('/puntos/guardar', [AdminController::class, 'storePunto'])->name('puntos.store');
+    Route::get('/puntos/{punto}/editar', [AdminController::class, 'editPunto'])->name('puntos.edit');
+    Route::put('/puntos/{punto}/actualizar', [AdminController::class, 'updatePunto'])->name('puntos.update');
     Route::patch('/puntos/{punto}/toggle', [AdminController::class, 'togglePunto'])->name('puntos.toggle');
 });
 

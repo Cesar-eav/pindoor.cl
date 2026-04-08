@@ -45,20 +45,25 @@
 
                     <div class="mb-10">
                         @if($imagenes->count())
-                            <div class="relative group">
-                                {{-- Imagen Principal con sombra suave --}}
+                            <div x-data="{ active: '{{ asset('storage/' . $principal->ruta) }}' }">
+                                {{-- Imagen Principal --}}
                                 <div class="aspect-[16/10] md:aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl shadow-gray-200 mb-4">
-                                    <img src="{{ asset('storage/' . $principal->ruta) }}"
+                                    <img :src="active"
                                          alt="{{ $punto->title }}"
-                                         class="w-full h-full object-cover transition duration-700 group-hover:scale-105" />
+                                         class="w-full h-full object-cover transition duration-500" />
                                 </div>
 
                                 {{-- Miniaturas con scroll horizontal en móvil --}}
                                 @if($imagenes->count() > 1)
                                     <div class="flex gap-3 overflow-x-auto pb-2 snap-x">
                                         @foreach($imagenes as $img)
-                                            <div class="flex-none w-20 h-20 md:w-24 md:h-24 snap-start rounded-2xl overflow-hidden border-2 {{ $img->es_principal ? 'border-pindoor-accent' : 'border-transparent' }} hover:border-pindoor-accent transition cursor-pointer">
-                                                <img src="{{ asset('storage/' . $img->ruta) }}"
+                                            @php $url = asset('storage/' . $img->ruta) @endphp
+                                            <div
+                                                @click="active = '{{ $url }}'"
+                                                class="flex-none w-20 h-20 md:w-24 md:h-24 snap-start rounded-2xl overflow-hidden border-2 transition cursor-pointer"
+                                                :class="active === '{{ $url }}' ? 'border-pindoor-accent' : 'border-transparent hover:border-gray-300'"
+                                            >
+                                                <img src="{{ $url }}"
                                                      alt="{{ $punto->title }}"
                                                      class="w-full h-full object-cover" />
                                             </div>
@@ -99,13 +104,37 @@
 
                         {{-- Tags Estilo Chips --}}
                         @if($punto->tags && count($punto->tags))
-                            <div class="flex flex-wrap gap-2 pt-6">
+                            <div class="flex flex-wrap gap-2 pt-4">
                                 @foreach($punto->tags as $tag)
                                     <span class="bg-white text-gray-500 text-[11px] font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-100 shadow-sm">
                                         #{{ $tag }}
                                     </span>
                                 @endforeach
                             </div>
+                        @endif
+
+                        {{-- Video YouTube --}}
+                        @if($punto->video_url)
+                            @php
+                                // Convertir URL de watch a embed
+                                $videoId = null;
+                                if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $punto->video_url, $m)) {
+                                    $videoId = $m[1];
+                                }
+                            @endphp
+                            @if($videoId)
+                                <div class="pt-6">
+                                    <h3 class="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Video</h3>
+                                    <div class="aspect-video rounded-2xl overflow-hidden shadow-lg">
+                                        <iframe
+                                            src="https://www.youtube.com/embed/{{ $videoId }}"
+                                            class="w-full h-full"
+                                            allowfullscreen
+                                            loading="lazy"
+                                        ></iframe>
+                                    </div>
+                                </div>
+                            @endif
                         @endif
                     </section>
                 </div>
@@ -133,27 +162,36 @@
 
                         {{-- Mapa --}}
                         @if($punto->lat && $punto->lng)
-                            <div class="relative group">
-                                <div id="mini-mapa" class="h-48 rounded-3xl overflow-hidden border border-gray-100 shadow-inner z-0"></div>
-                                <a href="https://www.google.com/maps/search/?api=1&query={{ $punto->lat }},{{ $punto->lng }}"
-                                   target="_blank"
-                                   class="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm text-center py-2 rounded-xl text-xs font-bold text-gray-900 shadow-lg hover:bg-pindoor-accenthover:text-white transition-all duration-300">
-                                    Abrir en Google Maps
-                                </a>
+                            <div id="mini-mapa" class="h-48 rounded-3xl overflow-hidden border border-gray-100 shadow-inner"></div>
+                            <a href="https://www.google.com/maps?q={{ $punto->lat }},{{ $punto->lng }}"
+                               target="_blank" rel="noopener"
+                               class="mt-2 flex items-center justify-center gap-2 w-full py-2 rounded-xl text-xs font-bold text-gray-600 border border-gray-200 hover:bg-pindoor-accent hover:text-white hover:border-pindoor-accent transition-all duration-300">
+                                Abrir en Google Maps
+                            </a>
+                        @endif
+                        {{-- Horario --}}
+                        @if($punto->horario)
+                            <div class="mt-6 pt-6 border-t border-gray-100">
+                                <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Horario</h3>
+                                <p class="text-gray-700 text-sm font-medium">{{ $punto->horario }}</p>
                             </div>
                         @endif
 
-                        {{-- Horario --}}
-                        @if($punto->horario)
-                            <div class="mt-8 pt-8 border-t border-gray-50">
-                                <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Cuándo visitar</h3>
-                                <p class="text-gray-600 text-sm font-medium">{{ $punto->horario }}</p>
+                        {{-- Enlace web o Instagram --}}
+                        @if($punto->enlace)
+                            <div class="mt-6 pt-6 border-t border-gray-100">
+                                <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Más información</h3>
+                                <a href="{{ $punto->enlace }}" target="_blank" rel="noopener"
+                                   class="flex items-center gap-2 text-sm font-bold text-pindoor-accent hover:underline break-all">
+                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    {{ parse_url($punto->enlace, PHP_URL_HOST) ?? $punto->enlace }}
+                                </a>
                             </div>
                         @endif
 
                         <div class="mt-8">
                             <a href="{{ route('atractivos.index') }}"
-                               class="group flex items-center justify-center gap-2 w-full bg-gray-900 text-white py-4 rounded-2xl font-bold hover:bg-pindoor-accenttransition-all duration-300 shadow-xl shadow-gray-900/10">
+                               class="group flex items-center justify-center gap-2 w-full bg-gray-900 text-white py-4 rounded-2xl font-bold hover:bg-pindoor-accent transition-all duration-300 shadow-xl shadow-gray-900/10">
                                 <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                 Explorar más
                             </a>

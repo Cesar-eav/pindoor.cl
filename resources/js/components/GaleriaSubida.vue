@@ -4,7 +4,7 @@
       <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-2xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
         <div class="flex flex-col items-center justify-center pt-5 pb-6">
           <svg class="w-8 h-8 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="2" stroke-linecap="round"/></svg>
-          <p class="text-sm text-gray-500">Haz clic para subir fotos del local</p>
+          <p class="text-sm text-gray-500">Haz clic para subir fotos</p>
         </div>
         <input type="file" class="hidden" multiple accept="image/*" @change="handleFiles" :disabled="isUploading" />
       </label>
@@ -20,15 +20,15 @@
         </div>
     </div>
 
-    <draggable 
-      v-model="images" 
+    <draggable
+      v-model="images"
       item-key="id"
       class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"
     >
       <template #item="{ element, index }">
-        <div class="relative group aspect-square bg-gray-100 rounded-xl overflow-hidden border-2" 
+        <div class="relative group aspect-square bg-gray-100 rounded-xl overflow-hidden border-2"
              :class="element.is_main ? 'border-pindoor-accent' : 'border-transparent'">
-          
+
           <img :src="element.url" class="object-cover w-full h-full cursor-move" />
 
           <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-1">
@@ -39,9 +39,12 @@
               Eliminar
             </button>
           </div>
-          
+
           <div v-if="element.is_main" class="absolute top-1 left-1 bg-pindoor-accent text-white text-[9px] px-2 py-0.5 rounded-full font-bold">
             PORTADA
+          </div>
+          <div v-if="element.isExisting" class="absolute top-1 right-1 bg-gray-700 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">
+            GUARDADA
           </div>
         </div>
       </template>
@@ -55,16 +58,29 @@ import axios from 'axios';
 
 export default {
     components: { draggable },
+    props: {
+        puntoId: { type: Number, default: null },
+        initialImages: { type: Array, default: () => [] },
+        endpoint: { type: String, default: '/admin/puntos/guardar' },
+    },
     data() {
         return {
             images: [],
             isUploading: false,
             uploadProgress: 0,
-            endpoint: '/admin/puntos/guardar'
         };
     },
     mounted() {
-        // 💡 Escuchamos un evento global desde Blade
+        // Cargar imágenes existentes en modo edición
+        if (this.initialImages.length > 0) {
+            this.images = this.initialImages.map(img => ({
+                id: img.id,
+                url: img.url,
+                is_main: img.es_principal,
+                isExisting: true,
+            }));
+        }
+
         window.addEventListener('trigger-pindoor-submit', () => {
             if (this.images.length > 0 && !this.isUploading) {
                 this.submitForm();
@@ -83,7 +99,8 @@ export default {
                         id: Math.random(),
                         url: e.target.result,
                         file: file,
-                        is_main: this.images.length === 0
+                        is_main: this.images.length === 0,
+                        isExisting: false,
                     });
                 };
                 reader.readAsDataURL(file);
@@ -100,19 +117,32 @@ export default {
             this.uploadProgress = 0;
 
             const formData = new FormData();
-            
-            // 1. Capturamos los datos del formulario (título, categoria_id, sector, etc.)
+
+            // Datos del formulario principal
             const mainForm = document.querySelector('#main-form');
             const otherData = new FormData(mainForm);
             for (let [key, value] of otherData.entries()) {
                 formData.append(key, value);
             }
 
-            // 2. Añadimos las fotos con el nombre 'photos[]' que espera el controlador
-            this.images.forEach((img, index) => {
-                formData.append(`photos[${index}]`, img.file); // El nombre debe ser 'photos'
-                formData.append(`metadata[${index}][is_main]`, img.is_main ? 1 : 0);
+            // Imágenes existentes (conservar): enviar ID + metadata
+            let newIndex = 0;
+            this.images.forEach((img, order) => {
+                if (img.isExisting) {
+                    formData.append(`keep_images[${img.id}][is_main]`, img.is_main ? 1 : 0);
+                    formData.append(`keep_images[${img.id}][orden]`, order);
+                } else {
+                    formData.append(`photos[${newIndex}]`, img.file);
+                    formData.append(`metadata[${newIndex}][is_main]`, img.is_main ? 1 : 0);
+                    formData.append(`metadata[${newIndex}][orden]`, order);
+                    newIndex++;
+                }
             });
+
+            // En edición, indicar método PUT
+            if (this.puntoId) {
+                formData.append('_method', 'PUT');
+            }
 
             try {
                 const response = await axios.post(this.endpoint, formData, {
@@ -122,14 +152,12 @@ export default {
                     }
                 });
 
-                // 3. Manejamos la respuesta JSON del controlador
                 if (response.data.success) {
-                    // Usamos la URL que nos manda el controlador para redirigir
                     window.location.href = response.data.url + '?success=1';
                 }
             } catch (error) {
                 console.error(error);
-                alert("Error al subir los datos. Revisa que todos los campos obligatorios estén llenos.");
+                alert("Error al guardar. Revisa que todos los campos obligatorios estén llenos.");
             } finally {
                 this.isUploading = false;
             }

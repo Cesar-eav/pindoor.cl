@@ -61,6 +61,86 @@ class AdminController extends Controller
 
     }
 
+    public function editPunto(PuntoInteres $punto)
+    {
+        $categorias = Categoria::orderBy('nombre')->get();
+        $punto->load('imagenes');
+        return view('admin.puntos-edit', compact('punto', 'categorias'));
+    }
+
+    public function updatePunto(Request $request, PuntoInteres $punto)
+    {
+        $request->validate([
+            'title'       => 'required|max:255',
+            'categoria_id'=> 'required|exists:categorias,id',
+            'description' => 'required',
+            'photos.*'    => 'image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $categoria = Categoria::find($request->categoria_id);
+
+        $punto->update([
+            'categoria_id' => $request->categoria_id,
+            'category'     => $categoria->nombre,
+            'title'        => $request->title,
+            'sector'       => $request->sector,
+            'description'  => $request->description,
+            'tags'      => $request->tags ? array_map('trim', explode(',', $request->tags)) : [],
+            'autor'     => $request->autor,
+            'direccion' => $request->direccion,
+            'horario'   => $request->horario,
+            'video_url' => $request->video_url,
+            'enlace'    => $request->enlace,
+            'lat'       => $request->lat,
+            'lng'       => $request->lng,
+        ]);
+
+        // Actualizar imágenes existentes que se conservan
+        if ($request->has('keep_images')) {
+            $keepIds = array_keys($request->keep_images);
+
+            // Eliminar las que no están en keep_images
+            $punto->imagenes()->whereNotIn('id', $keepIds)->each(function ($img) {
+                \Storage::disk('public')->delete($img->ruta);
+                $img->delete();
+            });
+
+            // Actualizar is_main y orden de las conservadas
+            foreach ($request->keep_images as $id => $meta) {
+                $punto->imagenes()->where('id', $id)->update([
+                    'es_principal' => ($meta['is_main'] ?? 0) == 1,
+                    'orden'        => $meta['orden'] ?? 0,
+                ]);
+            }
+        } else {
+            // Si no se conserva ninguna, eliminar todas las existentes
+            $punto->imagenes->each(function ($img) {
+                \Storage::disk('public')->delete($img->ruta);
+                $img->delete();
+            });
+        }
+
+        // Añadir nuevas imágenes
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $index => $file) {
+                $path = $file->store('puntos', 'public');
+                $esPrincipal = ($request->input("metadata.{$index}.is_main") == 1);
+                $orden = $request->input("metadata.{$index}.orden", $index);
+
+                $punto->imagenes()->create([
+                    'ruta'         => $path,
+                    'es_principal' => $esPrincipal,
+                    'orden'        => $orden,
+                ]);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'url'     => route('admin.puntos.create'),
+        ]);
+    }
+
     public function togglePunto(PuntoInteres $punto)
     {
         $punto->update(['activo' => !$punto->activo]);
@@ -87,11 +167,15 @@ class AdminController extends Controller
             'slug' => Str::slug($request->title) . '-' . rand(100, 999),
             'sector' => $request->sector,
             'description' => $request->description,
-            'tags'         => $request->tags ? array_map('trim', explode(',', $request->tags)) : [],
-            'autor'        => $request->autor,
-            'lat' => $request->lat,
-            'lng' => $request->lng,
-            'activo' => true,
+            'tags'      => $request->tags ? array_map('trim', explode(',', $request->tags)) : [],
+            'autor'     => $request->autor,
+            'direccion' => $request->direccion,
+            'horario'   => $request->horario,
+            'video_url' => $request->video_url,
+            'enlace'    => $request->enlace,
+            'lat'       => $request->lat,
+            'lng'       => $request->lng,
+            'activo'    => true,
             'eliminado' => false,
             // Podríamos añadir una marca de "Lugar Público" si quisieras más adelante
         ]);
