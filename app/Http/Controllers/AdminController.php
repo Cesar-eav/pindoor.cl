@@ -162,11 +162,31 @@ class AdminController extends Controller
 
     public function mostrarActivarCliente(PuntoInteres $punto)
     {
-        return view('admin.clientes-activar', compact('punto'));
+        // Usuarios cliente sin punto asignado (para vincular uno existente)
+        $usuariosSinPunto = User::where('type', 'cliente')
+            ->whereDoesntHave('puntoInteres')
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.clientes-activar', compact('punto', 'usuariosSinPunto'));
     }
 
     public function activarCliente(Request $request, PuntoInteres $punto)
     {
+        // Vincular usuario existente
+        if ($request->filled('user_id_existente')) {
+            $request->validate(['user_id_existente' => 'required|exists:users,id']);
+
+            $user = User::findOrFail($request->user_id_existente);
+            $user->update(['type' => 'cliente']);
+
+            $punto->update(['user_id' => $user->id, 'es_cliente' => true]);
+
+            return redirect()->route('admin.clientes')
+                ->with('success', "Punto \"{$punto->title}\" vinculado a {$user->email}.");
+        }
+
+        // Crear usuario nuevo
         $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',

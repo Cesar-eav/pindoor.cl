@@ -13,7 +13,7 @@ class ClienteController extends Controller
      */
     private function miPunto()
     {
-        return Auth::user()->puntoInteres()->where('eliminado', false)->firstOrFail();
+        return Auth::user()->puntoInteres()->where('eliminado', false)->first();
     }
 
     /**
@@ -22,6 +22,11 @@ class ClienteController extends Controller
     public function perfil()
     {
         $punto = $this->miPunto();
+
+        if (!$punto) {
+            return view('cliente.sin-negocio');
+        }
+
         return view('cliente.perfil', compact('punto'));
     }
 
@@ -31,6 +36,11 @@ class ClienteController extends Controller
     public function editarPerfil()
     {
         $punto = $this->miPunto();
+
+        if (!$punto) {
+            return redirect()->route('cliente.perfil');
+        }
+
         return view('cliente.perfil-editar', compact('punto'));
     }
 
@@ -82,6 +92,10 @@ class ClienteController extends Controller
     public function actualizarOferta(Request $request)
     {
         $punto = $this->miPunto();
+
+        if (!$punto) {
+            return redirect()->route('cliente.perfil');
+        }
 
         $request->validate([
             'oferta_del_dia' => 'nullable|string|max:1000',
