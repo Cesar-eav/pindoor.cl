@@ -37,21 +37,31 @@
                 <span class="text-pindoor-accent">{{ $punto->title }}</span>
             </nav>
 
-            {{-- Tabs móvil (solo si tiene carta) --}}
-            @if($punto->tieneCarta())
-            <div class="flex lg:hidden gap-2 mb-6">
+            {{-- Tabs móvil --}}
+            @if($punto->tieneCarta() || ($punto->es_cliente && $punto->menu_del_dia))
+            <div class="flex lg:hidden gap-2 mb-6 overflow-x-auto">
                 <button
                     @click="vista = 'contenido'"
                     :class="vista === 'contenido' ? 'bg-gray-900 text-white' : 'bg-white text-gray-600 border border-gray-200'"
-                    class="flex-1 py-2.5 rounded-xl text-sm font-bold transition">
+                    class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
                     Descripción
                 </button>
+                @if($punto->es_cliente && $punto->menu_del_dia)
+                <button
+                    @click="vista = 'menu'"
+                    :class="vista === 'menu' ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 border border-gray-200'"
+                    class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
+                    Menú del día
+                </button>
+                @endif
+                @if($punto->tieneCarta())
                 <button
                     @click="vista = 'carta'"
                     :class="vista === 'carta' ? 'bg-pindoor-accent text-white' : 'bg-white text-gray-600 border border-gray-200'"
-                    class="flex-1 py-2.5 rounded-xl text-sm font-bold transition">
+                    class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
                     Ver carta
                 </button>
+                @endif
             </div>
             @endif
 
@@ -69,6 +79,17 @@
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
                         <span>📖</span> Descripción
                     </button>
+
+                    @if($punto->es_cliente && $punto->menu_del_dia)
+                    <button
+                        @click="vista = 'menu'"
+                        :class="vista === 'menu'
+                            ? 'bg-orange-500 text-white shadow-lg'
+                            : 'bg-white text-gray-600 border border-gray-200 hover:border-orange-400'"
+                        class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
+                        <span>🥘</span> Menú del día
+                    </button>
+                    @endif
 
                     @if($punto->tieneCarta())
                     <button
@@ -187,6 +208,38 @@
                         </section>
                     </div>
 
+                    {{-- PANEL: Menú del día --}}
+                    @if($punto->es_cliente && $punto->menu_del_dia)
+                    <div x-show="vista === 'menu'" x-cloak
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0">
+
+                        <div class="mb-6 flex items-center gap-3">
+                            @if($punto->imagen_perfil)
+                                <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
+                                     alt="Logo {{ $punto->title }}"
+                                     class="w-12 h-12 rounded-xl object-cover border border-gray-100 shrink-0">
+                            @endif
+                            <div>
+                                <p class="text-xs font-black uppercase tracking-widest text-orange-500 mb-0.5">Hoy</p>
+                                <span class="text-2xl font-extrabold text-gray-900">Menú del día</span>
+                                @if($punto->menu_del_dia_updated_at)
+                                    <p class="text-xs text-gray-400 mt-0.5">
+                                        Actualizado {{ $punto->menu_del_dia_updated_at->diffForHumans() }}
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-3xl shadow-sm border border-orange-100 p-8">
+                            <div class="serif-text text-gray-700 leading-relaxed whitespace-pre-line text-base">
+                                {{ $punto->menu_del_dia }}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     {{-- PANEL: Carta / Menú --}}
                     @if($punto->tieneCarta())
                     <div x-show="vista === 'carta'" x-cloak
@@ -202,6 +255,11 @@
                                          class="w-12 h-12 rounded-xl object-cover border border-gray-100 inline-block mr-3">
                                 @endif
                                 <span class="text-2xl font-extrabold text-gray-900">Carta</span>
+                                @if($punto->carta_updated_at)
+                                    <p class="text-xs text-gray-400 mt-0.5">
+                                        Actualizada {{ $punto->carta_updated_at->diffForHumans() }}
+                                    </p>
+                                @endif
                             </div>
 
                             @if($punto->carta_pdf)
@@ -318,11 +376,21 @@
     </div>
 
     {{-- Botones flotantes móvil --}}
+    {{-- Botones flotantes móvil: se ocultan en lg porque allí están en la columna izquierda --}}
     <div class="lg:hidden fixed bottom-10 left-6 z-50 flex flex-col gap-2">
+        @if($punto->es_cliente && $punto->menu_del_dia)
+        <button
+            x-data
+            @click="$dispatch('set-vista', 'menu')"
+            class="inline-flex items-center gap-2 px-5 py-3 bg-orange-500 text-white rounded-full text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+            🥘 <span>Menú del día</span>
+        </button>
+        @endif
+
         @if($punto->tieneCarta())
         <button
             x-data
-            @click="$dispatch('toggle-carta')"
+            @click="$dispatch('set-vista', 'carta')"
             class="inline-flex items-center gap-2 px-5 py-3 bg-pindoor-accent text-white rounded-full text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
             🍽️ <span>Ver carta</span>
         </button>
@@ -337,15 +405,13 @@
         @endif
     </div>
 
-    {{-- Escuchar toggle desde botón flotante en móvil --}}
-    @if($punto->tieneCarta())
+    @if($punto->tieneCarta() || ($punto->es_cliente && $punto->menu_del_dia))
     <script>
         document.addEventListener('alpine:init', () => {
-            window.addEventListener('toggle-carta', () => {
-                const main = document.querySelector('[x-data]');
+            window.addEventListener('set-vista', (e) => {
+                const main = document.querySelector('main[x-data]');
                 if (main && main._x_dataStack) {
-                    const data = main._x_dataStack[0];
-                    data.vista = data.vista === 'carta' ? 'contenido' : 'carta';
+                    main._x_dataStack[0].vista = e.detail;
                 }
             });
         });

@@ -96,6 +96,10 @@ class ClienteController extends Controller
             $data['carta_pdf'] = $request->file('carta_pdf')->store('cartas', 'public');
         }
 
+        if (array_key_exists('carta', $data) && ($data['carta'] !== $punto->carta || isset($data['carta_pdf']))) {
+            $data['carta_updated_at'] = now();
+        }
+
         $punto->update($data);
 
         return redirect()->route('cliente.perfil')
@@ -105,6 +109,27 @@ class ClienteController extends Controller
     /**
      * Actualización rápida de la oferta del día (desde el dashboard).
      */
+    public function actualizarMenu(Request $request)
+    {
+        $punto = $this->miPunto();
+
+        if (!$punto) {
+            return redirect()->route('cliente.perfil');
+        }
+
+        $request->validate([
+            'menu_del_dia' => 'nullable|string|max:2000',
+        ]);
+
+        $punto->update([
+            'menu_del_dia'            => $request->menu_del_dia,
+            'menu_del_dia_updated_at' => $request->menu_del_dia ? now() : null,
+        ]);
+
+        return redirect()->route('cliente.perfil')
+            ->with('success', 'Menú del día actualizado.');
+    }
+
     public function actualizarOferta(Request $request)
     {
         $punto = $this->miPunto();

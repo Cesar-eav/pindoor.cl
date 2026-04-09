@@ -65,8 +65,9 @@ Route::middleware(['auth', 'role:cliente'])->prefix('cliente')->name('cliente.')
     Route::get('/perfil/editar', [ClienteController::class, 'editarPerfil'])->name('perfil.editar');
     Route::put('/perfil/actualizar', [ClienteController::class, 'actualizarPerfil'])->name('perfil.actualizar');
 
-    // Actualización rápida: oferta del día
+    // Actualización rápida: oferta del día y menú del día
     Route::patch('/oferta', [ClienteController::class, 'actualizarOferta'])->name('oferta.actualizar');
+    Route::patch('/menu', [ClienteController::class, 'actualizarMenu'])->name('menu.actualizar');
 });
 
 require __DIR__.'/auth.php';

@@ -89,6 +89,37 @@
                 </form>
             </div>
 
+            {{-- Menú del día: actualización rápida --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h4 class="font-bold text-gray-700 mb-1">Menú del día</h4>
+                <p class="text-xs text-gray-400 mb-4">
+                    Escribe el menú de hoy para que los turistas lo vean en tu ficha. Deja vacío para ocultarlo.
+                </p>
+
+                <form method="POST" action="{{ route('cliente.menu.actualizar') }}">
+                    @csrf @method('PATCH')
+                    <textarea
+                        name="menu_del_dia"
+                        rows="5"
+                        maxlength="2000"
+                        placeholder="Ej:&#10;PRIMER PLATO — Sopa del día&#10;SEGUNDO PLATO — Cazuela de vacuno&#10;POSTRE — Arroz con leche&#10;Todo por $5.500"
+                        class="w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-orange-400 resize-none"
+                    >{{ old('menu_del_dia', $punto->menu_del_dia) }}</textarea>
+
+                    <div class="flex justify-between items-center mt-3">
+                        @if($punto->menu_del_dia)
+                            <span class="text-xs text-gray-400">Activo — visible en tu ficha</span>
+                        @else
+                            <span class="text-xs text-gray-300 italic">Sin menú publicado</span>
+                        @endif
+                        <button type="submit"
+                                class="px-5 py-2 bg-orange-500 text-white text-sm font-bold rounded-lg hover:opacity-90 transition">
+                            Publicar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
             {{-- Descripción del negocio --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <div class="flex items-center justify-between mb-3">

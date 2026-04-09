@@ -12,7 +12,9 @@ class PuntoInteres extends Model
     protected $table = 'puntosinteres';
 
     protected $casts = [
-        'tags' => 'array',
+        'tags'                    => 'array',
+        'menu_del_dia_updated_at' => 'datetime',
+        'carta_updated_at'        => 'datetime',
     ];
 
     protected $fillable = [
@@ -34,10 +36,13 @@ class PuntoInteres extends Model
         'eliminado',
         'es_cliente',
         'oferta_del_dia',
+        'menu_del_dia',
         'descripcion_busqueda',
         'imagen_perfil',
         'carta',
         'carta_pdf',
+        'menu_del_dia_updated_at',
+        'carta_updated_at',
     ];
 
     public function tieneCarta(): bool

@@ -1,0 +1,25 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('puntosinteres', function (Blueprint $table) {
+            $table->text('menu_del_dia')->nullable()->after('oferta_del_dia');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('puntosinteres', function (Blueprint $table) {
+            $table->dropColumn('menu_del_dia');
+        });
+    }
+};
