@@ -6,6 +6,7 @@ use App\Models\PuntoInteres;
 use App\Models\Categoria;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AdminController extends Controller
@@ -139,6 +140,64 @@ class AdminController extends Controller
             'url'     => route('admin.puntos.create'),
         ]);
     }
+
+    // ─── Gestión de Clientes ──────────────────────────────────────────────────
+
+    public function clientes()
+    {
+        $clientes = PuntoInteres::clientes()
+            ->where('eliminado', false)
+            ->with(['user', 'categoria'])
+            ->latest()
+            ->paginate(15);
+
+        // Puntos que aún no son clientes: para que el admin pueda activar uno
+        $puntosDisponibles = PuntoInteres::where('es_cliente', false)
+            ->where('eliminado', false)
+            ->orderBy('title')
+            ->get();
+
+        return view('admin.clientes', compact('clientes', 'puntosDisponibles'));
+    }
+
+    public function mostrarActivarCliente(PuntoInteres $punto)
+    {
+        return view('admin.clientes-activar', compact('punto'));
+    }
+
+    public function activarCliente(Request $request, PuntoInteres $punto)
+    {
+        $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+            'type'     => 'cliente',
+        ]);
+
+        $punto->update([
+            'user_id'    => $user->id,
+            'es_cliente' => true,
+        ]);
+
+        return redirect()->route('admin.clientes')
+            ->with('success', "Cliente \"{$punto->title}\" activado. Credenciales creadas para {$user->email}.");
+    }
+
+    public function desactivarCliente(PuntoInteres $punto)
+    {
+        $punto->update(['es_cliente' => false]);
+
+        return redirect()->route('admin.clientes')
+            ->with('success', "\"{$punto->title}\" ya no figura como cliente.");
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
 
     public function togglePunto(PuntoInteres $punto)
     {
