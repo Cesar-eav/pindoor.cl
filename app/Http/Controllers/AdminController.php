@@ -151,9 +151,10 @@ class AdminController extends Controller
             ->latest()
             ->paginate(15);
 
-        // Puntos que aún no son clientes: para que el admin pueda activar uno
+        // Puntos que aún no son clientes, solo categorías de negocios
         $puntosDisponibles = PuntoInteres::where('es_cliente', false)
             ->where('eliminado', false)
+            ->whereIn('categoria_id', [2, 5, 7, 8, 10, 11])
             ->orderBy('title')
             ->get();
 

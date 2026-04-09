@@ -61,8 +61,16 @@ class ClienteController extends Controller
             'tags'                => 'nullable|string',
             'descripcion_busqueda'=> 'nullable|string',
             'imagen_perfil'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            // Alimentación
             'carta'               => 'nullable|string',
             'carta_pdf'           => 'nullable|file|mimes:pdf|max:5120',
+            // Alojamiento
+            'precio_desde'        => 'nullable|string|max:100',
+            'check_in'            => 'nullable|string|max:20',
+            'check_out'           => 'nullable|string|max:20',
+            'tipos_habitacion'    => 'nullable|string',
+            'servicios_incluidos' => 'nullable|array',
+            'politicas'           => 'nullable|string',
         ]);
 
         $data = [
@@ -75,6 +83,13 @@ class ClienteController extends Controller
                                         : [],
             'descripcion_busqueda' => $request->descripcion_busqueda,
             'carta'                => $request->carta,
+            // Alojamiento
+            'precio_desde'         => $request->precio_desde,
+            'check_in'             => $request->check_in,
+            'check_out'            => $request->check_out,
+            'tipos_habitacion'     => $request->tipos_habitacion,
+            'servicios_incluidos'  => $request->servicios_incluidos ?? [],
+            'politicas'            => $request->politicas,
         ];
 
         if ($request->hasFile('imagen_perfil')) {

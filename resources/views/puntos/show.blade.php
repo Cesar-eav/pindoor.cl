@@ -38,7 +38,13 @@
             </nav>
 
             {{-- Tabs móvil --}}
-            @if($punto->tieneOfertaActiva() || $punto->tieneCarta() || ($punto->es_cliente && $punto->menu_del_dia))
+            @php
+                $tieneTabsExtra = $punto->tieneOfertaActiva()
+                    || $punto->tieneCarta()
+                    || ($punto->es_cliente && $punto->menu_del_dia)
+                    || ($punto->esAlojamiento() && ($punto->tipos_habitacion || $punto->servicios_incluidos || $punto->politicas));
+            @endphp
+            @if($tieneTabsExtra)
             <div class="flex lg:hidden gap-2 mb-6 overflow-x-auto">
                 <button
                     @click="vista = 'contenido'"
@@ -68,6 +74,27 @@
                     :class="vista === 'carta' ? 'bg-pindoor-accent text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
                     Ver carta
+                </button>
+                @endif
+                @if($punto->esAlojamiento() && $punto->tipos_habitacion)
+                <button @click="vista = 'habitaciones'"
+                    :class="vista === 'habitaciones' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
+                    class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
+                    Habitaciones
+                </button>
+                @endif
+                @if($punto->esAlojamiento() && $punto->servicios_incluidos)
+                <button @click="vista = 'servicios'"
+                    :class="vista === 'servicios' ? 'bg-teal-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
+                    class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
+                    Servicios
+                </button>
+                @endif
+                @if($punto->esAlojamiento() && $punto->politicas)
+                <button @click="vista = 'politicas'"
+                    :class="vista === 'politicas' ? 'bg-gray-700 text-white' : 'bg-white text-gray-600 border border-gray-200'"
+                    class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
+                    Políticas
                 </button>
                 @endif
             </div>
@@ -118,6 +145,31 @@
                             : 'bg-white text-gray-600 border border-gray-200 hover:border-pindoor-accent'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
                         <span>🍽️</span> Ver carta
+                    </button>
+                    @endif
+
+                    {{-- Alojamiento --}}
+                    @if($punto->esAlojamiento() && $punto->tipos_habitacion)
+                    <button @click="vista = 'habitaciones'"
+                        :class="vista === 'habitaciones' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-indigo-400'"
+                        class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
+                        <span>🛏️</span> Habitaciones
+                    </button>
+                    @endif
+
+                    @if($punto->esAlojamiento() && $punto->servicios_incluidos)
+                    <button @click="vista = 'servicios'"
+                        :class="vista === 'servicios' ? 'bg-teal-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-teal-400'"
+                        class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
+                        <span>✨</span> Servicios
+                    </button>
+                    @endif
+
+                    @if($punto->esAlojamiento() && $punto->politicas)
+                    <button @click="vista = 'politicas'"
+                        :class="vista === 'politicas' ? 'bg-gray-700 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-500'"
+                        class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
+                        <span>📋</span> Políticas
                     </button>
                     @endif
 
@@ -368,6 +420,118 @@
                         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
                             <div class="serif-text text-gray-700 leading-relaxed whitespace-pre-line text-base">
                                 {{ $punto->carta }}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- PANEL: Habitaciones (alojamiento) --}}
+                    @if($punto->esAlojamiento() && $punto->tipos_habitacion)
+                    <div x-show="vista === 'habitaciones'" x-cloak
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0">
+
+                        <div class="mb-6 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                @if($punto->imagen_perfil)
+                                    <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
+                                         alt="Logo" class="w-12 h-12 rounded-xl object-cover border border-gray-100 shrink-0">
+                                @endif
+                                <div>
+                                    <p class="text-xs font-black uppercase tracking-widest text-indigo-600 mb-0.5">Alojamiento</p>
+                                    <span class="text-2xl font-extrabold text-gray-900">Habitaciones</span>
+                                </div>
+                            </div>
+                            @if($punto->precio_desde)
+                                <div class="text-right">
+                                    <p class="text-xs text-gray-400 uppercase font-bold">Desde</p>
+                                    <p class="text-lg font-extrabold text-indigo-600">{{ $punto->precio_desde }}</p>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="bg-white rounded-3xl shadow-sm border border-indigo-100 p-8">
+                            <div class="serif-text text-gray-700 leading-relaxed whitespace-pre-line text-base">
+                                {{ $punto->tipos_habitacion }}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- PANEL: Servicios (alojamiento) --}}
+                    @if($punto->esAlojamiento() && $punto->servicios_incluidos)
+                    @php $catalogo = App\Models\PuntoInteres::catalogoServicios(); @endphp
+                    <div x-show="vista === 'servicios'" x-cloak
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0">
+
+                        <div class="mb-6 flex items-center gap-3">
+                            @if($punto->imagen_perfil)
+                                <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
+                                     alt="Logo" class="w-12 h-12 rounded-xl object-cover border border-gray-100 shrink-0">
+                            @endif
+                            <div>
+                                <p class="text-xs font-black uppercase tracking-widest text-teal-600 mb-0.5">Incluido</p>
+                                <span class="text-2xl font-extrabold text-gray-900">Servicios</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-3xl shadow-sm border border-teal-100 p-8">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                @foreach($punto->servicios_incluidos as $slug)
+                                    @if(isset($catalogo[$slug]))
+                                    <div class="flex items-center gap-3 bg-teal-50 rounded-2xl px-4 py-3">
+                                        <span class="text-2xl">{{ $catalogo[$slug]['emoji'] }}</span>
+                                        <span class="text-sm font-medium text-gray-700">{{ $catalogo[$slug]['label'] }}</span>
+                                    </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- PANEL: Políticas (alojamiento) --}}
+                    @if($punto->esAlojamiento() && $punto->politicas)
+                    <div x-show="vista === 'politicas'" x-cloak
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0">
+
+                        <div class="mb-6 flex items-center gap-3">
+                            @if($punto->imagen_perfil)
+                                <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
+                                     alt="Logo" class="w-12 h-12 rounded-xl object-cover border border-gray-100 shrink-0">
+                            @endif
+                            <div>
+                                <p class="text-xs font-black uppercase tracking-widest text-gray-500 mb-0.5">Información</p>
+                                <span class="text-2xl font-extrabold text-gray-900">Políticas</span>
+                            </div>
+                        </div>
+
+                        {{-- Check-in / Check-out --}}
+                        @if($punto->check_in || $punto->check_out)
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            @if($punto->check_in)
+                            <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center">
+                                <p class="text-xs text-gray-400 uppercase font-bold mb-1">Check-in</p>
+                                <p class="text-2xl font-extrabold text-gray-900">{{ $punto->check_in }}</p>
+                            </div>
+                            @endif
+                            @if($punto->check_out)
+                            <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center">
+                                <p class="text-xs text-gray-400 uppercase font-bold mb-1">Check-out</p>
+                                <p class="text-2xl font-extrabold text-gray-900">{{ $punto->check_out }}</p>
+                            </div>
+                            @endif
+                        </div>
+                        @endif
+
+                        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+                            <div class="serif-text text-gray-700 leading-relaxed whitespace-pre-line text-base">
+                                {{ $punto->politicas }}
                             </div>
                         </div>
                     </div>

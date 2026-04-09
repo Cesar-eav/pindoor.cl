@@ -13,6 +13,7 @@ class PuntoInteres extends Model
 
     protected $casts = [
         'tags'                    => 'array',
+        'servicios_incluidos'     => 'array',
         'menu_del_dia_updated_at' => 'datetime',
         'carta_updated_at'        => 'datetime',
         'oferta_expira_at'        => 'datetime',
@@ -47,7 +48,51 @@ class PuntoInteres extends Model
         'carta_pdf',
         'menu_del_dia_updated_at',
         'carta_updated_at',
+        'precio_desde',
+        'check_in',
+        'check_out',
+        'tipos_habitacion',
+        'servicios_incluidos',
+        'politicas',
     ];
+
+    public function esAlojamiento(): bool
+    {
+        return $this->categoria_id === 11;
+    }
+
+    public function esAlimentacion(): bool
+    {
+        return in_array($this->categoria_id, [2, 10]);
+    }
+
+    // Catálogo de servicios de alojamiento disponibles
+    public static function catalogoServicios(): array
+    {
+        return [
+            'recepcion_24h'    => ['emoji' => '🔑', 'label' => 'Recepción 24h'],
+            'wifi'             => ['emoji' => '📶', 'label' => 'WiFi gratis'],
+            'desayuno'         => ['emoji' => '☕', 'label' => 'Desayuno incluido'],
+            'desayuno_buffet'  => ['emoji' => '🍳', 'label' => 'Desayuno buffet'],
+            'almuerzo'         => ['emoji' => '🥗', 'label' => 'Almuerzo'],
+            'cena'             => ['emoji' => '🍽️', 'label' => 'Cena'],
+            'bar'              => ['emoji' => '🍷', 'label' => 'Bar'],
+            'lavanderia'       => ['emoji' => '👕', 'label' => 'Lavandería'],
+            'estacionamiento'  => ['emoji' => '🚗', 'label' => 'Estacionamiento'],
+            'tours'            => ['emoji' => '🗺️', 'label' => 'Tours y excursiones'],
+            'cocina_comun'     => ['emoji' => '🍲', 'label' => 'Cocina comunitaria'],
+            'sala_comun'       => ['emoji' => '🛋️', 'label' => 'Sala común / Lounge'],
+            'sala_eventos'     => ['emoji' => '🎭', 'label' => 'Sala de eventos'],
+            'cowork'           => ['emoji' => '💻', 'label' => 'Coworking'],
+            'spa'              => ['emoji' => '💆', 'label' => 'Spa'],
+            'gimnasio'         => ['emoji' => '🏋️', 'label' => 'Gimnasio'],
+            'piscina'          => ['emoji' => '🏊', 'label' => 'Piscina'],
+            'terraza'          => ['emoji' => '🌅', 'label' => 'Terraza / Rooftop'],
+            'vista_mar'        => ['emoji' => '🌊', 'label' => 'Vista al mar/cerro'],
+            'mascotas'         => ['emoji' => '🐾', 'label' => 'Pet friendly'],
+            'traslado'         => ['emoji' => '🚌', 'label' => 'Traslado aeropuerto'],
+        ];
+    }
 
     public function tieneOfertaActiva(): bool
     {

@@ -148,6 +148,76 @@
                 </div>
                 @endif
 
+                {{-- ALOJAMIENTO --}}
+                @if($punto->esAlojamiento())
+                @php $catalogo = App\Models\PuntoInteres::catalogoServicios(); @endphp
+                <div class="bg-white rounded-2xl shadow-sm border border-indigo-100 p-6 space-y-6">
+                    <div>
+                        <p class="text-xs text-indigo-600 uppercase font-bold mb-1">Alojamiento</p>
+                        <p class="text-xs text-gray-400">Información específica para huéspedes. Solo aparece si completas al menos un campo.</p>
+                    </div>
+
+                    {{-- Precio y horarios --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <x-input-label for="precio_desde" value="Precio desde" />
+                            <x-text-input id="precio_desde" name="precio_desde" class="block mt-1 w-full"
+                                          value="{{ old('precio_desde', $punto->precio_desde) }}"
+                                          placeholder="Ej: $15.000 / noche" />
+                        </div>
+                        <div>
+                            <x-input-label for="check_in" value="Check-in" />
+                            <x-text-input id="check_in" name="check_in" class="block mt-1 w-full"
+                                          value="{{ old('check_in', $punto->check_in) }}"
+                                          placeholder="14:00" />
+                        </div>
+                        <div>
+                            <x-input-label for="check_out" value="Check-out" />
+                            <x-text-input id="check_out" name="check_out" class="block mt-1 w-full"
+                                          value="{{ old('check_out', $punto->check_out) }}"
+                                          placeholder="11:00" />
+                        </div>
+                    </div>
+
+                    {{-- Tipos de habitación --}}
+                    <div>
+                        <x-input-label for="tipos_habitacion" value="Habitaciones disponibles" />
+                        <textarea id="tipos_habitacion" name="tipos_habitacion" rows="6"
+                                  class="block mt-1 w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-indigo-400 resize-none"
+                                  placeholder="HABITACIÓN DOBLE — Cama queen, baño privado, vista al cerro · $35.000/noche&#10;DORMITORIO MIXTO — 8 camas, baño compartido · $12.000/noche&#10;SUITE — Living, cocina, terraza · $55.000/noche"
+                        >{{ old('tipos_habitacion', $punto->tipos_habitacion) }}</textarea>
+                    </div>
+
+                    {{-- Servicios incluidos --}}
+                    <div>
+                        <x-input-label value="Servicios incluidos" />
+                        <p class="text-xs text-gray-400 mt-1 mb-3">Selecciona todo lo que ofreces. Se mostrará como íconos en tu ficha.</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            @foreach($catalogo as $slug => $servicio)
+                            <label class="flex items-center gap-2 cursor-pointer bg-gray-50 hover:bg-indigo-50 border border-gray-200 rounded-xl px-3 py-2 transition">
+                                <input type="checkbox"
+                                       name="servicios_incluidos[]"
+                                       value="{{ $slug }}"
+                                       @checked(in_array($slug, old('servicios_incluidos', $punto->servicios_incluidos ?? [])))
+                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-400">
+                                <span class="text-lg">{{ $servicio['emoji'] }}</span>
+                                <span class="text-xs font-medium text-gray-700">{{ $servicio['label'] }}</span>
+                            </label>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Políticas --}}
+                    <div>
+                        <x-input-label for="politicas" value="Políticas del establecimiento" />
+                        <textarea id="politicas" name="politicas" rows="5"
+                                  class="block mt-1 w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-indigo-400 resize-none"
+                                  placeholder="CANCELACIÓN — Cancelación gratuita hasta 48h antes de la llegada.&#10;MASCOTAS — No se admiten mascotas.&#10;FUMADORES — Solo en terrazas exteriores.&#10;MENORES — Bienvenidos con supervisión adulta."
+                        >{{ old('politicas', $punto->politicas) }}</textarea>
+                    </div>
+                </div>
+                @endif
+
                 {{-- Perfil de búsqueda --}}
                 <div id="busqueda" class="bg-amber-50 border border-amber-200 rounded-2xl p-6">
                     <p class="text-xs text-amber-700 uppercase font-bold mb-1">Perfil de búsqueda</p>
