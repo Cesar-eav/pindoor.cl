@@ -117,6 +117,46 @@
                     {{-- PANEL: Contenido principal --}}
                     <div x-show="vista === 'contenido'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
 
+                        {{-- CABECERA DEL NEGOCIO --}}
+                        @if($punto->es_cliente)
+                        <div class="flex gap-4 items-start bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-8">
+                            @if($punto->imagen_perfil)
+                                <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
+                                     alt="Logo {{ $punto->title }}"
+                                     class="w-16 h-16 rounded-2xl object-cover border border-gray-100 shrink-0">
+                            @else
+                                <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center shrink-0 text-2xl">🏪</div>
+                            @endif
+
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h2 class="text-lg font-extrabold text-gray-900 leading-tight">{{ $punto->title }}</h2>
+                                    @if($punto->categoria)
+                                        <span class="text-[10px] font-black uppercase tracking-widest bg-pindoor-accent/10 text-pindoor-accent px-2 py-0.5 rounded-full">
+                                            {{ $punto->categoria->icono }} {{ $punto->categoria->nombre }}
+                                        </span>
+                                    @endif
+                                </div>
+
+                                <p class="text-sm text-gray-500 mt-1">📍 {{ $punto->sector }}{{ $punto->direccion ? ' · ' . $punto->direccion : '' }}</p>
+
+                                <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+                                    @if($punto->horario)
+                                        <span class="text-xs text-gray-500 flex items-center gap-1">
+                                            🕐 {{ $punto->horario }}
+                                        </span>
+                                    @endif
+                                    @if($punto->enlace)
+                                        <a href="{{ $punto->enlace }}" target="_blank" rel="noopener"
+                                           class="text-xs text-pindoor-accent hover:underline font-medium flex items-center gap-1 truncate max-w-[200px]">
+                                            🔗 {{ parse_url($punto->enlace, PHP_URL_HOST) ?? $punto->enlace }}
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
                         {{-- Galería --}}
                         @php
                             $imagenes = $punto->imagenes->sortBy('orden');
