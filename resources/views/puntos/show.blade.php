@@ -151,6 +151,20 @@
                     
                     {{-- Card de Ubicación --}}
                     <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/50 border border-white sticky top-8">
+
+                        {{-- Logo del negocio (solo si es cliente) --}}
+                        @if($punto->es_cliente && $punto->imagen_perfil)
+                            <div class="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
+                                <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
+                                     alt="Logo {{ $punto->title }}"
+                                     class="w-14 h-14 rounded-2xl object-cover border border-gray-100 shrink-0">
+                                <div>
+                                    <p class="font-bold text-gray-900 leading-tight">{{ $punto->title }}</p>
+                                    <p class="text-xs text-gray-400">{{ $punto->categoria?->nombre }}</p>
+                                </div>
+                            </div>
+                        @endif
+
                         <h2 class="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-6">Ubicación</h2>
                         
                         <div class="space-y-4 mb-8">
@@ -181,6 +195,18 @@
                             <div class="mt-6 pt-6 border-t border-gray-100">
                                 <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Horario</h3>
                                 <p class="text-gray-700 text-sm font-medium">{{ $punto->horario }}</p>
+                            </div>
+                        @endif
+
+                        {{-- Oferta del día (solo negocios con oferta activa) --}}
+                        @if($punto->es_cliente && $punto->oferta_del_dia)
+                            <div class="mt-6 pt-6 border-t border-gray-100">
+                                <h3 class="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-2">
+                                    Oferta de hoy
+                                </h3>
+                                <p class="text-gray-700 text-sm leading-relaxed">
+                                    {{ $punto->oferta_del_dia }}
+                                </p>
                             </div>
                         @endif
 

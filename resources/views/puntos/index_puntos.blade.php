@@ -127,11 +127,26 @@
                                                 📍</div>
                                         @endif
                                     </a>
+
                                     @if ($atractivo->categoria)
                                         <span
                                             class="absolute top-4 left-4 bg-[#fc5648] text-white text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full shadow-lg">
                                             {{ $atractivo->categoria->icono }} {{ $atractivo->categoria->nombre }}
                                         </span>
+                                    @endif
+
+                                    {{-- Badge oferta del día --}}
+                                    @if ($atractivo->es_cliente && $atractivo->oferta_del_dia)
+                                        <span class="absolute top-4 right-4 bg-amber-400 text-amber-900 text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full shadow-lg">
+                                            Oferta hoy
+                                        </span>
+                                    @endif
+
+                                    {{-- Logo del negocio --}}
+                                    @if ($atractivo->es_cliente && $atractivo->imagen_perfil)
+                                        <img src="{{ asset('storage/' . $atractivo->imagen_perfil) }}"
+                                             alt="Logo {{ $atractivo->title }}"
+                                             class="absolute bottom-4 right-4 w-12 h-12 rounded-xl object-cover border-2 border-white shadow-lg">
                                     @endif
                                 </div>
 

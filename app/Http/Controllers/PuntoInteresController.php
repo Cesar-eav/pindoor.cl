@@ -27,7 +27,9 @@ class PuntoInteresController extends Controller
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('descripcion_busqueda', 'like', "%{$search}%")
+                  ->orWhere('tags', 'like', "%{$search}%");
             });
         }
 
