@@ -72,6 +72,15 @@
                                       placeholder="café, vegano, terraza, wifi" />
                         <p class="text-xs text-gray-400 mt-1">Estas etiquetas aparecen en tu ficha pública.</p>
                     </div>
+
+                    {{-- Video YouTube --}}
+                    <div>
+                        <x-input-label for="video_url" value="Video de YouTube" />
+                        <x-text-input id="video_url" name="video_url" type="url" class="block mt-1 w-full"
+                                      value="{{ old('video_url', $punto->video_url) }}"
+                                      placeholder="https://www.youtube.com/watch?v=..." />
+                        <p class="text-xs text-gray-400 mt-1">Se mostrará incrustado en tu ficha pública.</p>
+                    </div>
                 </div>
 
                 {{-- Imagen de perfil --}}
@@ -100,6 +109,44 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- Carta / Menú (solo alimentación) --}}
+                @if($punto->categoria?->tipo === 'alimentacion')
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase font-bold mb-1">Carta / Menú</p>
+                        <p class="text-xs text-gray-400 mb-4">Se mostrará en tu ficha pública con un botón "Ver carta".</p>
+                    </div>
+
+                    <div>
+                        <x-input-label for="carta" value="Descripción de la carta (texto libre)" />
+                        <textarea id="carta" name="carta" rows="10"
+                                  class="block mt-1 w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-pindoor-accent resize-none"
+                                  placeholder="ENTRANTES&#10;— Empanadas de pino $2.000&#10;— Ceviche del día $4.500&#10;&#10;PRINCIPALES&#10;— Chorrillana $6.000&#10;...">{{ old('carta', $punto->carta) }}</textarea>
+                    </div>
+
+                    <div>
+                        <x-input-label for="carta_pdf" value="Carta en PDF (opcional)" />
+                        @if($punto->carta_pdf)
+                            <div class="flex items-center gap-3 mt-1 mb-2">
+                                <a href="{{ asset('storage/' . $punto->carta_pdf) }}" target="_blank"
+                                   class="text-xs text-pindoor-accent font-bold hover:underline flex items-center gap-1">
+                                    📄 Ver carta actual
+                                </a>
+                                <label class="flex items-center gap-1 text-xs text-gray-400 cursor-pointer">
+                                    <input type="checkbox" name="eliminar_carta_pdf" value="1" class="rounded"> Eliminar PDF
+                                </label>
+                            </div>
+                        @endif
+                        <input type="file" name="carta_pdf" id="carta_pdf" accept="application/pdf"
+                               class="block w-full text-sm text-gray-500
+                                      file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
+                                      file:text-sm file:font-bold file:bg-gray-100 file:text-gray-700
+                                      hover:file:bg-gray-200 cursor-pointer mt-1" />
+                        <p class="text-xs text-gray-400 mt-1">Solo PDF. Máximo 5 MB.</p>
+                    </div>
+                </div>
+                @endif
 
                 {{-- Perfil de búsqueda --}}
                 <div id="busqueda" class="bg-amber-50 border border-amber-200 rounded-2xl p-6">

@@ -57,27 +57,43 @@ class ClienteController extends Controller
             'description'         => 'required|string',
             'horario'             => 'nullable|string|max:255',
             'enlace'              => 'nullable|url|max:255',
+            'video_url'           => 'nullable|url|max:255',
             'tags'                => 'nullable|string',
             'descripcion_busqueda'=> 'nullable|string',
             'imagen_perfil'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'carta'               => 'nullable|string',
+            'carta_pdf'           => 'nullable|file|mimes:pdf|max:5120',
         ]);
 
         $data = [
             'description'          => $request->description,
             'horario'              => $request->horario,
             'enlace'               => $request->enlace,
+            'video_url'            => $request->video_url,
             'tags'                 => $request->tags
                                         ? array_map('trim', explode(',', $request->tags))
                                         : [],
             'descripcion_busqueda' => $request->descripcion_busqueda,
+            'carta'                => $request->carta,
         ];
 
         if ($request->hasFile('imagen_perfil')) {
-            // Eliminar imagen anterior si existe
             if ($punto->imagen_perfil) {
                 Storage::disk('public')->delete($punto->imagen_perfil);
             }
             $data['imagen_perfil'] = $request->file('imagen_perfil')->store('perfiles', 'public');
+        }
+
+        if ($request->boolean('eliminar_carta_pdf') && $punto->carta_pdf) {
+            Storage::disk('public')->delete($punto->carta_pdf);
+            $data['carta_pdf'] = null;
+        }
+
+        if ($request->hasFile('carta_pdf')) {
+            if ($punto->carta_pdf) {
+                Storage::disk('public')->delete($punto->carta_pdf);
+            }
+            $data['carta_pdf'] = $request->file('carta_pdf')->store('cartas', 'public');
         }
 
         $punto->update($data);

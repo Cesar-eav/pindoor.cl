@@ -36,7 +36,16 @@ class PuntoInteres extends Model
         'oferta_del_dia',
         'descripcion_busqueda',
         'imagen_perfil',
+        'carta',
+        'carta_pdf',
     ];
+
+    public function tieneCarta(): bool
+    {
+        return $this->es_cliente
+            && $this->categoria?->tipo === 'alimentacion'
+            && ($this->carta || $this->carta_pdf);
+    }
 
     public function scopeClientes($query)
     {
