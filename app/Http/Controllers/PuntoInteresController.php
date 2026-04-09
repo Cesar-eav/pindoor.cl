@@ -54,7 +54,9 @@ class PuntoInteresController extends Controller
             $query->inRandomOrder();
         }
 
-        $atractivos = $query->with(['categoria', 'imagenPrincipal'])->paginate(40)->withQueryString();
+        $atractivos = $query
+        ->where('activo', 1)
+        ->with(['categoria', 'imagenPrincipal'])->paginate(40)->withQueryString();
         $categorias = Categoria::all();
 
         if ($request->ajax() || $request->header('X-Requested-With') === 'XMLHttpRequest') {

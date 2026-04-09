@@ -172,6 +172,9 @@
                         <div class="p-10 text-center text-gray-400 italic">No has creado puntos públicos todavía.</div>
                     @endif
                 </div>
+                @if($puntos->hasPages())
+                    <div class="mt-4">{{ $puntos->links() }}</div>
+                @endif
             </div>
 
         </div>

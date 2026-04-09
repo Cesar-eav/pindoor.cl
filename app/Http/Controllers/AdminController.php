@@ -53,10 +53,9 @@ class AdminController extends Controller
 
     // Traemos los puntos creados por el admin (puntos públicos)
         $categorias = Categoria::orderBy('nombre')->get();
-        $puntos = PuntoInteres::where('user_id', auth()->id())
-                            ->where('eliminado', false)
+        $puntos = PuntoInteres::where('eliminado', false)
                             ->latest()
-                            ->get();
+                            ->paginate(50);
 
         return view('admin.puntos-create', compact('puntos', 'categorias'));
 
