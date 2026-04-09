@@ -86,9 +86,16 @@
                                     <span class="text-base">{{ $punto->categoria->icono }}</span>
                                     {{ $punto->categoria->nombre }}
                                 </span>
+
                             @endif
-                            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight leading-[1.1]">
-                                {{ $punto->title }}
+                            
+                            <div class="relativeflex flex-wrap items-start justify-between gap-4 mb-2">
+                                <h1 class="flex-1 text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight leading-[1.1]">
+                                    {{ $punto->title }}
+                                </h1>
+                                
+                            </div>
+
                             </h1>
                             @if($punto->autor)
                                 <div class="flex items-center gap-2 text-gray-500 font-medium italic">
@@ -202,6 +209,17 @@
             </div>
         </main>
     </div>
+
+    {{-- Botón flotante: Ir en Google Maps --}}
+    @if($punto->lat && $punto->lng)
+    <a href="https://www.google.com/maps?q={{ $punto->lat }},{{ $punto->lng }}"
+       target="_blank"
+       rel="noopener"
+       class="fixed bottom-10 md:bottom-30 left-6 z-50 inline-flex items-center gap-2 px-5 py-3 bg-white text-black rounded-full border-red-400 border-2 text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 group">
+        <span class="group-hover:scale-125 transition-transform duration-300">📍</span>
+        <span>Ir al Mapa</span>
+    </a>
+    @endif
 
     @if($punto->lat && $punto->lng)
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
