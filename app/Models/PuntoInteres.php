@@ -32,7 +32,21 @@ class PuntoInteres extends Model
         'tags',
         'activo',
         'eliminado',
+        'es_cliente',
+        'oferta_del_dia',
+        'descripcion_busqueda',
+        'imagen_perfil',
     ];
+
+    public function scopeClientes($query)
+    {
+        return $query->where('es_cliente', true);
+    }
+
+    public function scopeAtractivos($query)
+    {
+        return $query->where('es_cliente', false);
+    }
 
     public function user()
     {
