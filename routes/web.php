@@ -1,8 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PuntoInteresController; // Importante crearlo luego
-use App\Http\Controllers\AdminController;        // Importante crearlo luego
+use App\Http\Controllers\PuntoInteresController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ClienteController;
 use Illuminate\Support\Facades\Route;
 
 /* --- RUTAS PÚBLICAS (TURISTAS) --- */
@@ -56,10 +57,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 /* --- RUTAS CLIENTES (NEGOCIOS) --- */
 Route::middleware(['auth', 'role:cliente'])->prefix('cliente')->name('cliente.')->group(function () {
-    // Aquí el cliente gestiona sus propios puntos
-    Route::get('/mis-puntos', [PuntoInteresController::class, 'misPuntos'])->name('mis-puntos');
-    Route::get('/nuevo-punto', [PuntoInteresController::class, 'create'])->name('create');
-    Route::post('/guardar-punto', [PuntoInteresController::class, 'store'])->name('store');
+    // Dashboard: redirige a perfil
+    Route::get('/mis-puntos', fn() => redirect()->route('cliente.perfil'))->name('mis-puntos');
+
+    // Perfil del negocio
+    Route::get('/perfil', [ClienteController::class, 'perfil'])->name('perfil');
+    Route::get('/perfil/editar', [ClienteController::class, 'editarPerfil'])->name('perfil.editar');
+    Route::put('/perfil/actualizar', [ClienteController::class, 'actualizarPerfil'])->name('perfil.actualizar');
+
+    // Actualización rápida: oferta del día
+    Route::patch('/oferta', [ClienteController::class, 'actualizarOferta'])->name('oferta.actualizar');
 });
 
 require __DIR__.'/auth.php';
