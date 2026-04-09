@@ -145,6 +145,7 @@
 
             {{-- Menú del día: actualización rápida --}}
             @if(in_array('menu_del_dia', $modulos))
+            @php $textoMenu = $punto->dato('menu_del_dia')['texto'] ?? ''; @endphp
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h4 class="font-bold text-gray-700 mb-1">Menú del día</h4>
                 <p class="text-xs text-gray-400 mb-4">
@@ -159,10 +160,10 @@
                         maxlength="2000"
                         placeholder="Ej:&#10;PRIMER PLATO — Sopa del día&#10;SEGUNDO PLATO — Cazuela de vacuno&#10;POSTRE — Arroz con leche&#10;Todo por $5.500"
                         class="w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-orange-400 resize-none"
-                    >{{ old('menu_del_dia', $punto->menu_del_dia) }}</textarea>
+                    >{{ old('menu_del_dia', $textoMenu) }}</textarea>
 
                     <div class="flex justify-between items-center mt-3">
-                        @if($punto->menu_del_dia)
+                        @if($textoMenu)
                             <span class="text-xs text-gray-400">Activo — visible en tu ficha</span>
                         @else
                             <span class="text-xs text-gray-300 italic">Sin menú publicado</span>
@@ -197,6 +198,54 @@
                     </div>
                 @endif
             </div>
+
+            {{-- Accesos rápidos museo --}}
+            @if($punto->esMuseo())
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                @if(in_array('entradas', $modulos) || in_array('exposiciones', $modulos))
+                <a href="{{ route('cliente.museo') }}"
+                   class="bg-white rounded-2xl border border-amber-200 p-5 flex items-center gap-4 hover:border-amber-400 hover:shadow-sm transition group">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-2xl group-hover:bg-amber-100 transition">🎟️</div>
+                    <div>
+                        <p class="font-bold text-gray-800 text-sm">Entradas y exposiciones</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Gestiona tarifas y colecciones</p>
+                    </div>
+                </a>
+                @endif
+                <a href="{{ route('puntos.show', $punto->slug) }}" target="_blank"
+                   class="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4 hover:border-gray-300 hover:shadow-sm transition group">
+                    <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-2xl group-hover:bg-gray-100 transition">🔗</div>
+                    <div>
+                        <p class="font-bold text-gray-800 text-sm">Ver ficha pública</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Cómo te ven los turistas</p>
+                    </div>
+                </a>
+            </div>
+            @endif
+
+            {{-- Accesos rápidos cultura --}}
+            @if($punto->esCultura())
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                @if(in_array('agenda', $modulos))
+                <a href="{{ route('cliente.eventos') }}"
+                   class="bg-white rounded-2xl border border-blue-200 p-5 flex items-center gap-4 hover:border-blue-400 hover:shadow-sm transition group">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-2xl group-hover:bg-blue-100 transition">📅</div>
+                    <div>
+                        <p class="font-bold text-gray-800 text-sm">Agenda de eventos</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Programa obras, conciertos y más</p>
+                    </div>
+                </a>
+                @endif
+                <a href="{{ route('puntos.show', $punto->slug) }}" target="_blank"
+                   class="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4 hover:border-gray-300 hover:shadow-sm transition group">
+                    <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-2xl group-hover:bg-gray-100 transition">🔗</div>
+                    <div>
+                        <p class="font-bold text-gray-800 text-sm">Ver ficha pública</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Cómo te ven los turistas</p>
+                    </div>
+                </a>
+            </div>
+            @endif
 
             {{-- Estado del perfil de búsqueda --}}
             <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6">

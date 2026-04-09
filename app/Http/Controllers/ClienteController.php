@@ -2,23 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ModuloDato;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ClienteController extends Controller
 {
-    /**
-     * Obtiene el PuntoInteres del cliente autenticado o aborta 404.
-     */
+    /** Obtiene el PuntoInteres del cliente autenticado o null si no existe. */
     private function miPunto()
     {
         return Auth::user()->puntoInteres()->where('eliminado', false)->first();
     }
 
-    /**
-     * Dashboard del cliente: muestra su perfil y oferta del día.
-     */
+    // ─── Dashboard ─────────────────────────────────────────────────────────────
+
     public function perfil()
     {
         $punto = $this->miPunto();
@@ -27,14 +25,14 @@ class ClienteController extends Controller
             return view('cliente.sin-negocio');
         }
 
+        $punto->load('moduloDatos', 'moduloItems', 'categoria');
         $modulos = $punto->modulos_habilitados ?? [];
 
         return view('cliente.perfil', compact('punto', 'modulos'));
     }
 
-    /**
-     * Formulario completo de edición del perfil.
-     */
+    // ─── Edición del perfil ────────────────────────────────────────────────────
+
     public function editarPerfil()
     {
         $punto = $this->miPunto();
@@ -43,19 +41,18 @@ class ClienteController extends Controller
             return redirect()->route('cliente.perfil');
         }
 
-        $modulos = $punto->modulos_habilitados ?? [];
+        $punto->load('moduloDatos', 'categoria');
+        $modulos          = $punto->modulos_habilitados ?? [];
+        $datoCarta        = $punto->dato('carta');
+        $datoAlojamiento  = $punto->dato('alojamiento');
 
-        return view('cliente.perfil-editar', compact('punto', 'modulos'));
+        return view('cliente.perfil-editar', compact('punto', 'modulos', 'datoCarta', 'datoAlojamiento'));
     }
 
-    /**
-     * Guarda los cambios del formulario de edición completa.
-     * El cliente puede editar: descripcion, horario, enlace, tags,
-     * descripcion_busqueda e imagen_perfil. No puede cambiar título ni ubicación.
-     */
     public function actualizarPerfil(Request $request)
     {
         $punto = $this->miPunto();
+        $modulos = $punto->modulos_habilitados ?? [];
 
         $request->validate([
             'description'         => 'required|string',
@@ -72,12 +69,13 @@ class ClienteController extends Controller
             'precio_desde'        => 'nullable|string|max:100',
             'check_in'            => 'nullable|string|max:20',
             'check_out'           => 'nullable|string|max:20',
-            'tipos_habitacion'    => 'nullable|string',
+            'habitaciones'        => 'nullable|string',
             'servicios_incluidos' => 'nullable|array',
             'politicas'           => 'nullable|string',
         ]);
 
-        $data = [
+        // ── Campos universales en puntosinteres ──────────────────────────────
+        $datosPunto = [
             'description'          => $request->description,
             'horario'              => $request->horario,
             'enlace'               => $request->enlace,
@@ -86,48 +84,66 @@ class ClienteController extends Controller
                                         ? array_map('trim', explode(',', $request->tags))
                                         : [],
             'descripcion_busqueda' => $request->descripcion_busqueda,
-            'carta'                => $request->carta,
-            // Alojamiento
-            'precio_desde'         => $request->precio_desde,
-            'check_in'             => $request->check_in,
-            'check_out'            => $request->check_out,
-            'tipos_habitacion'     => $request->tipos_habitacion,
-            'servicios_incluidos'  => $request->servicios_incluidos ?? [],
-            'politicas'            => $request->politicas,
         ];
 
         if ($request->hasFile('imagen_perfil')) {
             if ($punto->imagen_perfil) {
                 Storage::disk('public')->delete($punto->imagen_perfil);
             }
-            $data['imagen_perfil'] = $request->file('imagen_perfil')->store('perfiles', 'public');
+            $datosPunto['imagen_perfil'] = $request->file('imagen_perfil')->store('perfiles', 'public');
         }
 
-        if ($request->boolean('eliminar_carta_pdf') && $punto->carta_pdf) {
-            Storage::disk('public')->delete($punto->carta_pdf);
-            $data['carta_pdf'] = null;
-        }
+        $punto->update($datosPunto);
 
-        if ($request->hasFile('carta_pdf')) {
-            if ($punto->carta_pdf) {
-                Storage::disk('public')->delete($punto->carta_pdf);
+        // ── Módulo: carta ────────────────────────────────────────────────────
+        if (in_array('carta', $modulos)) {
+            $registro = $punto->moduloDatos()->firstOrNew(['modulo' => 'carta']);
+            $datosCarta = $registro->datos ?? [];
+
+            $datosCarta['texto'] = $request->carta;
+
+            if ($request->boolean('eliminar_carta_pdf') && !empty($datosCarta['pdf_ruta'])) {
+                Storage::disk('public')->delete($datosCarta['pdf_ruta']);
+                $datosCarta['pdf_ruta'] = null;
             }
-            $data['carta_pdf'] = $request->file('carta_pdf')->store('cartas', 'public');
+
+            if ($request->hasFile('carta_pdf')) {
+                if (!empty($datosCarta['pdf_ruta'])) {
+                    Storage::disk('public')->delete($datosCarta['pdf_ruta']);
+                }
+                $datosCarta['pdf_ruta'] = $request->file('carta_pdf')->store('cartas', 'public');
+            }
+
+            $registro->fill([
+                'datos'         => $datosCarta,
+                'actualizado_en'=> now(),
+            ])->save();
         }
 
-        if (array_key_exists('carta', $data) && ($data['carta'] !== $punto->carta || isset($data['carta_pdf']))) {
-            $data['carta_updated_at'] = now();
+        // ── Módulo: alojamiento (habitaciones, servicios, politicas) ─────────
+        $modulosAlojamiento = ['habitaciones', 'servicios', 'politicas'];
+        if (array_intersect($modulosAlojamiento, $modulos)) {
+            $punto->moduloDatos()->updateOrCreate(
+                ['modulo' => 'alojamiento'],
+                [
+                    'datos' => [
+                        'precio_desde' => $request->precio_desde,
+                        'entrada'      => $request->check_in,
+                        'salida'       => $request->check_out,
+                        'habitaciones' => $request->habitaciones,
+                        'servicios'    => $request->servicios_incluidos ?? [],
+                        'politicas'    => $request->politicas,
+                    ],
+                ]
+            );
         }
-
-        $punto->update($data);
 
         return redirect()->route('cliente.perfil')
             ->with('success', 'Perfil actualizado correctamente.');
     }
 
-    /**
-     * Actualización rápida de la oferta del día (desde el dashboard).
-     */
+    // ─── Actualizaciones rápidas ───────────────────────────────────────────────
+
     public function actualizarMenu(Request $request)
     {
         $punto = $this->miPunto();
@@ -136,14 +152,15 @@ class ClienteController extends Controller
             return redirect()->route('cliente.perfil');
         }
 
-        $request->validate([
-            'menu_del_dia' => 'nullable|string|max:2000',
-        ]);
+        $request->validate(['menu_del_dia' => 'nullable|string|max:2000']);
 
-        $punto->update([
-            'menu_del_dia'            => $request->menu_del_dia,
-            'menu_del_dia_updated_at' => $request->menu_del_dia ? now() : null,
-        ]);
+        $punto->moduloDatos()->updateOrCreate(
+            ['modulo' => 'menu_del_dia'],
+            [
+                'datos'         => ['texto' => $request->menu_del_dia ?? ''],
+                'actualizado_en'=> $request->filled('menu_del_dia') ? now() : null,
+            ]
+        );
 
         return redirect()->route('cliente.perfil')
             ->with('success', 'Menú del día actualizado.');
@@ -163,16 +180,16 @@ class ClienteController extends Controller
             'duracion_dias'  => 'nullable|integer|min:1|max:30',
         ]);
 
-        $activa = $request->boolean('oferta_activa');
+        $activa  = $request->boolean('oferta_activa');
+        $expira  = null;
 
-        $expira = null;
         if ($activa && $request->filled('duracion_dias')) {
             $expira = now()->addDays((int) $request->duracion_dias);
         }
 
         $punto->update([
-            'oferta_del_dia'  => $request->oferta_del_dia,
-            'oferta_activa'   => $activa,
+            'oferta_del_dia'   => $request->oferta_del_dia,
+            'oferta_activa'    => $activa,
             'oferta_expira_at' => $activa ? $expira : null,
         ]);
 

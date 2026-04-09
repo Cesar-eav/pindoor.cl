@@ -122,14 +122,14 @@
                         <x-input-label for="carta" value="Descripción de la carta (texto libre)" />
                         <textarea id="carta" name="carta" rows="10"
                                   class="block mt-1 w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-pindoor-accent resize-none"
-                                  placeholder="ENTRANTES&#10;— Empanadas de pino $2.000&#10;— Ceviche del día $4.500&#10;&#10;PRINCIPALES&#10;— Chorrillana $6.000&#10;...">{{ old('carta', $punto->carta) }}</textarea>
+                                  placeholder="ENTRANTES&#10;— Empanadas de pino $2.000&#10;— Ceviche del día $4.500&#10;&#10;PRINCIPALES&#10;— Chorrillana $6.000&#10;...">{{ old('carta', $datoCarta['texto'] ?? '') }}</textarea>
                     </div>
 
                     <div>
                         <x-input-label for="carta_pdf" value="Carta en PDF (opcional)" />
-                        @if($punto->carta_pdf)
+                        @if($datoCarta['pdf_ruta'] ?? null)
                             <div class="flex items-center gap-3 mt-1 mb-2">
-                                <a href="{{ asset('storage/' . $punto->carta_pdf) }}" target="_blank"
+                                <a href="{{ asset('storage/' . $datoCarta['pdf_ruta']) }}" target="_blank"
                                    class="text-xs text-pindoor-accent font-bold hover:underline flex items-center gap-1">
                                     📄 Ver carta actual
                                 </a>
@@ -155,7 +155,7 @@
                                           || in_array('politicas', $modulos);
                 @endphp
                 @if($tieneModuloAlojamiento)
-                @php $catalogo = App\Models\PuntoInteres::catalogoServicios(); @endphp
+                @php $catalogoServicios = App\Models\PuntoInteres::catalogoServicios(); @endphp
                 <div class="bg-white rounded-2xl shadow-sm border border-indigo-100 p-6 space-y-6">
                     <div>
                         <p class="text-xs text-indigo-600 uppercase font-bold mb-1">Alojamiento</p>
@@ -168,29 +168,29 @@
                         <div>
                             <x-input-label for="precio_desde" value="Precio desde" />
                             <x-text-input id="precio_desde" name="precio_desde" class="block mt-1 w-full"
-                                          value="{{ old('precio_desde', $punto->precio_desde) }}"
+                                          value="{{ old('precio_desde', $datoAlojamiento['precio_desde'] ?? '') }}"
                                           placeholder="Ej: $15.000 / noche" />
                         </div>
                         <div>
                             <x-input-label for="check_in" value="Check-in" />
                             <x-text-input id="check_in" name="check_in" class="block mt-1 w-full"
-                                          value="{{ old('check_in', $punto->check_in) }}"
+                                          value="{{ old('check_in', $datoAlojamiento['entrada'] ?? '') }}"
                                           placeholder="14:00" />
                         </div>
                         <div>
                             <x-input-label for="check_out" value="Check-out" />
                             <x-text-input id="check_out" name="check_out" class="block mt-1 w-full"
-                                          value="{{ old('check_out', $punto->check_out) }}"
+                                          value="{{ old('check_out', $datoAlojamiento['salida'] ?? '') }}"
                                           placeholder="11:00" />
                         </div>
                     </div>
 
                     <div>
-                        <x-input-label for="tipos_habitacion" value="Habitaciones disponibles" />
-                        <textarea id="tipos_habitacion" name="tipos_habitacion" rows="6"
+                        <x-input-label for="habitaciones" value="Habitaciones disponibles" />
+                        <textarea id="habitaciones" name="habitaciones" rows="6"
                                   class="block mt-1 w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-indigo-400 resize-none"
                                   placeholder="HABITACIÓN DOBLE — Cama queen, baño privado, vista al cerro · $35.000/noche&#10;DORMITORIO MIXTO — 8 camas, baño compartido · $12.000/noche&#10;SUITE — Living, cocina, terraza · $55.000/noche"
-                        >{{ old('tipos_habitacion', $punto->tipos_habitacion) }}</textarea>
+                        >{{ old('habitaciones', $datoAlojamiento['habitaciones'] ?? '') }}</textarea>
                     </div>
                     @endif
 
@@ -199,9 +199,9 @@
                     <div>
                         <x-input-label value="Servicios incluidos" />
                         <p class="text-xs text-gray-400 mt-1 mb-4">Selecciona todo lo que ofreces. Se mostrará agrupado en tu ficha pública.</p>
-                        @php $seleccionados = old('servicios_incluidos', $punto->servicios_incluidos ?? []); @endphp
+                        @php $seleccionados = old('servicios_incluidos', $datoAlojamiento['servicios'] ?? []); @endphp
                         <div class="space-y-4">
-                            @foreach($catalogo as $grupo => $servicios)
+                            @foreach($catalogoServicios as $grupo => $servicios)
                             <div class="border border-gray-200 rounded-xl overflow-hidden">
                                 <div class="bg-gray-50 px-4 py-2 border-b border-gray-200">
                                     <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">{{ $grupo }}</p>
@@ -232,7 +232,7 @@
                         <textarea id="politicas" name="politicas" rows="5"
                                   class="block mt-1 w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-indigo-400 resize-none"
                                   placeholder="CANCELACIÓN — Cancelación gratuita hasta 48h antes de la llegada.&#10;MASCOTAS — No se admiten mascotas.&#10;FUMADORES — Solo en terrazas exteriores.&#10;MENORES — Bienvenidos con supervisión adulta."
-                        >{{ old('politicas', $punto->politicas) }}</textarea>
+                        >{{ old('politicas', $datoAlojamiento['politicas'] ?? '') }}</textarea>
                     </div>
                     @endif
                 </div>

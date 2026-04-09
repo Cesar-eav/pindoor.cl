@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PuntoInteresController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\ClienteMuseoController;
+use App\Http\Controllers\ClienteEventosController;
 use Illuminate\Support\Facades\Route;
 
 /* --- RUTAS PÚBLICAS (TURISTAS) --- */
@@ -70,6 +72,17 @@ Route::middleware(['auth', 'role:cliente'])->prefix('cliente')->name('cliente.')
     // Actualización rápida: oferta del día y menú del día
     Route::patch('/oferta', [ClienteController::class, 'actualizarOferta'])->name('oferta.actualizar');
     Route::patch('/menu', [ClienteController::class, 'actualizarMenu'])->name('menu.actualizar');
+
+    // Módulo museo (categoría 7)
+    Route::get('/museo', [ClienteMuseoController::class, 'index'])->name('museo');
+    Route::post('/museo/entradas', [ClienteMuseoController::class, 'guardarEntradas'])->name('museo.entradas.guardar');
+    Route::post('/museo/exposicion', [ClienteMuseoController::class, 'guardarExposicion'])->name('museo.exposicion.guardar');
+    Route::delete('/museo/exposicion/{exposicion}', [ClienteMuseoController::class, 'eliminarExposicion'])->name('museo.exposicion.eliminar');
+
+    // Módulo agenda cultural (categoría 5)
+    Route::get('/eventos', [ClienteEventosController::class, 'index'])->name('eventos');
+    Route::post('/eventos/guardar', [ClienteEventosController::class, 'guardarEvento'])->name('eventos.guardar');
+    Route::delete('/eventos/{evento}', [ClienteEventosController::class, 'eliminarEvento'])->name('eventos.eliminar');
 });
 
 require __DIR__.'/auth.php';

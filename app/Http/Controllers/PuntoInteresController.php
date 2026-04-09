@@ -169,7 +169,7 @@ class PuntoInteresController extends Controller
      */
     public function show($slug)
     {
-        $punto = PuntoInteres::with(['categoria', 'imagenes'])
+        $punto = PuntoInteres::with(['categoria', 'imagenes', 'moduloDatos', 'moduloItems'])
                              ->where('slug', $slug)
                              ->where('activo', true)
                              ->where('eliminado', false)

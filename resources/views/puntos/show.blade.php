@@ -39,12 +39,16 @@
 
             {{-- Tabs móvil --}}
             @php
+                $alojamiento    = $punto->dato('alojamiento');
                 $tieneTabsExtra = $punto->tieneOfertaActiva()
                     || $punto->tieneCarta()
-                    || ($punto->es_cliente && $punto->menu_del_dia)
-                    || ($punto->moduloActivo('habitaciones') && $punto->tipos_habitacion)
-                    || ($punto->moduloActivo('servicios') && $punto->servicios_incluidos)
-                    || ($punto->moduloActivo('politicas') && $punto->politicas);
+                    || $punto->tieneMenu()
+                    || ($punto->moduloActivo('habitaciones') && ($alojamiento['habitaciones'] ?? null))
+                    || ($punto->moduloActivo('servicios')    && ($alojamiento['servicios']    ?? null))
+                    || ($punto->moduloActivo('politicas')    && ($alojamiento['politicas']    ?? null))
+                    || ($punto->moduloActivo('entradas')     && $punto->items('entradas')->count())
+                    || ($punto->moduloActivo('exposiciones') && $punto->items('exposiciones')->count())
+                    || ($punto->moduloActivo('agenda')       && $punto->eventosProximos()->count());
             @endphp
             @if($tieneTabsExtra)
             <div class="flex lg:hidden gap-2 mb-6 overflow-x-auto">
@@ -62,7 +66,7 @@
                     Oferta del día
                 </button>
                 @endif
-                @if($punto->es_cliente && $punto->menu_del_dia)
+                @if($punto->tieneMenu())
                 <button
                     @click="vista = 'menu'"
                     :class="vista === 'menu' ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 border border-gray-200'"
@@ -78,25 +82,46 @@
                     Ver carta
                 </button>
                 @endif
-                @if($punto->moduloActivo('habitaciones') && $punto->tipos_habitacion)
+                @if($punto->moduloActivo('habitaciones') && ($alojamiento['habitaciones'] ?? null))
                 <button @click="vista = 'habitaciones'"
                     :class="vista === 'habitaciones' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
                     Habitaciones
                 </button>
                 @endif
-                @if($punto->moduloActivo('servicios') && $punto->servicios_incluidos)
+                @if($punto->moduloActivo('servicios') && ($alojamiento['servicios'] ?? null))
                 <button @click="vista = 'servicios'"
                     :class="vista === 'servicios' ? 'bg-teal-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
                     Servicios
                 </button>
                 @endif
-                @if($punto->moduloActivo('politicas') && $punto->politicas)
+                @if($punto->moduloActivo('politicas') && ($alojamiento['politicas'] ?? null))
                 <button @click="vista = 'politicas'"
                     :class="vista === 'politicas' ? 'bg-gray-700 text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
                     Políticas
+                </button>
+                @endif
+                @if($punto->moduloActivo('entradas') && $punto->items('entradas')->count())
+                <button @click="vista = 'entradas'"
+                    :class="vista === 'entradas' ? 'bg-amber-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
+                    class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
+                    🎟️ Entradas
+                </button>
+                @endif
+                @if($punto->moduloActivo('exposiciones') && $punto->items('exposiciones')->count())
+                <button @click="vista = 'exposiciones'"
+                    :class="vista === 'exposiciones' ? 'bg-purple-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
+                    class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
+                    🖼️ Exposiciones
+                </button>
+                @endif
+                @if($punto->moduloActivo('agenda') && $punto->eventosProximos()->count())
+                <button @click="vista = 'agenda'"
+                    :class="vista === 'agenda' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
+                    class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
+                    📅 Agenda
                 </button>
                 @endif
             </div>
@@ -128,7 +153,7 @@
                     </button>
                     @endif
 
-                    @if($punto->es_cliente && $punto->menu_del_dia)
+                    @if($punto->tieneMenu())
                     <button
                         @click="vista = 'menu'"
                         :class="vista === 'menu'
@@ -151,7 +176,7 @@
                     @endif
 
                     {{-- Alojamiento --}}
-                    @if($punto->moduloActivo('habitaciones') && $punto->tipos_habitacion)
+                    @if($punto->moduloActivo('habitaciones') && ($alojamiento['habitaciones'] ?? null))
                     <button @click="vista = 'habitaciones'"
                         :class="vista === 'habitaciones' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-indigo-400'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
@@ -159,7 +184,7 @@
                     </button>
                     @endif
 
-                    @if($punto->moduloActivo('servicios') && $punto->servicios_incluidos)
+                    @if($punto->moduloActivo('servicios') && ($alojamiento['servicios'] ?? null))
                     <button @click="vista = 'servicios'"
                         :class="vista === 'servicios' ? 'bg-teal-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-teal-400'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
@@ -167,11 +192,35 @@
                     </button>
                     @endif
 
-                    @if($punto->moduloActivo('politicas') && $punto->politicas)
+                    @if($punto->moduloActivo('politicas') && ($alojamiento['politicas'] ?? null))
                     <button @click="vista = 'politicas'"
                         :class="vista === 'politicas' ? 'bg-gray-700 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-500'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
                         <span>📋</span> Políticas
+                    </button>
+                    @endif
+
+                    @if($punto->moduloActivo('entradas') && $punto->items('entradas')->count())
+                    <button @click="vista = 'entradas'"
+                        :class="vista === 'entradas' ? 'bg-amber-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-amber-400'"
+                        class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
+                        <span>🎟️</span> Entradas
+                    </button>
+                    @endif
+
+                    @if($punto->moduloActivo('exposiciones') && $punto->items('exposiciones')->count())
+                    <button @click="vista = 'exposiciones'"
+                        :class="vista === 'exposiciones' ? 'bg-purple-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-400'"
+                        class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
+                        <span>🖼️</span> Exposiciones
+                    </button>
+                    @endif
+
+                    @if($punto->moduloActivo('agenda') && $punto->eventosProximos()->count())
+                    <button @click="vista = 'agenda'"
+                        :class="vista === 'agenda' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-400'"
+                        class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
+                        <span>📅</span> Agenda
                     </button>
                     @endif
 
@@ -354,7 +403,8 @@
                     @endif
 
                     {{-- PANEL: Menú del día --}}
-                    @if($punto->es_cliente && $punto->menu_del_dia)
+                    @if($punto->tieneMenu())
+                    @php $datoMenu = $punto->dato('menu_del_dia'); @endphp
                     <div x-show="vista === 'menu'" x-cloak
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-1"
@@ -369,9 +419,9 @@
                             <div>
                                 <p class="text-xs font-black uppercase tracking-widest text-orange-500 mb-0.5">Hoy</p>
                                 <span class="text-2xl font-extrabold text-gray-900">Menú del día</span>
-                                @if($punto->menu_del_dia_updated_at)
+                                @if($punto->registroDato('menu_del_dia')?->actualizado_en)
                                     <p class="text-xs text-gray-400 mt-0.5">
-                                        Actualizado {{ $punto->menu_del_dia_updated_at->diffForHumans() }}
+                                        Actualizado {{ $punto->registroDato('menu_del_dia')->actualizado_en->diffForHumans() }}
                                     </p>
                                 @endif
                             </div>
@@ -379,7 +429,7 @@
 
                         <div class="bg-white rounded-3xl shadow-sm border border-orange-100 p-8">
                             <div class="serif-text text-gray-700 leading-relaxed whitespace-pre-line text-base">
-                                {{ $punto->menu_del_dia }}
+                                {{ $datoMenu['texto'] ?? '' }}
                             </div>
                         </div>
                     </div>
@@ -387,6 +437,10 @@
 
                     {{-- PANEL: Carta / Menú --}}
                     @if($punto->tieneCarta())
+                    @php
+                        $datoCarta       = $punto->dato('carta');
+                        $registroCarta   = $punto->registroDato('carta');
+                    @endphp
                     <div x-show="vista === 'carta'" x-cloak
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-1"
@@ -400,15 +454,15 @@
                                          class="w-12 h-12 rounded-xl object-cover border border-gray-100 inline-block mr-3">
                                 @endif
                                 <span class="text-2xl font-extrabold text-gray-900">Carta</span>
-                                @if($punto->carta_updated_at)
+                                @if($registroCarta?->actualizado_en)
                                     <p class="text-xs text-gray-400 mt-0.5">
-                                        Actualizada {{ $punto->carta_updated_at->diffForHumans() }}
+                                        Actualizada {{ $registroCarta->actualizado_en->diffForHumans() }}
                                     </p>
                                 @endif
                             </div>
 
-                            @if($punto->carta_pdf)
-                                <a href="{{ asset('storage/' . $punto->carta_pdf) }}"
+                            @if($datoCarta['pdf_ruta'] ?? null)
+                                <a href="{{ asset('storage/' . $datoCarta['pdf_ruta']) }}"
                                    target="_blank" rel="noopener"
                                    class="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-bold rounded-xl hover:bg-pindoor-accent transition">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -421,14 +475,14 @@
 
                         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
                             <div class="serif-text text-gray-700 leading-relaxed whitespace-pre-line text-base">
-                                {{ $punto->carta }}
+                                {{ $datoCarta['texto'] ?? '' }}
                             </div>
                         </div>
                     </div>
                     @endif
 
                     {{-- PANEL: Habitaciones (alojamiento) --}}
-                    @if($punto->moduloActivo('habitaciones') && $punto->tipos_habitacion)
+                    @if($punto->moduloActivo('habitaciones') && ($alojamiento['habitaciones'] ?? null))
                     <div x-show="vista === 'habitaciones'" x-cloak
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-1"
@@ -445,27 +499,27 @@
                                     <span class="text-2xl font-extrabold text-gray-900">Habitaciones</span>
                                 </div>
                             </div>
-                            @if($punto->precio_desde)
+                            @if($alojamiento['precio_desde'] ?? null)
                                 <div class="text-right">
                                     <p class="text-xs text-gray-400 uppercase font-bold">Desde</p>
-                                    <p class="text-lg font-extrabold text-indigo-600">{{ $punto->precio_desde }}</p>
+                                    <p class="text-lg font-extrabold text-indigo-600">{{ $alojamiento['precio_desde'] }}</p>
                                 </div>
                             @endif
                         </div>
 
                         <div class="bg-white rounded-3xl shadow-sm border border-indigo-100 p-8">
                             <div class="serif-text text-gray-700 leading-relaxed whitespace-pre-line text-base">
-                                {{ $punto->tipos_habitacion }}
+                                {{ $alojamiento['habitaciones'] }}
                             </div>
                         </div>
                     </div>
                     @endif
 
                     {{-- PANEL: Servicios (alojamiento) --}}
-                    @if($punto->moduloActivo('servicios') && $punto->servicios_incluidos)
+                    @if($punto->moduloActivo('servicios') && ($alojamiento['servicios'] ?? null))
                     @php
-                        $catalogoGrupos = App\Models\PuntoInteres::catalogoServicios();
-                        $activos = $punto->servicios_incluidos;
+                        $catalogoGrupos  = App\Models\PuntoInteres::catalogoServicios();
+                        $serviciosActivos = $alojamiento['servicios'] ?? [];
                     @endphp
                     <div x-show="vista === 'servicios'" x-cloak
                          x-transition:enter="transition ease-out duration-200"
@@ -485,7 +539,7 @@
 
                         <div class="space-y-6">
                             @foreach($catalogoGrupos as $grupo => $servicios)
-                                @php $visibles = array_filter($servicios, fn($s, $k) => in_array($k, $activos), ARRAY_FILTER_USE_BOTH); @endphp
+                                @php $visibles = array_filter($servicios, fn($s, $k) => in_array($k, $serviciosActivos), ARRAY_FILTER_USE_BOTH); @endphp
                                 @if(count($visibles))
                                 <div class="bg-white rounded-2xl border border-teal-100 overflow-hidden">
                                     <div class="bg-teal-50 px-5 py-2.5">
@@ -507,7 +561,7 @@
                     @endif
 
                     {{-- PANEL: Políticas (alojamiento) --}}
-                    @if($punto->moduloActivo('politicas') && $punto->politicas)
+                    @if($punto->moduloActivo('politicas') && ($alojamiento['politicas'] ?? null))
                     <div x-show="vista === 'politicas'" x-cloak
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-1"
@@ -525,18 +579,18 @@
                         </div>
 
                         {{-- Check-in / Check-out --}}
-                        @if($punto->check_in || $punto->check_out)
+                        @if(($alojamiento['entrada'] ?? null) || ($alojamiento['salida'] ?? null))
                         <div class="grid grid-cols-2 gap-4 mb-6">
-                            @if($punto->check_in)
+                            @if($alojamiento['entrada'] ?? null)
                             <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center">
                                 <p class="text-xs text-gray-400 uppercase font-bold mb-1">Check-in</p>
-                                <p class="text-2xl font-extrabold text-gray-900">{{ $punto->check_in }}</p>
+                                <p class="text-2xl font-extrabold text-gray-900">{{ $alojamiento['entrada'] }}</p>
                             </div>
                             @endif
-                            @if($punto->check_out)
+                            @if($alojamiento['salida'] ?? null)
                             <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center">
                                 <p class="text-xs text-gray-400 uppercase font-bold mb-1">Check-out</p>
-                                <p class="text-2xl font-extrabold text-gray-900">{{ $punto->check_out }}</p>
+                                <p class="text-2xl font-extrabold text-gray-900">{{ $alojamiento['salida'] }}</p>
                             </div>
                             @endif
                         </div>
@@ -544,8 +598,224 @@
 
                         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
                             <div class="serif-text text-gray-700 leading-relaxed whitespace-pre-line text-base">
-                                {{ $punto->politicas }}
+                                {{ $alojamiento['politicas'] }}
                             </div>
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- PANEL: Entradas (museo) --}}
+                    @if($punto->moduloActivo('entradas') && $punto->items('entradas')->count())
+                    <div x-show="vista === 'entradas'" x-cloak
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0">
+
+                        <div class="mb-6 flex items-center gap-3">
+                            @if($punto->imagen_perfil)
+                                <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
+                                     alt="Logo {{ $punto->title }}"
+                                     class="w-12 h-12 rounded-xl object-cover border border-gray-100 shrink-0">
+                            @endif
+                            <div>
+                                <p class="text-xs font-black uppercase tracking-widest text-amber-600 mb-0.5">Acceso</p>
+                                <span class="text-2xl font-extrabold text-gray-900">Entradas y tarifas</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-3xl shadow-sm border border-amber-100 overflow-hidden">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="bg-amber-50 border-b border-amber-100">
+                                        <th class="px-6 py-3 text-left text-xs font-black uppercase tracking-widest text-amber-700">Tipo</th>
+                                        <th class="px-6 py-3 text-right text-xs font-black uppercase tracking-widest text-amber-700">Precio</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-amber-50">
+                                    @foreach($punto->items('entradas') as $entrada)
+                                    <tr class="hover:bg-amber-50/50 transition">
+                                        <td class="px-6 py-4">
+                                            <p class="font-semibold text-gray-800">{{ $entrada->datos['etiqueta'] ?? '' }}</p>
+                                            @if($entrada->datos['nota'] ?? null)
+                                                <p class="text-xs text-gray-400 mt-0.5">{{ $entrada->datos['nota'] }}</p>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <span class="font-extrabold text-lg {{ ($entrada->datos['precio'] ?? 1) == 0 ? 'text-green-600' : 'text-amber-700' }}">
+                                                {{ $entrada->precioEntrada() }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @if($punto->horario)
+                        <div class="mt-4 bg-amber-50 rounded-2xl px-5 py-3 flex items-center gap-2 text-sm text-amber-800">
+                            <span>🕐</span> <span class="font-medium">{{ $punto->horario }}</span>
+                        </div>
+                        @endif
+                    </div>
+                    @endif
+
+                    {{-- PANEL: Exposiciones (museo) --}}
+                    @if($punto->moduloActivo('exposiciones') && $punto->items('exposiciones')->count())
+                    @php
+                        $todasExposiciones = $punto->items('exposiciones');
+                        $permanentes = $todasExposiciones->filter(fn($e) => ($e->datos['tipo'] ?? '') === 'permanente');
+                        $temporales  = $todasExposiciones->filter(fn($e) => ($e->datos['tipo'] ?? '') === 'temporal');
+                    @endphp
+                    <div x-show="vista === 'exposiciones'" x-cloak
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0">
+
+                        <div class="mb-6 flex items-center gap-3">
+                            @if($punto->imagen_perfil)
+                                <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
+                                     alt="Logo {{ $punto->title }}"
+                                     class="w-12 h-12 rounded-xl object-cover border border-gray-100 shrink-0">
+                            @endif
+                            <div>
+                                <p class="text-xs font-black uppercase tracking-widest text-purple-600 mb-0.5">Colecciones</p>
+                                <span class="text-2xl font-extrabold text-gray-900">Exposiciones</span>
+                            </div>
+                        </div>
+
+                        @if($permanentes->count())
+                        <div class="mb-6">
+                            <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Permanentes</p>
+                            <div class="space-y-4">
+                                @foreach($permanentes as $expo)
+                                <div class="bg-white rounded-2xl border border-blue-100 overflow-hidden flex gap-0">
+                                    @if($expo->imagen)
+                                    <div class="w-24 shrink-0">
+                                        <img src="{{ asset('storage/' . $expo->imagen) }}" alt="{{ $expo->datos['titulo'] ?? '' }}"
+                                             class="w-full h-full object-cover">
+                                    </div>
+                                    @endif
+                                    <div class="p-5 flex-1">
+                                        <span class="text-[10px] font-black uppercase bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Permanente</span>
+                                        <h3 class="font-extrabold text-gray-900 mt-2 text-base">{{ $expo->datos['titulo'] ?? '' }}</h3>
+                                        @if($expo->datos['descripcion'] ?? null)
+                                            <p class="text-sm text-gray-600 mt-1 leading-relaxed">{{ $expo->datos['descripcion'] }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($temporales->count())
+                        <div>
+                            <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Temporales</p>
+                            <div class="space-y-4">
+                                @foreach($temporales as $expo)
+                                <div class="bg-white rounded-2xl border border-orange-100 overflow-hidden flex gap-0">
+                                    @if($expo->imagen)
+                                    <div class="w-24 shrink-0">
+                                        <img src="{{ asset('storage/' . $expo->imagen) }}" alt="{{ $expo->datos['titulo'] ?? '' }}"
+                                             class="w-full h-full object-cover">
+                                    </div>
+                                    @endif
+                                    <div class="p-5 flex-1">
+                                        <span class="text-[10px] font-black uppercase bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Temporal</span>
+                                        <h3 class="font-extrabold text-gray-900 mt-2 text-base">{{ $expo->datos['titulo'] ?? '' }}</h3>
+                                        @if($expo->datos['descripcion'] ?? null)
+                                            <p class="text-sm text-gray-600 mt-1 leading-relaxed">{{ $expo->datos['descripcion'] }}</p>
+                                        @endif
+                                        @if(($expo->datos['fecha_inicio'] ?? null) || ($expo->datos['fecha_fin'] ?? null))
+                                        <p class="text-xs text-gray-400 mt-2">
+                                            📅
+                                            {{ $expo->datos['fecha_inicio'] ? \Carbon\Carbon::parse($expo->datos['fecha_inicio'])->translatedFormat('d M Y') : '—' }}
+                                            →
+                                            {{ $expo->datos['fecha_fin'] ? \Carbon\Carbon::parse($expo->datos['fecha_fin'])->translatedFormat('d M Y') : 'Sin fecha fin' }}
+                                        </p>
+                                        @endif
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                    @endif
+
+                    {{-- PANEL: Agenda cultural --}}
+                    @if($punto->moduloActivo('agenda') && $punto->eventosProximos()->count())
+                    @php
+                        $eventosProximos   = $punto->eventosProximos();
+                        $eventosDestacados = $eventosProximos->where('destacado', true);
+                        $eventosResto      = $eventosProximos->where('destacado', false);
+                    @endphp
+                    <div x-show="vista === 'agenda'" x-cloak
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0">
+
+                        <div class="mb-6 flex items-center gap-3">
+                            @if($punto->imagen_perfil)
+                                <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
+                                     alt="Logo {{ $punto->title }}"
+                                     class="w-12 h-12 rounded-xl object-cover border border-gray-100 shrink-0">
+                            @endif
+                            <div>
+                                <p class="text-xs font-black uppercase tracking-widest text-blue-600 mb-0.5">Programación</p>
+                                <span class="text-2xl font-extrabold text-gray-900">Agenda</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            @foreach($eventosProximos as $evento)
+                            @php $tipoInfo = $evento->tipoEvento(); @endphp
+                            <div class="bg-white rounded-2xl border {{ $evento->destacado ? 'border-blue-200 shadow-md' : 'border-gray-100' }} overflow-hidden">
+                                <div class="flex gap-0">
+                                    @if($evento->imagen)
+                                    <div class="w-28 shrink-0">
+                                        <img src="{{ asset('storage/' . $evento->imagen) }}" alt="{{ $evento->datos['titulo'] ?? '' }}"
+                                             class="w-full h-full object-cover min-h-[7rem]">
+                                    </div>
+                                    @else
+                                    <div class="w-20 shrink-0 flex items-center justify-center bg-gray-50 border-r border-gray-100 text-3xl min-h-[7rem]">
+                                        {{ $tipoInfo['emoji'] }}
+                                    </div>
+                                    @endif
+                                    <div class="p-4 flex-1 min-w-0">
+                                        <div class="flex items-start justify-between gap-2">
+                                            <div>
+                                                @if($evento->destacado)
+                                                    <span class="text-[10px] font-black uppercase bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Destacado</span>
+                                                @endif
+                                                <span class="text-[10px] font-black uppercase bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full ml-1">
+                                                    {{ $tipoInfo['emoji'] }} {{ $tipoInfo['label'] }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <h3 class="font-extrabold text-gray-900 mt-2 leading-tight">{{ $evento->datos['titulo'] ?? '' }}</h3>
+                                        @if($evento->datos['descripcion'] ?? null)
+                                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ $evento->datos['descripcion'] }}</p>
+                                        @endif
+                                        <div class="flex items-center justify-between mt-2 flex-wrap gap-1">
+                                            <p class="text-xs text-gray-500">
+                                                📅 {{ $evento->fecha->translatedFormat('d M Y') }}
+                                                @if($evento->datos['hora'] ?? null)· {{ \Carbon\Carbon::parse($evento->datos['hora'])->format('H:i') }}@endif
+                                            </p>
+                                            <span class="text-sm font-extrabold {{ ($evento->datos['precio'] ?? 1) == 0 ? 'text-green-600' : 'text-blue-700' }}">
+                                                {{ $evento->precioEvento() }}
+                                            </span>
+                                        </div>
+                                        @if($evento->datos['url_entradas'] ?? null)
+                                        <a href="{{ $evento->datos['url_entradas'] }}" target="_blank" rel="noopener"
+                                           class="mt-2 inline-flex items-center gap-1 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition">
+                                            Comprar entradas →
+                                        </a>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
                         </div>
                     </div>
                     @endif
@@ -647,7 +917,7 @@
         </button>
         @endif
 
-        @if($punto->es_cliente && $punto->menu_del_dia)
+        @if($punto->tieneMenu())
         <button
             x-data
             @click="$dispatch('set-vista', 'menu')"
@@ -674,7 +944,7 @@
         @endif
     </div>
 
-    @if($punto->tieneCarta() || ($punto->es_cliente && $punto->menu_del_dia))
+    @if($punto->tieneCarta() || $punto->tieneMenu())
     <script>
         document.addEventListener('alpine:init', () => {
             window.addEventListener('set-vista', (e) => {

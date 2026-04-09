@@ -12,13 +12,10 @@ class PuntoInteres extends Model
     protected $table = 'puntosinteres';
 
     protected $casts = [
-        'tags'                    => 'array',
-        'servicios_incluidos'     => 'array',
-        'modulos_habilitados'     => 'array',
-        'menu_del_dia_updated_at' => 'datetime',
-        'carta_updated_at'        => 'datetime',
-        'oferta_expira_at'        => 'datetime',
-        'oferta_activa'           => 'boolean',
+        'tags'               => 'array',
+        'modulos_habilitados'=> 'array',
+        'oferta_expira_at'   => 'datetime',
+        'oferta_activa'      => 'boolean',
     ];
 
     protected $fillable = [
@@ -43,49 +40,151 @@ class PuntoInteres extends Model
         'oferta_del_dia',
         'oferta_activa',
         'oferta_expira_at',
-        'menu_del_dia',
         'descripcion_busqueda',
         'imagen_perfil',
-        'carta',
-        'carta_pdf',
-        'menu_del_dia_updated_at',
-        'carta_updated_at',
-        'precio_desde',
-        'check_in',
-        'check_out',
-        'tipos_habitacion',
-        'servicios_incluidos',
-        'politicas',
     ];
 
-    // Catálogo de todos los módulos disponibles para clientes
+    // ═══════════════════════════════════════════════════════════════════════════
+    // CATÁLOGOS DE MÓDULOS
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /** Catálogo completo de módulos disponibles para clientes. */
     public static function catalogoModulos(): array
     {
         return [
-            'oferta_del_dia' => ['label' => 'Oferta del día',            'emoji' => '🏷️', 'desc' => 'Promociones o avisos diarios'],
-            'menu_del_dia'   => ['label' => 'Menú del día',              'emoji' => '🥘', 'desc' => 'Menú de almuerzo o cena del día'],
-            'carta'          => ['label' => 'Carta / Menú permanente',   'emoji' => '🍽️', 'desc' => 'Carta completa del local'],
-            'habitaciones'   => ['label' => 'Habitaciones y precios',    'emoji' => '🛏️', 'desc' => 'Tipos de habitación y tarifas'],
-            'servicios'      => ['label' => 'Servicios incluidos',       'emoji' => '✨', 'desc' => 'Amenidades del alojamiento'],
-            'politicas'      => ['label' => 'Políticas',                 'emoji' => '📋', 'desc' => 'Check-in/out, cancelación, normas'],
+            'oferta_del_dia' => ['label' => 'Oferta del día',          'emoji' => '🏷️', 'desc' => 'Promociones o avisos diarios'],
+            'menu_del_dia'   => ['label' => 'Menú del día',            'emoji' => '🥘', 'desc' => 'Menú de almuerzo o cena del día'],
+            'carta'          => ['label' => 'Carta / Menú permanente', 'emoji' => '🍽️', 'desc' => 'Carta completa del local'],
+            'habitaciones'   => ['label' => 'Habitaciones y precios',  'emoji' => '🛏️', 'desc' => 'Tipos de habitación y tarifas'],
+            'servicios'      => ['label' => 'Servicios incluidos',     'emoji' => '✨', 'desc' => 'Amenidades del alojamiento'],
+            'politicas'      => ['label' => 'Políticas',               'emoji' => '📋', 'desc' => 'Check-in/out, cancelación, normas'],
+            'entradas'       => ['label' => 'Entradas y tarifas',      'emoji' => '🎟️', 'desc' => 'Precios de entrada al museo'],
+            'exposiciones'   => ['label' => 'Exposiciones',            'emoji' => '🖼️', 'desc' => 'Colecciones permanentes y temporales'],
+            'agenda'         => ['label' => 'Agenda cultural',         'emoji' => '📅', 'desc' => 'Programación de eventos y espectáculos'],
         ];
     }
 
-    // Módulos activos por defecto según categoría del punto
-    public static function modulosDefault(int $categoriaId): array
+    /** Módulos activos por defecto según la categoría del punto. */
+    public static function modulosDefecto(int $categoriaId): array
     {
-        return match(true) {
-            in_array($categoriaId, [2, 10]) => ['oferta_del_dia', 'menu_del_dia', 'carta'],
-            $categoriaId === 11             => ['oferta_del_dia', 'habitaciones', 'servicios', 'politicas'],
-            default                         => ['oferta_del_dia'],
+        return match (true) {
+            in_array($categoriaId, [2, 8, 10]) => ['oferta_del_dia', 'menu_del_dia', 'carta'],
+            $categoriaId === 11                 => ['oferta_del_dia', 'habitaciones', 'servicios', 'politicas'],
+            $categoriaId === 7                  => ['entradas', 'exposiciones', 'oferta_del_dia'],
+            $categoriaId === 5                  => ['agenda', 'oferta_del_dia'],
+            default                             => ['oferta_del_dia'],
         };
     }
 
-    // Comprueba si un módulo está habilitado para este punto
+    /** Alias en inglés para compatibilidad con llamadas existentes en AdminController. */
+    public static function modulosDefault(int $categoriaId): array
+    {
+        return static::modulosDefecto($categoriaId);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // RELACIONES
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    public function usuario()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /** @deprecated Usa usuario() */
+    public function user()
+    {
+        return $this->usuario();
+    }
+
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class);
+    }
+
+    public function imagenes()
+    {
+        return $this->hasMany(ImagenPunto::class, 'punto_interes_id');
+    }
+
+    public function imagenPrincipal()
+    {
+        return $this->hasOne(ImagenPunto::class, 'punto_interes_id')
+                    ->where('es_principal', true);
+    }
+
+    /** Datos singleton de módulos (uno por módulo). */
+    public function moduloDatos()
+    {
+        return $this->hasMany(ModuloDato::class, 'punto_interes_id');
+    }
+
+    /** Ítems de lista de módulos (múltiples por módulo). */
+    public function moduloItems()
+    {
+        return $this->hasMany(ModuloItem::class, 'punto_interes_id');
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // HELPERS DE MÓDULOS
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /** Comprueba si un módulo está habilitado para este punto. */
     public function moduloActivo(string $modulo): bool
     {
         return in_array($modulo, $this->modulos_habilitados ?? []);
     }
+
+    /**
+     * Devuelve el array 'datos' del módulo singleton indicado.
+     * Si la relación ya está cargada no hace consulta extra.
+     */
+    public function dato(string $modulo): array
+    {
+        $this->loadMissing('moduloDatos');
+        return $this->moduloDatos->firstWhere('modulo', $modulo)?->datos ?? [];
+    }
+
+    /**
+     * Devuelve el registro ModuloDato completo de un módulo (para acceder a actualizado_en, etc.).
+     */
+    public function registroDato(string $modulo): ?ModuloDato
+    {
+        $this->loadMissing('moduloDatos');
+        return $this->moduloDatos->firstWhere('modulo', $modulo);
+    }
+
+    /**
+     * Devuelve la colección de ítems activos de un módulo, ordenados por 'orden'.
+     * Si la relación ya está cargada no hace consulta extra.
+     */
+    public function items(string $modulo)
+    {
+        $this->loadMissing('moduloItems');
+        return $this->moduloItems
+            ->where('modulo', $modulo)
+            ->where('activo', true)
+            ->sortBy('orden')
+            ->values();
+    }
+
+    /**
+     * Devuelve los ítems de 'eventos' con fecha futura, ordenados por fecha y hora.
+     */
+    public function eventosProximos()
+    {
+        $this->loadMissing('moduloItems');
+        return $this->moduloItems
+            ->where('modulo', 'eventos')
+            ->where('activo', true)
+            ->filter(fn($i) => $i->fecha && $i->fecha->greaterThanOrEqualTo(today()))
+            ->sortBy([['fecha', 'asc'], ['datos.hora', 'asc']])
+            ->values();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // HELPERS DE TIPO DE NEGOCIO
+    // ═══════════════════════════════════════════════════════════════════════════
 
     public function esAlojamiento(): bool
     {
@@ -94,10 +193,55 @@ class PuntoInteres extends Model
 
     public function esAlimentacion(): bool
     {
-        return in_array($this->categoria_id, [2, 10]);
+        return in_array($this->categoria_id, [2, 8, 10]);
     }
 
-    // Catálogo de servicios de alojamiento agrupados por categoría
+    public function esMuseo(): bool
+    {
+        return $this->categoria_id === 7;
+    }
+
+    public function esCultura(): bool
+    {
+        return $this->categoria_id === 5;
+    }
+
+    public function esComercio(): bool
+    {
+        return $this->categoria_id === 12;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // HELPERS DE CONTENIDO
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    public function tieneOfertaActiva(): bool
+    {
+        return $this->es_cliente
+            && $this->oferta_activa
+            && $this->oferta_del_dia
+            && ($this->oferta_expira_at === null || $this->oferta_expira_at->isFuture());
+    }
+
+    public function tieneCarta(): bool
+    {
+        $carta = $this->dato('carta');
+        return $this->es_cliente
+            && $this->moduloActivo('carta')
+            && (!empty($carta['texto']) || !empty($carta['pdf_ruta']));
+    }
+
+    public function tieneMenu(): bool
+    {
+        return $this->es_cliente
+            && $this->moduloActivo('menu_del_dia')
+            && !empty($this->dato('menu_del_dia')['texto'] ?? '');
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // CATÁLOGO DE SERVICIOS DE ALOJAMIENTO
+    // ═══════════════════════════════════════════════════════════════════════════
+
     public static function catalogoServicios(): array
     {
         return [
@@ -135,26 +279,14 @@ class PuntoInteres extends Model
         ];
     }
 
-    // Versión plana del catálogo para lookups por slug
     public static function catalogoServiciosPlano(): array
     {
         return collect(self::catalogoServicios())->flatMap(fn($s) => $s)->all();
     }
 
-    public function tieneOfertaActiva(): bool
-    {
-        return $this->es_cliente
-            && $this->oferta_activa
-            && $this->oferta_del_dia
-            && ($this->oferta_expira_at === null || $this->oferta_expira_at->isFuture());
-    }
-
-    public function tieneCarta(): bool
-    {
-        return $this->es_cliente
-            && $this->categoria?->tipo === 'alimentacion'
-            && ($this->carta || $this->carta_pdf);
-    }
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SCOPES
+    // ═══════════════════════════════════════════════════════════════════════════
 
     public function scopeClientes($query)
     {
@@ -165,26 +297,4 @@ class PuntoInteres extends Model
     {
         return $query->where('es_cliente', false);
     }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function imagenes()
-        {
-            return $this->hasMany(ImagenPunto::class, 'punto_interes_id');
-        }
-
-    public function categoria(){
-        return $this->belongsTo(Categoria::class);        
-        }
-
-
-    public function imagenPrincipal()
-    {
-        return $this->hasOne(ImagenPunto::class, 'punto_interes_id')
-                    ->where('es_principal', true);
-    }
-
-    }
+}
