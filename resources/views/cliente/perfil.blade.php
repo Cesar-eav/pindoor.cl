@@ -57,6 +57,7 @@
             </div>
 
             {{-- Oferta del día --}}
+            @if(in_array('oferta_del_dia', $modulos))
             <div x-data="{ activa: {{ $punto->oferta_activa ? 'true' : 'false' }} }"
                  class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
 
@@ -140,8 +141,10 @@
                     </div>
                 </form>
             </div>
+            @endif
 
             {{-- Menú del día: actualización rápida --}}
+            @if(in_array('menu_del_dia', $modulos))
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h4 class="font-bold text-gray-700 mb-1">Menú del día</h4>
                 <p class="text-xs text-gray-400 mb-4">
@@ -171,6 +174,7 @@
                     </div>
                 </form>
             </div>
+            @endif
 
             {{-- Descripción del negocio --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">

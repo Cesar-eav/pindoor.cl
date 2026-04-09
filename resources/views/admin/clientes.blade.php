@@ -90,6 +90,10 @@
                                     </td>
                                     <td class="px-6 py-4 text-right">
                                         <div class="flex justify-end gap-3">
+                                            <a href="{{ route('admin.clientes.modulos.form', $punto) }}"
+                                               class="text-xs text-indigo-500 hover:text-indigo-700 font-medium">
+                                                Módulos
+                                            </a>
                                             <a href="{{ route('admin.puntos.edit', $punto) }}"
                                                class="text-xs text-gray-500 hover:text-gray-800 font-medium">
                                                 Editar

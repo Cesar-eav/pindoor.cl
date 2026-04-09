@@ -27,7 +27,9 @@ class ClienteController extends Controller
             return view('cliente.sin-negocio');
         }
 
-        return view('cliente.perfil', compact('punto'));
+        $modulos = $punto->modulos_habilitados ?? [];
+
+        return view('cliente.perfil', compact('punto', 'modulos'));
     }
 
     /**
@@ -41,7 +43,9 @@ class ClienteController extends Controller
             return redirect()->route('cliente.perfil');
         }
 
-        return view('cliente.perfil-editar', compact('punto'));
+        $modulos = $punto->modulos_habilitados ?? [];
+
+        return view('cliente.perfil-editar', compact('punto', 'modulos'));
     }
 
     /**

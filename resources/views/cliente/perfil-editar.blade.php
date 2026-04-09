@@ -110,8 +110,8 @@
                     </div>
                 </div>
 
-                {{-- Carta / Menú (solo alimentación) --}}
-                @if($punto->categoria?->tipo === 'alimentacion')
+                {{-- Carta / Menú (si módulo habilitado) --}}
+                @if(in_array('carta', $modulos))
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
                     <div>
                         <p class="text-xs text-gray-400 uppercase font-bold mb-1">Carta / Menú</p>
@@ -148,16 +148,22 @@
                 </div>
                 @endif
 
-                {{-- ALOJAMIENTO --}}
-                @if($punto->esAlojamiento())
+                {{-- ALOJAMIENTO (secciones independientes por módulo) --}}
+                @php
+                    $tieneModuloAlojamiento = in_array('habitaciones', $modulos)
+                                          || in_array('servicios', $modulos)
+                                          || in_array('politicas', $modulos);
+                @endphp
+                @if($tieneModuloAlojamiento)
                 @php $catalogo = App\Models\PuntoInteres::catalogoServicios(); @endphp
                 <div class="bg-white rounded-2xl shadow-sm border border-indigo-100 p-6 space-y-6">
                     <div>
                         <p class="text-xs text-indigo-600 uppercase font-bold mb-1">Alojamiento</p>
-                        <p class="text-xs text-gray-400">Información específica para huéspedes. Solo aparece si completas al menos un campo.</p>
+                        <p class="text-xs text-gray-400">Información específica para huéspedes.</p>
                     </div>
 
-                    {{-- Precio y horarios --}}
+                    {{-- Precio, check-in/out y habitaciones --}}
+                    @if(in_array('habitaciones', $modulos))
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <x-input-label for="precio_desde" value="Precio desde" />
@@ -179,7 +185,6 @@
                         </div>
                     </div>
 
-                    {{-- Tipos de habitación --}}
                     <div>
                         <x-input-label for="tipos_habitacion" value="Habitaciones disponibles" />
                         <textarea id="tipos_habitacion" name="tipos_habitacion" rows="6"
@@ -187,27 +192,41 @@
                                   placeholder="HABITACIÓN DOBLE — Cama queen, baño privado, vista al cerro · $35.000/noche&#10;DORMITORIO MIXTO — 8 camas, baño compartido · $12.000/noche&#10;SUITE — Living, cocina, terraza · $55.000/noche"
                         >{{ old('tipos_habitacion', $punto->tipos_habitacion) }}</textarea>
                     </div>
+                    @endif
 
                     {{-- Servicios incluidos --}}
+                    @if(in_array('servicios', $modulos))
                     <div>
                         <x-input-label value="Servicios incluidos" />
-                        <p class="text-xs text-gray-400 mt-1 mb-3">Selecciona todo lo que ofreces. Se mostrará como íconos en tu ficha.</p>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            @foreach($catalogo as $slug => $servicio)
-                            <label class="flex items-center gap-2 cursor-pointer bg-gray-50 hover:bg-indigo-50 border border-gray-200 rounded-xl px-3 py-2 transition">
-                                <input type="checkbox"
-                                       name="servicios_incluidos[]"
-                                       value="{{ $slug }}"
-                                       @checked(in_array($slug, old('servicios_incluidos', $punto->servicios_incluidos ?? [])))
-                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-400">
-                                <span class="text-lg">{{ $servicio['emoji'] }}</span>
-                                <span class="text-xs font-medium text-gray-700">{{ $servicio['label'] }}</span>
-                            </label>
+                        <p class="text-xs text-gray-400 mt-1 mb-4">Selecciona todo lo que ofreces. Se mostrará agrupado en tu ficha pública.</p>
+                        @php $seleccionados = old('servicios_incluidos', $punto->servicios_incluidos ?? []); @endphp
+                        <div class="space-y-4">
+                            @foreach($catalogo as $grupo => $servicios)
+                            <div class="border border-gray-200 rounded-xl overflow-hidden">
+                                <div class="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                                    <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">{{ $grupo }}</p>
+                                </div>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3">
+                                    @foreach($servicios as $slug => $servicio)
+                                    <label class="flex items-center gap-2 cursor-pointer bg-gray-50 hover:bg-indigo-50 border border-transparent hover:border-indigo-200 rounded-xl px-3 py-2 transition">
+                                        <input type="checkbox"
+                                               name="servicios_incluidos[]"
+                                               value="{{ $slug }}"
+                                               @checked(in_array($slug, $seleccionados))
+                                               class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-400">
+                                        <span class="text-lg">{{ $servicio['emoji'] }}</span>
+                                        <span class="text-xs font-medium text-gray-700">{{ $servicio['label'] }}</span>
+                                    </label>
+                                    @endforeach
+                                </div>
+                            </div>
                             @endforeach
                         </div>
                     </div>
+                    @endif
 
                     {{-- Políticas --}}
+                    @if(in_array('politicas', $modulos))
                     <div>
                         <x-input-label for="politicas" value="Políticas del establecimiento" />
                         <textarea id="politicas" name="politicas" rows="5"
@@ -215,6 +234,7 @@
                                   placeholder="CANCELACIÓN — Cancelación gratuita hasta 48h antes de la llegada.&#10;MASCOTAS — No se admiten mascotas.&#10;FUMADORES — Solo en terrazas exteriores.&#10;MENORES — Bienvenidos con supervisión adulta."
                         >{{ old('politicas', $punto->politicas) }}</textarea>
                     </div>
+                    @endif
                 </div>
                 @endif
 

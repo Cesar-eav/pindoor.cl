@@ -181,7 +181,11 @@ class AdminController extends Controller
             $user = User::findOrFail($request->user_id_existente);
             $user->update(['type' => 'cliente']);
 
-            $punto->update(['user_id' => $user->id, 'es_cliente' => true]);
+            $punto->update([
+                'user_id'             => $user->id,
+                'es_cliente'          => true,
+                'modulos_habilitados' => PuntoInteres::modulosDefault($punto->categoria_id),
+            ]);
 
             return redirect()->route('admin.clientes')
                 ->with('success', "Punto \"{$punto->title}\" vinculado a {$user->email}.");
@@ -202,12 +206,34 @@ class AdminController extends Controller
         ]);
 
         $punto->update([
-            'user_id'    => $user->id,
-            'es_cliente' => true,
+            'user_id'           => $user->id,
+            'es_cliente'        => true,
+            'modulos_habilitados' => PuntoInteres::modulosDefault($punto->categoria_id),
         ]);
 
         return redirect()->route('admin.clientes')
             ->with('success', "Cliente \"{$punto->title}\" activado. Credenciales creadas para {$user->email}.");
+    }
+
+    public function editarModulos(PuntoInteres $punto)
+    {
+        $catalogo = PuntoInteres::catalogoModulos();
+        return view('admin.clientes-modulos', compact('punto', 'catalogo'));
+    }
+
+    public function actualizarModulos(Request $request, PuntoInteres $punto)
+    {
+        $validos = array_keys(PuntoInteres::catalogoModulos());
+
+        $modulos = collect($request->input('modulos', []))
+            ->filter(fn($m) => in_array($m, $validos))
+            ->values()
+            ->all();
+
+        $punto->update(['modulos_habilitados' => $modulos]);
+
+        return redirect()->route('admin.clientes')
+            ->with('success', "Módulos de \"{$punto->title}\" actualizados.");
     }
 
     public function desactivarCliente(PuntoInteres $punto)

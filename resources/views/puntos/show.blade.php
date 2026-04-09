@@ -42,7 +42,9 @@
                 $tieneTabsExtra = $punto->tieneOfertaActiva()
                     || $punto->tieneCarta()
                     || ($punto->es_cliente && $punto->menu_del_dia)
-                    || ($punto->esAlojamiento() && ($punto->tipos_habitacion || $punto->servicios_incluidos || $punto->politicas));
+                    || ($punto->moduloActivo('habitaciones') && $punto->tipos_habitacion)
+                    || ($punto->moduloActivo('servicios') && $punto->servicios_incluidos)
+                    || ($punto->moduloActivo('politicas') && $punto->politicas);
             @endphp
             @if($tieneTabsExtra)
             <div class="flex lg:hidden gap-2 mb-6 overflow-x-auto">
@@ -76,21 +78,21 @@
                     Ver carta
                 </button>
                 @endif
-                @if($punto->esAlojamiento() && $punto->tipos_habitacion)
+                @if($punto->moduloActivo('habitaciones') && $punto->tipos_habitacion)
                 <button @click="vista = 'habitaciones'"
                     :class="vista === 'habitaciones' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
                     Habitaciones
                 </button>
                 @endif
-                @if($punto->esAlojamiento() && $punto->servicios_incluidos)
+                @if($punto->moduloActivo('servicios') && $punto->servicios_incluidos)
                 <button @click="vista = 'servicios'"
                     :class="vista === 'servicios' ? 'bg-teal-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
                     Servicios
                 </button>
                 @endif
-                @if($punto->esAlojamiento() && $punto->politicas)
+                @if($punto->moduloActivo('politicas') && $punto->politicas)
                 <button @click="vista = 'politicas'"
                     :class="vista === 'politicas' ? 'bg-gray-700 text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
@@ -149,7 +151,7 @@
                     @endif
 
                     {{-- Alojamiento --}}
-                    @if($punto->esAlojamiento() && $punto->tipos_habitacion)
+                    @if($punto->moduloActivo('habitaciones') && $punto->tipos_habitacion)
                     <button @click="vista = 'habitaciones'"
                         :class="vista === 'habitaciones' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-indigo-400'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
@@ -157,7 +159,7 @@
                     </button>
                     @endif
 
-                    @if($punto->esAlojamiento() && $punto->servicios_incluidos)
+                    @if($punto->moduloActivo('servicios') && $punto->servicios_incluidos)
                     <button @click="vista = 'servicios'"
                         :class="vista === 'servicios' ? 'bg-teal-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-teal-400'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
@@ -165,7 +167,7 @@
                     </button>
                     @endif
 
-                    @if($punto->esAlojamiento() && $punto->politicas)
+                    @if($punto->moduloActivo('politicas') && $punto->politicas)
                     <button @click="vista = 'politicas'"
                         :class="vista === 'politicas' ? 'bg-gray-700 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-500'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
@@ -426,7 +428,7 @@
                     @endif
 
                     {{-- PANEL: Habitaciones (alojamiento) --}}
-                    @if($punto->esAlojamiento() && $punto->tipos_habitacion)
+                    @if($punto->moduloActivo('habitaciones') && $punto->tipos_habitacion)
                     <div x-show="vista === 'habitaciones'" x-cloak
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-1"
@@ -460,8 +462,11 @@
                     @endif
 
                     {{-- PANEL: Servicios (alojamiento) --}}
-                    @if($punto->esAlojamiento() && $punto->servicios_incluidos)
-                    @php $catalogo = App\Models\PuntoInteres::catalogoServicios(); @endphp
+                    @if($punto->moduloActivo('servicios') && $punto->servicios_incluidos)
+                    @php
+                        $catalogoGrupos = App\Models\PuntoInteres::catalogoServicios();
+                        $activos = $punto->servicios_incluidos;
+                    @endphp
                     <div x-show="vista === 'servicios'" x-cloak
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-1"
@@ -478,23 +483,31 @@
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-3xl shadow-sm border border-teal-100 p-8">
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                @foreach($punto->servicios_incluidos as $slug)
-                                    @if(isset($catalogo[$slug]))
-                                    <div class="flex items-center gap-3 bg-teal-50 rounded-2xl px-4 py-3">
-                                        <span class="text-2xl">{{ $catalogo[$slug]['emoji'] }}</span>
-                                        <span class="text-sm font-medium text-gray-700">{{ $catalogo[$slug]['label'] }}</span>
+                        <div class="space-y-6">
+                            @foreach($catalogoGrupos as $grupo => $servicios)
+                                @php $visibles = array_filter($servicios, fn($s, $k) => in_array($k, $activos), ARRAY_FILTER_USE_BOTH); @endphp
+                                @if(count($visibles))
+                                <div class="bg-white rounded-2xl border border-teal-100 overflow-hidden">
+                                    <div class="bg-teal-50 px-5 py-2.5">
+                                        <p class="text-xs font-black uppercase tracking-widest text-teal-700">{{ $grupo }}</p>
                                     </div>
-                                    @endif
-                                @endforeach
-                            </div>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4">
+                                        @foreach($visibles as $servicio)
+                                        <div class="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5">
+                                            <span class="text-xl">{{ $servicio['emoji'] }}</span>
+                                            <span class="text-sm font-medium text-gray-700">{{ $servicio['label'] }}</span>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @endif
+                            @endforeach
                         </div>
                     </div>
                     @endif
 
                     {{-- PANEL: Políticas (alojamiento) --}}
-                    @if($punto->esAlojamiento() && $punto->politicas)
+                    @if($punto->moduloActivo('politicas') && $punto->politicas)
                     <div x-show="vista === 'politicas'" x-cloak
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-1"
