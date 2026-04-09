@@ -38,7 +38,7 @@
             </nav>
 
             {{-- Tabs móvil --}}
-            @if($punto->tieneCarta() || ($punto->es_cliente && $punto->menu_del_dia))
+            @if($punto->tieneOfertaActiva() || $punto->tieneCarta() || ($punto->es_cliente && $punto->menu_del_dia))
             <div class="flex lg:hidden gap-2 mb-6 overflow-x-auto">
                 <button
                     @click="vista = 'contenido'"
@@ -46,6 +46,14 @@
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
                     Descripción
                 </button>
+                @if($punto->tieneOfertaActiva())
+                <button
+                    @click="vista = 'oferta'"
+                    :class="vista === 'oferta' ? 'bg-green-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
+                    class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
+                    Oferta del día
+                </button>
+                @endif
                 @if($punto->es_cliente && $punto->menu_del_dia)
                 <button
                     @click="vista = 'menu'"
@@ -79,6 +87,17 @@
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
                         <span>📖</span> Descripción
                     </button>
+
+                    @if($punto->tieneOfertaActiva())
+                    <button
+                        @click="vista = 'oferta'"
+                        :class="vista === 'oferta'
+                            ? 'bg-green-600 text-white shadow-lg'
+                            : 'bg-white text-gray-600 border border-gray-200 hover:border-green-500'"
+                        class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
+                        <span>🏷️</span> Oferta del día
+                    </button>
+                    @endif
 
                     @if($punto->es_cliente && $punto->menu_del_dia)
                     <button
@@ -248,6 +267,38 @@
                         </section>
                     </div>
 
+                    {{-- PANEL: Oferta del día --}}
+                    @if($punto->tieneOfertaActiva())
+                    <div x-show="vista === 'oferta'" x-cloak
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0">
+
+                        <div class="mb-6 flex items-center gap-3">
+                            @if($punto->imagen_perfil)
+                                <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
+                                     alt="Logo {{ $punto->title }}"
+                                     class="w-12 h-12 rounded-xl object-cover border border-gray-100 shrink-0">
+                            @endif
+                            <div>
+                                <p class="text-xs font-black uppercase tracking-widest text-green-600 mb-0.5">Válida hoy</p>
+                                <span class="text-2xl font-extrabold text-gray-900">Oferta del día</span>
+                                @if($punto->oferta_expira_at)
+                                    <p class="text-xs text-gray-400 mt-0.5">
+                                        Válida hasta {{ $punto->oferta_expira_at->translatedFormat('d \d\e F') }}
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-3xl shadow-sm border border-green-100 p-8">
+                            <div class="serif-text text-gray-700 leading-relaxed whitespace-pre-line text-base">
+                                {{ $punto->oferta_del_dia }}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     {{-- PANEL: Menú del día --}}
                     @if($punto->es_cliente && $punto->menu_del_dia)
                     <div x-show="vista === 'menu'" x-cloak
@@ -377,14 +428,6 @@
                             </div>
                         @endif
 
-                        {{-- Oferta del día --}}
-                        @if($punto->es_cliente && $punto->oferta_del_dia)
-                            <div class="mt-6 pt-6 border-t border-gray-100">
-                                <h3 class="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-2">Oferta de hoy</h3>
-                                <p class="text-gray-700 text-sm leading-relaxed">{{ $punto->oferta_del_dia }}</p>
-                            </div>
-                        @endif
-
                         {{-- Enlace --}}
                         @if($punto->enlace)
                             <div class="mt-6 pt-6 border-t border-gray-100">
@@ -418,6 +461,15 @@
     {{-- Botones flotantes móvil --}}
     {{-- Botones flotantes móvil: se ocultan en lg porque allí están en la columna izquierda --}}
     <div class="lg:hidden fixed bottom-10 left-6 z-50 flex flex-col gap-2">
+        @if($punto->tieneOfertaActiva())
+        <button
+            x-data
+            @click="$dispatch('set-vista', 'oferta')"
+            class="inline-flex items-center gap-2 px-5 py-3 bg-green-600 text-white rounded-full text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+            🏷️ <span>Oferta del día</span>
+        </button>
+        @endif
+
         @if($punto->es_cliente && $punto->menu_del_dia)
         <button
             x-data

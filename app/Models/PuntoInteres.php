@@ -15,6 +15,8 @@ class PuntoInteres extends Model
         'tags'                    => 'array',
         'menu_del_dia_updated_at' => 'datetime',
         'carta_updated_at'        => 'datetime',
+        'oferta_expira_at'        => 'datetime',
+        'oferta_activa'           => 'boolean',
     ];
 
     protected $fillable = [
@@ -36,6 +38,8 @@ class PuntoInteres extends Model
         'eliminado',
         'es_cliente',
         'oferta_del_dia',
+        'oferta_activa',
+        'oferta_expira_at',
         'menu_del_dia',
         'descripcion_busqueda',
         'imagen_perfil',
@@ -44,6 +48,14 @@ class PuntoInteres extends Model
         'menu_del_dia_updated_at',
         'carta_updated_at',
     ];
+
+    public function tieneOfertaActiva(): bool
+    {
+        return $this->es_cliente
+            && $this->oferta_activa
+            && $this->oferta_del_dia
+            && ($this->oferta_expira_at === null || $this->oferta_expira_at->isFuture());
+    }
 
     public function tieneCarta(): bool
     {

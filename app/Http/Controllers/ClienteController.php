@@ -140,11 +140,24 @@ class ClienteController extends Controller
 
         $request->validate([
             'oferta_del_dia' => 'nullable|string|max:1000',
+            'oferta_activa'  => 'boolean',
+            'duracion_dias'  => 'nullable|integer|min:1|max:30',
         ]);
 
-        $punto->update(['oferta_del_dia' => $request->oferta_del_dia]);
+        $activa = $request->boolean('oferta_activa');
+
+        $expira = null;
+        if ($activa && $request->filled('duracion_dias')) {
+            $expira = now()->addDays((int) $request->duracion_dias);
+        }
+
+        $punto->update([
+            'oferta_del_dia'  => $request->oferta_del_dia,
+            'oferta_activa'   => $activa,
+            'oferta_expira_at' => $activa ? $expira : null,
+        ]);
 
         return redirect()->route('cliente.perfil')
-            ->with('success', 'Oferta del día actualizada.');
+            ->with('success', $activa ? 'Oferta activada.' : 'Oferta desactivada.');
     }
 }

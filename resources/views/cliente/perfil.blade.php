@@ -56,34 +56,86 @@
                 </div>
             </div>
 
-            {{-- Oferta del día: actualización rápida --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h4 class="font-bold text-gray-700 mb-1">Oferta del día</h4>
-                <p class="text-xs text-gray-400 mb-4">
-                    Actualiza tu menú, promoción o novedad del día. Se mostrará en tu ficha pública.
-                </p>
+            {{-- Oferta del día --}}
+            <div x-data="{ activa: {{ $punto->oferta_activa ? 'true' : 'false' }} }"
+                 class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h4 class="font-bold text-gray-700">Oferta del día</h4>
+                        <p class="text-xs text-gray-400 mt-0.5">Se muestra como botón en tu ficha pública mientras esté activa.</p>
+                    </div>
+
+                    {{-- Toggle activa/inactiva --}}
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" x-model="activa" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-green-400 rounded-full peer
+                                    peer-checked:after:translate-x-full peer-checked:after:border-white
+                                    after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                                    after:bg-white after:border-gray-300 after:border after:rounded-full
+                                    after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                    </label>
+                </div>
+
+                {{-- Estado actual --}}
+                @if($punto->tieneOfertaActiva())
+                    <div class="text-xs font-bold text-green-700 bg-green-50 rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
+                        <span>🟢</span>
+                        Activa
+                        @if($punto->oferta_expira_at)
+                            · Vence el {{ $punto->oferta_expira_at->translatedFormat('d \d\e F') }}
+                            ({{ $punto->oferta_expira_at->diffForHumans() }})
+                        @else
+                            · Sin fecha de vencimiento
+                        @endif
+                    </div>
+                @elseif($punto->oferta_activa === false && $punto->oferta_del_dia)
+                    <div class="text-xs text-gray-400 bg-gray-50 rounded-lg px-3 py-2 mb-4">
+                        ⚫ Desactivada manualmente
+                    </div>
+                @elseif($punto->oferta_expira_at && $punto->oferta_expira_at->isPast())
+                    <div class="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2 mb-4">
+                        🔴 Expirada el {{ $punto->oferta_expira_at->translatedFormat('d \d\e F') }}
+                    </div>
+                @endif
 
                 <form method="POST" action="{{ route('cliente.oferta.actualizar') }}">
                     @csrf @method('PATCH')
+
+                    {{-- Checkbox real para el toggle --}}
+                    <input type="hidden" name="oferta_activa" value="0">
+                    <input type="checkbox" name="oferta_activa" value="1" x-bind:checked="activa" class="hidden">
+
                     <textarea
                         name="oferta_del_dia"
                         rows="4"
                         maxlength="1000"
-                        placeholder="Ej: Hoy tenemos happy hour 18–20 h, capuchino + croissant $3.500..."
-                        class="w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-pindoor-accent resize-none"
+                        placeholder="Ej: Happy hour 18–20 h · Capuchino + croissant $3.500..."
+                        class="w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-green-400 resize-none"
                     >{{ old('oferta_del_dia', $punto->oferta_del_dia) }}</textarea>
 
-                    <div class="flex justify-between items-center mt-3">
-                        @if($punto->oferta_del_dia)
-                            <span class="text-xs text-gray-400">
-                                Última actualización: {{ $punto->updated_at->diffForHumans() }}
-                            </span>
-                        @else
-                            <span class="text-xs text-gray-300 italic">Sin oferta activa</span>
-                        @endif
+                    {{-- Duración --}}
+                    <div x-show="activa" class="mt-3">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Vigencia</label>
+                        <select name="duracion_dias"
+                                class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-green-400">
+                            <option value="">Sin fecha de vencimiento</option>
+                            <option value="1"  @selected(old('duracion_dias') == 1)>Solo hoy (1 día)</option>
+                            <option value="2"  @selected(old('duracion_dias') == 2)>2 días</option>
+                            <option value="3"  @selected(old('duracion_dias') == 3)>3 días</option>
+                            <option value="5"  @selected(old('duracion_dias') == 5)>5 días</option>
+                            <option value="7"  @selected(old('duracion_dias') == 7)>1 semana</option>
+                            <option value="14" @selected(old('duracion_dias') == 14)>2 semanas</option>
+                            <option value="30" @selected(old('duracion_dias') == 30)>1 mes</option>
+                        </select>
+                        <p class="text-xs text-gray-400 mt-1">Al vencer se ocultará automáticamente del mapa.</p>
+                    </div>
+
+                    <div class="flex justify-end mt-4">
                         <button type="submit"
-                                class="px-5 py-2 bg-pindoor-accent text-white text-sm font-bold rounded-lg hover:opacity-90 transition">
-                            Publicar
+                                class="px-5 py-2 text-white text-sm font-bold rounded-lg hover:opacity-90 transition"
+                                :class="activa ? 'bg-green-600' : 'bg-gray-400'">
+                            <span x-text="activa ? 'Activar oferta' : 'Guardar (desactivada)'"></span>
                         </button>
                     </div>
                 </form>
