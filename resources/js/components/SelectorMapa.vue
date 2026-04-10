@@ -5,13 +5,13 @@
     <div class="grid grid-cols-2 gap-4">
       <div>
         <label class="block text-xs font-bold text-gray-500 uppercase">Latitud</label>
-        <input type="text" name="lat" v-model="lat" readonly
-          class="block mt-1 w-full bg-gray-50 border-gray-300 rounded-md text-sm">
+        <input type="text" name="lat" v-model="lat" @change="aplicarCoordenadasManuales"
+          class="block mt-1 w-full border-gray-300 rounded-md text-sm">
       </div>
       <div>
         <label class="block text-xs font-bold text-gray-500 uppercase">Longitud</label>
-        <input type="text" name="lng" v-model="lng" readonly
-          class="block mt-1 w-full bg-gray-50 border-gray-300 rounded-md text-sm">
+        <input type="text" name="lng" v-model="lng" @change="aplicarCoordenadasManuales"
+          class="block mt-1 w-full border-gray-300 rounded-md text-sm">
       </div>
     </div>
     <p class="text-[10px] text-gray-400 mt-1 italic">* Haz clic en el mapa para ajustar la ubicación exacta en el cerro.</p>
@@ -37,6 +37,8 @@ onMounted(() => {
   map = L.map('map').setView([lat.value, lng.value], 14);
   // Corrige el render cuando el contenedor estaba oculto (x-show, tabs, etc.)
   setTimeout(() => map.invalidateSize(), 300);
+  // Escucha el evento que dispara Alpine al mostrar el panel de creación
+  window.addEventListener('mapa-visible', () => map.invalidateSize());
 
   // Capa de OpenStreetMap (Gratuita)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -71,6 +73,14 @@ function updatePosition(newLat, newLng) {
   lat.value = newLat.toFixed(6);
   lng.value = newLng.toFixed(6);
   marker.setLatLng([newLat, newLng]);
+}
+
+function aplicarCoordenadasManuales() {
+  const newLat = parseFloat(lat.value);
+  const newLng = parseFloat(lng.value);
+  if (isNaN(newLat) || isNaN(newLng)) return;
+  marker.setLatLng([newLat, newLng]);
+  map.setView([newLat, newLng]);
 }
 </script>
 
