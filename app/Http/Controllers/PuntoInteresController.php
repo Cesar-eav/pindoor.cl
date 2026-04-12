@@ -164,27 +164,9 @@ class PuntoInteresController extends Controller
                          ->with('success', 'El local ha sido retirado del mapa.');
     }
 
-    public function panoramas(Request $request)
+    public function panoramas()
     {
-        $query = PuntoInteres::where('activo', 1)
-            ->where('eliminado', false)
-            ->with(['categoria', 'imagenPrincipal']);
-
-        if ($request->filled('categoria')) {
-            $query->whereHas('categoria', fn($q) => $q->where('slug', $request->categoria));
-        }
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(fn($q) => $q->where('title', 'like', "%{$search}%")
-                ->orWhere('description', 'like', "%{$search}%")
-                ->orWhere('sector', 'like', "%{$search}%"));
-        }
-
-        $panoramas = $query->latest('id')->paginate(18)->withQueryString();
-        $categorias = Categoria::orderBy('nombre')->get();
-
-        return view('panoramas.index', compact('panoramas', 'categorias'));
+        return view('panoramas.index');
     }
 
     /**
