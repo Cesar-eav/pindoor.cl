@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ClienteMuseoController;
 use App\Http\Controllers\ClienteEventosController;
+use App\Http\Controllers\PublicitaController;
 use Illuminate\Support\Facades\Route;
 
 /* --- RUTAS PÚBLICAS (TURISTAS) --- */
@@ -21,6 +22,8 @@ Route::get('/atractivos/{atractivo}', [PuntoInteresController::class, 'show'])->
 Route::get('/atractivos/categoria/{categoria}', [PuntoInteresController::class, 'filtrarPorCategoria'])->name('atractivos.categoria');
 Route::get('/atractivos/ciudad/{ciudad}', [PuntoInteresController::class, 'filtrarPorCiudad'])->name('atractivos.ciudad');
 Route::get('/panoramas', [PuntoInteresController::class, 'panoramas'])->name('atractivos.panoramas');
+Route::get('/publicita', [PublicitaController::class, 'index'])->name('publicita.index');
+Route::post('/publicita', [PublicitaController::class, 'store'])->name('publicita.store');
 
 
 
@@ -49,6 +52,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/puntos/{punto}/editar', [AdminController::class, 'editPunto'])->name('puntos.edit');
     Route::put('/puntos/{punto}/actualizar', [AdminController::class, 'updatePunto'])->name('puntos.update');
     Route::patch('/puntos/{punto}/toggle', [AdminController::class, 'togglePunto'])->name('puntos.toggle');
+
+    // Leads de Publicita
+    Route::get('/leads', [AdminController::class, 'leads'])->name('leads');
+    Route::patch('/leads/{lead}/toggle', [AdminController::class, 'toggleLead'])->name('leads.toggle');
 
     // Gestión de Clientes (negocios)
     Route::get('/clientes', [AdminController::class, 'clientes'])->name('clientes');

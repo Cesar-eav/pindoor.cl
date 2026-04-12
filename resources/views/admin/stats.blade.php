@@ -28,6 +28,23 @@
                 </div>
             </div>
 
+            {{-- Leads Publicita --}}
+            <div class="bg-white shadow-sm sm:rounded-2xl p-6 mb-8 flex items-center justify-between border-l-4 border-amber-400">
+                <div>
+                    <div class="text-sm font-medium text-gray-500 uppercase">Consultas de Publicita</div>
+                    <div class="text-3xl font-bold text-gray-900">{{ $totalLeads }}</div>
+                    @if($leadsNuevos > 0)
+                        <div class="text-xs text-amber-600 font-bold mt-1">{{ $leadsNuevos }} sin contactar</div>
+                    @else
+                        <div class="text-xs text-green-600 font-bold mt-1">Todos contactados</div>
+                    @endif
+                </div>
+                <a href="{{ route('admin.leads') }}"
+                   class="text-sm font-bold text-amber-600 hover:underline">
+                    Ver consultas →
+                </a>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 
                 <div class="bg-white shadow-sm sm:rounded-2xl overflow-hidden">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PuntoInteres;
 use App\Models\Categoria;
+use App\Models\LeadPublicita;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -33,13 +34,30 @@ class AdminController extends Controller
                             ->take(5)
                             ->get();
 
+        $totalLeads = LeadPublicita::count();
+        $leadsNuevos = LeadPublicita::where('contactado', false)->count();
+
         return view('admin.stats', compact(
-            'totalPuntos', 
-            'totalClientes', 
-            'puntosActivos', 
+            'totalPuntos',
+            'totalClientes',
+            'puntosActivos',
             'ultimosPuntos',
-            'ultimosClientes'
+            'ultimosClientes',
+            'totalLeads',
+            'leadsNuevos'
         ));
+    }
+
+    public function leads()
+    {
+        $leads = LeadPublicita::latest()->paginate(30);
+        return view('admin.leads', compact('leads'));
+    }
+
+    public function toggleLead(LeadPublicita $lead)
+    {
+        $lead->update(['contactado' => !$lead->contactado]);
+        return back();
     }
 
     public function usuarios()

@@ -23,7 +23,7 @@
     <nav class="hidden lg:flex gap-4 items-center">
         <a href="{{ url('labrujula') }}" class="hover:text-green-600 transition-colors">Inicio</a>
         <a href="{{ url('panoramas') }}" class="hover:text-green-600 transition-colors">Panoramas</a>
-        <a href="{{ url('#') }}" class="hover:text-green-600 transition-colors">Publicita</a>
+        <a href="{{ route('publicita.index') }}" class="hover:text-green-600 transition-colors">Publicita</a>
         
     </nav>
 
