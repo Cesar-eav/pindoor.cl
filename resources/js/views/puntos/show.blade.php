@@ -14,15 +14,6 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .serif-text { font-family: 'Lora', serif; }
         [x-cloak] { display: none !important; }
-        .richtext strong, .richtext b { font-weight: 700 !important; }
-        .richtext em, .richtext i { font-style: italic !important; }
-        .richtext u { text-decoration: underline !important; }
-        .richtext h2 { font-size: 1.2rem; font-weight: 700; margin: 0.75rem 0 0.25rem; }
-        .richtext h3 { font-size: 1rem; font-weight: 700; margin: 0.5rem 0 0.25rem; }
-        .richtext ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.4rem 0; }
-        .richtext ol { list-style-type: decimal; padding-left: 1.5rem; margin: 0.4rem 0; }
-        .richtext li { margin: 0.2rem 0; }
-        .richtext p:not(:first-child) { margin-top: 0.5rem; }
     </style>
 </head>
 
@@ -321,12 +312,12 @@
                                 </div>
                             @endif
                         </div>
-
                         {{-- Texto --}}
                         <section class="space-y-6">
                             <div class="space-y-2">
                                 @if($punto->categoria)
                                     <span class="inline-flex items-center gap-2 bg-pindoor-accent/10 text-pindoor-accent text-[11px] uppercase font-black px-4 py-1.5 rounded-full">
+                                        <span class="text-base"></span>
                                         {{ $punto->categoria->nombre }}
                                     </span>
                                 @endif
@@ -343,8 +334,10 @@
                                 @endif
                             </div>
 
-                            <div class="richtext serif-text text-lg text-gray-700 leading-relaxed space-y-4">
-                                {!! $punto->description !!}
+                            12312321321321312321323213221232
+                            <div class="serif-text text-lg text-gray-700 leading-relaxed space-y-4">
+                                {!! nl2br(e($punto->description)) !!}                            12312321321321312321323213221232
+12312321321321312321323213221232
                             </div>
 
                             @if($punto->tags && count($punto->tags))
@@ -403,8 +396,8 @@
                         </div>
 
                         <div class="bg-white rounded-3xl shadow-sm border border-green-100 p-8">
-                            <div class="richtext serif-text text-gray-700 leading-relaxed text-base">
-                                {!! $punto->oferta_del_dia !!}
+                            <div class="serif-text text-gray-700 leading-relaxed whitespace-pre-line text-base">
+                                {{ $punto->oferta_del_dia }}
                             </div>
                         </div>
                     </div>
@@ -436,8 +429,8 @@
                         </div>
 
                         <div class="bg-white rounded-3xl shadow-sm border border-orange-100 p-8">
-                            <div class="richtext serif-text text-gray-700 leading-relaxed text-base">
-                                {!! $datoMenu['texto'] ?? '' !!}
+                            <div class="serif-text text-gray-700 leading-relaxed whitespace-pre-line text-base">
+                                {{ $datoMenu['texto'] ?? '' }}
                             </div>
                         </div>
                     </div>
@@ -482,8 +475,8 @@
                         </div>
 
                         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-                            <div class="richtext serif-text text-gray-700 leading-relaxed text-base">
-                                {!! $datoCarta['texto'] ?? '' !!}
+                            <div class="serif-text text-gray-700 leading-relaxed whitespace-pre-line text-base">
+                                {{ $datoCarta['texto'] ?? '' }}
                             </div>
                         </div>
                     </div>
@@ -516,8 +509,8 @@
                         </div>
 
                         <div class="bg-white rounded-3xl shadow-sm border border-indigo-100 p-8">
-                            <div class="richtext serif-text text-gray-700 leading-relaxed text-base">
-                                {!! $alojamiento['habitaciones'] !!}
+                            <div class="serif-text text-gray-700 leading-relaxed whitespace-pre-line text-base">
+                                {{ $alojamiento['habitaciones'] }}
                             </div>
                         </div>
                     </div>
@@ -605,8 +598,8 @@
                         @endif
 
                         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-                            <div class="richtext serif-text text-gray-700 leading-relaxed text-base">
-                                {!! $alojamiento['politicas'] !!}
+                            <div class="serif-text text-gray-700 leading-relaxed whitespace-pre-line text-base">
+                                {{ $alojamiento['politicas'] }}
                             </div>
                         </div>
                     </div>

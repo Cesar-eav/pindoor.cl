@@ -48,17 +48,28 @@ class AdminController extends Controller
         return view('admin.usuarios', compact('usuarios'));
     }
 
-    public function createPunto()
+    public function createPunto(Request $request)
     {
-
-    // Traemos los puntos creados por el admin (puntos públicos)
         $categorias = Categoria::orderBy('nombre')->get();
-        $puntos = PuntoInteres::where('eliminado', false)
-                            ->latest()
-                            ->paginate(50);
+
+        $query = PuntoInteres::where('eliminado', false)->with('categoria');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('sector', 'like', "%{$search}%")
+                  ->orWhere('autor', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('categoria')) {
+            $query->where('categoria_id', $request->categoria);
+        }
+
+        $puntos = $query->latest()->paginate(100)->withQueryString();
 
         return view('admin.puntos-create', compact('puntos', 'categorias'));
-
     }
 
     public function editPunto(PuntoInteres $punto)
@@ -74,7 +85,7 @@ class AdminController extends Controller
             'title'       => 'required|max:255',
             'categoria_id'=> 'required|exists:categorias,id',
             'description' => 'required',
-            'photos.*'    => 'image|mimes:jpeg,png,jpg|max:2048',
+            'photos.*'    => 'image|mimes:jpeg,png,jpg|max:4096',
         ]);
 
         $categoria = Categoria::find($request->categoria_id);
@@ -95,8 +106,9 @@ class AdminController extends Controller
         ]);
 
         // Actualizar imágenes existentes que se conservan
-        if ($request->has('keep_images')) {
-            $keepIds = array_keys($request->keep_images);
+        $keepImages = $request->input('keep_images', []);
+        if (!empty($keepImages)) {
+            $keepIds = array_map('intval', array_keys($keepImages));
 
             // Eliminar las que no están en keep_images
             $punto->imagenes()->whereNotIn('id', $keepIds)->each(function ($img) {
@@ -105,7 +117,7 @@ class AdminController extends Controller
             });
 
             // Actualizar is_main y orden de las conservadas
-            foreach ($request->keep_images as $id => $meta) {
+            foreach ($keepImages as $id => $meta) {
                 $punto->imagenes()->where('id', $id)->update([
                     'es_principal' => ($meta['is_main'] ?? 0) == 1,
                     'orden'        => $meta['orden'] ?? 0,
@@ -136,7 +148,7 @@ class AdminController extends Controller
 
         return response()->json([
             'success' => true,
-            'url'     => route('admin.puntos.create'),
+            'url'     => route('admin.puntos.edit', $punto),
         ]);
     }
 
@@ -258,7 +270,7 @@ class AdminController extends Controller
             'categoria_id' => 'required|exists:categorias,id', // Validamos que el ID exista            'sector' => 'required',
             'description' => 'required',
             'photos'       => 'required|array',       // Debe venir al menos una foto
-            'photos.*'     => 'image|mimes:jpeg,png,jpg|max:2048', // Reglas por cada imagen
+            'photos.*'     => 'image|mimes:jpeg,png,jpg|max:4096', // Reglas por cada imagen
         ]);
 
         $categoria = Categoria::find($request->categoria_id);

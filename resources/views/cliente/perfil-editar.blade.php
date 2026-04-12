@@ -9,6 +9,12 @@
     <div class="py-10">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
+            @if(session('success'))
+                <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-5 py-3 font-medium">
+                    ✓ {{ session('success') }}
+                </div>
+            @endif
+
             @if($errors->any())
                 <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-5 py-3">
                     <ul class="list-disc list-inside space-y-1">
@@ -42,10 +48,9 @@
                     {{-- Descripción --}}
                     <div>
                         <x-input-label for="description" value="Descripción *" />
-                        <textarea id="description" name="description" rows="5" required
-                                  class="block mt-1 w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-pindoor-accent resize-none"
-                                  placeholder="Cuéntale al turista qué es tu negocio, qué ofreces, qué lo hace especial..."
-                        >{{ old('description', $punto->description) }}</textarea>
+                        <div id="description-editor"
+                             class="mt-1 bg-white border border-gray-200 rounded-xl text-sm min-h-40"></div>
+                        <textarea id="description" name="description" class="hidden">{{ old('description', $punto->description) }}</textarea>
                     </div>
 
                     {{-- Horario --}}
@@ -120,9 +125,11 @@
 
                     <div>
                         <x-input-label for="carta" value="Descripción de la carta (texto libre)" />
-                        <textarea id="carta" name="carta" rows="10"
-                                  class="block mt-1 w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-pindoor-accent resize-none"
-                                  placeholder="ENTRANTES&#10;— Empanadas de pino $2.000&#10;— Ceviche del día $4.500&#10;&#10;PRINCIPALES&#10;— Chorrillana $6.000&#10;...">{{ old('carta', $datoCarta['texto'] ?? '') }}</textarea>
+                        {{-- Editor Quill --}}
+                        <div id="carta-editor"
+                             class="mt-1 bg-white border border-gray-200 rounded-xl text-sm min-h-55"></div>
+                        {{-- Textarea oculto que se envía con el form --}}
+                        <textarea id="carta" name="carta" class="hidden">{{ old('carta', $datoCarta['texto'] ?? '') }}</textarea>
                     </div>
 
                     <div>
@@ -187,10 +194,9 @@
 
                     <div>
                         <x-input-label for="habitaciones" value="Habitaciones disponibles" />
-                        <textarea id="habitaciones" name="habitaciones" rows="6"
-                                  class="block mt-1 w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-indigo-400 resize-none"
-                                  placeholder="HABITACIÓN DOBLE — Cama queen, baño privado, vista al cerro · $35.000/noche&#10;DORMITORIO MIXTO — 8 camas, baño compartido · $12.000/noche&#10;SUITE — Living, cocina, terraza · $55.000/noche"
-                        >{{ old('habitaciones', $datoAlojamiento['habitaciones'] ?? '') }}</textarea>
+                        <div id="habitaciones-editor"
+                             class="mt-1 bg-white border border-gray-200 rounded-xl text-sm min-h-40"></div>
+                        <textarea id="habitaciones" name="habitaciones" class="hidden">{{ old('habitaciones', $datoAlojamiento['habitaciones'] ?? '') }}</textarea>
                     </div>
                     @endif
 
@@ -229,10 +235,9 @@
                     @if(in_array('politicas', $modulos))
                     <div>
                         <x-input-label for="politicas" value="Políticas del establecimiento" />
-                        <textarea id="politicas" name="politicas" rows="5"
-                                  class="block mt-1 w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-indigo-400 resize-none"
-                                  placeholder="CANCELACIÓN — Cancelación gratuita hasta 48h antes de la llegada.&#10;MASCOTAS — No se admiten mascotas.&#10;FUMADORES — Solo en terrazas exteriores.&#10;MENORES — Bienvenidos con supervisión adulta."
-                        >{{ old('politicas', $datoAlojamiento['politicas'] ?? '') }}</textarea>
+                        <div id="politicas-editor"
+                             class="mt-1 bg-white border border-gray-200 rounded-xl text-sm min-h-40"></div>
+                        <textarea id="politicas" name="politicas" class="hidden">{{ old('politicas', $datoAlojamiento['politicas'] ?? '') }}</textarea>
                     </div>
                     @endif
                 </div>
@@ -266,4 +271,56 @@
             </form>
         </div>
     </div>
+
+{{-- Quill rich text (todos los editores) --}}
+<link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const toolbarOptions = [
+        ['bold', 'italic', 'underline'],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        [{ 'header': [2, 3, false] }],
+        ['clean']
+    ];
+
+    const allEditors = [];
+
+    function initEditor(editorId, textareaId) {
+        const editorEl = document.querySelector(editorId);
+        const textarea = document.querySelector(textareaId);
+        if (!editorEl || !textarea) return;
+
+        const quill = new Quill(editorEl, {
+            theme: 'snow',
+            modules: { toolbar: toolbarOptions }
+        });
+
+        // Cargar contenido existente
+        if (textarea.value.trim()) {
+            quill.clipboard.dangerouslyPasteHTML(textarea.value);
+        }
+
+        // Sincronizar textarea inmediatamente y en cada cambio
+        const sync = () => { textarea.value = quill.root.innerHTML; };
+        sync();
+        quill.on('text-change', sync);
+
+        allEditors.push({ quill, textarea });
+    }
+
+    initEditor('#description-editor', '#description');
+    initEditor('#carta-editor',       '#carta');
+    initEditor('#habitaciones-editor','#habitaciones');
+    initEditor('#politicas-editor',   '#politicas');
+
+    // Backup: sincronizar justo antes de enviar
+    document.querySelector('form').addEventListener('submit', () => {
+        allEditors.forEach(({ quill, textarea }) => {
+            textarea.value = quill.root.innerHTML;
+        });
+    });
+});
+</script>
+
 </x-app-layout>

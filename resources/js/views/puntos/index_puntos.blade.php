@@ -14,16 +14,11 @@
 
     @if (app()->environment('production'))
         <script type="text/javascript">
-            (function(c, l, a, r, i, t, y) {
-                c[a] = c[a] || function() {
-                    (c[a].q = c[a].q || []).push(arguments)
-                };
-                t = l.createElement(r);
-                t.async = 1;
-                t.src = "https://www.clarity.ms/tag/" + i;
-                y = l.getElementsByTagName(r)[0];
-                y.parentNode.insertBefore(t, y);
-            })(window, document, "clarity", "script", "vul5oo31fn");
+            (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "wajfuymjy1");
         </script>
     @endif
 </head>
@@ -40,7 +35,7 @@
                         class="text-red-400">oo</span>r
                 </h1>
                 <p class="text-xl text-gray-700">
-                    Descubre los mejores rincones y experiencias de Valparaíso
+                    Descubre los mejores rincones y experiencias de Valparaíso 
                 </p>
             </section>
 
@@ -55,14 +50,14 @@
                                 <option value="">Todas las categorías</option>
                                 @foreach ($categorias as $cat)
                                     <option value="{{ $cat->slug }}" @selected(request('category') == $cat->slug)>
-                                        {{ $cat->nombre }}
+                                        {{ $cat->icono }} {{ $cat->nombre }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1">Búsqueda por palabra</label>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Búsqueda por palabra 12312321321321312321323213221232</label>
                             <div class="flex">
                                 <input type="text" id="searchFilter" name="search" value="{{ request('search') }}"
                                     placeholder="Ascensor, puerta de colores, café"
@@ -131,7 +126,7 @@
                                     @if ($atractivo->categoria)
                                         <span
                                             class="absolute top-4 left-4 bg-[#fc5648] text-white text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full shadow-lg">
-                                            {{ $atractivo->categoria->nombre }}
+                                            {{ $atractivo->categoria->icono }} {{ $atractivo->categoria->nombre }}
                                         </span>
                                     @endif
 

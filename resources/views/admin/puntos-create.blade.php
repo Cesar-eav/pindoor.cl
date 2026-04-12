@@ -25,7 +25,7 @@
 
             {{-- FORMULARIO CREAR --}}
             <div x-show="view === 'crear'" x-cloak x-transition>
-                <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-4xl mx-auto">
+                <div class="bg-slate-100 p-8 rounded-2xl shadow-sm border border-slate-200 max-w-4xl mx-auto">
                     <h3 class="text-lg font-bold mb-1">Información del Nuevo Punto Público</h3>
                     <p class="text-xs text-gray-400 mb-6"><span class="text-red-500">*</span> Campo obligatorio</p>
 
@@ -44,10 +44,10 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-1">
                                     Categoría <span class="text-red-500">*</span>
                                 </label>
-                                <select name="categoria_id" required class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-pindoor-accent">
+                                <select name="categoria_id" required class="block mt-1 w-full bg-white border border-slate-200 text-gray-900 rounded-lg focus:border-pindoor-accent focus:ring-pindoor-accent transition">
                                     <option value="">Selecciona una categoría</option>
                                     @foreach($categorias as $cat)
-                                        <option value="{{ $cat->id }}">{{ $cat->icono }} {{ $cat->nombre }}</option>
+                                        <option value="{{ $cat->id }}">{{ $cat->nombre }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -57,11 +57,11 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <x-input-label for="autor" value="Autor / Artista / Institución" />
-                                <x-text-input id="autor" name="autor" class="block mt-1 w-full" placeholder="Ej: Municipalidad de Valparaíso" />
+                                <x-text-input id="autor" name="autor" class="block mt-1 w-full"  />
                             </div>
                             <div>
                                 <x-input-label for="tags" value="Etiquetas (separadas por coma)" />
-                                <x-text-input id="tags" name="tags" class="block mt-1 w-full" placeholder="vista, historia, arte" />
+                                <x-text-input id="tags" name="tags" class="block mt-1 w-full" />
                             </div>
                         </div>
 
@@ -73,7 +73,7 @@
                             </div>
                             <div>
                                 <x-input-label for="direccion" value="Dirección" />
-                                <x-text-input id="direccion" name="direccion" class="block mt-1 w-full" placeholder="Ej: Pasaje Gálvez 214, Cerro Alegre" />
+                                <x-text-input id="direccion" name="direccion" class="block mt-1 w-full" />
                             </div>
                         </div>
 
@@ -81,18 +81,18 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <x-input-label for="horario" value="Horario de visita" />
-                                <x-text-input id="horario" name="horario" class="block mt-1 w-full" placeholder="Ej: Lun–Vie 09:00–18:00" />
+                                <x-text-input id="horario" name="horario" class="block mt-1 w-full" />
                             </div>
                             <div>
                                 <x-input-label for="enlace" value="Sitio web o Instagram" />
-                                <x-text-input id="enlace" name="enlace" type="url" class="block mt-1 w-full" placeholder="https://..." />
+                                <x-text-input id="enlace" name="enlace" type="url" class="block mt-1 w-full"  />
                             </div>
                         </div>
 
                         {{-- Video YouTube --}}
                         <div class="mb-6">
                             <x-input-label for="video_url" value="Video de YouTube" />
-                            <x-text-input id="video_url" name="video_url" type="url" class="block mt-1 w-full" placeholder="https://www.youtube.com/watch?v=..." />
+                            <x-text-input id="video_url" name="video_url" type="url" class="block mt-1 w-full" />
                         </div>
 
                         {{-- Descripción --}}
@@ -101,7 +101,7 @@
                                 Reseña o descripción <span class="text-red-500">*</span>
                             </label>
                             <textarea name="description" rows="4" required
-                                class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-pindoor-accent focus:border-pindoor-accent"></textarea>
+                                class="block mt-1 w-full bg-white border border-slate-200 text-gray-900 rounded-lg focus:border-pindoor-accent focus:ring-pindoor-accent transition"></textarea>
                         </div>
 
                         {{-- Mapa + Galería (Vue) --}}
@@ -130,6 +130,58 @@
 
             {{-- LISTADO --}}
             <div x-show="view === 'listado'" x-cloak x-transition>
+
+                {{-- Buscador y filtros --}}
+                <form method="GET" action="{{ route('admin.puntos.create') }}"
+                      class="mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+
+                    <div class="relative flex-1 min-w-0">
+                        <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+                            </svg>
+                        </span>
+                        <input
+                            type="text"
+                            name="search"
+                            value="{{ request('search') }}"
+                            placeholder="Buscar por nombre, sector o autor…"
+                            class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-pindoor-accent focus:border-transparent transition"
+                        />
+                    </div>
+
+                    <select
+                        name="categoria"
+                        onchange="this.form.submit()"
+                        class="py-2 pl-3 pr-8 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-pindoor-accent transition">
+                        <option value="">Todas las categorías</option>
+                        @foreach($categorias as $cat)
+                            <option value="{{ $cat->id }}" {{ request('categoria') == $cat->id ? 'selected' : '' }}>
+                                {{ $cat->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <button type="submit"
+                            class="px-5 py-2 bg-pindoor-accent text-white rounded-xl text-sm font-bold hover:bg-red-600 transition whitespace-nowrap">
+                        Buscar
+                    </button>
+
+                    @if(request()->filled('search') || request()->filled('categoria'))
+                        <a href="{{ route('admin.puntos.create') }}"
+                           class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-200 transition whitespace-nowrap">
+                            Limpiar
+                        </a>
+                    @endif
+                </form>
+
+                @if(request()->filled('search') || request()->filled('categoria'))
+                    <p class="text-xs text-gray-400 mb-3">
+                        {{ $puntos->total() }} resultado{{ $puntos->total() !== 1 ? 's' : '' }} encontrado{{ $puntos->total() !== 1 ? 's' : '' }}
+                    </p>
+                @endif
+
                 <div class="bg-white shadow-sm sm:rounded-2xl overflow-hidden border border-gray-100">
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-gray-50 text-gray-500 uppercase text-xs font-bold">

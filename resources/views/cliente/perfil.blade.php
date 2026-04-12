@@ -107,13 +107,9 @@
                     <input type="hidden" name="oferta_activa" value="0">
                     <input type="checkbox" name="oferta_activa" value="1" x-bind:checked="activa" class="hidden">
 
-                    <textarea
-                        name="oferta_del_dia"
-                        rows="4"
-                        maxlength="1000"
-                        placeholder="Ej: Happy hour 18–20 h · Capuchino + croissant $3.500..."
-                        class="w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-green-400 resize-none"
-                    >{{ old('oferta_del_dia', $punto->oferta_del_dia) }}</textarea>
+                    <div id="oferta-editor"
+                         class="bg-white border border-gray-200 rounded-xl text-sm min-h-28"></div>
+                    <textarea id="oferta_del_dia" name="oferta_del_dia" class="hidden">{{ old('oferta_del_dia', $punto->oferta_del_dia) }}</textarea>
 
                     {{-- Duración --}}
                     <div x-show="activa" class="mt-3">
@@ -154,13 +150,9 @@
 
                 <form method="POST" action="{{ route('cliente.menu.actualizar') }}">
                     @csrf @method('PATCH')
-                    <textarea
-                        name="menu_del_dia"
-                        rows="5"
-                        maxlength="2000"
-                        placeholder="Ej:&#10;PRIMER PLATO — Sopa del día&#10;SEGUNDO PLATO — Cazuela de vacuno&#10;POSTRE — Arroz con leche&#10;Todo por $5.500"
-                        class="w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-orange-400 resize-none"
-                    >{{ old('menu_del_dia', $textoMenu) }}</textarea>
+                    <div id="menu-editor"
+                         class="bg-white border border-gray-200 rounded-xl text-sm min-h-36"></div>
+                    <textarea id="menu_del_dia" name="menu_del_dia" class="hidden">{{ old('menu_del_dia', $textoMenu) }}</textarea>
 
                     <div class="flex justify-between items-center mt-3">
                         @if($textoMenu)
@@ -274,4 +266,46 @@
 
         </div>
     </div>
+
+{{-- Quill para oferta del día y menú del día --}}
+<link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const toolbar = [
+        ['bold', 'italic', 'underline'],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        ['clean']
+    ];
+
+    function initEditor(editorId, textareaId, formEl) {
+        const editorEl = document.querySelector(editorId);
+        const textarea = document.querySelector(textareaId);
+        if (!editorEl || !textarea || !formEl) return;
+
+        const quill = new Quill(editorEl, { theme: 'snow', modules: { toolbar } });
+
+        if (textarea.value.trim()) {
+            quill.clipboard.dangerouslyPasteHTML(textarea.value);
+        }
+
+        const sync = () => { textarea.value = quill.root.innerHTML; };
+        sync();
+        quill.on('text-change', sync);
+
+        formEl.addEventListener('submit', sync);
+    }
+
+    @if(in_array('oferta_del_dia', $modulos))
+    initEditor('#oferta-editor', '#oferta_del_dia',
+        document.querySelector('form[action="{{ route('cliente.oferta.actualizar') }}"]'));
+    @endif
+
+    @if(in_array('menu_del_dia', $modulos))
+    initEditor('#menu-editor', '#menu_del_dia',
+        document.querySelector('form[action="{{ route('cliente.menu.actualizar') }}"]'));
+    @endif
+});
+</script>
+
 </x-app-layout>

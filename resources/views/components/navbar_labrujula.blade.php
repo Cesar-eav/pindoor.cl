@@ -24,7 +24,7 @@
         <a href="{{ url('labrujula') }}" class="hover:text-green-600 transition-colors">Inicio</a>
         <a href="{{ url('panoramas') }}" class="hover:text-green-600 transition-colors">Panoramas</a>
         <a href="{{ url('#') }}" class="hover:text-green-600 transition-colors">Publicita</a>
-        <a href="{{ url('/') }}" class="text-black hover:text-green-600 transition-colors">El Pionero</a>
+        
     </nav>
 
     <button id="mobile-menu-button" class="lg:hidden text-[#fc5648] focus:outline-none pl-2 relative z-[60]">
@@ -53,7 +53,7 @@
         <a href="{{ url('/labrujula') }}" class="hover:text-green-600 transition-colors block py-1">Inicio</a>
         <a href="{{ url('panoramas') }}" class="hover:text-green-600 transition-colors block py-1">Panoramas</a>
         <a href="{{ url('#') }}" class="hover:text-green-600 transition-colors block py-1">Publicita</a>
-        <a href="{{ url('/') }}" class="text-black hover:text-green-600 transition-colors block py-1">El Pionero</a>
+        
     </div>
 </div>
 <script>
