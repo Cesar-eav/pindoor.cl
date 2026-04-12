@@ -909,7 +909,64 @@
                     </div>
                 </aside>
 
-            </div>
+            </div>{{-- /grid --}}
+
+            {{-- Puntos cercanos (200 m) --}}
+            @if($cercanos->count())
+            <section class="mt-16 pt-10 border-t border-gray-200">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-[.2em] text-[#fc5648] mb-1">Cerca de aquí</p>
+                        <h2 class="text-2xl font-extrabold text-gray-900">Los más cercanos</h2>
+                    </div>
+                    <span class="text-xs text-gray-400 font-medium hidden sm:block">
+                        {{ $cercanos->count() }} lugar{{ $cercanos->count() !== 1 ? 'es' : '' }}
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                    @foreach($cercanos as $cercano)
+                    <a href="{{ route('atractivos.show', $cercano->slug ?? $cercano->id) }}"
+                       class="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
+
+                        {{-- Imagen --}}
+                        <div class="relative h-36 overflow-hidden bg-gray-100">
+                            @if($cercano->imagenPrincipal)
+                                <img src="{{ asset('storage/' . $cercano->imagenPrincipal->ruta) }}"
+                                     alt="{{ $cercano->title }}"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center text-3xl text-gray-300">📍</div>
+                            @endif
+
+                            {{-- Distancia badge --}}
+                            <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded-full backdrop-blur-sm">
+                                {{ round($cercano->distancia_m) }} m
+                            </span>
+
+                            {{-- Categoría badge --}}
+                            @if($cercano->categoria)
+                            <span class="absolute top-2 left-2 bg-[#fc5648] text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
+                                {{ $cercano->categoria->nombre }}
+                            </span>
+                            @endif
+                        </div>
+
+                        {{-- Contenido --}}
+                        <div class="p-4 flex-1 flex flex-col">
+                            <h3 class="font-bold text-gray-900 text-sm leading-tight group-hover:text-[#fc5648] transition line-clamp-2">
+                                {{ $cercano->title }}
+                            </h3>
+                            @if($cercano->sector)
+                            <p class="text-xs text-gray-400 mt-1">📍 {{ $cercano->sector }}</p>
+                            @endif
+                        </div>
+                    </a>
+                    @endforeach
+                </div>
+            </section>
+            @endif
+
         </main>
     </div>
 

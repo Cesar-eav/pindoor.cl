@@ -199,6 +199,23 @@ class PuntoInteresController extends Controller
                              ->where('eliminado', false)
                              ->firstOrFail();
 
-        return view('puntos.show', compact('punto'));
+        $cercanos = collect();
+        if ($punto->lat && $punto->lng) {
+            $cercanos = PuntoInteres::where('activo', true)
+                ->where('eliminado', false)
+                ->where('id', '!=', $punto->id)
+                ->whereNotNull('lat')
+                ->whereNotNull('lng')
+                ->selectRaw(
+                    '*, ST_Distance_Sphere(POINT(lng, lat), POINT(?, ?)) as distancia_m',
+                    [$punto->lng, $punto->lat]
+                )
+                ->with(['categoria', 'imagenPrincipal'])
+                ->orderBy('distancia_m')
+                ->limit(5)
+                ->get();
+        }
+
+        return view('puntos.show', compact('punto', 'cercanos'));
     }
 }
