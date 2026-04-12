@@ -897,15 +897,6 @@
                             </div>
                         @endif
 
-                        <div class="mt-8">
-                            <a href="{{ route('atractivos.index') }}"
-                               class="group flex items-center justify-center gap-2 w-full bg-gray-900 text-white py-4 rounded-2xl font-bold hover:bg-pindoor-accent transition-all duration-300 shadow-xl shadow-gray-900/10">
-                                <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M15 19l-7-7 7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                Explorar más
-                            </a>
-                        </div>
                     </div>
                 </aside>
 
