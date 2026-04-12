@@ -12,6 +12,18 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    {{-- Leaflet --}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        #mapa-principal { height: 70vh; border-radius: 1rem; z-index: 1; }
+        .leaflet-popup-content-wrapper { border-radius: 0.75rem; box-shadow: 0 4px 20px rgba(0,0,0,.12); }
+        .leaflet-popup-content { margin: 0; padding: 0; width: 220px !important; }
+        .pin-marker { background: #fc5648; border: 3px solid white; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+        .pin-marker.cliente { background: #f59e0b; }
+    </style>
+
     @if (app()->environment('production'))
         <script type="text/javascript">
             (function(c, l, a, r, i, t, y) {
@@ -44,6 +56,39 @@
                 </p>
             </section>
 
+            {{-- Toggle Listado / Mapa --}}
+            <div class="flex justify-center mb-6">
+                <div class="inline-flex bg-gray-200 p-1 rounded-xl gap-1">
+                    <button id="btn-listado"
+                            onclick="setView('listado')"
+                            class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all bg-white shadow text-[#fc5648]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                        </svg>
+                        Listado
+                    </button>
+                    <button id="btn-mapa"
+                            onclick="setView('mapa')"
+                            class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all text-gray-500 hover:text-gray-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                        </svg>
+                        Mapa
+                    </button>
+                </div>
+            </div>
+
+            {{-- Vista Mapa --}}
+            <div id="vista-mapa" class="hidden mb-8">
+                <div id="mapa-principal"></div>
+                <p class="text-xs text-gray-400 text-center mt-2">
+                    {{ count($puntosMapData) }} puntos en el mapa · Haz clic en un marcador para ver el detalle
+                </p>
+            </div>
+
+            <div id="vista-listado">
             <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border-t-4 border-[#fc5648]">
                 <form id="filterForm" action="{{ route('atractivos.index') }}" method="GET">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
@@ -196,6 +241,7 @@
                     </div>
                 @endif
             </div>
+            </div>{{-- /vista-listado --}}
         </div>
 
         {{-- <x-footer /> --}}
@@ -203,6 +249,112 @@
 
 
     <script>
+        // ── Datos del mapa ──────────────────────────────────────────────────────
+        const PUNTOS_DATA = @json($puntosMapData);
+
+        // ── Toggle Listado / Mapa ───────────────────────────────────────────────
+        let mapaIniciado = false;
+        let mapaLeaflet  = null;
+
+        function setView(vista) {
+            const elListado = document.getElementById('vista-listado');
+            const elMapa    = document.getElementById('vista-mapa');
+            const btnL      = document.getElementById('btn-listado');
+            const btnM      = document.getElementById('btn-mapa');
+
+            if (vista === 'mapa') {
+                elListado.classList.add('hidden');
+                elMapa.classList.remove('hidden');
+                btnM.classList.add('bg-white', 'shadow', 'text-[#fc5648]');
+                btnM.classList.remove('text-gray-500', 'hover:text-gray-700');
+                btnL.classList.remove('bg-white', 'shadow', 'text-[#fc5648]');
+                btnL.classList.add('text-gray-500', 'hover:text-gray-700');
+                if (!mapaIniciado) iniciarMapa();
+            } else {
+                elMapa.classList.add('hidden');
+                elListado.classList.remove('hidden');
+                btnL.classList.add('bg-white', 'shadow', 'text-[#fc5648]');
+                btnL.classList.remove('text-gray-500', 'hover:text-gray-700');
+                btnM.classList.remove('bg-white', 'shadow', 'text-[#fc5648]');
+                btnM.classList.add('text-gray-500', 'hover:text-gray-700');
+            }
+        }
+
+        // ── Inicializar Leaflet ─────────────────────────────────────────────────
+        function iniciarMapa() {
+            mapaIniciado = true;
+
+            mapaLeaflet = L.map('mapa-principal', {
+                center: [-33.047, -71.612],   // Valparaíso
+                zoom: 14,
+                zoomControl: true,
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 19,
+            }).addTo(mapaLeaflet);
+
+            // Icono personalizado
+            function crearIcono(esCliente) {
+                return L.divIcon({
+                    className: '',
+                    html: `<div style="
+                        width:14px; height:14px;
+                        background:${esCliente ? '#f59e0b' : '#fc5648'};
+                        border:2.5px solid white;
+                        border-radius:50%;
+                        box-shadow:0 1px 6px rgba(0,0,0,.35);
+                    "></div>`,
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7],
+                    popupAnchor: [0, -10],
+                });
+            }
+
+            const bounds = [];
+
+            PUNTOS_DATA.forEach(function(p) {
+                if (!p.lat || !p.lng) return;
+
+                bounds.push([p.lat, p.lng]);
+
+                const marker = L.marker([p.lat, p.lng], { icon: crearIcono(p.es_cliente) });
+
+                const imgHtml = p.imagen
+                    ? `<img src="${p.imagen}" alt="${p.title}" style="width:100%;height:110px;object-fit:cover;border-radius:0.5rem 0.5rem 0 0;">`
+                    : `<div style="width:100%;height:60px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:1.5rem;border-radius:0.5rem 0.5rem 0 0;">📍</div>`;
+
+                const catBadge = p.categoria
+                    ? `<span style="background:#fc5648;color:white;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 7px;border-radius:999px;">${p.categoria}</span>`
+                    : '';
+
+                const clienteBadge = p.es_cliente
+                    ? `<span style="background:#fef3c7;color:#92400e;font-size:9px;font-weight:700;padding:2px 7px;border-radius:999px;margin-left:4px;">Negocio</span>`
+                    : '';
+
+                const popup = `
+                    <div style="font-family:sans-serif;">
+                        ${imgHtml}
+                        <div style="padding:10px 12px 12px;">
+                            <div style="margin-bottom:5px;">${catBadge}${clienteBadge}</div>
+                            <div style="font-weight:700;font-size:13px;line-height:1.3;margin-bottom:3px;">${p.title}</div>
+                            ${p.sector ? `<div style="font-size:11px;color:#6b7280;margin-bottom:8px;">📍 ${p.sector}</div>` : ''}
+                            <a href="/lugar/${p.slug}" style="display:inline-block;background:#fc5648;color:white;font-size:11px;font-weight:700;padding:5px 12px;border-radius:8px;text-decoration:none;">
+                                Ver detalle →
+                            </a>
+                        </div>
+                    </div>`;
+
+                marker.bindPopup(popup, { maxWidth: 230 }).addTo(mapaLeaflet);
+            });
+
+            if (bounds.length > 1) {
+                mapaLeaflet.fitBounds(bounds, { padding: [40, 40] });
+            }
+        }
+
+        // ── Lógica existente ────────────────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', function() {
             console.log("🚀 La Brújula: Script cargado y listo.");
 

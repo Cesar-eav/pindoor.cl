@@ -63,7 +63,26 @@ class PuntoInteresController extends Controller
             return view('labrujula.partials.atractivos-container', compact('atractivos'))->render();
         }
 
-        return view('puntos.index_puntos', compact('atractivos', 'categorias'));
+        // Datos ligeros para el mapa (todos los puntos activos con coordenadas)
+        $puntosMapData = PuntoInteres::where('activo', 1)
+            ->where('eliminado', false)
+            ->whereNotNull('lat')
+            ->whereNotNull('lng')
+            ->with(['categoria', 'imagenPrincipal'])
+            ->get()
+            ->map(fn($p) => [
+                'id'       => $p->id,
+                'title'    => $p->title,
+                'slug'     => $p->slug,
+                'lat'      => (float) $p->lat,
+                'lng'      => (float) $p->lng,
+                'sector'   => $p->sector,
+                'categoria'=> $p->categoria?->nombre,
+                'imagen'   => $p->imagenPrincipal ? asset('storage/' . $p->imagenPrincipal->ruta) : null,
+                'es_cliente' => (bool) $p->es_cliente,
+            ]);
+
+        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'puntosMapData'));
         
     } catch (\Exception $e) {
         Log::error('Error en index: ' . $e->getMessage());
