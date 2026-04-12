@@ -6,12 +6,12 @@
       <div>
         <label class="block text-xs font-bold text-gray-500 uppercase">Latitud</label>
         <input type="text" name="lat" v-model="lat" @change="aplicarCoordenadasManuales"
-          class="block mt-1 w-full border-gray-300 rounded-md text-sm">
+          class="block bg-white mt-1 w-full border-gray-300 rounded-md text-sm">
       </div>
       <div>
         <label class="block text-xs font-bold text-gray-500 uppercase">Longitud</label>
         <input type="text" name="lng" v-model="lng" @change="aplicarCoordenadasManuales"
-          class="block mt-1 w-full border-gray-300 rounded-md text-sm">
+          class="block bg-white mt-1 w-full border-gray-300 rounded-md text-sm">
       </div>
     </div>
     <p class="text-[10px] text-gray-400 mt-1 italic">* Haz clic en el mapa para ajustar la ubicación exacta en el cerro.</p>

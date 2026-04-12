@@ -1,6 +1,6 @@
 @php
 $sectores = [
-    'Alemndral'              => 'Almendral',
+    'Almendral'              => 'Almendral',
     'Cerro Alegre'           => 'Cerro Alegre',
     'Cerro Arrayán'          => 'Cerro Arrayán',
     'Cerro Artillería'       => 'Cerro Artillería',

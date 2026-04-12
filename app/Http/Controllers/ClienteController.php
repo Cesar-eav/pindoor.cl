@@ -138,7 +138,7 @@ class ClienteController extends Controller
             );
         }
 
-        return redirect()->route('cliente.perfil')
+        return redirect()->route('cliente.perfil.editar')
             ->with('success', 'Perfil actualizado correctamente.');
     }
 

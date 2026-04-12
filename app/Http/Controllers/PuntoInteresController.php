@@ -51,12 +51,12 @@ class PuntoInteresController extends Controller
             // 3. Ordenamos por el más cercano (en lugar de Random)
             $query->orderBy('distancia', 'asc');
         } else {
-            $query->inRandomOrder();
+            $query;
         }
 
         $atractivos = $query
         ->where('activo', 1)
-        ->with(['categoria', 'imagenPrincipal'])->paginate(40)->withQueryString();
+        ->with(['categoria', 'imagenPrincipal'])->latest('id')->paginate(60)->withQueryString();
         $categorias = Categoria::all();
 
         if ($request->ajax() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
