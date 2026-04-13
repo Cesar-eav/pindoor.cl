@@ -72,13 +72,14 @@ Route::middleware(['auth', 'role:cliente'])->prefix('cliente')->name('cliente.')
     Route::get('/mis-puntos', fn() => redirect()->route('cliente.perfil'))->name('mis-puntos');
 
     // Perfil del negocio
-    Route::get('/perfil', [ClienteController::class, 'perfil'])->name('perfil');
-    Route::get('/perfil/editar', [ClienteController::class, 'editarPerfil'])->name('perfil.editar');
-    Route::put('/perfil/actualizar', [ClienteController::class, 'actualizarPerfil'])->name('perfil.actualizar');
+    Route::get('/perfil', [ClienteController::class, 'perfil'])->name('perfil');                          // lista de negocios
+    Route::get('/perfil/{punto}', [ClienteController::class, 'verPerfil'])->name('perfil.ver');           // detalle de uno
+    Route::get('/perfil/{punto}/editar', [ClienteController::class, 'editarPerfil'])->name('perfil.editar');
+    Route::put('/perfil/{punto}/actualizar', [ClienteController::class, 'actualizarPerfil'])->name('perfil.actualizar');
 
     // Actualización rápida: oferta del día y menú del día
-    Route::patch('/oferta', [ClienteController::class, 'actualizarOferta'])->name('oferta.actualizar');
-    Route::patch('/menu', [ClienteController::class, 'actualizarMenu'])->name('menu.actualizar');
+    Route::patch('/oferta/{punto}', [ClienteController::class, 'actualizarOferta'])->name('oferta.actualizar');
+    Route::patch('/menu/{punto}', [ClienteController::class, 'actualizarMenu'])->name('menu.actualizar');
 
     // Módulo museo (categoría 7)
     Route::get('/museo', [ClienteMuseoController::class, 'index'])->name('museo');

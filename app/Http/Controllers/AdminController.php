@@ -192,9 +192,8 @@ class AdminController extends Controller
 
     public function mostrarActivarCliente(PuntoInteres $punto)
     {
-        // Usuarios cliente sin punto asignado (para vincular uno existente)
+        // Todos los usuarios cliente disponibles para vincular
         $usuariosSinPunto = User::where('type', 'cliente')
-            ->whereDoesntHave('puntoInteres')
             ->orderBy('name')
             ->get();
 

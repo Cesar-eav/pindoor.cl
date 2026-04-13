@@ -32,11 +32,8 @@
                     @endif
 
                     @if(Auth::user()->type === 'cliente')
-                        <x-nav-link :href="route('cliente.perfil')" :active="request()->routeIs('cliente.perfil')">
-                            Mi Negocio
-                        </x-nav-link>
-                        <x-nav-link :href="route('cliente.perfil.editar')" :active="request()->routeIs('cliente.perfil.editar')">
-                            Editar Perfil
+                        <x-nav-link :href="route('cliente.perfil')" :active="request()->routeIs('cliente.perfil*')">
+                            Mis Negocios
                         </x-nav-link>
                     @endif
                 </div>
@@ -108,11 +105,8 @@
             @endif
 
             @if(Auth::user()->type === 'cliente')
-                <x-responsive-nav-link :href="route('cliente.perfil')" :active="request()->routeIs('cliente.perfil')">
-                    Mi Negocio
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('cliente.perfil.editar')" :active="request()->routeIs('cliente.perfil.editar')">
-                    Editar Perfil
+                <x-responsive-nav-link :href="route('cliente.perfil')" :active="request()->routeIs('cliente.perfil*')">
+                    Mis Negocios
                 </x-responsive-nav-link>
             @endif
         </div>

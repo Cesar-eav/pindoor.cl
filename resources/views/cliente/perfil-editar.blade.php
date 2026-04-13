@@ -25,7 +25,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('cliente.perfil.actualizar') }}" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('cliente.perfil.actualizar', $punto) }}" enctype="multipart/form-data">
                 @csrf @method('PUT')
 
                 {{-- Info básica --}}
@@ -258,7 +258,7 @@
 
                 {{-- Botones --}}
                 <div class="flex justify-between items-center pb-4">
-                    <a href="{{ route('cliente.perfil') }}"
+                    <a href="{{ route('cliente.perfil.ver', $punto) }}"
                        class="text-sm text-gray-500 hover:text-gray-700">
                         Cancelar
                     </a>

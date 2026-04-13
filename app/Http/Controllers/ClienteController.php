@@ -3,43 +3,53 @@
 namespace App\Http\Controllers;
 
 use App\Models\ModuloDato;
+use App\Models\PuntoInteres;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ClienteController extends Controller
 {
-    /** Obtiene el PuntoInteres del cliente autenticado o null si no existe. */
-    private function miPunto()
+    /** Aborta con 403 si el punto no pertenece al usuario autenticado. */
+    private function autorizarPunto(PuntoInteres $punto): void
     {
-        return Auth::user()->puntoInteres()->where('eliminado', false)->first();
+        abort_if((int) $punto->user_id !== Auth::id(), 403);
     }
 
     // ─── Dashboard ─────────────────────────────────────────────────────────────
 
     public function perfil()
     {
-        $punto = $this->miPunto();
+        $puntos = Auth::user()->puntoInteres()
+            ->where('eliminado', false)
+            ->with('categoria')
+            ->latest()
+            ->get();
 
-        if (!$punto) {
+        if ($puntos->isEmpty()) {
             return view('cliente.sin-negocio');
         }
 
+        if ($puntos->count() === 1) {
+            return redirect()->route('cliente.perfil.ver', $puntos->first());
+        }
+
+        return view('cliente.mis-negocios', compact('puntos'));
+    }
+
+    public function verPerfil(PuntoInteres $punto)
+    {
+        $this->autorizarPunto($punto);
         $punto->load('moduloDatos', 'moduloItems', 'categoria');
         $modulos = $punto->modulos_habilitados ?? [];
-
         return view('cliente.perfil', compact('punto', 'modulos'));
     }
 
     // ─── Edición del perfil ────────────────────────────────────────────────────
 
-    public function editarPerfil()
+    public function editarPerfil(PuntoInteres $punto)
     {
-        $punto = $this->miPunto();
-
-        if (!$punto) {
-            return redirect()->route('cliente.perfil');
-        }
+        $this->autorizarPunto($punto);
 
         $punto->load('moduloDatos', 'categoria');
         $modulos          = $punto->modulos_habilitados ?? [];
@@ -49,9 +59,9 @@ class ClienteController extends Controller
         return view('cliente.perfil-editar', compact('punto', 'modulos', 'datoCarta', 'datoAlojamiento'));
     }
 
-    public function actualizarPerfil(Request $request)
+    public function actualizarPerfil(Request $request, PuntoInteres $punto)
     {
-        $punto = $this->miPunto();
+        $this->autorizarPunto($punto);
         $modulos = $punto->modulos_habilitados ?? [];
 
         $request->validate([
@@ -138,19 +148,15 @@ class ClienteController extends Controller
             );
         }
 
-        return redirect()->route('cliente.perfil.editar')
+        return redirect()->route('cliente.perfil.editar', $punto)
             ->with('success', 'Perfil actualizado correctamente.');
     }
 
     // ─── Actualizaciones rápidas ───────────────────────────────────────────────
 
-    public function actualizarMenu(Request $request)
+    public function actualizarMenu(Request $request, PuntoInteres $punto)
     {
-        $punto = $this->miPunto();
-
-        if (!$punto) {
-            return redirect()->route('cliente.perfil');
-        }
+        $this->autorizarPunto($punto);
 
         $request->validate(['menu_del_dia' => 'nullable|string|max:2000']);
 
@@ -162,17 +168,13 @@ class ClienteController extends Controller
             ]
         );
 
-        return redirect()->route('cliente.perfil')
+        return redirect()->route('cliente.perfil.ver', $punto)
             ->with('success', 'Menú del día actualizado.');
     }
 
-    public function actualizarOferta(Request $request)
+    public function actualizarOferta(Request $request, PuntoInteres $punto)
     {
-        $punto = $this->miPunto();
-
-        if (!$punto) {
-            return redirect()->route('cliente.perfil');
-        }
+        $this->autorizarPunto($punto);
 
         $request->validate([
             'oferta_del_dia' => 'nullable|string|max:1000',
@@ -193,7 +195,7 @@ class ClienteController extends Controller
             'oferta_expira_at' => $activa ? $expira : null,
         ]);
 
-        return redirect()->route('cliente.perfil')
+        return redirect()->route('cliente.perfil.ver', $punto)
             ->with('success', $activa ? 'Oferta activada.' : 'Oferta desactivada.');
     }
 }

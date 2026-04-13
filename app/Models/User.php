@@ -47,6 +47,6 @@ class User extends Authenticatable
 
     public function puntoInteres()
     {
-        return $this->hasOne(PuntoInteres::class);
+        return $this->hasMany(PuntoInteres::class);
     }
 }

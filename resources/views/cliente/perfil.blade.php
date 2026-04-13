@@ -4,10 +4,13 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Mi Negocio &mdash; {{ $punto->title }}
             </h2>
-            <a href="{{ route('cliente.perfil.editar') }}"
-               class="px-4 py-2 bg-pindoor-accent text-white text-sm font-bold rounded-xl hover:opacity-90 transition">
-                Editar Perfil
-            </a>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('cliente.perfil') }}" class="text-sm text-gray-400 hover:text-gray-700">&larr; Mis negocios</a>
+                <a href="{{ route('cliente.perfil.editar', $punto) }}"
+                   class="px-4 py-2 bg-pindoor-accent text-white text-sm font-bold rounded-xl hover:opacity-90 transition">
+                    Editar Perfil
+                </a>
+            </div>
         </div>
     </x-slot>
 
@@ -100,7 +103,7 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('cliente.oferta.actualizar') }}">
+                <form method="POST" action="{{ route('cliente.oferta.actualizar', $punto) }}">
                     @csrf @method('PATCH')
 
                     {{-- Checkbox real para el toggle --}}
@@ -148,7 +151,7 @@
                     Escribe el menú de hoy para que los turistas lo vean en tu ficha. Deja vacío para ocultarlo.
                 </p>
 
-                <form method="POST" action="{{ route('cliente.menu.actualizar') }}">
+                <form method="POST" action="{{ route('cliente.menu.actualizar', $punto) }}">
                     @csrf @method('PATCH')
                     <div id="menu-editor"
                          class="bg-white border border-gray-200 rounded-xl text-sm min-h-36"></div>
@@ -173,7 +176,7 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <div class="flex items-center justify-between mb-3">
                     <h4 class="font-bold text-gray-700">Descripción del negocio</h4>
-                    <a href="{{ route('cliente.perfil.editar') }}"
+                    <a href="{{ route('cliente.perfil.editar', $punto) }}"
                        class="text-xs text-pindoor-accent hover:underline">Editar</a>
                 </div>
                 <p class="text-sm text-gray-600 leading-relaxed">
@@ -191,10 +194,11 @@
                 @endif
             </div>
 
-            {{-- Accesos rápidos museo --}}
-            @if($punto->esMuseo())
+            {{-- Accesos rápidos --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                @if(in_array('entradas', $modulos) || in_array('exposiciones', $modulos))
+
+                {{-- Museo --}}
+                @if($punto->esMuseo() && (in_array('entradas', $modulos) || in_array('exposiciones', $modulos)))
                 <a href="{{ route('cliente.museo') }}"
                    class="bg-white rounded-2xl border border-amber-200 p-5 flex items-center gap-4 hover:border-amber-400 hover:shadow-sm transition group">
                     <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-2xl group-hover:bg-amber-100 transition">🎟️</div>
@@ -204,21 +208,9 @@
                     </div>
                 </a>
                 @endif
-                <a href="{{ route('puntos.show', $punto->slug) }}" target="_blank"
-                   class="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4 hover:border-gray-300 hover:shadow-sm transition group">
-                    <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-2xl group-hover:bg-gray-100 transition">🔗</div>
-                    <div>
-                        <p class="font-bold text-gray-800 text-sm">Ver ficha pública</p>
-                        <p class="text-xs text-gray-400 mt-0.5">Cómo te ven los turistas</p>
-                    </div>
-                </a>
-            </div>
-            @endif
 
-            {{-- Accesos rápidos cultura --}}
-            @if($punto->esCultura())
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                @if(in_array('agenda', $modulos))
+                {{-- Cultura --}}
+                @if($punto->esCultura() && in_array('agenda', $modulos))
                 <a href="{{ route('cliente.eventos') }}"
                    class="bg-white rounded-2xl border border-blue-200 p-5 flex items-center gap-4 hover:border-blue-400 hover:shadow-sm transition group">
                     <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-2xl group-hover:bg-blue-100 transition">📅</div>
@@ -228,6 +220,8 @@
                     </div>
                 </a>
                 @endif
+
+                {{-- Ver ficha pública (siempre visible) --}}
                 <a href="{{ route('puntos.show', $punto->slug) }}" target="_blank"
                    class="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4 hover:border-gray-300 hover:shadow-sm transition group">
                     <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-2xl group-hover:bg-gray-100 transition">🔗</div>
@@ -236,14 +230,14 @@
                         <p class="text-xs text-gray-400 mt-0.5">Cómo te ven los turistas</p>
                     </div>
                 </a>
+
             </div>
-            @endif
 
             {{-- Estado del perfil de búsqueda --}}
             <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6">
                 <div class="flex items-center justify-between mb-2">
                     <h4 class="font-bold text-amber-800">Perfil de búsqueda</h4>
-                    <a href="{{ route('cliente.perfil.editar') }}#busqueda"
+                    <a href="{{ route('cliente.perfil.editar', $punto) }}#busqueda"
                        class="text-xs text-amber-700 hover:underline font-medium">Completar</a>
                 </div>
                 <p class="text-xs text-amber-700 mb-3">
@@ -257,7 +251,7 @@
                 @else
                     <p class="text-sm text-amber-600 italic">
                         Aún no has completado tu perfil de búsqueda.
-                        <a href="{{ route('cliente.perfil.editar') }}#busqueda" class="font-bold hover:underline">
+                        <a href="{{ route('cliente.perfil.editar', $punto) }}#busqueda" class="font-bold hover:underline">
                             Hazlo ahora
                         </a>
                     </p>
@@ -298,12 +292,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     @if(in_array('oferta_del_dia', $modulos))
     initEditor('#oferta-editor', '#oferta_del_dia',
-        document.querySelector('form[action="{{ route('cliente.oferta.actualizar') }}"]'));
+        document.querySelector('form[action="{{ route('cliente.oferta.actualizar', $punto) }}"]'));
     @endif
 
     @if(in_array('menu_del_dia', $modulos))
     initEditor('#menu-editor', '#menu_del_dia',
-        document.querySelector('form[action="{{ route('cliente.menu.actualizar') }}"]'));
+        document.querySelector('form[action="{{ route('cliente.menu.actualizar', $punto) }}"]'));
     @endif
 });
 </script>
