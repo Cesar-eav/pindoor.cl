@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Publicita tu negocio — Pindoor.cl</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    @if(app()->environment('production'))
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wajfuymjy1");
+    </script>
+    @endif
 </head>
 <body class="bg-gray-50 text-gray-900 font-serif">
 
@@ -103,7 +109,7 @@
                 </label>
                 <input type="text" name="nombre" value="{{ old('nombre') }}" required
                        placeholder="Tu nombre"
-                       class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#fc5648] transition text-sm @error('nombre') border-red-400 @enderror">
+                       class="w-full px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#fc5648] transition text-sm {{ $errors->has('nombre') ? 'border-red-400' : 'border-gray-200' }}">
                 @error('nombre')
                     <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                 @enderror
@@ -116,7 +122,7 @@
                     </label>
                     <input type="email" name="email" value="{{ old('email') }}" required
                            placeholder="tu@correo.com"
-                           class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#fc5648] transition text-sm @error('email') border-red-400 @enderror">
+                           class="w-full px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#fc5648] transition text-sm {{ $errors->has('email') ? 'border-red-400' : 'border-gray-200' }}">
                     @error('email')
                         <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                     @enderror
@@ -135,7 +141,7 @@
                 </label>
                 <input type="text" name="negocio" value="{{ old('negocio') }}" required
                        placeholder="Café del Cerro, Hostal Los Artistas…"
-                       class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#fc5648] transition text-sm @error('negocio') border-red-400 @enderror">
+                       class="w-full px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#fc5648] transition text-sm {{ $errors->has('negocio') ? 'border-red-400' : 'border-gray-200' }}">
                 @error('negocio')
                     <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                 @enderror

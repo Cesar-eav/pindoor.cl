@@ -8,6 +8,13 @@
     <title>{{ $punto->title }} — Pindoor.cl</title>
     <meta name="description" content="{{ Str::limit(strip_tags($punto->description), 160) }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    @if(app()->environment('production'))
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wajfuymjy1");
+    </script>
+    @endif
+
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Lora:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
