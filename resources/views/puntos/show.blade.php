@@ -351,7 +351,7 @@
                             </div>
 
                             <div class="richtext serif-text text-lg text-gray-700 leading-relaxed space-y-4">
-                                {!! $punto->description !!}
+                                {!! nl2br(e($punto->description)) !!}
                             </div>
 
                             @if($punto->tags && count($punto->tags))
