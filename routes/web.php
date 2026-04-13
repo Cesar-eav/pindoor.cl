@@ -29,7 +29,10 @@ Route::post('/publicita', [PublicitaController::class, 'store'])->name('publicit
 
 /* --- RUTAS PROTEGIDAS (BREEZE) --- */
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $type = auth()->user()->type ?? '';
+    if ($type === 'admin')   return redirect()->route('admin.stats');
+    if ($type === 'cliente') return redirect()->route('cliente.perfil');
+    return redirect()->route('atractivos.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

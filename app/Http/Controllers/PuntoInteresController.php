@@ -59,10 +59,6 @@ class PuntoInteresController extends Controller
         ->with(['categoria', 'imagenPrincipal'])->latest('id')->paginate(60)->withQueryString();
         $categorias = Categoria::all();
 
-        if ($request->ajax() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
-            return view('labrujula.partials.atractivos-container', compact('atractivos'))->render();
-        }
-
         // Datos ligeros para el mapa (todos los puntos activos con coordenadas)
         $puntosMapData = PuntoInteres::where('activo', 1)
             ->where('eliminado', false)
@@ -92,29 +88,6 @@ class PuntoInteresController extends Controller
 
 
 
-
-    /**
-     * Muestra el listado de locales que pertenecen al cliente logueado.
-     */
-    public function misPuntos()
-    {
-        // Solo traemos los puntos del usuario actual que NO estén eliminados
-        $puntos = PuntoInteres::where('user_id', Auth::id())
-                              ->where('eliminado', false)
-                              ->latest()
-                              ->get();
-
-        return view('cliente.index', compact('puntos'));
-    }
-
-    /**
-     * Muestra el formulario para crear un nuevo punto.
-     */
-    public function create()
-    {
-        $categorias = Categoria::orderBy('nombre')->get();
-        return view('cliente.create', compact('categorias'));
-    }
 
     /**
      * Guarda el nuevo punto de interés en la base de datos.
