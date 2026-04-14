@@ -1071,7 +1071,7 @@
         @endif
     </div>
 
-    @if($punto->tieneCarta() || $punto->tieneMenu())
+    @if($punto->tieneOfertaActiva() || $punto->tieneCarta() || $punto->tieneMenu())
     <script>
         document.addEventListener('alpine:init', () => {
             window.addEventListener('set-vista', (e) => {
