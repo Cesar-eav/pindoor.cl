@@ -138,7 +138,7 @@
                         @if($atractivo->imagenPrincipal)
                             <img src="{{ asset('storage/' . $atractivo->imagenPrincipal->ruta) }}"
                                  alt="{{ $atractivo->title }}"
-                                 class="w-full h-44 object-cover">
+                                 class="w-full h-96 object-cover">
                         @else
                             <div class="w-full h-44 bg-gray-100 flex items-center justify-center text-4xl">📍</div>
                         @endif
@@ -418,12 +418,6 @@
                                 </p>
                             </div>
 
-                            <div class="px-4 pb-4">
-                                <a href="{{ route('atractivos.show', $atractivo->slug ?? $atractivo->id) }}"
-                                   class="block text-center text-xs font-bold text-[#fc5648] border border-[#fc5648] rounded-xl py-2 hover:bg-[#fc5648] hover:text-white transition">
-                                    Ver detalle →
-                                </a>
-                            </div>
                         </article>
                         @endforeach
                     </div>
