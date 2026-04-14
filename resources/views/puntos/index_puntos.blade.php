@@ -285,7 +285,7 @@
         <div class="flex items-center justify-between my-6">
             <h1 class="text-3xl font-bold text-gray-900">
                 <span class="text-red-400">P</span>i<span class="text-red-400">n</span>d<span class="text-red-400">oo</span>r
-                <span class="text-base font-normal text-gray-400 ml-2">· La Brújula de Valparaíso</span>
+                
             </h1>
             <div class="inline-flex bg-gray-200 p-1 rounded-xl gap-1">
                 <button id="btn-listado" onclick="setView('listado')"
