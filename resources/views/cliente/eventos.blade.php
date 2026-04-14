@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center gap-3">
-            <a href="{{ route('cliente.perfil') }}" class="text-gray-400 hover:text-gray-700 text-sm">&larr; Mi negocio</a>
+            <a href="{{ route('cliente.perfil.ver', $punto) }}" class="text-gray-400 hover:text-gray-700 text-sm">&larr; Mi negocio</a>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Agenda Cultural &mdash; {{ $punto->title }}
             </h2>
@@ -41,7 +41,7 @@
                 </div>
 
                 <div x-show="abierto" x-transition class="border-t border-gray-100 pt-5 mt-2">
-                    <form method="POST" action="{{ route('cliente.eventos.guardar') }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('cliente.eventos.guardar', $punto) }}" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="evento_id" :value="editando ? editando.id : ''">
 
@@ -196,7 +196,7 @@
                                 <p class="text-xs font-bold text-blue-700 mt-0.5">{{ $evento->precioEvento() }}</p>
                             </div>
                             <div class="flex gap-2 shrink-0">
-                                <form method="POST" action="{{ route('cliente.eventos.eliminar', $evento) }}"
+                                <form method="POST" action="{{ route('cliente.eventos.eliminar', [$punto, $evento]) }}"
                                       onsubmit="return confirm('¿Eliminar este evento?')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="text-xs text-red-500 font-bold hover:underline">Eliminar</button>
@@ -220,7 +220,7 @@
                                     <p class="text-sm font-medium text-gray-700">{{ $evento->datos['titulo'] ?? '' }}</p>
                                     <p class="text-xs text-gray-400">{{ $evento->fecha->translatedFormat('d M Y') }}</p>
                                 </div>
-                                <form method="POST" action="{{ route('cliente.eventos.eliminar', $evento) }}"
+                                <form method="POST" action="{{ route('cliente.eventos.eliminar', [$punto, $evento]) }}"
                                       onsubmit="return confirm('¿Eliminar?')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="text-xs text-red-400 hover:text-red-600">Eliminar</button>
@@ -242,7 +242,7 @@
                     <p class="text-sm font-bold text-gray-700">🏷️ Oferta del día</p>
                     <p class="text-xs text-gray-500 mt-0.5">Gestiona la oferta desde tu dashboard principal.</p>
                 </div>
-                <a href="{{ route('cliente.perfil') }}"
+                <a href="{{ route('cliente.perfil.ver', $punto) }}"
                    class="text-sm text-pindoor-accent font-bold hover:underline">Ir al dashboard →</a>
             </div>
             @endif

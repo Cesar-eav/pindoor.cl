@@ -3,23 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\ModuloItem;
+use App\Models\PuntoInteres;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ClienteEventosController extends Controller
 {
-    private function miPunto()
+    private function verificarPunto(PuntoInteres $punto): bool
     {
-        return Auth::user()->puntoInteres()->where('eliminado', false)->first();
+        return !$punto->eliminado
+            && $punto->user_id === Auth::id()
+            && $punto->esCultura();
     }
 
     /** Dashboard del centro cultural: gestión de agenda de eventos. */
-    public function index()
+    public function index(PuntoInteres $punto)
     {
-        $punto = $this->miPunto();
-
-        if (!$punto || !$punto->esCultura()) {
+        if (!$this->verificarPunto($punto)) {
             return redirect()->route('cliente.perfil');
         }
 
@@ -37,11 +38,9 @@ class ClienteEventosController extends Controller
     }
 
     /** Crea o actualiza un evento en la agenda. */
-    public function guardarEvento(Request $request)
+    public function guardarEvento(Request $request, PuntoInteres $punto)
     {
-        $punto = $this->miPunto();
-
-        if (!$punto || !$punto->esCultura()) {
+        if (!$this->verificarPunto($punto)) {
             return redirect()->route('cliente.perfil');
         }
 
@@ -108,16 +107,14 @@ class ClienteEventosController extends Controller
             ]);
         }
 
-        return redirect()->route('cliente.eventos')
+        return redirect()->route('cliente.eventos', $punto)
             ->with('success', 'Evento guardado en la agenda.');
     }
 
     /** Elimina un evento. */
-    public function eliminarEvento(ModuloItem $evento)
+    public function eliminarEvento(PuntoInteres $punto, ModuloItem $evento)
     {
-        $punto = $this->miPunto();
-
-        if (!$punto || $evento->punto_interes_id !== $punto->id || $evento->modulo !== 'eventos') {
+        if (!$this->verificarPunto($punto) || $evento->punto_interes_id !== $punto->id || $evento->modulo !== 'eventos') {
             abort(403);
         }
 
@@ -127,7 +124,7 @@ class ClienteEventosController extends Controller
 
         $evento->delete();
 
-        return redirect()->route('cliente.eventos')
+        return redirect()->route('cliente.eventos', $punto)
             ->with('success', 'Evento eliminado.');
     }
 }

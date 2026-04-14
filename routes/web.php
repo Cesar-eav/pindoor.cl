@@ -91,9 +91,9 @@ Route::middleware(['auth', 'role:cliente'])->prefix('cliente')->name('cliente.')
     Route::delete('/museo/exposicion/{exposicion}', [ClienteMuseoController::class, 'eliminarExposicion'])->name('museo.exposicion.eliminar');
 
     // Módulo agenda cultural (categoría 5)
-    Route::get('/eventos', [ClienteEventosController::class, 'index'])->name('eventos');
-    Route::post('/eventos/guardar', [ClienteEventosController::class, 'guardarEvento'])->name('eventos.guardar');
-    Route::delete('/eventos/{evento}', [ClienteEventosController::class, 'eliminarEvento'])->name('eventos.eliminar');
+    Route::get('/eventos/{punto}', [ClienteEventosController::class, 'index'])->name('eventos');
+    Route::post('/eventos/{punto}/guardar', [ClienteEventosController::class, 'guardarEvento'])->name('eventos.guardar');
+    Route::delete('/eventos/{punto}/{evento}', [ClienteEventosController::class, 'eliminarEvento'])->name('eventos.eliminar');
 });
 
 require __DIR__.'/auth.php';

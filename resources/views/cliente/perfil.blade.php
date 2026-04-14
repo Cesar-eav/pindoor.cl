@@ -211,7 +211,7 @@
 
                 {{-- Cultura --}}
                 @if($punto->esCultura() && in_array('agenda', $modulos))
-                <a href="{{ route('cliente.eventos') }}"
+                <a href="{{ route('cliente.eventos', $punto) }}"
                    class="bg-white rounded-2xl border border-blue-200 p-5 flex items-center gap-4 hover:border-blue-400 hover:shadow-sm transition group">
                     <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-2xl group-hover:bg-blue-100 transition">📅</div>
                     <div>
