@@ -156,6 +156,12 @@
                     </span>
                     @endif
 
+                    @if($atractivo->sector)
+                    <span class="absolute bottom-3 left-3 bg-white text-[#fc5648] text-[9px] uppercase font-bold px-2.5 py-1 rounded-full shadow">
+                       📍 {{ $atractivo->sector }}
+                    </span>
+                    @endif
+
                     @if($atractivo->es_cliente && $atractivo->imagen_perfil)
                     <img src="{{ asset('storage/' . $atractivo->imagen_perfil) }}"
                          class="absolute bottom-3 right-3 w-10 h-10 rounded-xl object-cover border-2 border-white shadow">
@@ -173,7 +179,7 @@
                            class="hover:text-[#fc5648] transition">{{ $atractivo->title }}</a>
                     </h3>
                     <p class="text-gray-500 text-sm leading-relaxed">
-                        {{ Str::limit(strip_tags($atractivo->description), 100) }}
+                        {{ Str::limit(strip_tags($atractivo->description), 250) }}
                     </p>
                 </div>
             </article>
