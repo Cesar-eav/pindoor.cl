@@ -176,7 +176,7 @@
                                     @endif
 
                                     {{-- Badge oferta del día --}}
-                                    @if ($atractivo->es_cliente && $atractivo->oferta_del_dia)
+                                    @if ($atractivo->es_cliente && $atractivo->oferta_del_dia && $atractivo->oferta_activa)
                                         <span class="absolute top-4 right-4 bg-amber-400 text-amber-900 text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full shadow-lg">
                                             Oferta hoy
                                         </span>
