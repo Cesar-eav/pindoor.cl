@@ -299,28 +299,92 @@
                         @php
                             $imagenes = $punto->imagenes->sortBy('orden');
                             $principal = $imagenes->firstWhere('es_principal', true) ?? $imagenes->first();
+                            $principalIndex = $imagenes->values()->search(fn($img) => $img->id === ($principal?->id));
                         @endphp
 
                         <div class="mb-10">
                             @if($imagenes->count())
-                                <div x-data="{ active: '{{ $principal ? asset('storage/' . $principal->ruta) : '' }}' }">
-                                    <div class="aspect-[16/10] md:aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl shadow-gray-200 mb-4">
-                                        <img :src="active" alt="{{ $punto->title }}"
+                                <div x-data='{
+                                    images: @json($imagenes->values()->map(fn($img) => asset("storage/" . $img->ruta))),
+                                    current: {{ $principalIndex !== false ? $principalIndex : 0 }},
+                                    lightbox: false,
+                                    init() { console.log("[galeria] init OK — images:", this.images, "| current:", this.current); },
+                                    goTo(index) { console.log("[galeria] goTo", index); this.current = index; },
+                                    open() { console.log("[galeria] open lightbox"); this.lightbox = true; },
+                                    close() { console.log("[galeria] close lightbox"); this.lightbox = false; },
+                                    prev() { this.current = (this.current - 1 + this.images.length) % this.images.length; },
+                                    next() { this.current = (this.current + 1) % this.images.length; },
+                                }'>
+
+                                    {{-- Imagen principal --}}
+                                    <div class="aspect-[16/10] md:aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl shadow-gray-200 mb-4 cursor-zoom-in"
+                                         @click="open()">
+                                        <img :src="images[current]" alt="{{ $punto->title }}"
                                              class="w-full h-full object-cover transition duration-500" />
                                     </div>
+
+                                    {{-- Miniaturas --}}
                                     @if($imagenes->count() > 1)
                                         <div class="flex gap-3 overflow-x-auto pb-2 snap-x">
-                                            @foreach($imagenes as $img)
-                                                @php $url = asset('storage/' . $img->ruta) @endphp
-                                                <div @click="active = '{{ $url }}'"
+                                            @foreach($imagenes->values() as $i => $img)
+                                                <div @click="goTo({{ $i }})"
                                                      class="flex-none w-20 h-20 md:w-24 md:h-24 snap-start rounded-2xl overflow-hidden border-2 transition cursor-pointer"
-                                                     :class="active === '{{ $url }}' ? 'border-pindoor-accent' : 'border-transparent hover:border-gray-300'">
-                                                    <img src="{{ $url }}" alt="{{ $punto->title }}"
+                                                     :class="current === {{ $i }} ? 'border-pindoor-accent' : 'border-transparent hover:border-gray-300'">
+                                                    <img src="{{ asset('storage/' . $img->ruta) }}" alt="{{ $punto->title }}"
                                                          class="w-full h-full object-cover" />
                                                 </div>
                                             @endforeach
                                         </div>
                                     @endif
+
+                                    {{-- Lightbox --}}
+                                    <div x-show="lightbox" x-transition.opacity
+                                         class="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+                                         @click.self="close()"
+                                         @keydown.escape.window="close()"
+                                         @keydown.arrow-left.window="prev()"
+                                         @keydown.arrow-right.window="next()"
+                                         style="display:none;">
+
+                                        {{-- Cerrar --}}
+                                        <button @click="close()"
+                                                class="absolute top-4 right-4 text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+
+                                        {{-- Anterior --}}
+                                        @if($imagenes->count() > 1)
+                                            <button @click="prev()"
+                                                    class="absolute left-4 text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                                </svg>
+                                            </button>
+                                        @endif
+
+                                        {{-- Imagen --}}
+                                        <img :src="images[current]" alt="{{ $punto->title }}"
+                                             class="max-h-[90vh] max-w-[90vw] object-contain rounded-xl shadow-2xl select-none" />
+
+                                        {{-- Siguiente --}}
+                                        @if($imagenes->count() > 1)
+                                            <button @click="next()"
+                                                    class="absolute right-4 text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                                </svg>
+                                            </button>
+                                        @endif
+
+                                        {{-- Contador --}}
+                                        @if($imagenes->count() > 1)
+                                            <div class="absolute bottom-4 text-white/60 text-sm">
+                                                <span x-text="current + 1"></span> / {{ $imagenes->count() }}
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
                             @else
                                 <div class="aspect-video bg-gray-100 rounded-3xl flex items-center justify-center text-6xl shadow-inner italic text-gray-300">
