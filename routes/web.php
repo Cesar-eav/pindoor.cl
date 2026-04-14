@@ -80,15 +80,17 @@ Route::middleware(['auth', 'role:cliente'])->prefix('cliente')->name('cliente.')
     Route::get('/perfil/{punto}/editar', [ClienteController::class, 'editarPerfil'])->name('perfil.editar');
     Route::put('/perfil/{punto}/actualizar', [ClienteController::class, 'actualizarPerfil'])->name('perfil.actualizar');
 
-    // Actualización rápida: oferta del día y menú del día
-    Route::patch('/oferta/{punto}', [ClienteController::class, 'actualizarOferta'])->name('oferta.actualizar');
-    Route::patch('/menu/{punto}', [ClienteController::class, 'actualizarMenu'])->name('menu.actualizar');
+    // Actualización rápida: módulos transversales
+    Route::patch('/oferta/{punto}',     [ClienteController::class, 'actualizarOferta'])->name('oferta.actualizar');
+    Route::patch('/menu/{punto}',       [ClienteController::class, 'actualizarMenu'])->name('menu.actualizar');
+    Route::patch('/aviso/{punto}',      [ClienteController::class, 'actualizarAviso'])->name('aviso.actualizar');
+    Route::patch('/promocion/{punto}',  [ClienteController::class, 'actualizarPromocion'])->name('promocion.actualizar');
 
-    // Módulo museo (categoría 7)
-    Route::get('/museo', [ClienteMuseoController::class, 'index'])->name('museo');
-    Route::post('/museo/entradas', [ClienteMuseoController::class, 'guardarEntradas'])->name('museo.entradas.guardar');
-    Route::post('/museo/exposicion', [ClienteMuseoController::class, 'guardarExposicion'])->name('museo.exposicion.guardar');
-    Route::delete('/museo/exposicion/{exposicion}', [ClienteMuseoController::class, 'eliminarExposicion'])->name('museo.exposicion.eliminar');
+    // Módulo museo
+    Route::get('/museo/{punto}', [ClienteMuseoController::class, 'index'])->name('museo');
+    Route::post('/museo/{punto}/entradas', [ClienteMuseoController::class, 'guardarEntradas'])->name('museo.entradas.guardar');
+    Route::post('/museo/{punto}/exposicion', [ClienteMuseoController::class, 'guardarExposicion'])->name('museo.exposicion.guardar');
+    Route::delete('/museo/{punto}/exposicion/{exposicion}', [ClienteMuseoController::class, 'eliminarExposicion'])->name('museo.exposicion.eliminar');
 
     // Módulo agenda cultural (categoría 5)
     Route::get('/eventos/{punto}', [ClienteEventosController::class, 'index'])->name('eventos');

@@ -59,6 +59,8 @@
                 $tieneTabsExtra = $punto->tieneOfertaActiva()
                     || $punto->tieneCarta()
                     || $punto->tieneMenu()
+                    || $punto->tieneAvisos()
+                    || $punto->tienePromociones()
                     || ($punto->moduloActivo('habitaciones') && ($alojamiento['habitaciones'] ?? null))
                     || ($punto->moduloActivo('servicios')    && ($alojamiento['servicios']    ?? null))
                     || ($punto->moduloActivo('politicas')    && ($alojamiento['politicas']    ?? null))
@@ -96,6 +98,22 @@
                     :class="vista === 'carta' ? 'bg-pindoor-accent text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
                     Ver carta
+                </button>
+                @endif
+                @if($punto->tieneAvisos())
+                <button
+                    @click="vista = 'avisos'"
+                    :class="vista === 'avisos' ? 'bg-gray-700 text-white' : 'bg-white text-gray-600 border border-gray-200'"
+                    class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
+                    📢 Avisos
+                </button>
+                @endif
+                @if($punto->tienePromociones())
+                <button
+                    @click="vista = 'promociones'"
+                    :class="vista === 'promociones' ? 'bg-purple-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
+                    class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
+                    🎁 Promociones
                 </button>
                 @endif
                 @if($punto->moduloActivo('habitaciones') && ($alojamiento['habitaciones'] ?? null))
@@ -188,6 +206,28 @@
                             : 'bg-white text-gray-600 border border-gray-200 hover:border-pindoor-accent'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
                         <span>🍽️</span> Ver carta
+                    </button>
+                    @endif
+
+                    @if($punto->tieneAvisos())
+                    <button
+                        @click="vista = 'avisos'"
+                        :class="vista === 'avisos'
+                            ? 'bg-gray-700 text-white shadow-lg'
+                            : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-500'"
+                        class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
+                        <span>📢</span> Avisos
+                    </button>
+                    @endif
+
+                    @if($punto->tienePromociones())
+                    <button
+                        @click="vista = 'promociones'"
+                        :class="vista === 'promociones'
+                            ? 'bg-purple-600 text-white shadow-lg'
+                            : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-400'"
+                        class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
+                        <span>🎁</span> Promociones
                     </button>
                     @endif
 
@@ -415,18 +455,10 @@
                             </div>
 
                             <div class="richtext serif-text text-lg text-gray-700 leading-relaxed space-y-4">
-                                {!! nl2br(e($punto->description)) !!}
+                                {!! ($punto->description) !!}
                             </div>
 
-                            @if($punto->tags && count($punto->tags))
-                                <div class="flex flex-wrap gap-2 pt-4">
-                                    @foreach($punto->tags as $tag)
-                                        <span class="bg-white text-gray-500 text-[11px] font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-100 shadow-sm">
-                                            #{{ $tag }}
-                                        </span>
-                                    @endforeach
-                                </div>
-                            @endif
+
 
                             {{-- Video YouTube --}}
                             @if($punto->video_url)
@@ -509,6 +541,56 @@
                         <div class="bg-white rounded-3xl shadow-sm border border-orange-100 p-8">
                             <div class="richtext serif-text text-gray-700 leading-relaxed text-base">
                                 {!! $datoMenu['texto'] ?? '' !!}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- PANEL: Avisos --}}
+                    @if($punto->tieneAvisos())
+                    <div x-show="vista === 'avisos'" x-cloak
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0">
+                        <div class="mb-6 flex items-center gap-3">
+                            @if($punto->imagen_perfil)
+                                <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
+                                     alt="Logo {{ $punto->title }}"
+                                     class="w-12 h-12 rounded-xl object-cover border border-gray-100 shrink-0">
+                            @endif
+                            <div>
+                                <p class="text-xs font-black uppercase tracking-widest text-gray-600 mb-0.5">Aviso</p>
+                                <span class="text-2xl font-extrabold text-gray-900">Avisos</span>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-3xl shadow-sm border border-gray-200 p-8">
+                            <div class="richtext serif-text text-gray-700 leading-relaxed text-base">
+                                {!! $punto->dato('avisos')['texto'] ?? '' !!}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- PANEL: Promociones --}}
+                    @if($punto->tienePromociones())
+                    <div x-show="vista === 'promociones'" x-cloak
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0">
+                        <div class="mb-6 flex items-center gap-3">
+                            @if($punto->imagen_perfil)
+                                <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
+                                     alt="Logo {{ $punto->title }}"
+                                     class="w-12 h-12 rounded-xl object-cover border border-gray-100 shrink-0">
+                            @endif
+                            <div>
+                                <p class="text-xs font-black uppercase tracking-widest text-purple-600 mb-0.5">Oferta especial</p>
+                                <span class="text-2xl font-extrabold text-gray-900">Promociones</span>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-3xl shadow-sm border border-purple-100 p-8">
+                            <div class="richtext serif-text text-gray-700 leading-relaxed text-base">
+                                {!! $punto->dato('promociones')['texto'] ?? '' !!}
                             </div>
                         </div>
                     </div>
@@ -1059,6 +1141,24 @@
             @click="$dispatch('set-vista', 'carta')"
             class="inline-flex items-center gap-2 px-5 py-3 bg-pindoor-accent text-white rounded-full text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
             🍽️ <span>Ver carta</span>
+        </button>
+        @endif
+
+        @if($punto->tieneAvisos())
+        <button
+            x-data
+            @click="$dispatch('set-vista', 'avisos')"
+            class="inline-flex items-center gap-2 px-5 py-3 bg-gray-700 text-white rounded-full text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+            📢 <span>Avisos</span>
+        </button>
+        @endif
+
+        @if($punto->tienePromociones())
+        <button
+            x-data
+            @click="$dispatch('set-vista', 'promociones')"
+            class="inline-flex items-center gap-2 px-5 py-3 bg-purple-600 text-white rounded-full text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+            🎁 <span>Promociones</span>
         </button>
         @endif
 

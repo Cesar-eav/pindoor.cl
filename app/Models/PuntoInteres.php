@@ -52,28 +52,55 @@ class PuntoInteres extends Model
     public static function catalogoModulos(): array
     {
         return [
-            'oferta_del_dia' => ['label' => 'Oferta del día',          'emoji' => '🏷️', 'desc' => 'Promociones o avisos diarios'],
-            'menu_del_dia'   => ['label' => 'Menú del día',            'emoji' => '🥘', 'desc' => 'Menú de almuerzo o cena del día'],
-            'carta'          => ['label' => 'Carta / Menú permanente', 'emoji' => '🍽️', 'desc' => 'Carta completa del local'],
-            'habitaciones'   => ['label' => 'Habitaciones y precios',  'emoji' => '🛏️', 'desc' => 'Tipos de habitación y tarifas'],
-            'servicios'      => ['label' => 'Servicios incluidos',     'emoji' => '✨', 'desc' => 'Amenidades del alojamiento'],
-            'politicas'      => ['label' => 'Políticas',               'emoji' => '📋', 'desc' => 'Check-in/out, cancelación, normas'],
-            'entradas'       => ['label' => 'Entradas y tarifas',      'emoji' => '🎟️', 'desc' => 'Precios de entrada al museo'],
-            'exposiciones'   => ['label' => 'Exposiciones',            'emoji' => '🖼️', 'desc' => 'Colecciones permanentes y temporales'],
-            'agenda'         => ['label' => 'Agenda cultural',         'emoji' => '📅', 'desc' => 'Programación de eventos y espectáculos'],
+            // Transversales — disponibles para todos los clientes
+            'oferta_del_dia' => ['label' => 'Oferta del día',          'emoji' => '🏷️', 'desc' => 'Oferta puntual visible en la ficha',        'grupo' => 'Transversal'],
+            'avisos'         => ['label' => 'Avisos',                  'emoji' => '📢', 'desc' => 'Comunicados y avisos importantes',           'grupo' => 'Transversal'],
+            'promociones'    => ['label' => 'Promociones',             'emoji' => '🎁', 'desc' => 'Descuentos y promociones especiales',        'grupo' => 'Transversal'],
+            // Gastronomía — restaurantes, cafeterías, bares
+            'menu_del_dia'   => ['label' => 'Menú del día',            'emoji' => '🥘', 'desc' => 'Menú de almuerzo o cena del día',            'grupo' => 'Gastronomía'],
+            'carta'          => ['label' => 'Carta / Menú permanente', 'emoji' => '🍽️', 'desc' => 'Carta completa del local',                   'grupo' => 'Gastronomía'],
+            // Alojamiento
+            'habitaciones'   => ['label' => 'Habitaciones y precios',  'emoji' => '🛏️', 'desc' => 'Tipos de habitación y tarifas',              'grupo' => 'Alojamiento'],
+            'servicios'      => ['label' => 'Servicios incluidos',     'emoji' => '✨', 'desc' => 'Amenidades del alojamiento',                 'grupo' => 'Alojamiento'],
+            'politicas'      => ['label' => 'Políticas',               'emoji' => '📋', 'desc' => 'Check-in/out, cancelación, normas',          'grupo' => 'Alojamiento'],
+            // Museo
+            'entradas'       => ['label' => 'Entradas y tarifas',      'emoji' => '🎟️', 'desc' => 'Precios de entrada al museo',                'grupo' => 'Museo'],
+            'exposiciones'   => ['label' => 'Exposiciones',            'emoji' => '🖼️', 'desc' => 'Colecciones permanentes y temporales',       'grupo' => 'Museo'],
+            // Cultura
+            'agenda'         => ['label' => 'Agenda cultural',         'emoji' => '📅', 'desc' => 'Programación de eventos y espectáculos',     'grupo' => 'Cultura'],
         ];
     }
 
-    /** Módulos activos por defecto según la categoría del punto. */
+    /** Módulos activos por defecto al activar un cliente, según su categoría. */
     public static function modulosDefecto(int $categoriaId): array
     {
         return match (true) {
             in_array($categoriaId, [2, 8, 10]) => ['oferta_del_dia', 'menu_del_dia', 'carta'],
             $categoriaId === 11                 => ['oferta_del_dia', 'habitaciones', 'servicios', 'politicas'],
-            $categoriaId === 7                  => ['entradas', 'exposiciones', 'oferta_del_dia'],
-            $categoriaId === 5                  => ['agenda', 'oferta_del_dia'],
+            $categoriaId === 7                  => ['oferta_del_dia', 'entradas', 'exposiciones'],
+            $categoriaId === 5                  => ['oferta_del_dia', 'agenda'],
             default                             => ['oferta_del_dia'],
         };
+    }
+
+    /**
+     * Módulos disponibles para selección según la categoría.
+     * Define el catálogo filtrado que ve el admin al asignar módulos.
+     */
+    public static function modulosDisponibles(int $categoriaId): array
+    {
+        $gruposPermitidos = match (true) {
+            in_array($categoriaId, [2, 8, 10]) => ['Transversal', 'Gastronomía'],
+            $categoriaId === 11                 => ['Transversal', 'Alojamiento'],
+            $categoriaId === 7                  => ['Transversal', 'Museo'],
+            $categoriaId === 5                  => ['Transversal', 'Cultura'],
+            default                             => ['Transversal'],
+        };
+
+        return array_filter(
+            static::catalogoModulos(),
+            fn($m) => in_array($m['grupo'], $gruposPermitidos)
+        );
     }
 
     /** Alias en inglés para compatibilidad con llamadas existentes en AdminController. */
@@ -236,6 +263,20 @@ class PuntoInteres extends Model
         return $this->es_cliente
             && $this->moduloActivo('menu_del_dia')
             && !empty($this->dato('menu_del_dia')['texto'] ?? '');
+    }
+
+    public function tieneAvisos(): bool
+    {
+        return $this->es_cliente
+            && $this->moduloActivo('avisos')
+            && !empty($this->dato('avisos')['texto'] ?? '');
+    }
+
+    public function tienePromociones(): bool
+    {
+        return $this->es_cliente
+            && $this->moduloActivo('promociones')
+            && !empty($this->dato('promociones')['texto'] ?? '');
     }
 
     // ═══════════════════════════════════════════════════════════════════════════

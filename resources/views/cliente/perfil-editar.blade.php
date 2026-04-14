@@ -50,7 +50,7 @@
                         <x-input-label for="description" value="Descripción *" />
                         <div id="description-editor"
                              class="mt-1 bg-white border border-gray-200 rounded-xl text-sm min-h-40"></div>
-                        <textarea id="description" name="description" class="hidden">{{ old('description', $punto->description) }}</textarea>
+                        <textarea id="description" name="description" class="hidden">{!! old('description', $punto->description) !!}</textarea>
                     </div>
 
                     {{-- Horario --}}
@@ -117,7 +117,7 @@
 
                 {{-- Carta / Menú (si módulo habilitado) --}}
                 @if(in_array('carta', $modulos))
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
+                <div id="seccion-carta" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
                     <div>
                         <p class="text-xs text-gray-400 uppercase font-bold mb-1">Carta / Menú</p>
                         <p class="text-xs text-gray-400 mb-4">Se mostrará en tu ficha pública con un botón "Ver carta".</p>
@@ -129,7 +129,7 @@
                         <div id="carta-editor"
                              class="mt-1 bg-white border border-gray-200 rounded-xl text-sm min-h-55"></div>
                         {{-- Textarea oculto que se envía con el form --}}
-                        <textarea id="carta" name="carta" class="hidden">{{ old('carta', $datoCarta['texto'] ?? '') }}</textarea>
+                        <textarea id="carta" name="carta" class="hidden">{!! old('carta', $datoCarta['texto'] ?? '') !!}</textarea>
                     </div>
 
                     <div>
@@ -196,7 +196,7 @@
                         <x-input-label for="habitaciones" value="Habitaciones disponibles" />
                         <div id="habitaciones-editor"
                              class="mt-1 bg-white border border-gray-200 rounded-xl text-sm min-h-40"></div>
-                        <textarea id="habitaciones" name="habitaciones" class="hidden">{{ old('habitaciones', $datoAlojamiento['habitaciones'] ?? '') }}</textarea>
+                        <textarea id="habitaciones" name="habitaciones" class="hidden">{!! old('habitaciones', $datoAlojamiento['habitaciones'] ?? '') !!}</textarea>
                     </div>
                     @endif
 
@@ -237,7 +237,7 @@
                         <x-input-label for="politicas" value="Políticas del establecimiento" />
                         <div id="politicas-editor"
                              class="mt-1 bg-white border border-gray-200 rounded-xl text-sm min-h-40"></div>
-                        <textarea id="politicas" name="politicas" class="hidden">{{ old('politicas', $datoAlojamiento['politicas'] ?? '') }}</textarea>
+                        <textarea id="politicas" name="politicas" class="hidden">{!! old('politicas', $datoAlojamiento['politicas'] ?? '') !!}</textarea>
                     </div>
                     @endif
                 </div>
@@ -296,14 +296,13 @@ document.addEventListener('DOMContentLoaded', function () {
             modules: { toolbar: toolbarOptions }
         });
 
-        // Cargar contenido existente
+        // Cargar contenido existente desde el textarea (ya viene con valor desde Blade)
         if (textarea.value.trim()) {
             quill.clipboard.dangerouslyPasteHTML(textarea.value);
         }
 
-        // Sincronizar textarea inmediatamente y en cada cambio
+        // Sincronizar solo en cambios del usuario (no inmediatamente, el textarea ya tiene el valor correcto)
         const sync = () => { textarea.value = quill.root.innerHTML; };
-        sync();
         quill.on('text-change', sync);
 
         allEditors.push({ quill, textarea });

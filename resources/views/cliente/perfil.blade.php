@@ -172,6 +172,60 @@
             </div>
             @endif
 
+            {{-- Avisos --}}
+            @if(in_array('avisos', $modulos))
+            @php $textoAviso = $punto->dato('avisos')['texto'] ?? ''; @endphp
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h4 class="font-bold text-gray-700 mb-1">📢 Avisos</h4>
+                <p class="text-xs text-gray-400 mb-4">
+                    Comunicados importantes para tus visitantes. Deja vacío para ocultarlo.
+                </p>
+                <form method="POST" action="{{ route('cliente.aviso.actualizar', $punto) }}">
+                    @csrf @method('PATCH')
+                    <div id="aviso-editor" class="bg-white border border-gray-200 rounded-xl text-sm min-h-28"></div>
+                    <textarea id="aviso" name="aviso" class="hidden">{{ old('aviso', $textoAviso) }}</textarea>
+                    <div class="flex justify-between items-center mt-3">
+                        @if($textoAviso)
+                            <span class="text-xs text-gray-400">Activo — visible en tu ficha</span>
+                        @else
+                            <span class="text-xs text-gray-300 italic">Sin aviso publicado</span>
+                        @endif
+                        <button type="submit"
+                                class="px-5 py-2 bg-gray-700 text-white text-sm font-bold rounded-lg hover:opacity-90 transition">
+                            Publicar
+                        </button>
+                    </div>
+                </form>
+            </div>
+            @endif
+
+            {{-- Promociones --}}
+            @if(in_array('promociones', $modulos))
+            @php $textoPromocion = $punto->dato('promociones')['texto'] ?? ''; @endphp
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h4 class="font-bold text-gray-700 mb-1">🎁 Promociones</h4>
+                <p class="text-xs text-gray-400 mb-4">
+                    Descuentos y promociones especiales. Deja vacío para ocultarlo.
+                </p>
+                <form method="POST" action="{{ route('cliente.promocion.actualizar', $punto) }}">
+                    @csrf @method('PATCH')
+                    <div id="promocion-editor" class="bg-white border border-gray-200 rounded-xl text-sm min-h-28"></div>
+                    <textarea id="promocion" name="promocion" class="hidden">{{ old('promocion', $textoPromocion) }}</textarea>
+                    <div class="flex justify-between items-center mt-3">
+                        @if($textoPromocion)
+                            <span class="text-xs text-gray-400">Activa — visible en tu ficha</span>
+                        @else
+                            <span class="text-xs text-gray-300 italic">Sin promoción publicada</span>
+                        @endif
+                        <button type="submit"
+                                class="px-5 py-2 bg-purple-600 text-white text-sm font-bold rounded-lg hover:opacity-90 transition">
+                            Publicar
+                        </button>
+                    </div>
+                </form>
+            </div>
+            @endif
+
             {{-- Descripción del negocio --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <div class="flex items-center justify-between mb-3">
@@ -197,9 +251,24 @@
             {{-- Accesos rápidos --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-                {{-- Museo --}}
-                @if($punto->esMuseo() && (in_array('entradas', $modulos) || in_array('exposiciones', $modulos)))
-                <a href="{{ route('cliente.museo') }}"
+                {{-- Carta --}}
+                @if(in_array('carta', $modulos))
+                @php $tieneCarta = $punto->tieneCarta(); @endphp
+                <a href="{{ route('cliente.perfil.editar', $punto) }}#seccion-carta"
+                   class="bg-white rounded-2xl border border-orange-200 p-5 flex items-center gap-4 hover:border-orange-400 hover:shadow-sm transition group">
+                    <div class="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-2xl group-hover:bg-orange-100 transition">🍽️</div>
+                    <div>
+                        <p class="font-bold text-gray-800 text-sm">Carta / Menú</p>
+                        <p class="text-xs mt-0.5 {{ $tieneCarta ? 'text-green-600 font-medium' : 'text-gray-400' }}">
+                            {{ $tieneCarta ? 'Activa — visible en tu ficha' : 'Sin carta publicada' }}
+                        </p>
+                    </div>
+                </a>
+                @endif
+
+                {{-- Entradas y exposiciones --}}
+                @if(in_array('entradas', $modulos) || in_array('exposiciones', $modulos))
+                <a href="{{ route('cliente.museo', $punto) }}"
                    class="bg-white rounded-2xl border border-amber-200 p-5 flex items-center gap-4 hover:border-amber-400 hover:shadow-sm transition group">
                     <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-2xl group-hover:bg-amber-100 transition">🎟️</div>
                     <div>
@@ -209,8 +278,8 @@
                 </a>
                 @endif
 
-                {{-- Cultura --}}
-                @if($punto->esCultura() && in_array('agenda', $modulos))
+                {{-- Agenda de eventos --}}
+                @if(in_array('agenda', $modulos))
                 <a href="{{ route('cliente.eventos', $punto) }}"
                    class="bg-white rounded-2xl border border-blue-200 p-5 flex items-center gap-4 hover:border-blue-400 hover:shadow-sm transition group">
                     <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-2xl group-hover:bg-blue-100 transition">📅</div>
@@ -284,7 +353,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const sync = () => { textarea.value = quill.root.innerHTML; };
-        sync();
         quill.on('text-change', sync);
 
         formEl.addEventListener('submit', sync);
@@ -298,6 +366,16 @@ document.addEventListener('DOMContentLoaded', function () {
     @if(in_array('menu_del_dia', $modulos))
     initEditor('#menu-editor', '#menu_del_dia',
         document.querySelector('form[action="{{ route('cliente.menu.actualizar', $punto) }}"]'));
+    @endif
+
+    @if(in_array('avisos', $modulos))
+    initEditor('#aviso-editor', '#aviso',
+        document.querySelector('form[action="{{ route('cliente.aviso.actualizar', $punto) }}"]'));
+    @endif
+
+    @if(in_array('promociones', $modulos))
+    initEditor('#promocion-editor', '#promocion',
+        document.querySelector('form[action="{{ route('cliente.promocion.actualizar', $punto) }}"]'));
     @endif
 });
 </script>

@@ -172,6 +172,40 @@ class ClienteController extends Controller
             ->with('success', 'Menú del día actualizado.');
     }
 
+    public function actualizarAviso(Request $request, PuntoInteres $punto)
+    {
+        $this->autorizarPunto($punto);
+        $request->validate(['aviso' => 'nullable|string|max:2000']);
+
+        $punto->moduloDatos()->updateOrCreate(
+            ['modulo' => 'avisos'],
+            [
+                'datos'          => ['texto' => $request->aviso ?? ''],
+                'actualizado_en' => $request->filled('aviso') ? now() : null,
+            ]
+        );
+
+        return redirect()->route('cliente.perfil.ver', $punto)
+            ->with('success', 'Aviso actualizado.');
+    }
+
+    public function actualizarPromocion(Request $request, PuntoInteres $punto)
+    {
+        $this->autorizarPunto($punto);
+        $request->validate(['promocion' => 'nullable|string|max:2000']);
+
+        $punto->moduloDatos()->updateOrCreate(
+            ['modulo' => 'promociones'],
+            [
+                'datos'          => ['texto' => $request->promocion ?? ''],
+                'actualizado_en' => $request->filled('promocion') ? now() : null,
+            ]
+        );
+
+        return redirect()->route('cliente.perfil.ver', $punto)
+            ->with('success', 'Promoción actualizada.');
+    }
+
     public function actualizarOferta(Request $request, PuntoInteres $punto)
     {
         $this->autorizarPunto($punto);

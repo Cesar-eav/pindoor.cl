@@ -245,13 +245,13 @@ class AdminController extends Controller
 
     public function editarModulos(PuntoInteres $punto)
     {
-        $catalogo = PuntoInteres::catalogoModulos();
+        $catalogo = PuntoInteres::modulosDisponibles($punto->categoria_id);
         return view('admin.clientes-modulos', compact('punto', 'catalogo'));
     }
 
     public function actualizarModulos(Request $request, PuntoInteres $punto)
     {
-        $validos = array_keys(PuntoInteres::catalogoModulos());
+        $validos = array_keys(PuntoInteres::modulosDisponibles($punto->categoria_id));
 
         $modulos = collect($request->input('modulos', []))
             ->filter(fn($m) => in_array($m, $validos))

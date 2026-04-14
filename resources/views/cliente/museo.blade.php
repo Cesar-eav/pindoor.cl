@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center gap-3">
-            <a href="{{ route('cliente.perfil') }}" class="text-gray-400 hover:text-gray-700 text-sm">&larr; Mi negocio</a>
+            <a href="{{ route('cliente.perfil.ver', $punto) }}" class="text-gray-400 hover:text-gray-700 text-sm">&larr; Mi negocio</a>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Gestión del Museo &mdash; {{ $punto->title }}
             </h2>
@@ -36,7 +36,7 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('cliente.museo.entradas.guardar') }}">
+                <form method="POST" action="{{ route('cliente.museo.entradas.guardar', $punto) }}">
                     @csrf
 
                     <div class="space-y-3 mb-4">
@@ -149,7 +149,7 @@
                         <div class="flex gap-2 shrink-0">
                             <button @click="editando = {{ json_encode($expoParaEditar) }}; modalAbierto = true"
                                     class="text-xs text-blue-600 font-bold hover:underline">Editar</button>
-                            <form method="POST" action="{{ route('cliente.museo.exposicion.eliminar', $expo) }}"
+                            <form method="POST" action="{{ route('cliente.museo.exposicion.eliminar', [$punto, $expo]) }}"
                                   onsubmit="return confirm('¿Eliminar esta exposición?')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="text-xs text-red-500 font-bold hover:underline">Eliminar</button>
@@ -172,7 +172,7 @@
                             <button @click="modalAbierto = false" class="text-gray-400 hover:text-gray-700 text-xl">✕</button>
                         </div>
 
-                        <form method="POST" action="{{ route('cliente.museo.exposicion.guardar') }}" enctype="multipart/form-data">
+                        <form method="POST" action="{{ route('cliente.museo.exposicion.guardar', $punto) }}" enctype="multipart/form-data">
                             @csrf
                             <input type="hidden" name="item_id" :value="editando ? editando.id : ''">
 

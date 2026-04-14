@@ -12,9 +12,7 @@ class ClienteEventosController extends Controller
 {
     private function verificarPunto(PuntoInteres $punto): bool
     {
-        return !$punto->eliminado
-            && $punto->user_id === Auth::id()
-            && $punto->esCultura();
+        return !$punto->eliminado && $punto->user_id === Auth::id();
     }
 
     /** Dashboard del centro cultural: gestión de agenda de eventos. */

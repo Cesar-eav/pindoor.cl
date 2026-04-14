@@ -3,23 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\ModuloItem;
+use App\Models\PuntoInteres;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ClienteMuseoController extends Controller
 {
-    private function miPunto()
+    private function verificarPunto(PuntoInteres $punto): bool
     {
-        return Auth::user()->puntoInteres()->where('eliminado', false)->first();
+        return !$punto->eliminado && $punto->user_id === Auth::id();
     }
 
-    /** Dashboard del museo: gestión de entradas y exposiciones. */
-    public function index()
+    /** Dashboard de módulos museo/exposiciones. */
+    public function index(PuntoInteres $punto)
     {
-        $punto = $this->miPunto();
-
-        if (!$punto || !$punto->esMuseo()) {
+        if (!$this->verificarPunto($punto)) {
             return redirect()->route('cliente.perfil');
         }
 
@@ -35,11 +34,9 @@ class ClienteMuseoController extends Controller
      * Reemplaza el set completo de tarifas de entrada.
      * Borra las existentes y recrea desde el formulario.
      */
-    public function guardarEntradas(Request $request)
+    public function guardarEntradas(Request $request, PuntoInteres $punto)
     {
-        $punto = $this->miPunto();
-
-        if (!$punto || !$punto->esMuseo()) {
+        if (!$this->verificarPunto($punto)) {
             return redirect()->route('cliente.perfil');
         }
 
@@ -68,16 +65,14 @@ class ClienteMuseoController extends Controller
             ]);
         }
 
-        return redirect()->route('cliente.museo')
+        return redirect()->route('cliente.museo', $punto)
             ->with('success', 'Tarifas de entrada actualizadas.');
     }
 
     /** Crea o actualiza una exposición. */
-    public function guardarExposicion(Request $request)
+    public function guardarExposicion(Request $request, PuntoInteres $punto)
     {
-        $punto = $this->miPunto();
-
-        if (!$punto || !$punto->esMuseo()) {
+        if (!$this->verificarPunto($punto)) {
             return redirect()->route('cliente.perfil');
         }
 
@@ -137,16 +132,14 @@ class ClienteMuseoController extends Controller
             ]);
         }
 
-        return redirect()->route('cliente.museo')
+        return redirect()->route('cliente.museo', $punto)
             ->with('success', 'Exposición guardada.');
     }
 
     /** Elimina una exposición. */
-    public function eliminarExposicion(ModuloItem $exposicion)
+    public function eliminarExposicion(PuntoInteres $punto, ModuloItem $exposicion)
     {
-        $punto = $this->miPunto();
-
-        if (!$punto || $exposicion->punto_interes_id !== $punto->id || $exposicion->modulo !== 'exposiciones') {
+        if (!$this->verificarPunto($punto) || $exposicion->punto_interes_id !== $punto->id || $exposicion->modulo !== 'exposiciones') {
             abort(403);
         }
 
@@ -156,7 +149,7 @@ class ClienteMuseoController extends Controller
 
         $exposicion->delete();
 
-        return redirect()->route('cliente.museo')
+        return redirect()->route('cliente.museo', $punto)
             ->with('success', 'Exposición eliminada.');
     }
 }
