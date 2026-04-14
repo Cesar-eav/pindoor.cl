@@ -14,13 +14,12 @@ class PuntoInteresController extends Controller
   public function index(Request $request)
 {
     try {
-        $query = PuntoInteres::query();
+        $query = PuntoInteres::query()
+            ->where('activo', 1)
+            ->where('eliminado', false);
 
-        // --- Filtros existentes ---
         if ($request->filled('category')) {
-            $query->whereHas('categoria', function ($q) use ($request) {
-                $q->where('slug', $request->category);
-            });
+            $query->whereHas('categoria', fn($q) => $q->where('slug', $request->category));
         }
 
         if ($request->filled('search')) {
@@ -33,33 +32,25 @@ class PuntoInteresController extends Controller
             });
         }
 
-        // --- NUEVO: Filtro por GPS ---
-        if ($request->filled(['lat', 'lng', 'rango'])) {
-            $lat = $request->lat;
-            $lng = $request->lng;
-            $rango = $request->rango;
-
-            // 1. Calculamos la distancia y la filtramos
-            $query->whereRaw(
-                "ST_Distance_Sphere(POINT(lng, lat), POINT(?, ?)) <= ?", 
-                [$lng, $lat, $rango]
-            );
-
-            // 2. Agregamos la distancia como un campo para mostrarla en la vista
-            $query->selectRaw("*, ST_Distance_Sphere(POINT(lng, lat), POINT(?, ?)) as distancia", [$lng, $lat]);
-            
-            // 3. Ordenamos por el más cercano (en lugar de Random)
-            $query->orderBy('distancia', 'asc');
+        // GPS: ordenar por cercanía, sin filtro de radio
+        $usoGps = $request->filled('lat') && $request->filled('lng');
+        if ($usoGps) {
+            $lat = (float) $request->lat;
+            $lng = (float) $request->lng;
+            $query->whereNotNull('lat')->whereNotNull('lng')
+                  ->selectRaw('*, ST_Distance_Sphere(POINT(lng, lat), POINT(?, ?)) as distancia', [$lng, $lat])
+                  ->orderBy('distancia', 'asc');
         } else {
-            $query;
+            $query->latest('id');
         }
 
         $atractivos = $query
-        ->where('activo', 1)
-        ->with(['categoria', 'imagenPrincipal'])->latest('id')->paginate(60)->withQueryString();
+            ->with(['categoria', 'imagenPrincipal'])
+            ->paginate(20)
+            ->withQueryString();
+
         $categorias = Categoria::all();
 
-        // Datos ligeros para el mapa (todos los puntos activos con coordenadas)
         $puntosMapData = PuntoInteres::where('activo', 1)
             ->where('eliminado', false)
             ->whereNotNull('lat')
@@ -67,21 +58,21 @@ class PuntoInteresController extends Controller
             ->with(['categoria', 'imagenPrincipal'])
             ->get()
             ->map(fn($p) => [
-                'id'       => $p->id,
-                'title'    => $p->title,
-                'slug'     => $p->slug,
-                'lat'      => (float) $p->lat,
-                'lng'      => (float) $p->lng,
-                'sector'   => $p->sector,
-                'categoria'=> $p->categoria?->nombre,
-                'imagen'   => $p->imagenPrincipal ? asset('storage/' . $p->imagenPrincipal->ruta) : null,
-                'es_cliente' => (bool) $p->es_cliente,
+                'id'        => $p->id,
+                'title'     => $p->title,
+                'slug'      => $p->slug,
+                'lat'       => (float) $p->lat,
+                'lng'       => (float) $p->lng,
+                'sector'    => $p->sector,
+                'categoria' => $p->categoria?->nombre,
+                'imagen'    => $p->imagenPrincipal ? asset('storage/' . $p->imagenPrincipal->ruta) : null,
+                'es_cliente'=> (bool) $p->es_cliente,
             ]);
 
         return view('puntos.index_puntos', compact('atractivos', 'categorias', 'puntosMapData'));
-        
+
     } catch (\Exception $e) {
-        Log::error('Error en index: ' . $e->getMessage());
+        \Log::error('Error en index: ' . $e->getMessage());
         return back()->with('error', 'Ocurrió un error al buscar.');
     }
 }
