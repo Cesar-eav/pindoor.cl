@@ -46,7 +46,7 @@ class PuntoInteresController extends Controller
 
         $atractivos = $query
             ->with(['categoria', 'imagenPrincipal'])
-            ->paginate(20)
+            ->paginate(40)
             ->withQueryString();
 
         $categorias = Categoria::all();
