@@ -25,9 +25,9 @@
         #drawer { transition: transform .28s cubic-bezier(.4,0,.2,1); }
     </style>
 
-    @if(app()->environment('production'))
+
     <script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","wajfuymjy1");</script>
-    @endif
+
 </head>
 
 <body class="bg-gray-100 text-gray-900 font-serif">
