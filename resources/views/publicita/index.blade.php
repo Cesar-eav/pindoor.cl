@@ -1,20 +1,10 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Publicita tu negocio — Pindoor.cl</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+@extends('layouts.pindoor')
 
-    @if(app()->environment('production'))
-    <script type="text/javascript">
-        (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","wajfuymjy1");
-    </script>
-    @endif
-</head>
-<body class="bg-gray-50 text-gray-900 font-serif">
+@section('title', 'Publicita tu negocio — Pindoor.cl')
 
-<x-navbar_labrujula />
+@section('bodyClass', 'bg-gray-50 text-gray-900 font-serif')
+
+@section('content')
 
 {{-- Hero --}}
 <section class="bg-[#fc5648] text-white py-20 px-4 text-center">
@@ -166,5 +156,4 @@
     © {{ date('Y') }} Pindoor.cl — El pionero de Valparaíso
 </footer>
 
-</body>
-</html>
+@endsection

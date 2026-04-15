@@ -4,33 +4,26 @@
     $hayFiltros = request()->anyFilled(['category', 'search', 'lat']);
 @endphp
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pindoor · La Brújula de Valparaíso</title>
+@extends('layouts.pindoor')
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+@section('title', 'Pindoor · La Brújula de Valparaíso')
+
+@section('bodyClass', 'bg-gray-100 text-gray-900 font-serif')
+
+@section('head')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <style>
         #mapa-principal { height: 70vh; border-radius: 1rem; z-index: 1; }
         .leaflet-popup-content-wrapper { border-radius: .75rem; box-shadow: 0 4px 20px rgba(0,0,0,.12); }
         .leaflet-popup-content { margin: 0; padding: 0; width: 220px !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        /* Drawer lateral */
         #drawer { transition: transform .28s cubic-bezier(.4,0,.2,1); }
     </style>
+@endsection
 
-
-    <script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","wajfuymjy1");</script>
-
-</head>
-
-<body class="bg-gray-100 text-gray-900 font-serif">
+@section('content')
 
 {{-- ══════════════════════════════════════════════════════════════════
      MOBILE  (< md)
@@ -128,7 +121,7 @@
     @endif
 
     {{-- ── Listado de resultados ────────────────────────────────────────────── --}}
-    <div class="flex-1 px-3 pt-3 pb-6">
+    <div id="vista-listado-mobile" class="flex-1 px-3 pt-3 pb-6">
         @if($atractivos->count())
             <div class="grid grid-cols-1 gap-4">
             @foreach($atractivos as $atractivo)
@@ -211,6 +204,11 @@
                    class="text-sm font-bold text-[#fc5648] underline">Ver todos</a>
             </div>
         @endif
+    </div>
+
+    {{-- ── Mapa mobile ─────────────────────────────────────────────────────── --}}
+    <div id="vista-mapa-mobile" class="hidden flex-1">
+        <div id="mapa-mobile" style="height:70vh;"></div>
     </div>
 </div>{{-- /mobile --}}
 
@@ -297,8 +295,6 @@
      DESKTOP  (md+)
 ══════════════════════════════════════════════════════════════════ --}}
 <div class="hidden md:block w-full md:p-4">
-    <x-navbar_labrujula />
-
     <div class="max-w-7xl mx-auto px-4">
 
         <div class="flex items-center justify-between my-6">
@@ -320,7 +316,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                     </svg>
-                    Mapa
+                    Mapa 
                 </button>
             </div>
         </div>
@@ -482,12 +478,9 @@
 </div>{{-- /desktop --}}
 
 
-{{-- ══════════════════════════════════════════════════════════════════
-     MAPA (compartido mobile/desktop — se inserta fuera del flujo)
-══════════════════════════════════════════════════════════════════ --}}
-{{-- El div#mapa-principal ya está dentro del bloque desktop --}}
+@endsection
 
-
+@section('scripts')
 <script>
 const PUNTOS_DATA = @json($puntosMapData);
 
@@ -515,33 +508,52 @@ let mapaIniciado = false;
 let mapaLeaflet  = null;
 
 function setView(vista) {
-    const elListado = document.getElementById('vista-listado');
-    const elMapa    = document.getElementById('vista-mapa');
-    const btnL      = document.getElementById('btn-listado');
-    const btnM      = document.getElementById('btn-mapa');
+    const mobile = window.innerWidth < 768;
+
+    const elListado  = document.getElementById('vista-listado');
+    const elMapa     = document.getElementById('vista-mapa');
+    const elListadoM = document.getElementById('vista-listado-mobile');
+    const elMapaM    = document.getElementById('vista-mapa-mobile');
+    const btnL       = document.getElementById('btn-listado');
+    const btnM       = document.getElementById('btn-mapa');
 
     if (vista === 'mapa') {
-        elListado?.classList.add('hidden');
-        elMapa?.classList.remove('hidden');
-        btnM?.classList.add('bg-white','shadow','text-[#fc5648]');
-        btnM?.classList.remove('text-gray-500','hover:text-gray-700');
-        btnL?.classList.remove('bg-white','shadow','text-[#fc5648]');
-        btnL?.classList.add('text-gray-500','hover:text-gray-700');
-        if (!mapaIniciado) iniciarMapa();
+        if (mobile) {
+            elListadoM?.classList.add('hidden');
+            elMapaM?.classList.remove('hidden');
+        } else {
+            elListado?.classList.add('hidden');
+            elMapa?.classList.remove('hidden');
+            btnM?.classList.add('bg-white','shadow','text-[#fc5648]');
+            btnM?.classList.remove('text-gray-500','hover:text-gray-700');
+            btnL?.classList.remove('bg-white','shadow','text-[#fc5648]');
+            btnL?.classList.add('text-gray-500','hover:text-gray-700');
+        }
+        const containerId = mobile ? 'mapa-mobile' : 'mapa-principal';
+        if (!mapaIniciado) {
+            mapaIniciado = true;
+            void document.getElementById(containerId)?.offsetHeight;
+            iniciarMapa(containerId);
+        }
     } else {
-        elMapa?.classList.add('hidden');
-        elListado?.classList.remove('hidden');
-        btnL?.classList.add('bg-white','shadow','text-[#fc5648]');
-        btnL?.classList.remove('text-gray-500');
-        btnM?.classList.remove('bg-white','shadow','text-[#fc5648]');
-        btnM?.classList.add('text-gray-500','hover:text-gray-700');
+        if (mobile) {
+            elMapaM?.classList.add('hidden');
+            elListadoM?.classList.remove('hidden');
+        } else {
+            elMapa?.classList.add('hidden');
+            elListado?.classList.remove('hidden');
+            btnL?.classList.add('bg-white','shadow','text-[#fc5648]');
+            btnL?.classList.remove('text-gray-500');
+            btnM?.classList.remove('bg-white','shadow','text-[#fc5648]');
+            btnM?.classList.add('text-gray-500','hover:text-gray-700');
+        }
     }
 }
 
 // ── Leaflet ─────────────────────────────────────────────────────────────
-function iniciarMapa() {
-    mapaIniciado = true;
-    mapaLeaflet = L.map('mapa-principal', { center: [-33.047, -71.612], zoom: 14 });
+function iniciarMapa(containerId) {
+    mapaLeaflet = L.map(containerId, { center: [-33.047, -71.612], zoom: 14 });
+    mapaLeaflet.invalidateSize();
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         maxZoom: 19,
@@ -620,6 +632,4 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
-
-</body>
-</html>
+@endsection

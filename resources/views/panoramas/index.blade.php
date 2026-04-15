@@ -1,14 +1,10 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Panoramas — Pindoor.cl</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-gray-50 text-gray-900 font-serif">
+@extends('layouts.pindoor')
 
-<x-navbar_labrujula />
+@section('title', 'Panoramas — Pindoor.cl')
+
+@section('bodyClass', 'bg-gray-50 text-gray-900 font-serif')
+
+@section('content')
 
 <div class="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center py-24">
 
@@ -51,5 +47,4 @@
     </a>
 </div>
 
-</body>
-</html>
+@endsection
