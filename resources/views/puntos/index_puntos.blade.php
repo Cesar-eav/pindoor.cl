@@ -87,7 +87,23 @@
             </div>
         </form>
     </div>
-
+            <div class="inline-flex bg-gray-200 p-1 rounded-xl gap-1 justify-center">
+                <button id="btn-listado-m" onclick="setView('listado')"
+                        class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all bg-white shadow text-[#fc5648]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                    </svg>
+                    Listado
+                </button>
+                <button id="btn-mapa-m" onclick="setView('mapa')"
+                        class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all text-gray-500 hover:text-gray-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                    </svg>
+                    Mapa
+                </button>
+            </div>
     {{-- ── Filtro de categorías (pills) ───────────────────────────────────── --}}
     <div class="overflow-x-auto no-scrollbar bg-white border-b border-gray-100 px-4 py-3">
         <div class="flex gap-2 w-max">
@@ -299,7 +315,7 @@
 
         <div class="flex items-center justify-between my-6">
             <h1 class="text-3xl font-bold text-gray-900">
-                <span class="text-red-400">P</span>i<span class="text-red-400">n</span>d<span class="text-red-400">oo</span>r
+                <span class="text-red-400"></span>¿Qué quieres <span class="text-red-400">conocer</span> hoy ?</span>
                 
             </h1>
             <div class="inline-flex bg-gray-200 p-1 rounded-xl gap-1">
@@ -516,11 +532,17 @@ function setView(vista) {
     const elMapaM    = document.getElementById('vista-mapa-mobile');
     const btnL       = document.getElementById('btn-listado');
     const btnM       = document.getElementById('btn-mapa');
+    const btnLM      = document.getElementById('btn-listado-m');
+    const btnMM      = document.getElementById('btn-mapa-m');
 
     if (vista === 'mapa') {
         if (mobile) {
             elListadoM?.classList.add('hidden');
             elMapaM?.classList.remove('hidden');
+            btnMM?.classList.add('bg-white','shadow','text-[#fc5648]');
+            btnMM?.classList.remove('text-gray-500','hover:text-gray-700');
+            btnLM?.classList.remove('bg-white','shadow','text-[#fc5648]');
+            btnLM?.classList.add('text-gray-500','hover:text-gray-700');
         } else {
             elListado?.classList.add('hidden');
             elMapa?.classList.remove('hidden');
@@ -539,11 +561,15 @@ function setView(vista) {
         if (mobile) {
             elMapaM?.classList.add('hidden');
             elListadoM?.classList.remove('hidden');
+            btnLM?.classList.add('bg-white','shadow','text-[#fc5648]');
+            btnLM?.classList.remove('text-gray-500','hover:text-gray-700');
+            btnMM?.classList.remove('bg-white','shadow','text-[#fc5648]');
+            btnMM?.classList.add('text-gray-500','hover:text-gray-700');
         } else {
             elMapa?.classList.add('hidden');
             elListado?.classList.remove('hidden');
             btnL?.classList.add('bg-white','shadow','text-[#fc5648]');
-            btnL?.classList.remove('text-gray-500');
+            btnL?.classList.remove('text-gray-500','hover:text-gray-700');
             btnM?.classList.remove('bg-white','shadow','text-[#fc5648]');
             btnM?.classList.add('text-gray-500','hover:text-gray-700');
         }
@@ -552,7 +578,7 @@ function setView(vista) {
 
 // ── Leaflet ─────────────────────────────────────────────────────────────
 function iniciarMapa(containerId) {
-    mapaLeaflet = L.map(containerId, { center: [-33.047, -71.612], zoom: 14 });
+    mapaLeaflet = L.map(containerId, { center: [-33.043, -71.624277], zoom: 18 });
     mapaLeaflet.invalidateSize();
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',

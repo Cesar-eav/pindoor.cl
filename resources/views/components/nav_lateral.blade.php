@@ -8,7 +8,7 @@
                 <span class="text-[#fc5648]">Pin</span><span class="text-gray-900">door</span>
             </span>
             <span class="text-[10px] text-gray-400 font-semibold tracking-wider uppercase mt-1">
-                La Brújula de Valparaíso
+                Road House Blues
             </span>
         </a>
     </div>
