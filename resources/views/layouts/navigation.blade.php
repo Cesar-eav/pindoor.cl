@@ -16,28 +16,37 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                 </div>
-
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('revistas.index')" :active="request()->routeIs('revistas.index')">
-                        {{ __('Revistas') }}
+                    <x-nav-link :href="route('admin.stats')" :active="request()->routeIs('admin.stats')">
+                        Stats
+                    </x-nav-link>
+                </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('admin.clientes')" :active="request()->routeIs('admin.clientes')">
+                        Clientes
+                    </x-nav-link>
+                </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('admin.leads')" :active="request()->routeIs('admin.leads')">
+                        Leads
+                    </x-nav-link>
+                </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('admin.usuarios')" :active="request()->routeIs('admin.usuarios')">
+                        Usuarios
+                    </x-nav-link>
+                </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('admin.puntos.create')" :active="request()->routeIs('admin.puntos.create')">
+                        Nuevo Punto
+                    </x-nav-link>
+                </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('admin.categorias.index')" :active="request()->routeIs('admin.categorias.*')">
+                        Categorías
                     </x-nav-link>
                 </div>
 
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('articulos.index')" :active="request()->routeIs('articulos.index')">
-                        {{ __('Artículos') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('noticias.index')" :active="request()->routeIs('noticias.index')">
-                        {{ __('Noticias') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('newsletter.index')" :active="request()->routeIs('noticias.index')">
-                        {{ __('Suscriptores') }}
-                    </x-nav-link>
-                </div>
             </div>
 
             <!-- Settings Dropdown -->

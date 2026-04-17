@@ -49,7 +49,6 @@
             <!-- Menú desplegable -->
             <div id="desktop-dropdown-menu" class="hidden absolute right-0 mt-2 w-48 bg-black border border-gray-300 rounded-md shadow-lg py-2 z-50">
                 <a href="{{ url('editoriales') }}" class="block px-4 py-2 hover:bg-gray-800 hover:text-white transition-colors">Editoriales</a>
-                <a href="{{ url('revistas-lista') }}" class="block px-4 py-2 hover:bg-gray-800 hover:text-white transition-colors">Revistas</a>
                 <a href="{{ url('nosotros') }}" class="block px-4 py-2 hover:bg-gray-800 hover:text-white transition-colors">Nosotros</a>
                         <a href="{{ route('aportes') }}" class="hover:text-white text-green-600 transition-colors block px-4 py-2 border-t border-gray-700 pt-3 mt-2">
             
@@ -108,7 +107,6 @@
         <a href="{{ url('noticias') }}" class="hover:text-white transition-colors block py-1">Notas</a>
         <a href="{{ url('entrevistas') }}" class="hover:text-white transition-colors block py-1">Entrevistas</a>
         <a href="{{ url('cable-a-tierra') }}" class="hover:text-white transition-colors block py-1">Cable a Tierra</a>
-        <a href="{{ url('revistas-lista') }}" class="hover:text-white transition-colors block py-1">Revistas</a>
         <a href="{{ route('juegos.index') }}" class="hover:text-white transition-colors block py-1">Juegos</a>
         <a href="{{ url('nosotros') }}" class="hover:text-white transition-colors block py-1">Nosotros</a>
         <a href="{{ route('aportes') }}" class="hover:text-white transition-colors block py-1 border-t border-gray-700 pt-3 mt-2">
