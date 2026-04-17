@@ -23,6 +23,7 @@
     </style>
 @endsection
 
+
 @section('content')
 
 {{-- ══════════════════════════════════════════════════════════════════
@@ -30,63 +31,7 @@
 ══════════════════════════════════════════════════════════════════ --}}
 <div class="md:hidden flex flex-col min-h-screen">
 
-    {{-- ── App Bar sticky ──────────────────────────────────────────────────── --}}
-    <header class="sticky top-0 z-40 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between shadow-sm">
-        <a href="{{ route('atractivos.index') }}" class="text-lg font-bold tracking-tight">
-            <span class="text-[#fc5648]">Pin</span>door
-        </a>
 
-        <div class="flex items-center gap-3">
-            {{-- Buscar --}}
-            <button onclick="toggleSearch()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50 text-gray-600">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-            </button>
-
-            {{-- Indicador de filtro activo --}}
-            @if($hayFiltros)
-            <a href="{{ route('atractivos.index') }}"
-               class="w-9 h-9 flex items-center justify-center rounded-xl bg-[#fc5648] text-white text-sm font-bold">
-                ✕
-            </a>
-            @endif
-
-            {{-- Hamburguesa --}}
-            <button onclick="openDrawer()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50 text-gray-600">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-        </div>
-    </header>
-
-    {{-- ── Barra de búsqueda (slide) ───────────────────────────────────────── --}}
-    <div id="search-bar" class="hidden bg-white border-b border-gray-100 px-4 py-3 shadow-sm">
-        <form action="{{ route('atractivos.index') }}" method="GET">
-            @if(request('category'))
-                <input type="hidden" name="category" value="{{ request('category') }}">
-            @endif
-            <div class="flex gap-2">
-                <div class="flex-1 relative">
-                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <input type="text" name="search" value="{{ request('search') }}" autofocus
-                           placeholder="Café, mirador, ascensor…"
-                           class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-[#fc5648] outline-none bg-gray-50">
-                </div>
-                <button type="submit"
-                        class="bg-[#fc5648] text-white px-4 py-2.5 rounded-xl text-sm font-bold">
-                    Buscar
-                </button>
-            </div>
-        </form>
-    </div>
             <div class="inline-flex bg-gray-200 p-1 rounded-xl gap-1 justify-center">
                 <button id="btn-listado-m" onclick="setView('listado')"
                         class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all bg-white shadow text-[#fc5648]">
@@ -229,82 +174,6 @@
 </div>{{-- /mobile --}}
 
 
-{{-- ── Drawer hamburguesa (mobile) ────────────────────────────────────── --}}
-<div id="drawer-overlay"
-     onclick="closeDrawer()"
-     class="hidden fixed inset-0 bg-black/40 z-50 md:hidden">
-</div>
-
-<div id="drawer"
-     class="fixed top-0 right-0 bottom-0 w-72 bg-white z-50 shadow-2xl translate-x-full md:hidden flex flex-col">
-    {{-- Header drawer --}}
-    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-        <span class="font-bold text-gray-800">Explorar</span>
-        <button onclick="closeDrawer()" class="text-gray-400 text-xl leading-none">✕</button>
-    </div>
-
-    <div class="flex-1 overflow-y-auto p-5 space-y-6">
-        {{-- GPS --}}
-        <div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Cerca de mí</p>
-            <form id="filterForm-mobile" action="{{ route('atractivos.index') }}" method="GET">
-                @if(request('category'))
-                    <input type="hidden" name="category" value="{{ request('category') }}">
-                @endif
-                <input type="hidden" id="lat-m" name="lat" value="{{ request('lat') }}">
-                <input type="hidden" id="lng-m" name="lng" value="{{ request('lng') }}">
-
-                <button type="button" id="btn-gps-m"
-                        class="w-full flex items-center justify-center gap-2 bg-gray-900 text-white py-3 rounded-xl font-bold text-sm">
-                    📍 Buscar cerca de mí
-                </button>
-
-                @if(request('lat'))
-                <p class="text-xs text-green-600 text-center mt-2 font-semibold">✓ Mostrando por cercanía</p>
-                @endif
-            </form>
-        </div>
-
-        {{-- Mapa --}}
-        <div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Vista</p>
-            <div class="grid grid-cols-2 gap-2">
-                <button onclick="setView('listado'); closeDrawer();"
-                        class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 border-[#fc5648] bg-[#fff0ef]">
-                    <svg class="w-5 h-5 text-[#fc5648]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-                    </svg>
-                    <span class="text-xs font-bold text-[#fc5648]">Listado</span>
-                </button>
-                <button onclick="setView('mapa'); closeDrawer();"
-                        class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 border-gray-200 bg-gray-50">
-                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-                    </svg>
-                    <span class="text-xs font-bold text-gray-500">Mapa</span>
-                </button>
-            </div>
-        </div>
-
-        {{-- Enlaces --}}
-        <div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Explorar</p>
-            <div class="space-y-1">
-                <a href="{{ route('atractivos.panoramas') }}"
-                   class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition text-gray-700">
-                    <span class="text-xl">🖼️</span>
-                    <span class="text-sm font-semibold">Panoramas</span>
-                </a>
-                <a href="{{ route('publicita.index') }}"
-                   class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition text-gray-700">
-                    <span class="text-xl">📣</span>
-                    <span class="text-sm font-semibold">Publicita tu negocio</span>
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
 
 
 {{-- ══════════════════════════════════════════════════════════════════
@@ -500,24 +369,8 @@
 <script>
 const PUNTOS_DATA = @json($puntosMapData);
 
-// ── Drawer hamburguesa ──────────────────────────────────────────────────
-function openDrawer() {
-    document.getElementById('drawer-overlay').classList.remove('hidden');
-    document.getElementById('drawer').classList.remove('translate-x-full');
-}
-function closeDrawer() {
-    document.getElementById('drawer-overlay').classList.add('hidden');
-    document.getElementById('drawer').classList.add('translate-x-full');
-}
-
 // ── Toggle search bar ───────────────────────────────────────────────────
-function toggleSearch() {
-    const bar = document.getElementById('search-bar');
-    bar.classList.toggle('hidden');
-    if (!bar.classList.contains('hidden')) {
-        bar.querySelector('input[type=text]').focus();
-    }
-}
+
 
 // ── Toggle Listado / Mapa (desktop) ────────────────────────────────────
 let mapaIniciado = false;

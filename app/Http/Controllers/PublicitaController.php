@@ -3,13 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\LeadPublicita;
+use App\Models\PuntoInteres;
 use Illuminate\Http\Request;
 
 class PublicitaController extends Controller
 {
     public function index()
     {
-        return view('publicita.index');
+
+        $atractivos = PuntoInteres::query()
+        ->where('activo', 1)
+        ->whereIn('id', [64,80,81])
+        ->where('eliminado', false)
+        ->get();
+
+        return view('publicita.index', compact('atractivos'));
     }
 
     public function store(Request $request)
