@@ -100,8 +100,10 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">
                                 Reseña o descripción <span class="text-red-500">*</span>
                             </label>
-                            <textarea name="description" rows="4" required
-                                class="block mt-1 w-full bg-white border border-slate-200 text-gray-900 rounded-lg focus:border-pindoor-accent focus:ring-pindoor-accent transition"></textarea>
+                            <textarea id="description-input" name="description" class="hidden"></textarea>
+                            <div id="description-editor"
+                                 class="bg-white border border-slate-200 rounded-lg"
+                                 style="min-height: 180px;"></div>
                         </div>
 
                         {{-- Mapa + Galería (Vue) --}}
@@ -233,6 +235,46 @@
     </div>
 </x-app-layout>
 
+<link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+
 <style>
     [x-cloak] { display: none !important; }
+    #description-editor .ql-container { font-size: 14px; border-radius: 0 0 0.5rem 0.5rem; border-color: #e2e8f0; }
+    #description-editor .ql-toolbar { border-radius: 0.5rem 0.5rem 0 0; border-color: #e2e8f0; }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const quill = new Quill('#description-editor', {
+        theme: 'snow',
+        placeholder: 'Escribe una descripción del lugar…',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['clean']
+            ]
+        }
+    });
+
+    // Si hay contenido previo (errores de validación), cargarlo
+    const hidden = document.getElementById('description-input');
+    if (hidden.value) quill.root.innerHTML = hidden.value;
+
+    // Antes de enviar el form, pasar el HTML al textarea oculto
+    document.getElementById('main-form').addEventListener('trigger-pindoor-submit', () => {
+        hidden.value = quill.root.innerHTML;
+    });
+
+    // También capturar el submit normal por si acaso
+    document.getElementById('main-form').addEventListener('submit', () => {
+        hidden.value = quill.root.innerHTML;
+    });
+
+    // El botón usa CustomEvent, interceptarlo antes de que Vue lo procese
+    window.addEventListener('trigger-pindoor-submit', () => {
+        hidden.value = quill.root.innerHTML;
+    }, true);
+});
+</script>

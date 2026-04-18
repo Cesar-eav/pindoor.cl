@@ -118,8 +118,8 @@
                     </div>
 
                     <!-- Descripción -->
-                    <div class="prose prose-lg max-w-none mb-8">
-                        {{$atractivo->description}}
+                    <div class="ql-content prose prose-lg max-w-none mb-8">
+                        {!! $atractivo->description !!}
                     </div>
 
 
@@ -278,4 +278,11 @@ function moveSlider(direction) {
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
+    .ql-content p { margin-bottom: 0.75rem; }
+    .ql-content strong { font-weight: 700; }
+    .ql-content em { font-style: italic; }
+    .ql-content u { text-decoration: underline; }
+    .ql-content ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+    .ql-content ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+    .ql-content li { margin-bottom: 0.25rem; }
 </style>

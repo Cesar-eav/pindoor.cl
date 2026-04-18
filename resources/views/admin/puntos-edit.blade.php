@@ -35,7 +35,7 @@
                                 <option value="">Selecciona una categoría</option>
                                 @foreach($categorias as $cat)
                                     <option value="{{ $cat->id }}" @selected($punto->categoria_id == $cat->id)>
-                                        {{ $cat->icono }} {{ $cat->nombre }}
+                                        {{ $cat->nombre }}
                                     </option>
                                 @endforeach
                             </select>
@@ -96,8 +96,10 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">
                             Reseña o descripción <span class="text-red-500">*</span>
                         </label>
-                        <textarea name="description" rows="4" required
-                            class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-pindoor-accent focus:border-pindoor-accent">{{ $punto->description }}</textarea>
+                        <textarea id="description-input" name="description" class="hidden">{{ $punto->description }}</textarea>
+                        <div id="description-editor"
+                             class="bg-white border border-gray-300 rounded-lg"
+                             style="min-height: 180px;"></div>
                     </div>
 
                     {{-- Mapa + Galería (Vue) --}}
@@ -149,6 +151,34 @@
     </div>
 </x-app-layout>
 
+<link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+
 <style>
     [x-cloak] { display: none !important; }
+    #description-editor .ql-container { font-size: 14px; border-radius: 0 0 0.5rem 0.5rem; border-color: #d1d5db; }
+    #description-editor .ql-toolbar { border-radius: 0.5rem 0.5rem 0 0; border-color: #d1d5db; }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const quill = new Quill('#description-editor', {
+        theme: 'snow',
+        placeholder: 'Escribe una descripción del lugar…',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['clean']
+            ]
+        }
+    });
+
+    const hidden = document.getElementById('description-input');
+    if (hidden.value) quill.root.innerHTML = hidden.value;
+
+    window.addEventListener('trigger-pindoor-submit', () => {
+        hidden.value = quill.root.innerHTML;
+    }, true);
+});
+</script>
