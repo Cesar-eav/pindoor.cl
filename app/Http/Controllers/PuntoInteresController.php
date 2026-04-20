@@ -42,7 +42,7 @@ class PuntoInteresController extends Controller
                   ->selectRaw('*, ST_Distance_Sphere(POINT(lng, lat), POINT(?, ?)) as distancia', [$lng, $lat])
                   ->orderBy('distancia', 'asc');
         } else {
-            $query->latest('id');
+            $query->latest('updated_at');
         }
 
         $atractivos = $query
