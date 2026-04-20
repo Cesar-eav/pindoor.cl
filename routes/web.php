@@ -7,10 +7,12 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ClienteMuseoController;
 use App\Http\Controllers\ClienteEventosController;
 use App\Http\Controllers\PublicitaController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Admin\CategoriaController;
 use Illuminate\Support\Facades\Route;
 
 /* --- RUTAS PÚBLICAS (TURISTAS) --- */
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/', [PuntoInteresController::class, 'index'])->name('puntos.index');
 
 // El turista busca y ve, pero no edita

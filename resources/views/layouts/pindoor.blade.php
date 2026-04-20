@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@yield('title', 'Pindoor · La Brújula de Valparaíso')</title>
+    @hasSection('canonical')
+        <link rel="canonical" href="@yield('canonical')" />
+    @endif
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('head')
     @if(app()->environment('production'))

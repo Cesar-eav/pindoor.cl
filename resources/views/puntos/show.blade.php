@@ -4,10 +4,68 @@
 
 @section('title', $punto->title . ' — Pindoor.cl')
 
+@section('canonical', route('atractivos.show', $punto->slug ?? $punto->id))
+
 @section('bodyClass', 'bg-[#f9fafb] text-gray-900 leading-relaxed')
 
 @section('head')
     <meta name="description" content="{{ Str::limit(strip_tags($punto->description), 160) }}">
+    @php
+        $imagenPrincipal = $punto->imagenes->firstWhere('es_principal', true) ?? $punto->imagenes->first();
+        $imagenUrl = $imagenPrincipal ? asset('storage/' . $imagenPrincipal->ruta) : null;
+        $canonicalUrl = route('atractivos.show', $punto->slug ?? $punto->id);
+    @endphp
+    <meta property="og:type" content="place" />
+    <meta property="og:url" content="{{ $canonicalUrl }}" />
+    <meta property="og:title" content="{{ $punto->title }} — Pindoor.cl" />
+    <meta property="og:description" content="{{ Str::limit(strip_tags($punto->description), 160) }}" />
+    @if($imagenUrl)
+    <meta property="og:image" content="{{ $imagenUrl }}" />
+    <meta property="og:image:alt" content="{{ $punto->title }}" />
+    @endif
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{{ $punto->title }} — Pindoor.cl" />
+    <meta name="twitter:description" content="{{ Str::limit(strip_tags($punto->description), 160) }}" />
+    @if($imagenUrl)<meta name="twitter:image" content="{{ $imagenUrl }}" />@endif
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "{{ $punto->es_cliente ? 'LocalBusiness' : 'TouristAttraction' }}",
+        "name": "{{ addslashes($punto->title) }}",
+        "description": "{{ addslashes(Str::limit(strip_tags($punto->description), 300)) }}",
+        "url": "{{ $canonicalUrl }}"
+        @if($imagenUrl),"image": "{{ $imagenUrl }}"@endif
+        @if($punto->direccion || $punto->sector)
+        ,"address": {
+            "@type": "PostalAddress",
+            "streetAddress": "{{ addslashes($punto->direccion ?? $punto->sector) }}",
+            "addressLocality": "Valparaíso",
+            "addressCountry": "CL"
+        }
+        @endif
+        @if($punto->lat && $punto->lng)
+        ,"geo": {
+            "@type": "GeoCoordinates",
+            "latitude": {{ $punto->lat }},
+            "longitude": {{ $punto->lng }}
+        }
+        @endif
+        @if($punto->horario),"openingHours": "{{ addslashes($punto->horario) }}"@endif
+        @if($punto->enlace),"sameAs": "{{ $punto->enlace }}"@endif
+        ,"breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"@type":"ListItem","position":1,"name":"Pindoor","item":"{{ route('atractivos.index') }}"}
+                @if($punto->categoria)
+                ,{"@type":"ListItem","position":2,"name":"{{ addslashes($punto->categoria->nombre) }}","item":"{{ route('atractivos.categoria', $punto->categoria->slug ?? $punto->categoria->id) }}"}
+                ,{"@type":"ListItem","position":3,"name":"{{ addslashes($punto->title) }}","item":"{{ $canonicalUrl }}"}
+                @else
+                ,{"@type":"ListItem","position":2,"name":"{{ addslashes($punto->title) }}","item":"{{ $canonicalUrl }}"}
+                @endif
+            ]
+        }
+    }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Lora:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>

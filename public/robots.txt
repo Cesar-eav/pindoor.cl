@@ -1,2 +1,7 @@
 User-agent: *
-Disallow:
+Disallow: /admin/
+Disallow: /cliente/
+Disallow: /dashboard
+Disallow: /profile
+
+Sitemap: https://pindoor.cl/sitemap.xml

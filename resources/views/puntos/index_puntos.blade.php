@@ -8,6 +8,8 @@
 
 @section('title', 'Pindoor · La Brújula de Valparaíso')
 
+@section('canonical', route('atractivos.index'))
+
 @section('bodyClass', 'bg-gray-100 text-gray-900 font-serif')
 
 @section('head')

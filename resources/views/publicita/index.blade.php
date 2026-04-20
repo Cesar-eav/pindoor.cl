@@ -2,6 +2,8 @@
 
 @section('title', 'Publicita tu negocio — Pindoor.cl')
 
+@section('canonical', route('publicita.index'))
+
 @section('bodyClass', 'bg-gray-50 text-gray-900 font-serif')
 
 @section('content')
