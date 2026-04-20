@@ -1065,7 +1065,7 @@
                        class="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
 
                         {{-- Imagen --}}
-                        <div class="relative h-36 overflow-hidden bg-gray-100">
+                        <div class="relative h-80 md:h-36 overflow-hidden bg-gray-100">
                             @if($cercano->imagenPrincipal)
                                 <img src="{{ asset('storage/' . $cercano->imagenPrincipal->ruta) }}"
                                      alt="{{ $cercano->title }}"
