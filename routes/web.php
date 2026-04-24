@@ -16,7 +16,7 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap')
 Route::get('/', [PuntoInteresController::class, 'index'])->name('puntos.index');
 
 // El turista busca y ve, pero no edita
-Route::get('/buscar', [PuntoInteresController::class, 'index'])->name('puntos.index');
+Route::get('/buscar', [PuntoInteresController::class, 'index'])->name('puntos.buscar');
 Route::get('/lugar/{slug}', [PuntoInteresController::class, 'show'])->name('puntos.show');
 
 
