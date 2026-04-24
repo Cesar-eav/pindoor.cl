@@ -337,7 +337,7 @@
                                 @endif
 
                                 <p class="text-gray-500 text-sm leading-relaxed">
-                                    {!! Str::limit($atractivo->description, 100) !!}                                
+                                    {{ Str::limit(strip_tags($atractivo->description), 250) }}
                                 </p>
                             </div>
 
