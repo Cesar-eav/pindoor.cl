@@ -13,7 +13,7 @@ class PublicitaController extends Controller
 
         $atractivos = PuntoInteres::query()
         ->where('activo', 1)
-        ->whereIn('id', [64,80,81])
+        ->whereIn('id', [64,80,81,87])
         ->where('eliminado', false)
         ->get();
 

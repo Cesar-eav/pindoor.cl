@@ -16,7 +16,7 @@ class PuntoInteresController extends Controller
     try {
         $query = PuntoInteres::query()
             ->where('activo', 1)
-            ->whereNotIn('id', [81,80,64])
+            ->whereNotIn('id', [81,80,64,87])
             ->where('eliminado', false);
 
         if ($request->filled('category')) {
@@ -47,7 +47,7 @@ class PuntoInteresController extends Controller
 
         $atractivos = $query
             ->with(['categoria', 'imagenPrincipal'])
-            ->paginate(40)
+            ->paginate(45)
             ->withQueryString();
 
         $categorias = Categoria::all();
@@ -168,6 +168,7 @@ class PuntoInteresController extends Controller
         if ($punto->lat && $punto->lng) {
             $cercanos = PuntoInteres::where('activo', true)
                 ->where('eliminado', false)
+                ->whereNotIn('id', [81,80,64,87])
                 ->where('id', '!=', $punto->id)
                 ->whereNotNull('lat')
                 ->whereNotNull('lng')
