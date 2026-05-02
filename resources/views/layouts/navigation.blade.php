@@ -16,6 +16,7 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                 </div>
+                @if(Auth::user()->type === 'admin')
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('admin.stats')" :active="request()->routeIs('admin.stats')">
                         Stats
@@ -51,6 +52,7 @@
                         Panoramas
                     </x-nav-link>
                 </div>
+                @endif
 
             </div>
 
