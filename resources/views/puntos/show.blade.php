@@ -80,7 +80,8 @@
         .richtext ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.4rem 0; }
         .richtext ol { list-style-type: decimal; padding-left: 1.5rem; margin: 0.4rem 0; }
         .richtext li { margin: 0.2rem 0; }
-        .richtext p:not(:first-child) { margin-top: 0.5rem; }
+        .richtext p { margin-bottom: 0.875rem; }
+        .richtext p:last-child { margin-bottom: 0; }
     </style>
 @endsection
 

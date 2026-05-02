@@ -233,9 +233,9 @@
                     <a href="{{ route('cliente.perfil.editar', $punto) }}"
                        class="text-xs text-pindoor-accent hover:underline">Editar</a>
                 </div>
-                <p class="text-sm text-gray-600 leading-relaxed">
-                    {{ $punto->description ?: 'Sin descripción aún.' }}
-                </p>
+                <div class="text-sm text-gray-600 leading-relaxed [&_p]:mb-3 [&_p:last-child]:mb-0">
+                    {!! $punto->description ?: 'Sin descripción aún.' !!}
+                </div>
 
                 @if($punto->tags && count($punto->tags))
                     <div class="flex flex-wrap gap-2 mt-4">
