@@ -1320,7 +1320,7 @@
         </button>
         @endif
 
-        @if($punto->eventosProximos())
+        @if($punto->eventosProximos() && $punto->moduloActivo('agenda'))
         <button
             x-data
             @click="$dispatch('set-vista', 'agenda')"
