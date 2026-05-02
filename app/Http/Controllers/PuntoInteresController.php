@@ -150,7 +150,8 @@ class PuntoInteresController extends Controller
 
     public function panoramas()
     {
-        return view('panoramas.index');
+        $panoramas = \App\Models\Panorama::activos()->get();
+        return view('labrujula.panoramas', compact('panoramas'));
     }
 
     /**
@@ -178,7 +179,7 @@ class PuntoInteresController extends Controller
                 )
                 ->with(['categoria', 'imagenPrincipal'])
                 ->orderBy('distancia_m')
-                ->limit(5)
+                ->limit(8)
                 ->get();
         }
 

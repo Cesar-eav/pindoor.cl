@@ -9,6 +9,7 @@ use App\Http\Controllers\ClienteEventosController;
 use App\Http\Controllers\PublicitaController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Admin\CategoriaController;
+use App\Http\Controllers\Admin\PanoramaController;
 use Illuminate\Support\Facades\Route;
 
 /* --- RUTAS PÚBLICAS (TURISTAS) --- */
@@ -61,6 +62,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Categorías
     Route::resource('categorias', CategoriaController::class)->except(['show']);
+
+    // Panoramas — La Brújula
+    Route::resource('panoramas', PanoramaController::class)->except(['show']);
+    Route::patch('/panoramas/{panorama}/toggle', [PanoramaController::class, 'toggle'])->name('panoramas.toggle');
 
     // Leads de Publicita
     Route::get('/leads', [AdminController::class, 'leads'])->name('leads');
