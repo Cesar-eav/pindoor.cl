@@ -67,7 +67,7 @@ class PuntoInteres extends Model
             'entradas'       => ['label' => 'Entradas y tarifas',      'emoji' => '🎟️', 'desc' => 'Precios de entrada al museo',                'grupo' => 'Museo'],
             'exposiciones'   => ['label' => 'Exposiciones',            'emoji' => '🖼️', 'desc' => 'Colecciones permanentes y temporales',       'grupo' => 'Museo'],
             // Cultura
-            'agenda'         => ['label' => 'Agenda cultural',         'emoji' => '📅', 'desc' => 'Programación de eventos y espectáculos',     'grupo' => 'Cultura'],
+            'agenda'         => ['label' => 'Agenda cultural',         'emoji' => '📅', 'desc' => 'Programación de eventos y espectáculos',     'grupo' => 'Transversal'],
         ];
     }
 
