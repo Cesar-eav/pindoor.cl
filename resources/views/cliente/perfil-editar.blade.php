@@ -275,10 +275,6 @@
 {{-- Quill rich text (todos los editores) --}}
 <link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
-<style>
-    .ql-editor p { margin-bottom: 0.875rem; }
-    .ql-editor p:last-child { margin-bottom: 0; }
-</style>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const toolbarOptions = [

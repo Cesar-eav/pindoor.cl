@@ -80,8 +80,6 @@
         .richtext ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.4rem 0; }
         .richtext ol { list-style-type: decimal; padding-left: 1.5rem; margin: 0.4rem 0; }
         .richtext li { margin: 0.2rem 0; }
-        .richtext p { margin-bottom: 0.875rem; }
-        .richtext p:last-child { margin-bottom: 0; }
     </style>
 @endsection
 
@@ -504,7 +502,7 @@
                                 @endif
                             </div>
 
-                            <div class="richtext serif-text text-lg text-gray-700 leading-relaxed space-y-4">
+                            <div class="richtext serif-text text-lg text-gray-700 leading-relaxed">
                                 {!! ($punto->description) !!}
                             </div>
 

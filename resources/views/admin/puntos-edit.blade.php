@@ -156,8 +156,6 @@
 
 <style>
     [x-cloak] { display: none !important; }
-    .ql-editor p { margin-bottom: 0.875rem; }
-    .ql-editor p:last-child { margin-bottom: 0; }
     #description-editor .ql-container { font-size: 14px; border-radius: 0 0 0.5rem 0.5rem; border-color: #d1d5db; }
     #description-editor .ql-toolbar { border-radius: 0.5rem 0.5rem 0 0; border-color: #d1d5db; }
 </style>
