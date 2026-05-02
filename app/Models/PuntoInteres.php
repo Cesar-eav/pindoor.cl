@@ -279,6 +279,13 @@ class PuntoInteres extends Model
             && !empty($this->dato('promociones')['texto'] ?? '');
     }
 
+        public function tieneAgenda(): bool
+    {
+        return $this->es_cliente
+            && $this->moduloActivo('agenda')
+            && !empty($this->dato('agenda')['texto'] ?? '');
+    }
+
     // ═══════════════════════════════════════════════════════════════════════════
     // CATÁLOGO DE SERVICIOS DE ALOJAMIENTO
     // ═══════════════════════════════════════════════════════════════════════════
