@@ -47,7 +47,7 @@ Route::middleware('auth')->group(function () {
 
 
 /* --- RUTAS ADMINISTRADOR --- */
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/stats', [AdminController::class, 'index'])->name('stats');
     
     // Gestión de Usuarios
@@ -81,7 +81,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 });
 
 /* --- RUTAS CLIENTES (NEGOCIOS) --- */
-Route::middleware(['auth', 'role:cliente'])->prefix('cliente')->name('cliente.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:cliente'])->prefix('cliente')->name('cliente.')->group(function () {
     // Dashboard: redirige a perfil
     Route::get('/mis-puntos', fn() => redirect()->route('cliente.perfil'))->name('mis-puntos');
 
