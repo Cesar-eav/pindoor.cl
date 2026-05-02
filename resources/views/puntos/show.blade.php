@@ -1319,13 +1319,11 @@
         </button>
         @endif
 
-        {{-- AGENDA --}}
-
         @if($punto->eventosProximos())
         <button
             x-data
             @click="$dispatch('set-vista', 'agenda')"
-            class="inline-flex items-center gap-2 px-5 py-3 bg-green-600 text-white rounded-full text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+            class="inline-flex items-center gap-2 px-5 py-3 bg-yellow-500 text-white rounded-full text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
             <span>📅</span> Agenda
         </button>
         @endif
@@ -1339,7 +1337,6 @@
         @endif
     </div>
 
-    @if($punto->tieneOfertaActiva() || $punto->tieneCarta() || $punto->tieneMenu())
     <script>
         document.addEventListener('alpine:init', () => {
             window.addEventListener('set-vista', (e) => {
@@ -1347,10 +1344,10 @@
                 if (main && main._x_dataStack) {
                     main._x_dataStack[0].vista = e.detail;
                 }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         });
     </script>
-    @endif
 
     @if($punto->lat && $punto->lng)
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
