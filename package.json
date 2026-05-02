@@ -22,6 +22,7 @@
     "dependencies": {
         "alpine": "^0.2.1",
         "leaflet": "^1.9.4",
+        "quill": "^2.0.3",
         "vuedraggable": "^4.1.0"
     }
 }

@@ -331,8 +331,7 @@
     </div>
 
 {{-- Quill para oferta del día y menú del día --}}
-<link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+@vite('resources/js/quill-editor.js')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const toolbar = [

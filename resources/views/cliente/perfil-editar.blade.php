@@ -273,8 +273,7 @@
     </div>
 
 {{-- Quill rich text (todos los editores) --}}
-<link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+@vite('resources/js/quill-editor.js')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const toolbarOptions = [
