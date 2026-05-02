@@ -1141,9 +1141,9 @@
                 </div>
 
                 {{-- COLUMNA DERECHA: sidebar --}}
-                <aside class="lg:col-span-4">
+                <aside class="lg:col-span-4 hidden md:block">
                     <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/50 border border-white sticky top-8">
-
+                        
                         {{-- Logo del negocio (solo si es cliente) --}}
                         @if($punto->es_cliente && $punto->imagen_perfil)
                             <div class="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
@@ -1156,6 +1156,7 @@
                                 </div>
                             </div>
                         @endif
+
 
                         <h2 class="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-6">Ubicación</h2>
 
@@ -1206,7 +1207,7 @@
                                 </a>
                             </div>
                         @endif
-
+           
                     </div>
                 </aside>
 
