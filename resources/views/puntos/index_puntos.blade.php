@@ -6,7 +6,7 @@
 
 @extends('layouts.pindoor')
 
-@section('title', 'Pindoor · La Brújula de Valparaíso')
+@section('title', 'Pindoor · ¿Qué quieres conocer hoy?')
 
 @section('canonical', route('atractivos.index'))
 

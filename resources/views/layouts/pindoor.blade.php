@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@yield('title', 'Pindoor · La Brújula de Valparaíso')</title>
+    <title>@yield('title', 'Pindoor ¿Qué quieres conocer hoy?')</title>
     @hasSection('canonical')
         <link rel="canonical" href="@yield('canonical')" />
     @endif
