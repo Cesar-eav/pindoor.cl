@@ -32,7 +32,6 @@
 
     <form method="POST" action="{{ route('register') }}">
         @csrf
-        {{-- Honeypot: campo invisible que solo los bots llenan --}}
         <div style="display:none" aria-hidden="true">
             <input type="text" name="website" tabindex="-1" autocomplete="off">
         </div>
