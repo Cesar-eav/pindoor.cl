@@ -1163,62 +1163,88 @@
         </main>
     </div>
 
-    {{-- Botones flotantes móvil --}}
-    {{-- Botones flotantes móvil: se ocultan en lg porque allí están en la columna izquierda --}}
-    <div class="lg:hidden fixed bottom-10 left-6 z-50 flex flex-col gap-2">
-        @if($punto->tieneOfertaActiva())
-        <button
-            x-data
-            @click="$dispatch('set-vista', 'oferta')"
-            class="inline-flex items-center gap-2 px-5 py-3 bg-green-600 text-white rounded-full text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-            🏷️ <span>Oferta del día</span>
-        </button>
-        @endif
+    {{-- FAB colapsable móvil --}}
+    @php
+        $hayAcciones = $punto->tieneOfertaActiva() || $punto->tieneMenu()
+                    || $punto->tieneCarta()         || $punto->tieneAvisos()
+                    || $punto->tienePromociones()   || ($punto->lat && $punto->lng);
+    @endphp
+    @if($hayAcciones)
+    <div class="lg:hidden fixed bottom-6 right-4 z-50"
+         x-data="{ abierto: false }"
+         @click.outside="abierto = false">
 
-        @if($punto->tieneMenu())
-        <button
-            x-data
-            @click="$dispatch('set-vista', 'menu')"
-            class="inline-flex items-center gap-2 px-5 py-3 bg-orange-500 text-white rounded-full text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-            🥘 <span>Menú del día</span>
-        </button>
-        @endif
+        {{-- Panel de acciones --}}
+        <div x-show="abierto"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+             x-transition:leave-end="opacity-0 scale-95 translate-y-2"
+             x-cloak
+             class="absolute bottom-16 right-0 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden min-w-48">
 
-        @if($punto->tieneCarta())
-        <button
-            x-data
-            @click="$dispatch('set-vista', 'carta')"
-            class="inline-flex items-center gap-2 px-5 py-3 bg-pindoor-accent text-white rounded-full text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-            🍽️ <span>Ver carta</span>
-        </button>
-        @endif
+            @if($punto->tieneOfertaActiva())
+            <button @click="abierto = false; $dispatch('set-vista', 'oferta')"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-green-50 transition border-b border-gray-100">
+                <span class="w-2 h-2 rounded-full bg-green-500 shrink-0"></span>
+                🏷️ Oferta del día
+            </button>
+            @endif
 
-        @if($punto->tieneAvisos())
-        <button
-            x-data
-            @click="$dispatch('set-vista', 'avisos')"
-            class="inline-flex items-center gap-2 px-5 py-3 bg-gray-700 text-white rounded-full text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-            📢 <span>Avisos</span>
-        </button>
-        @endif
+            @if($punto->tieneMenu())
+            <button @click="abierto = false; $dispatch('set-vista', 'menu')"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-orange-50 transition border-b border-gray-100">
+                <span class="w-2 h-2 rounded-full bg-orange-500 shrink-0"></span>
+                🥘 Menú del día
+            </button>
+            @endif
 
-        @if($punto->tienePromociones())
-        <button
-            x-data
-            @click="$dispatch('set-vista', 'promociones')"
-            class="inline-flex items-center gap-2 px-5 py-3 bg-purple-600 text-white rounded-full text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-            🎁 <span>Promociones</span>
-        </button>
-        @endif
+            @if($punto->tieneCarta())
+            <button @click="abierto = false; $dispatch('set-vista', 'carta')"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-red-50 transition border-b border-gray-100">
+                <span class="w-2 h-2 rounded-full bg-[#fc5648] shrink-0"></span>
+                🍽️ Ver carta
+            </button>
+            @endif
 
-        @if($punto->lat && $punto->lng)
-        <a href="https://www.google.com/maps?q={{ $punto->lat }},{{ $punto->lng }}"
-           target="_blank" rel="noopener"
-           class="inline-flex items-center gap-2 px-5 py-3 bg-white text-black rounded-full border-red-400 border-2 text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-            📍 <span>Ir al mapa</span>
-        </a>
-        @endif
+            @if($punto->tieneAvisos())
+            <button @click="abierto = false; $dispatch('set-vista', 'avisos')"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-gray-50 transition border-b border-gray-100">
+                <span class="w-2 h-2 rounded-full bg-gray-700 shrink-0"></span>
+                📢 Avisos
+            </button>
+            @endif
+
+            @if($punto->tienePromociones())
+            <button @click="abierto = false; $dispatch('set-vista', 'promociones')"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-purple-50 transition border-b border-gray-100">
+                <span class="w-2 h-2 rounded-full bg-purple-600 shrink-0"></span>
+                🎁 Promociones
+            </button>
+            @endif
+
+            @if($punto->lat && $punto->lng)
+            <a href="https://www.google.com/maps?q={{ $punto->lat }},{{ $punto->lng }}"
+               target="_blank" rel="noopener"
+               class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-gray-50 transition">
+                <span class="w-2 h-2 rounded-full bg-[#fc5648] shrink-0"></span>
+                📍 Ir al mapa
+            </a>
+            @endif
+        </div>
+
+        {{-- Botón principal --}}
+        <button @click="abierto = !abierto"
+                class="w-14 h-14 bg-[#fc5648] text-white rounded-full shadow-xl flex items-center justify-center transition-transform duration-300"
+                :class="abierto ? 'rotate-45' : ''">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+        </button>
     </div>
+    @endif
 
     @if($punto->tieneOfertaActiva() || $punto->tieneCarta() || $punto->tieneMenu())
     <script>
@@ -1228,6 +1254,7 @@
                 if (main && main._x_dataStack) {
                     main._x_dataStack[0].vista = e.detail;
                 }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         });
     </script>
