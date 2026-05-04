@@ -153,7 +153,7 @@
     <section class="p-6">
         <h2 class="text-xl font-bold mb-6">Así se verá tu ficha</h2>
         <div class="space-y-4">
-            @foreach($atractivos->take(3) as $atractivo)
+            @foreach($atractivos->take(4) as $atractivo)
             <a href="{{ route('atractivos.show', $atractivo->slug ?? $atractivo->id) }}" class="flex bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
                 <img src="{{ asset('storage/' . ($atractivo->imagenPrincipal->ruta ?? '')) }}" class="w-24 h-24 object-cover shrink-0">
                 <div class="p-3">
