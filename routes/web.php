@@ -85,11 +85,19 @@ Route::middleware(['auth', 'verified', 'role:cliente'])->prefix('cliente')->name
     // Dashboard: redirige a perfil
     Route::get('/mis-puntos', fn() => redirect()->route('cliente.perfil'))->name('mis-puntos');
 
+    // Alta propia de negocio
+    Route::get('/nuevo',  [ClienteController::class, 'onboarding'])->name('nuevo');
+    Route::post('/nuevo', [ClienteController::class, 'crearNegocio'])->name('crear');
+
     // Perfil del negocio
     Route::get('/perfil', [ClienteController::class, 'perfil'])->name('perfil');                          // lista de negocios
     Route::get('/perfil/{punto}', [ClienteController::class, 'verPerfil'])->name('perfil.ver');           // detalle de uno
     Route::get('/perfil/{punto}/editar', [ClienteController::class, 'editarPerfil'])->name('perfil.editar');
     Route::put('/perfil/{punto}/actualizar', [ClienteController::class, 'actualizarPerfil'])->name('perfil.actualizar');
+
+    // Galería de imágenes
+    Route::post('/imagenes/{punto}',             [ClienteController::class, 'subirImagen'])->name('imagenes.subir');
+    Route::delete('/imagenes/{punto}/{imagen}',  [ClienteController::class, 'eliminarImagen'])->name('imagenes.eliminar');
 
     // Actualización rápida: módulos transversales
     Route::patch('/oferta/{punto}',     [ClienteController::class, 'actualizarOferta'])->name('oferta.actualizar');

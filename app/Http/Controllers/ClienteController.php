@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categoria;
+use App\Models\ImagenPunto;
 use App\Models\ModuloDato;
 use App\Models\PuntoInteres;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ClienteController extends Controller
 {
@@ -14,6 +17,60 @@ class ClienteController extends Controller
     private function autorizarPunto(PuntoInteres $punto): void
     {
         abort_if((int) $punto->user_id !== Auth::id(), 403);
+    }
+
+    // ─── Alta propia ───────────────────────────────────────────────────────────
+
+    public function onboarding()
+    {
+        $categorias = Categoria::orderBy('nombre')->get();
+        return view('cliente.onboarding', compact('categorias'));
+    }
+
+    public function crearNegocio(Request $request)
+    {
+        $data = $request->validate([
+            'title'       => ['required', 'string', 'max:255'],
+            'categoria_id'=> ['required', 'exists:categorias,id'],
+            'lat'         => ['required', 'numeric', 'between:-90,90'],
+            'lng'         => ['required', 'numeric', 'between:-180,180'],
+            'imagen'      => ['required', 'image', 'max:5120'],
+        ]);
+
+        // Slug único
+        $slug = Str::slug($data['title']);
+        $base = $slug;
+        $i = 2;
+        while (PuntoInteres::where('slug', $slug)->exists()) {
+            $slug = "{$base}-{$i}";
+            $i++;
+        }
+
+        $punto = PuntoInteres::create([
+            'user_id'            => Auth::id(),
+            'title'              => $data['title'],
+            'slug'               => $slug,
+            'categoria_id'       => $data['categoria_id'],
+            'lat'                => $data['lat'],
+            'lng'                => $data['lng'],
+            'sector'             => '',
+            'description'        => '',
+            'es_cliente'         => true,
+            'activo'             => true,
+            'modulos_habilitados'=> PuntoInteres::modulosDefecto($data['categoria_id']),
+        ]);
+
+        $ruta = $request->file('imagen')->store('puntos', 'public');
+
+        ImagenPunto::create([
+            'punto_interes_id' => $punto->id,
+            'ruta'             => $ruta,
+            'es_principal'     => true,
+            'orden'            => 0,
+        ]);
+
+        return redirect()->route('cliente.perfil.ver', $punto)
+            ->with('success', '¡Tu perfil ya está activo en Pindoor!');
     }
 
     // ─── Dashboard ─────────────────────────────────────────────────────────────
@@ -40,7 +97,7 @@ class ClienteController extends Controller
     public function verPerfil(PuntoInteres $punto)
     {
         $this->autorizarPunto($punto);
-        $punto->load('moduloDatos', 'moduloItems', 'categoria');
+        $punto->load('moduloDatos', 'moduloItems', 'categoria', 'imagenes');
         $modulos = $punto->modulos_habilitados ?? [];
         return view('cliente.perfil', compact('punto', 'modulos'));
     }
@@ -205,6 +262,64 @@ class ClienteController extends Controller
         return redirect()->route('cliente.perfil.ver', $punto)
             ->with('success', 'Promoción actualizada.');
     }
+
+    // ─── Galería de imágenes ───────────────────────────────────────────────────
+
+    public function subirImagen(Request $request, PuntoInteres $punto)
+    {
+        $this->autorizarPunto($punto);
+
+        $actual      = $punto->imagenes()->count();
+        $disponibles = 10 - $actual;
+
+        if ($disponibles <= 0) {
+            return back()->with('error', 'Has alcanzado el límite de 10 fotos.');
+        }
+
+        $request->validate([
+            'imagenes'   => 'required|array|max:10',
+            'imagenes.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        $archivos = array_slice($request->file('imagenes'), 0, $disponibles);
+        $orden    = ($punto->imagenes()->max('orden') ?? 0) + 1;
+
+        foreach ($archivos as $archivo) {
+            ImagenPunto::create([
+                'punto_interes_id' => $punto->id,
+                'ruta'             => $archivo->store('puntos', 'public'),
+                'es_principal'     => false,
+                'orden'            => $orden++,
+            ]);
+        }
+
+        $subidas  = count($archivos);
+        $omitidas = count($request->file('imagenes')) - $subidas;
+        $msg      = $subidas === 1 ? '1 foto añadida.' : "{$subidas} fotos añadidas.";
+        if ($omitidas > 0) {
+            $msg .= " ({$omitidas} omitida(s): límite de 10 alcanzado.)";
+        }
+
+        return back()->with('success', $msg);
+    }
+
+    public function eliminarImagen(PuntoInteres $punto, ImagenPunto $imagen)
+    {
+        $this->autorizarPunto($punto);
+        abort_if($imagen->punto_interes_id !== $punto->id, 403);
+
+        Storage::disk('public')->delete($imagen->ruta);
+        $wasPrincipal = $imagen->es_principal;
+        $imagen->delete();
+
+        if ($wasPrincipal) {
+            $punto->imagenes()->orderBy('orden')->first()?->update(['es_principal' => true]);
+        }
+
+        return back()->with('success', 'Foto eliminada.');
+    }
+
+    // ─── Actualizaciones rápidas ───────────────────────────────────────────────
 
     public function actualizarOferta(Request $request, PuntoInteres $punto)
     {
