@@ -10,14 +10,14 @@
 
 @section('description', 'Explora restaurantes, cafeterías, hoteles, museos, bares y atracciones turísticas en Valdivia. Filtra por categoría, busca por nombre o activa el GPS para ver qué tienes cerca.')
 
-@section('canonical', route('atractivos.index'))
+@section('canonical', route('puntos.index'))
 
 @section('bodyClass', 'bg-gray-100 text-gray-900 font-serif')
 
 @section('head')
     {{-- Open Graph --}}
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="{{ route('atractivos.index') }}" />
+    <meta property="og:url" content="{{ route('puntos.index') }}" />
     <meta property="og:title" content="Pindoor · Guía de lugares en Valdivia" />
     <meta property="og:description" content="Explora restaurantes, hoteles, museos y atracciones turísticas en Valdivia. La guía local más completa." />
     <meta property="og:image" content="{{ asset('img/pindoor-og.jpg') }}" />
@@ -33,7 +33,7 @@
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "Pindoor",
-        "url": "{{ route('atractivos.index') }}",
+        "url": "{{ route('puntos.index') }}",
         "description": "Guía de lugares, restaurantes, hoteles y atracciones turísticas en Valdivia, Chile.",
         "potentialAction": {
           "@type": "SearchAction",
@@ -48,7 +48,7 @@
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "Pindoor",
-        "url": "{{ route('atractivos.index') }}",
+        "url": "{{ route('puntos.index') }}",
         "logo": "{{ asset('img/pindoor-logo.png') }}",
         "contactPoint": {
           "@type": "ContactPoint",
@@ -124,7 +124,7 @@
             @elseif(request('lat')) Cerca de ti
             @endif
         </span>
-        <a href="{{ route('atractivos.index') }}" class="text-xs text-gray-400 font-bold">✕ Borrar</a>
+        <a href="{{ route('puntos.index') }}" class="text-xs text-gray-400 font-bold">✕ Borrar</a>
     </div>
     @endif
 
@@ -208,7 +208,7 @@
                 <div class="text-5xl mb-3">🕵️‍♂️</div>
                 <p class="font-bold text-gray-700 mb-1">Sin resultados</p>
                 <p class="text-sm text-gray-400 mb-4">Prueba con otra búsqueda</p>
-                <a href="{{ route('atractivos.index') }}"
+                <a href="{{ route('puntos.index') }}"
                    class="text-sm font-bold text-[#fc5648] underline">Ver todos</a>
             </div>
         @endif
@@ -264,7 +264,7 @@
         <div id="vista-listado">
             {{-- Filtros desktop --}}
             <div class="bg-white rounded-2xl shadow-sm p-5 mb-8 border border-gray-100">
-                <form id="filterForm" action="{{ route('atractivos.index') }}" method="GET">
+                <form id="filterForm" action="{{ route('puntos.index') }}" method="GET">
                     <div class="grid grid-cols-3 gap-4 items-end">
                         <div>
                             <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Categoría</label>
@@ -308,7 +308,7 @@
 
                     @if($hayFiltros)
                     <div class="flex justify-end mt-3 pt-3 border-t border-gray-50">
-                        <a href="{{ route('atractivos.index') }}"
+                        <a href="{{ route('puntos.index') }}"
                            class="text-sm font-semibold text-gray-400 hover:text-[#fc5648] transition flex items-center gap-1">
                             ✕ Borrar filtros
                         </a>
@@ -398,7 +398,7 @@
                         <div class="text-5xl mb-4">🕵️‍♂️</div>
                         <h3 class="text-xl font-bold text-gray-800 mb-2">Sin resultados</h3>
                         <p class="text-gray-400 mb-5 text-sm">No encontramos lugares que coincidan.</p>
-                        <a href="{{ route('atractivos.index') }}"
+                        <a href="{{ route('puntos.index') }}"
                            class="bg-[#fc5648] text-white px-5 py-2.5 rounded-xl font-bold hover:bg-gray-900 transition text-sm">
                             Ver todos
                         </a>
