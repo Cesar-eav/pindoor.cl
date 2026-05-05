@@ -80,7 +80,6 @@
         .richtext ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.4rem 0; }
         .richtext ol { list-style-type: decimal; padding-left: 1.5rem; margin: 0.4rem 0; }
         .richtext li { margin: 0.2rem 0; }
-        .richtext p:not(:first-child) { margin-top: 0.5rem; }
     </style>
 @endsection
 
@@ -204,7 +203,7 @@
                 <button @click="vista = 'agenda'"
                     :class="vista === 'agenda' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
-                    📅 Agenda
+                    📅 Agenda Arriba
                 </button>
                 @endif
             </div>
@@ -503,7 +502,7 @@
                                 @endif
                             </div>
 
-                            <div class="richtext serif-text text-lg text-gray-700 leading-relaxed space-y-4">
+                            <div class="richtext serif-text text-lg text-gray-700 leading-relaxed">
                                 {!! ($punto->description) !!}
                             </div>
 
@@ -963,7 +962,9 @@
                     <div x-show="vista === 'agenda'" x-cloak
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-1"
-                         x-transition:enter-end="opacity-100 translate-y-0">
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-data="{ modalOpen: false, evento: {} }"
+                         @keydown.escape.window="modalOpen = false">
 
                         <div class="mb-6 flex items-center gap-3">
                             @if($punto->imagen_perfil)
@@ -979,7 +980,23 @@
 
                         <div class="space-y-4">
                             @foreach($eventosProximos as $evento)
-                            @php $tipoInfo = $evento->tipoEvento(); @endphp
+                            @php
+                                $tipoInfo   = $evento->tipoEvento();
+                                $descripcion = $evento->datos['descripcion'] ?? '';
+                                $eventoJson  = json_encode([
+                                    'titulo'      => $evento->datos['titulo']      ?? '',
+                                    'descripcion' => $descripcion,
+                                    'fecha'       => $evento->fecha->translatedFormat('d \d\e F \d\e Y'),
+                                    'hora'        => isset($evento->datos['hora']) ? \Carbon\Carbon::parse($evento->datos['hora'])->format('H:i') : null,
+                                    'precio'      => $evento->precioEvento(),
+                                    'precio_gratis' => ($evento->datos['precio'] ?? 1) == 0,
+                                    'url_entradas'=> $evento->datos['url_entradas'] ?? null,
+                                    'imagen'      => $evento->imagen ? asset('storage/' . $evento->imagen) : null,
+                                    'tipo_emoji'  => $tipoInfo['emoji'],
+                                    'tipo_label'  => $tipoInfo['label'],
+                                    'destacado'   => $evento->destacado,
+                                ]);
+                            @endphp
                             <div class="bg-white rounded-2xl border {{ $evento->destacado ? 'border-blue-200 shadow-md' : 'border-gray-100' }} overflow-hidden">
                                 <div class="flex gap-0">
                                     @if($evento->imagen)
@@ -1004,8 +1021,15 @@
                                             </div>
                                         </div>
                                         <h3 class="font-extrabold text-gray-900 mt-2 leading-tight">{{ $evento->datos['titulo'] ?? '' }}</h3>
-                                        @if($evento->datos['descripcion'] ?? null)
-                                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ $evento->datos['descripcion'] }}</p>
+                                        @if($descripcion)
+                                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ $descripcion }}</p>
+                                            @if(mb_strlen($descripcion) > 120)
+                                            <button type="button"
+                                                    @click="evento = {{ $eventoJson }}; modalOpen = true"
+                                                    class="mt-1 text-xs font-bold text-blue-600 hover:underline">
+                                                Leer más →
+                                            </button>
+                                            @endif
                                         @endif
                                         <div class="flex items-center justify-between mt-2 flex-wrap gap-1">
                                             <p class="text-xs text-gray-500">
@@ -1017,8 +1041,11 @@
                                             </span>
                                         </div>
                                         @if($evento->datos['url_entradas'] ?? null)
+
+                                        {{-- CAMBIAR CUANDO DECIDAMOS COMO COMPRAR ENTRADAS
+                                        inline-flex  --}}
                                         <a href="{{ $evento->datos['url_entradas'] }}" target="_blank" rel="noopener"
-                                           class="mt-2 inline-flex items-center gap-1 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition">
+                                           class="hidden mt-2 items-center gap-1 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition">
                                             Comprar entradas →
                                         </a>
                                         @endif
@@ -1027,15 +1054,95 @@
                             </div>
                             @endforeach
                         </div>
+
+                        {{-- Modal evento --}}
+                        <div x-show="modalOpen"
+                             x-transition.opacity
+                             class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 px-4 pb-4 sm:pb-0"
+                             @click.self="modalOpen = false"
+                             style="display:none;">
+
+                            <div x-show="modalOpen"
+                                 x-transition:enter="transition ease-out duration-300"
+                                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                 x-transition:leave="transition ease-in duration-200"
+                                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                 class="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+
+                                {{-- Imagen --}}
+                                <template x-if="evento.imagen">
+                                    <div class="w-full bg-black rounded-t-3xl flex items-center justify-center overflow-hidden"
+                                         style="max-height: 65vh;">
+                                        <img :src="evento.imagen" :alt="evento.titulo"
+                                             class="w-full object-contain"
+                                             style="max-height: 65vh;">
+                                    </div>
+                                </template>
+                                <template x-if="!evento.imagen">
+                                    <div class="w-full h-24 rounded-t-3xl bg-blue-50 flex items-center justify-center text-4xl"
+                                         x-text="evento.tipo_emoji"></div>
+                                </template>
+
+                                <div class="p-6">
+                                    {{-- Badges --}}
+                                    <div class="flex flex-wrap gap-1.5 mb-3">
+                                        <template x-if="evento.destacado">
+                                            <span class="text-[10px] font-black uppercase bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Destacado</span>
+                                        </template>
+                                        <span class="text-[10px] font-black uppercase bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
+                                              x-text="evento.tipo_emoji + ' ' + evento.tipo_label"></span>
+                                    </div>
+
+                                    {{-- Título --}}
+                                    <h3 class="text-xl font-extrabold text-gray-900 leading-tight mb-3"
+                                        x-text="evento.titulo"></h3>
+
+                                    {{-- Descripción completa --}}
+                                    <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-line mb-4"
+                                       x-text="evento.descripcion"></p>
+
+                                    {{-- Meta --}}
+                                    <div class="flex items-center justify-between flex-wrap gap-2 pt-4 border-t border-gray-100">
+                                        <div class="text-sm text-gray-500 space-y-0.5">
+                                            <p>📅 <span x-text="evento.fecha"></span></p>
+                                            <template x-if="evento.hora">
+                                                <p>🕐 <span x-text="evento.hora"></span></p>
+                                            </template>
+                                        </div>
+                                        <span class="text-lg font-extrabold"
+                                              :class="evento.precio_gratis ? 'text-green-600' : 'text-blue-700'"
+                                              x-text="evento.precio"></span>
+                                    </div>
+
+                                    {{-- Botones --}}
+                                    <div class="flex gap-3 mt-5">
+                                        <template x-if="evento.url_entradas" class="hidden">
+                                            {{-- <a :href="evento.url_entradas" target="_blank" rel="noopener"
+                                               class="flex-1 text-center text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-xl transition">
+                                                Comprar entradas →
+                                            </a> --}}
+                                        </template>
+                                        <button type="button"
+                                                @click="modalOpen = false"
+                                                class="flex-1 text-sm font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 px-4 py-2.5 rounded-xl transition">
+                                            Cerrar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                     @endif
 
                 </div>
 
                 {{-- COLUMNA DERECHA: sidebar --}}
-                <aside class="lg:col-span-4">
+                <aside class="lg:col-span-4 hidden md:block">
                     <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/50 border border-white sticky top-8">
-
+                        
                         {{-- Logo del negocio (solo si es cliente) --}}
                         @if($punto->es_cliente && $punto->imagen_perfil)
                             <div class="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
@@ -1048,6 +1155,7 @@
                                 </div>
                             </div>
                         @endif
+
 
                         <h2 class="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-6">Ubicación</h2>
 
@@ -1098,7 +1206,7 @@
                                 </a>
                             </div>
                         @endif
-
+           
                     </div>
                 </aside>
 
@@ -1167,7 +1275,8 @@
     @php
         $hayAcciones = $punto->tieneOfertaActiva() || $punto->tieneMenu()
                     || $punto->tieneCarta()         || $punto->tieneAvisos()
-                    || $punto->tienePromociones()   || ($punto->lat && $punto->lng);
+                    || $punto->tienePromociones()   || ($punto->lat && $punto->lng)
+                    || ($punto->moduloActivo('agenda') && $punto->eventosProximos()->count());
     @endphp
     @if($hayAcciones)
     <div class="lg:hidden fixed bottom-6 right-4 z-50"
@@ -1225,6 +1334,14 @@
             </button>
             @endif
 
+            @if($punto->moduloActivo('agenda') && $punto->eventosProximos()->count())
+            <button @click="abierto = false; $dispatch('set-vista', 'agenda')"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-blue-50 transition border-b border-gray-100">
+                <span class="w-2 h-2 rounded-full bg-blue-600 shrink-0"></span>
+                📅 Agenda
+            </button>
+            @endif
+
             @if($punto->lat && $punto->lng)
             <a href="https://www.google.com/maps?q={{ $punto->lat }},{{ $punto->lng }}"
                target="_blank" rel="noopener"
@@ -1246,7 +1363,6 @@
     </div>
     @endif
 
-    @if($punto->tieneOfertaActiva() || $punto->tieneCarta() || $punto->tieneMenu())
     <script>
         document.addEventListener('alpine:init', () => {
             window.addEventListener('set-vista', (e) => {
@@ -1258,7 +1374,6 @@
             });
         });
     </script>
-    @endif
 
     @if($punto->lat && $punto->lng)
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

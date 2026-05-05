@@ -67,8 +67,6 @@ class PuntoInteres extends Model
             // Museo
             'entradas'       => ['label' => 'Entradas y tarifas',      'emoji' => '🎟️', 'desc' => 'Precios de entrada al museo',                'grupo' => 'Museo'],
             'exposiciones'   => ['label' => 'Exposiciones',            'emoji' => '🖼️', 'desc' => 'Colecciones permanentes y temporales',       'grupo' => 'Museo'],
-            
-            
         ];
     }
 
@@ -278,6 +276,13 @@ class PuntoInteres extends Model
         return $this->es_cliente
             && $this->moduloActivo('promociones')
             && !empty($this->dato('promociones')['texto'] ?? '');
+    }
+
+        public function tieneAgenda(): bool
+    {
+        return $this->es_cliente
+            && $this->moduloActivo('agenda')
+            && !empty($this->dato('agenda')['texto'] ?? '');
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
