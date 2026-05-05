@@ -433,18 +433,141 @@ function setView(vista) {
 
 // ── Leaflet ─────────────────────────────────────────────────────────────
 function iniciarMapa(containerId) {
-    mapaLeaflet = L.map(containerId, { center: [-33.043, -71.624277], zoom: 18 });
-    mapaLeaflet.invalidateSize();
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    delete L.Icon.Default.prototype._getIconUrl;
+
+    mapaLeaflet = L.map(containerId, {
+        center: [-33.043, -71.624277],
+        zoom: 18,
+        minZoom: 12,
         maxZoom: 19,
+        zoomControl: false,
+        attributionControl: false,
+    });
+        mapaLeaflet.invalidateSize();
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        subdomains: 'abcd',
+    }).addTo(mapaLeaflet);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        subdomains: 'abcd',
+        pane: 'shadowPane',
     }).addTo(mapaLeaflet);
 
-    function crearIcono(esCliente) {
+const EMOJI_CAT = {
+    // 1: Miradores (Telescopio / Binoculares)
+    1: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; display: block;">
+        <path d="M10 19H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-6"/>
+        <path d="M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+        <path d="M12 19v3M9 22h6"/>
+    </svg>`, 
+
+    // 2: Cafetería (Taza de café humeante)
+    2: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#854d0e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; display: block;">
+        <path d="M17 8h1a4 4 0 1 1 0 8h-1"/>
+        <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
+        <path d="M6 2v2M10 2v2M14 2v2"/>
+    </svg>`, 
+
+    // 3: Street Art (Tarro de spray / Graffiti)
+    3: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#d946ef" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; display: block;">
+        <path d="M12 2v3m-3-3h6M9 9h6v11a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V9Z"/>
+        <path d="M9 13h6M17 5a2 2 0 0 1 2 2M18 10a1 1 0 0 1 1 1"/>
+    </svg>`, 
+
+    // 4: Monumentos (Arco de triunfo / Hito monumental)
+    4: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bolt-icon lucide-bolt"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><circle cx="12" cy="12" r="4"/></svg>`, 
+
+    // 5: Centro Cultural (Máscaras de teatro / Artes)
+    5: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; display: block;">
+        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"/>
+        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+        <path d="M9 9h.01M15 9h.01"/>
+    </svg>`,
+
+    // 6: Naturaleza (Árbol / Parque)
+    6: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; display: block;">
+        <path d="M12 22V12m0 0a5 5 0 1 0-5-5M12 12a5 5 0 1 1 5-5"/>
+        <path d="M12 12a5 5 0 0 1-5 5M12 12a5 5 0 0 0 5 5"/>
+    </svg>`, 
+
+    // 7: Museo (Edificio clásico con columnas)
+    7: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; display: block;">
+        <path d="m3 9 9-7 9 7"/>
+        <path d="M5 22V11M9 22V11M15 22V11M19 22V11"/>
+        <path d="M2 22h20"/>
+    </svg>`, 
+
+    // 8: Restaurante (Plato, tenedor y cuchillo)
+    8: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bottle-wine-icon lucide-bottle-wine"><path d="M10 3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a6 6 0 0 0 1.2 3.6l.6.8A6 6 0 0 1 17 13v8a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-8a6 6 0 0 1 1.2-3.6l.6-.8A6 6 0 0 0 10 5z"/><path d="M17 13h-4a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h4"/></svg>`, 
+
+    // 9: Arquitectura (Compás de precisión / Regla)
+    9: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; display: block;">
+        <path d="M2 22h20"/>
+        <path d="M12 2v2"/>
+        <path d="m12 4-4 14"/>
+        <path d="m12 4 4 14"/>
+        <path d="M9 14h6"/>
+    </svg>`, 
+
+    // 10: Bar / Coctelería / Vinos (Copa de vino)
+    10: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#be123c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; display: block;">
+        <path d="M8 22h8M12 15v7M12 15a5 5 0 0 0 5-5V2H7v8a5 5 0 0 0 5 5Z"/>
+        <path d="M7 8h10"/>
+    </svg>`,
+
+    // 11: Alojamiento (Cama de hotel)
+    11: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; display: block;">
+        <path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v3a2 2 0 0 0 2 2h3"/>
+    </svg>`, 
+
+    // 12: Estatua (Estatua de la Libertad / Silueta de monumento)
+    12: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; display: block;">
+        <path d="M7 21a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2"/>
+        <path d="M10 17v4h4v-4"/>
+        <path d="M8 8.5V11a4 4 0 0 0 4 4 4 4 0 0 0 4-4V8.5Z"/>
+        <path d="M18 10V5a2 2 0 0 0-2-2h-2"/>
+        <path d="M12 2l-1 2h2z" fill="currentColor"/>
+        <path d="M10 7a2 2 0 1 1 4 0"/>
+        <path d="M8.5 5.5L10 7M15.5 5.5L14 7M12 4.5V7M8.1 7L10 7M15.9 7L14 7" stroke-width="1"/>
+    </svg>`, 
+
+    // 13: Patrimonio Inmaterial (Manos protegiendo una estrella / Cultura viva)
+    13: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; display: block;">
+        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"/>
+        <path d="m12 14-3 3.5 1-4.5-4-1.5 4.5-.5L12 7l1.5 4 4.5.5-4 1.5 1 4.5Z"/>
+    </svg>`, 
+};
+
+    function crearIcono(p) {
+        const emoji  = EMOJI_CAT[p.categoria_id] || (p.es_cliente ? '🏪' : '📍');
+        const border = p.es_cliente ? '#fc5648' : '#9ca3af';
         return L.divIcon({
             className: '',
-            html: `<div style="width:14px;height:14px;background:${esCliente?'#f59e0b':'#fc5648'};border:2.5px solid white;border-radius:50%;box-shadow:0 1px 6px rgba(0,0,0,.35);"></div>`,
-            iconSize:[14,14], iconAnchor:[7,7], popupAnchor:[0,-10],
+            html: `
+                <div style="display:flex;flex-direction:column;align-items:center;">
+                    <div style="
+                        background:white;
+                        border:2.5px solid ${border};
+                        border-radius:50%;
+                        width:34px;height:34px;
+                        display:flex;align-items:center;justify-content:center;
+                        font-size:17px;
+                        box-shadow:0 2px 10px rgba(0,0,0,.22);
+                        line-height:1;">
+                        ${emoji}
+                    </div>
+                    <div style="
+                        width:0;height:0;
+                        border-left:5px solid transparent;
+                        border-right:5px solid transparent;
+                        border-top:7px solid ${border};
+                        margin-top:-1px;">
+                    </div>
+                </div>`,
+            iconSize:   [34, 41],
+            iconAnchor: [17, 41],
+            popupAnchor:[0, -44],
         });
     }
 
@@ -454,8 +577,9 @@ function iniciarMapa(containerId) {
         bounds.push([p.lat, p.lng]);
         const catBadge    = p.categoria ? `<span style="background:#fc5648;color:white;font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:999px;">${p.categoria}</span>` : '';
         const clienteBadge= p.es_cliente ? `<span style="background:#fef3c7;color:#92400e;font-size:9px;font-weight:700;padding:2px 7px;border-radius:999px;margin-left:4px;">Negocio</span>` : '';
-        const imgHtml     = p.imagen ? `<img src="${p.imagen}" style="width:100%;height:110px;object-fit:cover;border-radius:.5rem .5rem 0 0;">` : `<div style="width:100%;height:60px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:1.5rem;border-radius:.5rem .5rem 0 0;">📍</div>`;
-        L.marker([p.lat, p.lng], { icon: crearIcono(p.es_cliente) })
+        const catEmoji    = EMOJI_CAT[p.categoria_id] || (p.es_cliente ? '🏪' : '📍');
+        const imgHtml     = p.imagen ? `<img src="${p.imagen}" style="width:100%;height:110px;object-fit:cover;border-radius:.5rem .5rem 0 0;">` : `<div style="width:100%;height:60px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:1.5rem;border-radius:.5rem .5rem 0 0;">${catEmoji}</div>`;
+        L.marker([p.lat, p.lng], { icon: crearIcono(p) })
             .bindPopup(`<div style="font-family:sans-serif;">${imgHtml}<div style="padding:10px 12px 12px;"><div style="margin-bottom:5px;">${catBadge}${clienteBadge}</div><div style="font-weight:700;font-size:13px;line-height:1.3;margin-bottom:8px;">${p.title}</div><a href="/lugar/${p.slug}" style="background:#fc5648;color:white;font-size:11px;font-weight:700;padding:5px 12px;border-radius:8px;text-decoration:none;display:inline-block;">Ver detalle →</a></div></div>`, { maxWidth: 230 })
             .addTo(mapaLeaflet);
     });
