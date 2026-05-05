@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Panoramas — La Brújula</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Panoramas — Pindoor</h2>
             <a href="{{ route('admin.panoramas.create') }}"
                class="bg-[#fc5648] text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#d94439] transition">
                 + Nuevo panorama

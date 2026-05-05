@@ -56,6 +56,7 @@ class PuntoInteres extends Model
             'oferta_del_dia' => ['label' => 'Oferta del día',          'emoji' => '🏷️', 'desc' => 'Oferta puntual visible en la ficha',        'grupo' => 'Transversal'],
             'avisos'         => ['label' => 'Avisos',                  'emoji' => '📢', 'desc' => 'Comunicados y avisos importantes',           'grupo' => 'Transversal'],
             'promociones'    => ['label' => 'Promociones',             'emoji' => '🎁', 'desc' => 'Descuentos y promociones especiales',        'grupo' => 'Transversal'],
+            'agenda'         => ['label' => 'Agenda cultural',         'emoji' => '📅', 'desc' => 'Programación de eventos y espectáculos',     'grupo' => 'Transversal'],
             // Gastronomía — restaurantes, cafeterías, bares
             'menu_del_dia'   => ['label' => 'Menú del día',            'emoji' => '🥘', 'desc' => 'Menú de almuerzo o cena del día',            'grupo' => 'Gastronomía'],
             'carta'          => ['label' => 'Carta / Menú permanente', 'emoji' => '🍽️', 'desc' => 'Carta completa del local',                   'grupo' => 'Gastronomía'],
@@ -66,8 +67,6 @@ class PuntoInteres extends Model
             // Museo
             'entradas'       => ['label' => 'Entradas y tarifas',      'emoji' => '🎟️', 'desc' => 'Precios de entrada al museo',                'grupo' => 'Museo'],
             'exposiciones'   => ['label' => 'Exposiciones',            'emoji' => '🖼️', 'desc' => 'Colecciones permanentes y temporales',       'grupo' => 'Museo'],
-            // Cultura
-            'agenda'         => ['label' => 'Agenda cultural',         'emoji' => '📅', 'desc' => 'Programación de eventos y espectáculos',     'grupo' => 'Transversal'],
         ];
     }
 
