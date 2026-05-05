@@ -6,13 +6,58 @@
 
 @extends('layouts.pindoor')
 
-@section('title', 'Pindoor · ¿Qué quieres conocer hoy?')
+@section('title', 'Pindoor · Guía de lugares en Valdivia')
+
+@section('description', 'Explora restaurantes, cafeterías, hoteles, museos, bares y atracciones turísticas en Valdivia. Filtra por categoría, busca por nombre o activa el GPS para ver qué tienes cerca.')
 
 @section('canonical', route('atractivos.index'))
 
 @section('bodyClass', 'bg-gray-100 text-gray-900 font-serif')
 
 @section('head')
+    {{-- Open Graph --}}
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ route('atractivos.index') }}" />
+    <meta property="og:title" content="Pindoor · Guía de lugares en Valdivia" />
+    <meta property="og:description" content="Explora restaurantes, hoteles, museos y atracciones turísticas en Valdivia. La guía local más completa." />
+    <meta property="og:image" content="{{ asset('img/pindoor-og.jpg') }}" />
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Pindoor · Guía de lugares en Valdivia" />
+    <meta name="twitter:description" content="Explora restaurantes, hoteles, museos y atracciones turísticas en Valdivia. La guía local más completa." />
+    <meta name="twitter:image" content="{{ asset('img/pindoor-og.jpg') }}" />
+    {{-- Schema.org: WebSite + Organization --}}
+    <script type="application/ld+json">
+    [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Pindoor",
+        "url": "{{ route('atractivos.index') }}",
+        "description": "Guía de lugares, restaurantes, hoteles y atracciones turísticas en Valdivia, Chile.",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "{{ route('puntos.buscar') }}?search={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Pindoor",
+        "url": "{{ route('atractivos.index') }}",
+        "logo": "{{ asset('img/pindoor-logo.png') }}",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "availableLanguage": "Spanish"
+        }
+      }
+    ]
+    </script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>

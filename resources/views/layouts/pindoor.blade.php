@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@yield('title', 'Pindoor ¿Qué quieres conocer hoy?')</title>
+    <meta name="robots" content="index, follow" />
+    <title>@yield('title', 'Pindoor · Guía de lugares en Valdivia')</title>
+    <meta name="description" content="@yield('description', 'Descubre restaurantes, hoteles, museos, bares y atracciones turísticas en Valdivia. La guía local completa de Pindoor.')">
     @hasSection('canonical')
         <link rel="canonical" href="@yield('canonical')" />
     @endif
+    <meta property="og:site_name" content="Pindoor" />
+    <meta property="og:locale" content="es_CL" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('head')
     @if(app()->environment('production'))

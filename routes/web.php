@@ -22,7 +22,8 @@ Route::get('/lugar/{slug}', [PuntoInteresController::class, 'show'])->name('punt
 
 
 Route::get('/labrujula', [PuntoInteresController::class, 'index'])->name('atractivos.index');
-Route::get('/atractivos/{atractivo}', [PuntoInteresController::class, 'show'])->name('atractivos.show');
+// Redirect 301 de URLs antiguas a la URL canónica /lugar/{slug}
+Route::get('/atractivos/{atractivo}', fn($slug) => redirect()->route('puntos.show', $slug, 301))->name('atractivos.show');
 Route::get('/atractivos/categoria/{categoria}', [PuntoInteresController::class, 'filtrarPorCategoria'])->name('atractivos.categoria');
 Route::get('/atractivos/ciudad/{ciudad}', [PuntoInteresController::class, 'filtrarPorCiudad'])->name('atractivos.ciudad');
 Route::get('/panoramas', [PuntoInteresController::class, 'panoramas'])->name('atractivos.panoramas');

@@ -21,7 +21,7 @@
 
     @foreach($puntos as $punto)
     <url>
-        <loc>{{ route('atractivos.show', $punto->slug) }}</loc>
+        <loc>{{ route('puntos.show', $punto->slug) }}</loc>
         <lastmod>{{ $punto->updated_at->toAtomString() }}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>

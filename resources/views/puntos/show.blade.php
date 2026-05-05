@@ -4,16 +4,17 @@
 
 @section('title', $punto->title . ' — Pindoor.cl')
 
-@section('canonical', route('atractivos.show', $punto->slug ?? $punto->id))
+@section('canonical', route('puntos.show', $punto->slug ?? $punto->id))
+
+@section('description', Str::limit(strip_tags($punto->description), 160))
 
 @section('bodyClass', 'bg-[#f9fafb] text-gray-900 leading-relaxed')
 
 @section('head')
-    <meta name="description" content="{{ Str::limit(strip_tags($punto->description), 160) }}">
     @php
         $imagenPrincipal = $punto->imagenes->firstWhere('es_principal', true) ?? $punto->imagenes->first();
         $imagenUrl = $imagenPrincipal ? asset('storage/' . $imagenPrincipal->ruta) : null;
-        $canonicalUrl = route('atractivos.show', $punto->slug ?? $punto->id);
+        $canonicalUrl = route('puntos.show', $punto->slug ?? $punto->id);
     @endphp
     <meta property="og:type" content="place" />
     <meta property="og:url" content="{{ $canonicalUrl }}" />
