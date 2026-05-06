@@ -17,47 +17,40 @@
     <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
 
         @php
+            $enMapa = request()->routeIs('puntos.index') && request('vista') === 'mapa';
             $navItems = [
                 [
-                    'route'  => 'puntos.index',
+                    'href'   => route('puntos.index'),
                     'label'  => 'Inicio',
                     'icon'   => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M5 10v10a2 2 0 002 2h10a2 2 0 002-2V10"/></svg>',
-                    'match'  => ['puntos.index', 'puntos.index'],
+                    'active' => request()->routeIs('puntos.index') && !$enMapa,
                 ],
                 [
-                    'route'  => 'puntos.index',
-                    'label'  => 'Explorar mapa',
-                    'icon'   => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>',
-                    'match'  => ['atractivos.show', 'puntos.show'],
-                    'onclick' => true,
+                    'href'    => route('puntos.index', ['vista' => 'mapa']),
+                    'label'   => 'Explorar mapa',
+                    'icon'    => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>',
+                    'active'  => $enMapa,
+                    'onclick' => "if(typeof setView!=='undefined'){event.preventDefault();setView('mapa');}",
                 ],
                 [
-                    'route'  => 'atractivos.panoramas',
+                    'href'   => route('atractivos.panoramas'),
                     'label'  => 'Panoramas',
                     'icon'   => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>',
-                    'match'  => ['atractivos.panoramas'],
+                    'active' => request()->routeIs('atractivos.panoramas'),
                 ],
             ];
         @endphp
 
-        @foreach($navItems as $item)
-            @php $isActive = request()->routeIs($item['match']); @endphp
-            @if(!empty($item['onclick']))
-            <a href="{{ route($item['route']) }}"
-               onclick="if(typeof setView!=='undefined'){event.preventDefault();setView('mapa');}"
+        @php $navIds = ['nav-inicio', 'nav-explorar-mapa', 'nav-panoramas']; @endphp
+        @foreach($navItems as $i => $item)
+            <a id="{{ $navIds[$i] }}"
+               href="{{ $item['href'] }}"
+               @if(!empty($item['onclick'])) onclick="{{ $item['onclick'] }}" @endif
                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all
-                      {{ $isActive ? 'bg-[#fff0ef] text-[#fc5648]' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                      {{ $item['active'] ? 'bg-[#fff0ef] text-[#fc5648]' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                 {!! $item['icon'] !!}
                 {{ $item['label'] }}
             </a>
-            @else
-            <a href="{{ route($item['route']) }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all
-                      {{ $isActive ? 'bg-[#fff0ef] text-[#fc5648]' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                {!! $item['icon'] !!}
-                {{ $item['label'] }}
-            </a>
-            @endif
         @endforeach
 
         <div class="pt-3 mt-3 border-t border-gray-100">

@@ -435,6 +435,23 @@ function setView(vista) {
     const btnLM      = document.getElementById('btn-listado-m');
     const btnMM      = document.getElementById('btn-mapa-m');
 
+    // Actualizar nav lateral (sidebar desktop)
+    const navInicio = document.getElementById('nav-inicio');
+    const navMapa   = document.getElementById('nav-explorar-mapa');
+    const activeNav   = ['bg-[#fff0ef]', 'text-[#fc5648]'];
+    const inactiveNav = ['text-gray-600', 'hover:bg-gray-50', 'hover:text-gray-900'];
+    if (vista === 'mapa') {
+        navInicio?.classList.remove(...activeNav);
+        navInicio?.classList.add(...inactiveNav);
+        navMapa?.classList.add(...activeNav);
+        navMapa?.classList.remove(...inactiveNav);
+    } else {
+        navMapa?.classList.remove(...activeNav);
+        navMapa?.classList.add(...inactiveNav);
+        navInicio?.classList.add(...activeNav);
+        navInicio?.classList.remove(...inactiveNav);
+    }
+
     if (vista === 'mapa') {
         if (mobile) {
             elListadoM?.classList.add('hidden');
