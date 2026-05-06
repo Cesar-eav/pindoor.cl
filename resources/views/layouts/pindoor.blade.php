@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="index, follow" />
-    <title>@yield('title', 'Pindoor · Guía de lugares en Valdivia')</title>
-    <meta name="description" content="@yield('description', 'Descubre restaurantes, hoteles, museos, bares y atracciones turísticas en Valdivia. La guía local completa de Pindoor.')">
+    <title>@yield('title', 'Pindoor · Guía de lugares en Valparaíso')</title>
+    <meta name="description" content="@yield('description', 'Descubre restaurantes, hoteles, museos, bares y atracciones turísticas en Valparaíso. La guía local completa de Pindoor.')">
     @hasSection('canonical')
         <link rel="canonical" href="@yield('canonical')" />
     @endif

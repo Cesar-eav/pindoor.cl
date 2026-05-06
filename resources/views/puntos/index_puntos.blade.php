@@ -6,9 +6,9 @@
 
 @extends('layouts.pindoor')
 
-@section('title', 'Pindoor · Guía de lugares en Valdivia')
+@section('title', 'Pindoor · Guía de lugares en Valparaíso')
 
-@section('description', 'Explora restaurantes, cafeterías, hoteles, museos, bares y atracciones turísticas en Valdivia. Filtra por categoría, busca por nombre o activa el GPS para ver qué tienes cerca.')
+@section('description', 'Explora restaurantes, cafeterías, hoteles, museos, bares y atracciones turísticas en Valparaíso. Filtra por categoría, busca por nombre o activa el GPS para ver qué tienes cerca.')
 
 @section('canonical', route('puntos.index'))
 
@@ -18,13 +18,13 @@
     {{-- Open Graph --}}
     <meta property="og:type" content="website" />
     <meta property="og:url" content="{{ route('puntos.index') }}" />
-    <meta property="og:title" content="Pindoor · Guía de lugares en Valdivia" />
-    <meta property="og:description" content="Explora restaurantes, hoteles, museos y atracciones turísticas en Valdivia. La guía local más completa." />
+    <meta property="og:title" content="Pindoor · Guía de lugares en Valparaíso" />
+    <meta property="og:description" content="Explora restaurantes, hoteles, museos y atracciones turísticas en Valparaíso. La guía local más completa." />
     <meta property="og:image" content="{{ asset('img/pindoor-og.jpg') }}" />
     {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Pindoor · Guía de lugares en Valdivia" />
-    <meta name="twitter:description" content="Explora restaurantes, hoteles, museos y atracciones turísticas en Valdivia. La guía local más completa." />
+    <meta name="twitter:title" content="Pindoor · Guía de lugares en Valparaíso" />
+    <meta name="twitter:description" content="Explora restaurantes, hoteles, museos y atracciones turísticas en Valparaíso. La guía local más completa." />
     <meta name="twitter:image" content="{{ asset('img/pindoor-og.jpg') }}" />
     {{-- Schema.org: WebSite + Organization --}}
     <script type="application/ld+json">
@@ -34,7 +34,7 @@
         "@type": "WebSite",
         "name": "Pindoor",
         "url": "{{ route('puntos.index') }}",
-        "description": "Guía de lugares, restaurantes, hoteles y atracciones turísticas en Valdivia, Chile.",
+        "description": "Guía de lugares, restaurantes, hoteles y atracciones turísticas en Valparaíso, Chile.",
         "potentialAction": {
           "@type": "SearchAction",
           "target": {
