@@ -30,7 +30,7 @@
             </section>
 
             <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border-t-4 border-[#fc5648]">
-                <form id="filterForm" action="{{ route('atractivos.index') }}" method="GET">
+                <form id="filterForm" action="{{ route('puntos.index') }}" method="GET">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                         
                         <div>
@@ -81,7 +81,7 @@
                     <div class="flex items-center justify-between mt-4">
                         <p class="text-xs text-gray-400 italic">El Pionero de Valparaíso</p>
                         @if(request()->anyFilled(['category', 'search', 'lat']))
-                            <a href="{{ route('atractivos.index') }}" 
+                            <a href="{{ route('puntos.index') }}" 
                                class="text-sm font-semibold text-gray-500 hover:text-[#fc5648] transition flex items-center gap-1 underline">
                                 <span>✕</span> Borrar filtros
                             </a>
@@ -147,7 +147,7 @@
                         <div class="text-6xl mb-6">🕵️‍♂️</div>
                         <h3 class="text-2xl font-bold text-gray-800 mb-2">Sin resultados</h3>
                         <p class="text-gray-500 mb-6">No encontramos lugares cercanos o que coincidan con tu búsqueda.</p>
-                        <a href="{{ route('atractivos.index') }}" class="bg-[#fc5648] text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-900 transition">
+                        <a href="{{ route('puntos.index') }}" class="bg-[#fc5648] text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-900 transition">
                             Ver toda La Brújula
                         </a>
                     </div>

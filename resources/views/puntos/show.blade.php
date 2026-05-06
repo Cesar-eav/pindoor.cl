@@ -56,7 +56,7 @@
         ,"breadcrumb": {
             "@type": "BreadcrumbList",
             "itemListElement": [
-                {"@type":"ListItem","position":1,"name":"Pindoor","item":"{{ route('atractivos.index') }}"}
+                {"@type":"ListItem","position":1,"name":"Pindoor","item":"{{ route('puntos.index') }}"}
                 @if($punto->categoria)
                 ,{"@type":"ListItem","position":2,"name":"{{ addslashes($punto->categoria->nombre) }}","item":"{{ route('atractivos.categoria', $punto->categoria->slug ?? $punto->categoria->id) }}"}
                 ,{"@type":"ListItem","position":3,"name":"{{ addslashes($punto->title) }}","item":"{{ $canonicalUrl }}"}
@@ -67,7 +67,6 @@
         }
     }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Lora:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -93,7 +92,7 @@
         >
             {{-- Breadcrumbs --}}
             <nav class="flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-8 overflow-x-auto whitespace-nowrap">
-                <a href="{{ route('atractivos.index') }}" class="hover:text-pindoor-accent transition">Pindoor</a>
+                <a href="{{ route('puntos.index') }}" class="hover:text-pindoor-accent transition">Pindoor</a>
                 <span class="text-gray-300">/</span>
                 @if($punto->categoria)
                     <span class="text-gray-500">{{ $punto->categoria->nombre }}</span>

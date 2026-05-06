@@ -1,9 +1,9 @@
 {{-- Sidebar lateral — solo visible en md+ --}}
-<aside class="hidden md:flex flex-col w-56 fixed top-0 left-0 h-full bg-white border-r border-gray-100 z-40">
+<aside class="hidden md:flex flex-col w-56 fixed top-0 left-0 h-full bg-white border-r border-gray-100 z-40 font-sans">
 
     {{-- Brand --}}
     <div class="px-5 py-5 border-b border-gray-100">
-        <a href="{{ route('atractivos.index') }}" class="flex flex-col gap-0.5">
+        <a href="{{ route('puntos.index') }}" class="flex flex-col gap-0.5">
             <span class="text-2xl font-black tracking-tight leading-none">
                 <span class="text-[#fc5648]">Pin</span><span class="text-gray-900">door</span>
             </span>
@@ -19,13 +19,13 @@
         @php
             $navItems = [
                 [
-                    'route'  => 'atractivos.index',
+                    'route'  => 'puntos.index',
                     'label'  => 'Inicio',
                     'icon'   => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M5 10v10a2 2 0 002 2h10a2 2 0 002-2V10"/></svg>',
-                    'match'  => ['atractivos.index', 'puntos.index'],
+                    'match'  => ['puntos.index', 'puntos.index'],
                 ],
                 [
-                    'route'  => 'atractivos.index',
+                    'route'  => 'puntos.index',
                     'label'  => 'Explorar mapa',
                     'icon'   => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>',
                     'match'  => ['atractivos.show', 'puntos.show'],

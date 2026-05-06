@@ -1,6 +1,6 @@
 {{-- App Bar mobile — global para todas las vistas --}}
 <header class="md:hidden sticky top-0 z-40 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between shadow-sm">
-    <a href="{{ route('atractivos.index') }}" class="text-lg font-bold tracking-tight font-sans">
+    <a href="{{ route('puntos.index') }}" class="text-lg font-bold tracking-tight font-sans">
         <span class="text-[#fc5648]">Pin</span>door
     </a>
     <div class="flex items-center gap-3">
@@ -11,7 +11,7 @@
             </svg>
         </button>
         @if(isset($hayFiltros) && $hayFiltros)
-        <a href="{{ route('atractivos.index') }}"
+        <a href="{{ route('puntos.index') }}"
            class="w-9 h-9 flex items-center justify-center rounded-xl bg-[#fc5648] text-white text-sm font-bold">
             ✕
         </a>
@@ -26,7 +26,7 @@
 
 {{-- Barra de búsqueda (slide) — global para todas las vistas --}}
 <div id="search-bar" class="md:hidden hidden bg-white border-b border-gray-100 px-4 py-3 shadow-sm">
-    <form action="{{ route('atractivos.index') }}" method="GET">
+    <form action="{{ route('puntos.index') }}" method="GET">
         <div class="flex gap-2">
             <div class="flex-1 relative">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"

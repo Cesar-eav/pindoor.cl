@@ -61,7 +61,7 @@
         <div class="text-6xl mb-6">🕵️‍♂️</div>
         <h3 class="text-2xl font-bold text-gray-800 mb-2">Sin resultados</h3>
         <p class="text-gray-500 mb-6">No encontramos lugares que coincidan con "{{ request('search') }}".</p>
-        <a href="{{ route('atractivos.index') }}" class="bg-[#fc5648] text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-900 transition">
+        <a href="{{ route('puntos.index') }}" class="bg-[#fc5648] text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-900 transition">
             Ver toda La Brújula
         </a>
     </div>

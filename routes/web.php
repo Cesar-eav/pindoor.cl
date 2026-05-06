@@ -21,10 +21,7 @@ Route::get('/buscar', [PuntoInteresController::class, 'index'])->name('puntos.bu
 Route::get('/lugar/{slug}', [PuntoInteresController::class, 'show'])->name('puntos.show');
 
 
-Route::get('/labrujula', function() {
-    $qs = request()->getQueryString();
-    return redirect($qs ? '/?' . $qs : '/', 301);
-})->name('atractivos.index');
+Route::get('/labrujula', fn() => redirect('/', 301));
 // Redirect 301 de URLs antiguas a la URL canónica /lugar/{slug}
 Route::get('/atractivos/{atractivo}', fn($slug) => redirect()->route('puntos.show', $slug, 301))->name('atractivos.show');
 Route::get('/atractivos/categoria/{categoria}', [PuntoInteresController::class, 'filtrarPorCategoria'])->name('atractivos.categoria');
@@ -40,7 +37,7 @@ Route::get('/dashboard', function () {
     $type = auth()->user()->type ?? '';
     if ($type === 'admin')   return redirect()->route('admin.stats');
     if ($type === 'cliente') return redirect()->route('cliente.perfil');
-    return redirect()->route('atractivos.index');
+    return redirect()->route('puntos.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
