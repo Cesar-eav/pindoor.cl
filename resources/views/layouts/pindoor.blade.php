@@ -52,7 +52,7 @@
         {{-- GPS --}}
         <div>
             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Cerca de mí</p>
-            <form id="filterForm-mobile" action="{{ route('atractivos.index') }}" method="GET">
+            <form id="filterForm-mobile" action="{{ route('puntos.index') }}" method="GET">
                 <input type="hidden" id="lat-m" name="lat" value="{{ request('lat') }}">
                 <input type="hidden" id="lng-m" name="lng" value="{{ request('lng') }}">
                 <button type="button" id="btn-gps-m"
@@ -68,7 +68,7 @@
         <div>
             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Vista</p>
             <div class="grid grid-cols-2 gap-2">
-                <a href="{{ route('atractivos.index', ['vista' => 'listado']) }}"
+                <a href="{{ route('puntos.index', ['vista' => 'listado']) }}"
                    onclick="if(typeof setView==='function'){event.preventDefault();setView('listado');} closeDrawer();"
                    class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 border-[#fc5648] bg-[#fff0ef]">
                     <svg class="w-5 h-5 text-[#fc5648]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,7 +76,7 @@
                     </svg>
                     <span class="text-xs font-bold text-[#fc5648]">Listado</span>
                 </a>
-                <a href="{{ route('atractivos.index', ['vista' => 'mapa']) }}"
+                <a href="{{ route('puntos.index', ['vista' => 'mapa']) }}"
                    onclick="if(typeof setView==='function'){event.preventDefault();setView('mapa');} closeDrawer();"
                    class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 border-gray-200 bg-gray-50">
                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +92,7 @@
         <div>
             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Explorar</p>
             <div class="space-y-1">
-                <a href="{{ route('atractivos.index') }}"
+                <a href="{{ route('puntos.index') }}"
                    class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition text-gray-700">
                     <span class="text-xl">🏠</span>
                     <span class="text-sm font-semibold">Inicio</span>
