@@ -50,8 +50,8 @@ class RegisteredUserController extends Controller
         ]);
 
         event(new Registered($user));
-
-        Notification::route('mail', ['cesar.eav@gmail.com', 'soporte@pindoor.cl','danielapazcabrera89@gmail.com'])
+        // 'soporte@pindoor.cl' ,'danielapazcabrera89@gmail.com' 
+        Notification::route('mail', ['cesar.eav@gmail.com'])
             ->notify(new AdminNewClientNotification($user));
 
         Auth::login($user);
