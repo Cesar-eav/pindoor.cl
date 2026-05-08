@@ -188,6 +188,7 @@
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-gray-50 text-gray-500 uppercase text-xs font-bold">
                             <tr>
+                                <th class="px-6 py-4">Id</th>
                                 <th class="px-6 py-4">Punto</th>
                                 <th class="px-6 py-4">Sector</th>
                                 <th class="px-6 py-4">Categoría</th>
@@ -198,6 +199,7 @@
                         <tbody class="divide-y divide-gray-100 text-sm">
                             @foreach($puntos as $punto)
                             <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-4 font-bold text-gray-900">{{ $punto->id }}</td>
                                 <td class="px-6 py-4 font-bold text-gray-900">{{ $punto->title }}</td>
                                 <td class="px-6 py-4 text-gray-600">{{ $punto->sector }}</td>
                                 <td class="px-6 py-4">
