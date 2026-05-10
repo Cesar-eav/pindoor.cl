@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+use Carbon\Carbon;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,8 +22,16 @@ class Panorama extends Model
         'activo' => 'boolean',
     ];
 
-    public function scopeActivos($query)
+    public function scopeActivos($query, $limite = 15)
     {
-        return $query->where('activo', true)->orderBy('orden')->orderBy('id');
+
+        
+        return $query->where('activo', true)
+        ->whereBetween('fecha', [
+            Carbon::today(),
+            Carbon::today()->addDays($limite),
+        ])
+        ->orderBy('orden')
+        ->orderBy('id');
     }
 }

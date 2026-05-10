@@ -32,7 +32,7 @@
             🧭 Panoramas
         </h1>
         <p class="text-xl text-gray-700">
-            Descubre los mejores rincones y experiencias de Valparaíso
+            Descubre los mejores rincones y experiencias de Valparaíso para los próximos 15 días
         </p>
     </section>
 
