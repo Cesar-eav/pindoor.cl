@@ -58,8 +58,7 @@
       }
     ]
     </script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    @vite('resources/js/leaflet.js')
     <style>
         #mapa-principal { height: 70vh; border-radius: 1rem; z-index: 1; }
         .leaflet-popup-content-wrapper { border-radius: .75rem; box-shadow: 0 4px 20px rgba(0,0,0,.12); }

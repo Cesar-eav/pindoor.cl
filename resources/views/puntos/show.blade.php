@@ -67,7 +67,7 @@
         }
     }
     </script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    @vite('resources/js/leaflet.js')
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .serif-text { font-family: 'Lora', serif; }
@@ -1376,7 +1376,6 @@
     </script>
 
     @if($punto->lat && $punto->lng)
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const map = L.map('mini-mapa', {

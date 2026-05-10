@@ -22,7 +22,7 @@
                     Podrás completar el resto del perfil (carta, ofertas, galería) desde tu panel.
                 </p>
 
-                <form method="POST" action="{{ route('cliente.crear') }}" enctype="multipart/form-data">
+                <form id="form-onboarding" method="POST" action="{{ route('cliente.crear') }}" enctype="multipart/form-data">
                     @csrf
 
                     {{-- Nombre + Categoría --}}
@@ -82,13 +82,25 @@
                            class="px-5 py-2.5 text-sm text-gray-500 hover:text-gray-800 transition">
                             Cancelar
                         </a>
-                        <x-primary-button>
+                        <x-primary-button id="btn-publicar">
                             Publicar mi negocio →
                         </x-primary-button>
                     </div>
                 </form>
             </div>
         </div>
+    </div>
+
+    {{-- Overlay de carga --}}
+    <div id="loading-overlay"
+         class="fixed inset-0 z-50 flex-col items-center justify-center bg-gray-900/80 backdrop-blur-sm"
+         style="display:none">
+        <svg class="animate-spin h-16 w-16 text-white mb-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        <p class="text-white text-xl font-bold tracking-tight">Publicando tu negocio…</p>
+        <p class="text-gray-300 text-sm mt-2">Esto puede tardar unos segundos</p>
     </div>
 
     <script>
@@ -99,6 +111,13 @@
         const img  = document.getElementById('preview-img');
         img.src = URL.createObjectURL(file);
         wrap.classList.remove('hidden');
+    });
+
+    document.getElementById('form-onboarding').addEventListener('submit', function () {
+        const btn = document.getElementById('btn-publicar');
+        btn.disabled = true;
+        btn.textContent = 'Publicando…';
+        document.getElementById('loading-overlay').style.display = 'flex';
     });
     </script>
 </x-app-layout>

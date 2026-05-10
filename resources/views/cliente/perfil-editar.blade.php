@@ -290,8 +290,7 @@
         </div>
     </div>
 
-<link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+@vite('resources/js/quill-editor.js')
 <style>
     .nav-pill {
         display: inline-block;

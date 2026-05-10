@@ -28,6 +28,7 @@ Route::get('/atractivos/categoria/{categoria}', [PuntoInteresController::class, 
 Route::get('/atractivos/ciudad/{ciudad}', [PuntoInteresController::class, 'filtrarPorCiudad'])->name('atractivos.ciudad');
 Route::get('/panoramas', [PuntoInteresController::class, 'panoramas'])->name('atractivos.panoramas');
 Route::get('/registro', [PublicitaController::class, 'index'])->name('publicita.index');
+Route::get('/ejemplos', [PublicitaController::class, 'index'])->name('publicita.index');
 Route::post('/publicita', [PublicitaController::class, 'store'])->name('publicita.store');
 
 
