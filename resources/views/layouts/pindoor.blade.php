@@ -108,7 +108,7 @@
                 <a href="{{ route('publicita.index') }}"
                    class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition text-gray-700">
                     <span class="text-xl">📣</span>
-                    <span class="text-sm font-semibold">Publicita tu negocio</span>
+                    <span class="text-sm font-semibold">Registra tu negocio</span>
                 </a>
             </div>
         </div>
