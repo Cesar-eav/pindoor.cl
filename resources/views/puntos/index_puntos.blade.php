@@ -126,6 +126,7 @@
     </div>
 
     {{-- ── Indicador de búsqueda activa ────────────────────────────────────── --}}
+    <div id="filtro-activo-mobile">
     @if($hayFiltros)
     <div class="mx-3 mb-2 px-3 py-2 bg-[#fff0ef] rounded-xl flex items-center justify-between">
         <span class="text-xs text-[#fc5648] font-semibold">
@@ -137,6 +138,7 @@
         <a href="{{ route('puntos.index') }}" class="text-xs text-gray-400 font-bold">✕ Borrar</a>
     </div>
     @endif
+    </div>
 
     {{-- ── Listado de resultados ────────────────────────────────────────────── --}}
     <div id="vista-listado-mobile" class="flex-1 px-3 pt-3 pb-6">
@@ -721,6 +723,40 @@ document.addEventListener('DOMContentLoaded', function () {
                 searchFilter?.parentNode.removeChild(searchFilter);
                 fForm.submit();
             }
+        });
+    }
+
+    // AJAX category pill filter — no page reload
+    const pillsScroll = document.querySelector('.overflow-x-auto.no-scrollbar');
+    if (pillsScroll) {
+        pillsScroll.querySelectorAll('a').forEach(pill => {
+            pill.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const url = pill.href;
+
+                // Update active pill style immediately
+                pillsScroll.querySelectorAll('a').forEach(p => {
+                    p.classList.remove('bg-gray-900', 'text-white', 'border-gray-900');
+                    p.classList.add('bg-white', 'text-gray-500', 'border-gray-300', 'hover:border-gray-500');
+                });
+                pill.classList.remove('bg-white', 'text-gray-500', 'border-gray-300', 'hover:border-gray-500');
+                pill.classList.add('bg-gray-900', 'text-white', 'border-gray-900');
+
+                history.pushState({}, '', url);
+
+                try {
+                    const res  = await fetch(url);
+                    const html = await res.text();
+                    const doc  = new DOMParser().parseFromString(html, 'text/html');
+
+                    const newListado = doc.getElementById('vista-listado-mobile');
+                    const newFiltro  = doc.getElementById('filtro-activo-mobile');
+                    if (newListado) document.getElementById('vista-listado-mobile').replaceWith(newListado);
+                    if (newFiltro)  document.getElementById('filtro-activo-mobile').replaceWith(newFiltro);
+                } catch (_) {
+                    window.location.href = url;
+                }
+            });
         });
     }
 });
