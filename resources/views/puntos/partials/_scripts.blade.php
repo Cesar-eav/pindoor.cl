@@ -201,12 +201,37 @@ function geolocate(latInput, lngInput, form, btn) {
 }
 
 function geolocateMobile(btn) {
-    geolocate(
-        document.getElementById('lat-m'),
-        document.getElementById('lng-m'),
-        document.getElementById('filterForm-mobile'),
-        btn
-    );
+    const mapaVisible = !document.getElementById('vista-mapa-mobile')?.classList.contains('hidden');
+
+    if (mapaVisible && mapaLeaflet) {
+        // Estamos en el mapa: solo centrar, sin recargar página
+        if (!navigator.geolocation) { alert('Tu navegador no soporta geolocalización.'); return; }
+        btn.disabled = true;
+        const orig = btn.innerHTML;
+        btn.innerHTML = '⌛ Localizando…';
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                btn.disabled = false;
+                btn.innerHTML = orig;
+                mapaLeaflet.flyTo([lat, lng], 18, { duration: 1 });
+                L.circleMarker([lat, lng], {
+                    radius: 8, color: '#fc5648', fillColor: '#fc5648', fillOpacity: 1, weight: 3,
+                }).addTo(mapaLeaflet).bindPopup('Estás aquí').openPopup();
+            },
+            () => { alert('No pudimos obtener tu ubicación.'); btn.disabled = false; btn.innerHTML = orig; },
+            { enableHighAccuracy: true, timeout: 8000 }
+        );
+    } else {
+        // Estamos en el listado: submit normal para filtrar por cercanía
+        geolocate(
+            document.getElementById('lat-m'),
+            document.getElementById('lng-m'),
+            document.getElementById('filterForm-mobile'),
+            btn
+        );
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
