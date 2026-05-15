@@ -65,9 +65,10 @@ class PuntoInteresController extends Controller
                 'lat'       => (float) $p->lat,
                 'lng'       => (float) $p->lng,
                 'sector'    => $p->sector,
-                'categoria'    => $p->categoria?->nombre,
-                'categoria_id' => $p->categoria_id,
-                'icono'        => $p->categoria?->icono,
+                'categoria'      => $p->categoria?->nombre,
+                'categoria_id'   => $p->categoria_id,
+                'categoria_slug' => $p->categoria?->slug,
+                'icono'          => $p->categoria?->icono,
                 'imagen'       => $p->imagenPrincipal ? asset('storage/' . $p->imagenPrincipal->ruta) : null,
                 'es_cliente'   => (bool) $p->es_cliente,
             ]);
