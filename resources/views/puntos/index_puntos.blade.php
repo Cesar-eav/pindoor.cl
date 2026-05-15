@@ -130,9 +130,25 @@
 
         {{-- Vista Mapa --}}
         <div id="vista-mapa" class="hidden mb-8">
+            {{-- Pills de categoría --}}
+            <div id="pills-mapa-desktop" class="flex flex-wrap gap-2 mb-4">
+                <button data-slug=""
+                        class="pill-mapa px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors
+                               {{ !request('category') ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-500' }}">
+                    Todos
+                </button>
+                @foreach($categorias as $cat)
+                <button data-slug="{{ $cat->slug }}"
+                        class="pill-mapa px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors
+                               {{ request('category') == $cat->slug ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-500' }}">
+                    {{ $cat->nombre }}
+                </button>
+                @endforeach
+            </div>
+
             <div id="mapa-principal"></div>
             <p class="text-xs text-gray-400 text-center mt-2">
-                {{ count($puntosMapData) }} puntos · Clic en un marcador para ver el detalle
+                <span id="mapa-contador">{{ count($puntosMapData) }}</span> puntos · Clic en un marcador para ver el detalle
             </p>
         </div>
 
