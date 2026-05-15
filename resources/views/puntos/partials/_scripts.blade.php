@@ -1,5 +1,7 @@
 <script>
 const PUNTOS_DATA = @json($puntosMapData);
+const GPS_LAT     = {{ request('lat') ? (float) request('lat') : 'null' }};
+const GPS_LNG     = {{ request('lng') ? (float) request('lng') : 'null' }};
 
 // ── Vista Listado / Mapa ─────────────────────────────────────────────────
 let mapaIniciado  = false;
@@ -56,6 +58,13 @@ function setView(vista) {
             void document.getElementById(containerId)?.offsetHeight;
             iniciarMapa(containerId);
         }
+        // Re-ajustar tamaño y animar zoom a GPS una vez el contenedor esté visible
+        setTimeout(() => {
+            mapaLeaflet?.invalidateSize();
+            if (GPS_LAT && GPS_LNG) {
+                mapaLeaflet.flyTo([GPS_LAT, GPS_LNG], 18, { duration: 1 });
+            }
+        }, 150);
     } else {
         if (mobile) {
             elMapaM?.classList.add('hidden');
@@ -164,8 +173,6 @@ function iniciarMapa(containerId) {
         maxZoom: 19, subdomains: 'abcd', pane: 'shadowPane',
     }).addTo(mapaLeaflet);
 
-    const GPS_LAT = {{ request('lat') ? (float) request('lat') : 'null' }};
-    const GPS_LNG = {{ request('lng') ? (float) request('lng') : 'null' }};
     if (GPS_LAT && GPS_LNG) {
         mapaLeaflet.setView([GPS_LAT, GPS_LNG], 15);
         L.circleMarker([GPS_LAT, GPS_LNG], {
@@ -181,19 +188,28 @@ function iniciarMapa(containerId) {
 }
 
 // ── GPS ──────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function () {
+function geolocate(latInput, lngInput, form, btn) {
+    if (!navigator.geolocation) { alert('Tu navegador no soporta geolocalización.'); return; }
+    btn.disabled = true;
+    const orig = btn.innerHTML;
+    btn.innerHTML = '⌛ Localizando…';
+    navigator.geolocation.getCurrentPosition(
+        pos => { latInput.value = pos.coords.latitude; lngInput.value = pos.coords.longitude; form.submit(); },
+        ()  => { alert('No pudimos obtener tu ubicación.'); btn.disabled = false; btn.innerHTML = orig; },
+        { enableHighAccuracy: true, timeout: 8000 }
+    );
+}
 
-    function geolocate(latInput, lngInput, form, btn) {
-        if (!navigator.geolocation) { alert('Tu navegador no soporta geolocalización.'); return; }
-        btn.disabled = true;
-        const orig = btn.innerHTML;
-        btn.innerHTML = btn.tagName === 'BUTTON' ? '⌛ Localizando…' : orig;
-        navigator.geolocation.getCurrentPosition(
-            pos => { latInput.value = pos.coords.latitude; lngInput.value = pos.coords.longitude; form.submit(); },
-            ()  => { alert('No pudimos obtener tu ubicación.'); btn.disabled = false; btn.innerHTML = orig; },
-            { enableHighAccuracy: true, timeout: 8000 }
-        );
-    }
+function geolocateMobile(btn) {
+    geolocate(
+        document.getElementById('lat-m'),
+        document.getElementById('lng-m'),
+        document.getElementById('filterForm-mobile'),
+        btn
+    );
+}
+
+document.addEventListener('DOMContentLoaded', function () {
 
     // Desktop GPS
     const btnGps = document.getElementById('btn-gps');
@@ -204,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ));
     }
 
-    // Mobile GPS
+    // Mobile GPS (botón del drawer)
     const btnGpsM = document.getElementById('btn-gps-m');
     const fFormM  = document.getElementById('filterForm-mobile');
     if (btnGpsM && fFormM) {
