@@ -23,17 +23,21 @@ class PanoramaController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'titulo'    => 'required|string|max:255',
-            'ubicacion' => 'nullable|string|max:255',
-            'fecha'     => 'nullable|date',
-            'hora'      => 'nullable|string|max:20',
-            'orden'     => 'nullable|integer|min:0',
-            'activo'    => 'nullable|boolean',
-            'imagen'    => 'nullable|image|max:4096',
+            'titulo'      => 'required|string|max:255',
+            'ubicacion'   => 'nullable|string|max:255',
+            'fecha'       => 'required|date',
+            'fecha_fin'   => 'nullable|date|after_or_equal:fecha',
+            'hora'        => 'nullable|string|max:20',
+            'categoria'   => 'nullable|string|in:' . implode(',', array_keys(\App\Models\Panorama::CATEGORIAS)),
+            'orden'       => 'nullable|integer|min:0',
+            'activo'      => 'nullable|boolean',
+            'es_gratuito' => 'nullable|boolean',
+            'imagen'      => 'nullable|image|max:4096',
         ]);
 
-        $data['activo'] = $request->boolean('activo', true);
-        $data['orden']  = $request->input('orden', 0);
+        $data['activo']      = $request->boolean('activo', true);
+        $data['es_gratuito'] = $request->boolean('es_gratuito', false);
+        $data['orden']       = $request->input('orden', 0);
 
         if ($request->hasFile('imagen')) {
             $data['imagen'] = $request->file('imagen')->store('panoramas', 'public');
@@ -52,17 +56,21 @@ class PanoramaController extends Controller
     public function update(Request $request, Panorama $panorama)
     {
         $data = $request->validate([
-            'titulo'    => 'required|string|max:255',
-            'ubicacion' => 'nullable|string|max:255',
-            'fecha'     => 'nullable|date',
-            'hora'      => 'nullable|string|max:20',
-            'orden'     => 'nullable|integer|min:0',
-            'activo'    => 'nullable|boolean',
-            'imagen'    => 'nullable|image|max:4096',
+            'titulo'      => 'required|string|max:255',
+            'ubicacion'   => 'nullable|string|max:255',
+            'fecha'       => 'required|date',
+            'fecha_fin'   => 'nullable|date|after_or_equal:fecha',
+            'hora'        => 'nullable|string|max:20',
+            'categoria'   => 'nullable|string|in:' . implode(',', array_keys(\App\Models\Panorama::CATEGORIAS)),
+            'orden'       => 'nullable|integer|min:0',
+            'activo'      => 'nullable|boolean',
+            'es_gratuito' => 'nullable|boolean',
+            'imagen'      => 'nullable|image|max:4096',
         ]);
 
-        $data['activo'] = $request->boolean('activo', true);
-        $data['orden']  = $request->input('orden', 0);
+        $data['activo']      = $request->boolean('activo', true);
+        $data['es_gratuito'] = $request->boolean('es_gratuito', false);
+        $data['orden']       = $request->input('orden', 0);
 
         if ($request->hasFile('imagen')) {
             if ($panorama->imagen) {

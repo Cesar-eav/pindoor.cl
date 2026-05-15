@@ -21,33 +21,66 @@
     @error('ubicacion') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
 </div>
 
-{{-- Fecha + Hora --}}
+{{-- Categoría + Gratuito --}}
 <div class="grid grid-cols-2 gap-4">
     <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha</label>
-        <input type="date" name="fecha"
-               value="{{ old('fecha', isset($panorama->fecha) ? $panorama->fecha->format('Y-m-d') : '') }}"
-               class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
-        @error('fecha') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Categoría</label>
+        <select name="categoria"
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none bg-white">
+            <option value="">— Sin categoría —</option>
+            @foreach(\App\Models\Panorama::CATEGORIAS as $slug => $cat)
+                <option value="{{ $slug }}" {{ old('categoria', $panorama->categoria ?? '') === $slug ? 'selected' : '' }}>
+                    {{ $cat['emoji'] }} {{ $cat['label'] }}
+                </option>
+            @endforeach
+        </select>
+        @error('categoria') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
     </div>
-    <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Hora</label>
-        <input type="text" name="hora"
-               value="{{ old('hora', $panorama->hora ?? '') }}"
-               placeholder="19:00 / 10:00 a.m."
-               class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
-        @error('hora') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+    <div class="flex items-end pb-2.5">
+        <label class="flex items-center gap-2 cursor-pointer">
+            <input type="hidden" name="es_gratuito" value="0">
+            <input type="checkbox" name="es_gratuito" value="1" id="es_gratuito"
+                   {{ old('es_gratuito', $panorama->es_gratuito ?? false) ? 'checked' : '' }}
+                   class="w-4 h-4 accent-[#fc5648] rounded">
+            <span class="text-sm font-semibold text-gray-700">🎟️ Entrada gratuita</span>
+        </label>
     </div>
 </div>
 
-{{-- Orden --}}
-<div>
-    <label class="block text-sm font-semibold text-gray-700 mb-1">Orden de aparición</label>
-    <input type="number" name="orden" min="0"
-           value="{{ old('orden', $panorama->orden ?? 0) }}"
-           class="w-32 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
-    <p class="text-xs text-gray-400 mt-1">Número menor aparece primero. 0 = sin orden preferente.</p>
+{{-- Fechas --}}
+<div class="grid grid-cols-2 gap-4">
+    <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">
+            Fecha inicio <span class="text-red-500">*</span>
+        </label>
+        <input type="date" name="fecha" required
+               value="{{ old('fecha', isset($panorama->fecha) ? $panorama->fecha->format('Y-m-d') : '') }}"
+               class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none
+                      {{ $errors->has('fecha') ? 'border-red-400' : 'border-gray-200' }}">
+        @error('fecha') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+    </div>
+    <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">
+            Fecha fin <span class="text-gray-400 font-normal">(opcional)</span>
+        </label>
+        <input type="date" name="fecha_fin"
+               value="{{ old('fecha_fin', isset($panorama->fecha_fin) ? $panorama->fecha_fin->format('Y-m-d') : '') }}"
+               class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none
+                      {{ $errors->has('fecha_fin') ? 'border-red-400' : 'border-gray-200' }}">
+        @error('fecha_fin') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+    </div>
 </div>
+
+{{-- Hora --}}
+<div>
+    <label class="block text-sm font-semibold text-gray-700 mb-1">Hora</label>
+    <input type="text" name="hora"
+           value="{{ old('hora', $panorama->hora ?? '') }}"
+           placeholder="19:00 / 10:00 a.m."
+           class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+    @error('hora') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+</div>
+
 
 {{-- Imagen --}}
 <div>

@@ -11,11 +11,19 @@
     $hoy    = Carbon::today();
     $manana = Carbon::tomorrow();
 
-    // Agrupar por fecha (string YYYY-MM-DD como clave)
-    $porDia = $panoramas->groupBy(fn($p) => $p->fecha->toDateString());
+    $categorias  = \App\Models\Panorama::CATEGORIAS;
+    $catActiva = request('categoria');
+    $coleccion = match(true) {
+        $catActiva === 'gratuito' => $panoramas->where('es_gratuito', true),
+        (bool) $catActiva        => $panoramas->where('categoria', $catActiva),
+        default                  => $panoramas,
+    };
 
-    // Todos los ítems indexados para el lightbox
-    $items = $panoramas->values();
+    // Agrupar por fecha (string YYYY-MM-DD como clave)
+    $porDia = $coleccion->groupBy(fn($p) => $p->fecha->toDateString());
+
+    // Todos los ítems indexados para el lightbox (filtrados)
+    $items = $coleccion->values();
 
     // Mapa fecha → índice inicial en $items (para el lightbox desde el strip)
     $indicesPorDia = [];
@@ -63,6 +71,33 @@
         <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">🧭 Panoramas</h1>
         <p class="text-gray-500 text-base">Valparaíso · próximos 15 días</p>
     </section>
+
+    {{-- Filtro de categorías --}}
+    @if($panoramas->isNotEmpty())
+    <div class="flex flex-wrap gap-2 justify-center mb-6">
+        <a href="{{ route('atractivos.panoramas') }}"
+           class="px-4 py-1.5 rounded-full text-xs font-bold border transition-colors
+                  {{ !$catActiva ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-500' }}">
+            Todos
+        </a>
+        @foreach($categorias as $slug => $cat)
+            @if($panoramas->where('categoria', $slug)->isNotEmpty())
+            <a href="{{ route('atractivos.panoramas', ['categoria' => $slug]) }}"
+               class="px-4 py-1.5 rounded-full text-xs font-bold border transition-colors
+                      {{ $catActiva === $slug ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-500' }}">
+                {{ $cat['emoji'] }} {{ $cat['label'] }}
+            </a>
+            @endif
+        @endforeach
+        @if($panoramas->where('es_gratuito', true)->isNotEmpty())
+        <a href="{{ route('atractivos.panoramas', ['categoria' => 'gratuito']) }}"
+           class="px-4 py-1.5 rounded-full text-xs font-bold border transition-colors
+                  {{ $catActiva === 'gratuito' ? 'bg-green-700 text-white border-green-700' : 'bg-green-50 text-green-700 border-green-200 hover:border-green-500' }}">
+            🎟️ Gratis
+        </a>
+        @endif
+    </div>
+    @endif
 
     @if($panoramas->isEmpty())
         <div class="text-center py-20">
@@ -140,7 +175,21 @@
                         <div class="w-full h-full flex items-center justify-center text-4xl text-gray-300">📷</div>
                     @endif
 
-                    {{-- Badge hora --}}
+                    {{-- Badge categoría (arriba izquierda) --}}
+                    @if($panorama->categoria && isset($categorias[$panorama->categoria]))
+                    <div class="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-lg">
+                        {{ $categorias[$panorama->categoria]['emoji'] }} {{ $categorias[$panorama->categoria]['label'] }}
+                    </div>
+                    @endif
+
+                    {{-- Badge gratuito (arriba derecha) --}}
+                    @if($panorama->es_gratuito)
+                    <div class="absolute top-2 right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg">
+                        🎟️ Gratis
+                    </div>
+                    @endif
+
+                    {{-- Badge hora (abajo derecha) --}}
                     @if($panorama->hora)
                     <div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-lg">
                         🕐 {{ $panorama->hora }}
@@ -150,7 +199,19 @@
 
                 {{-- Info --}}
                 <div class="p-4">
-                    <p class="font-bold text-gray-900 leading-snug mb-1">{{ $panorama->titulo }}</p>
+                    <p class="font-bold text-gray-900 leading-snug mb-2">{{ $panorama->titulo }}</p>
+
+                    {{-- Rango de fechas --}}
+                    @if($panorama->fecha_fin && !$panorama->fecha->isSameDay($panorama->fecha_fin))
+                    @php
+                        $mismoMes = $panorama->fecha->month === $panorama->fecha_fin->month;
+                    @endphp
+                    <p class="text-xs text-[#fc5648] font-semibold mb-1">
+                        📅 {{ $panorama->fecha->translatedFormat($mismoMes ? 'j' : 'j \d\e F') }}
+                           al {{ $panorama->fecha_fin->translatedFormat('j \d\e F') }}
+                    </p>
+                    @endif
+
                     @if($panorama->ubicacion)
                     <p class="text-xs text-gray-500 flex items-center gap-1">
                         <svg class="w-3 h-3 shrink-0 text-[#fc5648]" fill="currentColor" viewBox="0 0 20 20">
