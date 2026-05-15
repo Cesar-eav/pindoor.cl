@@ -155,8 +155,8 @@ class PuntoInteresController extends Controller
 
     public function panoramas()
     {
-        $panoramas = \App\Models\Panorama::activos()->get();
-        return view('labrujula.panoramas', compact('panoramas'));
+        $panoramas = \App\Models\Panorama::activos()->reorder()->orderBy('fecha')->orderBy('hora')->get();
+        return view('panoramas.index', compact('panoramas'));
     }
 
     /**
