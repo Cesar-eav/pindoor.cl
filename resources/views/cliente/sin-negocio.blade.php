@@ -10,7 +10,7 @@
                 <h3 class="text-xl font-bold text-gray-800 mb-2">¡Activa tu perfil en Pindoor!</h3>
                 <p class="text-sm text-gray-500 leading-relaxed mb-8">
                     Sube una foto, elige tu categoría y marca tu ubicación en el mapa.
-                    Tu negocio queda publicado de inmediato.
+                    Tu espacio queda publicado de inmediato.
                 </p>
                 <a href="{{ route('cliente.nuevo') }}"
                    class="inline-block bg-[#fc5648] text-white font-bold px-8 py-3 rounded-2xl shadow-lg hover:bg-[#e83a2c] transition">

@@ -60,7 +60,7 @@
 
                         {{-- Descripción --}}
                         <div id="descripcion" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 scroll-mt-20">
-                            <p class="text-xs text-gray-400 uppercase font-bold mb-4">Descripción del negocio</p>
+                            <p class="text-xs text-gray-400 uppercase font-bold mb-4">Descripción del espacio</p>
                             <div id="description-editor"
                                  class="bg-white border border-gray-200 rounded-xl text-sm min-h-44"></div>
                             <textarea id="description" name="description" class="hidden">{!! old('description', $punto->description) !!}</textarea>

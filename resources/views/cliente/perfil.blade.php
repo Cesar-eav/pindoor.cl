@@ -241,7 +241,7 @@
                     {{-- Descripción --}}
                     <div id="descripcion" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 scroll-mt-20">
                         <div class="flex items-center justify-between mb-3">
-                            <h4 class="font-bold text-gray-800">📝 Descripción del negocio</h4>
+                            <h4 class="font-bold text-gray-800">📝 Descripción del espacio</h4>
                             <a href="{{ route('cliente.perfil.editar', $punto) }}" class="text-xs text-[#fc5648] hover:underline">Editar →</a>
                         </div>
                         <p class="text-sm text-gray-600 leading-relaxed">
@@ -346,7 +346,7 @@
                     {{-- Módulos de contenido (carta, museo, agenda) --}}
                     @if(in_array('carta', $modulos) || in_array('entradas', $modulos) || in_array('exposiciones', $modulos) || in_array('agenda', $modulos))
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                        <h4 class="font-bold text-gray-800 mb-3">Contenido del negocio</h4>
+                        <h4 class="font-bold text-gray-800 mb-3">Contenido del espacio</h4>
                         <div class="space-y-1.5">
                             @if(in_array('carta', $modulos))
                             @php $tieneCarta = $punto->tieneCarta(); @endphp

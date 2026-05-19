@@ -16,7 +16,7 @@
 
             {{-- Panel: activar un punto como cliente --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h3 class="font-bold text-gray-700 mb-1">Activar un negocio como cliente</h3>
+                <h3 class="font-bold text-gray-700 mb-1">Activar un espacio como cliente</h3>
                 <p class="text-xs text-gray-400 mb-4">Selecciona un punto de interés existente para convertirlo en cliente y crear sus credenciales de acceso.</p>
 
                 @if($puntosDisponibles->isEmpty())
@@ -99,7 +99,7 @@
                                                 Editar
                                             </a>
                                             <form method="POST" action="{{ route('admin.clientes.desactivar', $punto) }}"
-                                                  onsubmit="return confirm('¿Quitar este negocio como cliente?')">
+                                                  onsubmit="return confirm('¿Quitar este espacio como cliente?')">
                                                 @csrf @method('PATCH')
                                                 <button type="submit" class="text-xs text-red-400 hover:text-red-600 font-medium">
                                                     Desactivar

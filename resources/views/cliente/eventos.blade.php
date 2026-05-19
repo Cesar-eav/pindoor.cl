@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center gap-3">
-            <a href="{{ route('cliente.perfil.ver', $punto) }}" class="text-gray-400 hover:text-gray-700 text-sm">&larr; Mi negocio</a>
+            <a href="{{ route('cliente.perfil.ver', $punto) }}" class="text-gray-400 hover:text-gray-700 text-sm">&larr; Mi espacio</a>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Agenda Cultural &mdash; {{ $punto->title }}
             </h2>

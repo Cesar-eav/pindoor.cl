@@ -25,7 +25,7 @@
 
     <div class="mb-6">
         <h2 class="text-xl font-bold text-gray-900">Accede a tu perfil</h2>
-        <p class="text-sm text-gray-500 mt-1">Administra tu negocio en Pindoor</p>
+        <p class="text-sm text-gray-500 mt-1">Administra tu espacio en Pindoor</p>
     </div>
 
     <form method="POST" action="{{ route('login') }}">

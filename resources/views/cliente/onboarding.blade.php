@@ -18,7 +18,7 @@
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
                 <p class="text-sm text-gray-500 mb-8">
-                    Con estos datos básicos tu negocio queda publicado en el mapa de Pindoor de inmediato.
+                    Con estos datos básicos tu espacio queda publicado en el mapa de Pindoor de inmediato.
                     Podrás completar el resto del perfil (carta, ofertas, galería) desde tu panel.
                 </p>
 
@@ -28,7 +28,7 @@
                     {{-- Nombre + Categoría --}}
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
                         <div>
-                            <x-input-label for="title" value="Nombre del negocio *" />
+                            <x-input-label for="title" value="Nombre del espacio *" />
                             <x-text-input id="title" name="title" class="block mt-1 w-full"
                                           :value="old('title')" required autofocus />
                         </div>
@@ -49,7 +49,7 @@
                     {{-- Mapa --}}
                     <div class="mb-6">
                         <x-input-label value="Ubicación en el mapa *" />
-                        <p class="text-xs text-gray-400 mb-2">Haz clic en el mapa o arrastra el marcador para ajustar la posición exacta de tu negocio.</p>
+                        <p class="text-xs text-gray-400 mb-2">Haz clic en el mapa o arrastra el marcador para ajustar la posición exacta de tu espacio.</p>
                         <div id="app">
                             <selector-mapa
                                 :initial-lat="-33.0472"
@@ -83,7 +83,7 @@
                             Cancelar
                         </a>
                         <x-primary-button id="btn-publicar">
-                            Publicar mi negocio →
+                            Publicar mi espacio →
                         </x-primary-button>
                     </div>
                 </form>
