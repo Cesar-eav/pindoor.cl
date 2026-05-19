@@ -82,6 +82,17 @@
 </div>
 
 
+{{-- Enlace --}}
+<div>
+    <label class="block text-sm font-semibold text-gray-700 mb-1">Enlace</label>
+    <input type="url" name="enlace"
+           value="{{ old('enlace', $panorama->enlace ?? '') }}"
+           placeholder="https://..."
+           class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+    <p class="text-xs text-gray-400 mt-1">URL del evento, entradas o más información (opcional)</p>
+    @error('enlace') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+</div>
+
 {{-- Imagen portada --}}
 <div>
     <label class="block text-sm font-semibold text-gray-700 mb-2">Imagen portada</label>
@@ -95,7 +106,7 @@
         </div>
     @endif
 
-    <input type="file" name="imagen" accept="image/*"
+    <input id="input-portada" type="file" name="imagen" accept="image/*"
            class="block w-full text-sm text-gray-500
                   file:mr-4 file:py-2 file:px-4
                   file:rounded-xl file:border-0
@@ -103,6 +114,11 @@
                   file:bg-[#fff0ef] file:text-[#fc5648]
                   hover:file:bg-[#ffe0dd] cursor-pointer">
     <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP — máx. 4 MB</p>
+    <div id="preview-portada" class="mt-3 hidden">
+        <img id="preview-portada-img" src="" alt="Preview portada"
+             class="h-40 w-auto rounded-xl border border-[#fc5648]/40 object-cover">
+        <p class="text-xs text-gray-400 mt-1">Vista previa — se guardará al enviar el formulario</p>
+    </div>
 
     @error('imagen') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
 </div>
@@ -134,7 +150,7 @@
         </div>
     @endif
 
-    <input type="file" name="imagenes[]" accept="image/*" multiple
+    <input id="input-adicionales" type="file" name="imagenes[]" accept="image/*" multiple
            class="block w-full text-sm text-gray-500
                   file:mr-4 file:py-2 file:px-4
                   file:rounded-xl file:border-0
@@ -142,9 +158,70 @@
                   file:bg-[#fff0ef] file:text-[#fc5648]
                   hover:file:bg-[#ffe0dd] cursor-pointer">
     <p class="text-xs text-gray-400 mt-1">Puedes seleccionar varias imágenes a la vez — JPG, PNG, WEBP — máx. 4 MB c/u</p>
+    <div id="preview-adicionales" class="hidden mt-3 flex-wrap gap-3"></div>
 
     @error('imagenes.*') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
 </div>
+
+<script>
+(function () {
+    // Preview portada
+    document.getElementById('input-portada').addEventListener('change', function () {
+        const file = this.files[0];
+        const wrap = document.getElementById('preview-portada');
+        const img  = document.getElementById('preview-portada-img');
+
+        if (!file) { wrap.classList.add('hidden'); return; }
+
+        console.info('[Panorama] portada seleccionada', {
+            name: file.name,
+            size: (file.size / 1024).toFixed(1) + ' KB',
+            type: file.type,
+        });
+
+        if (file.size > 4 * 1024 * 1024) {
+            console.warn('[Panorama] portada supera 4 MB — será rechazada por el servidor');
+        }
+
+        img.src = URL.createObjectURL(file);
+        img.onload = () => URL.revokeObjectURL(img.src);
+        wrap.classList.remove('hidden');
+    });
+
+    // Preview adicionales
+    document.getElementById('input-adicionales').addEventListener('change', function () {
+        const container = document.getElementById('preview-adicionales');
+        container.innerHTML = '';
+
+        if (!this.files.length) { container.classList.remove('flex'); container.classList.add('hidden'); return; }
+
+        console.info('[Panorama] adicionales seleccionadas', this.files.length + ' archivo(s)');
+
+        Array.from(this.files).forEach((file, i) => {
+            console.info('[Panorama] adicional #' + i, {
+                name: file.name,
+                size: (file.size / 1024).toFixed(1) + ' KB',
+                type: file.type,
+            });
+
+            if (file.size > 4 * 1024 * 1024) {
+                console.warn('[Panorama] adicional #' + i + ' supera 4 MB — será rechazada');
+            }
+
+            const url = URL.createObjectURL(file);
+            const img = document.createElement('img');
+            img.src    = url;
+            img.alt    = file.name;
+            img.onload = () => URL.revokeObjectURL(url);
+            img.className = 'h-28 w-28 object-cover rounded-xl border border-[#fc5648]/40';
+            container.appendChild(img);
+        });
+
+        container.classList.remove('hidden');
+        container.classList.add('flex');
+    });
+})();
+</script>
 
 {{-- Activo --}}
 <div class="flex items-center gap-3">

@@ -30,6 +30,7 @@ class Panorama extends Model
         'hora',
         'categoria',
         'es_gratuito',
+        'enlace',
         'imagen',
         'activo',
         'orden',

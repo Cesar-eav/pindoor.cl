@@ -1,6 +1,6 @@
 @extends('layouts.pindoor')
 
-@section('title', 'Panoramas — La Brújula de Valparaíso')
+@section('title', 'Panoramas — Pindoor.cl')
 @section('canonical', route('atractivos.panoramas'))
 @section('bodyClass', 'bg-gray-100 text-gray-900 font-serif')
 
@@ -34,6 +34,7 @@
             'ubicacion' => $p->ubicacion,
             'fecha'     => $p->fecha?->translatedFormat('l j \d\e F \d\e Y'),
             'hora'      => $p->hora,
+            'enlace'    => $p->enlace,
         ];
 
         if ($p->imagen) {
@@ -251,6 +252,17 @@
                         {{ $panorama->ubicacion }}
                     </p>
                     @endif
+
+                    @if($panorama->enlace)
+                    <a href="{{ $panorama->enlace }}" target="_blank" rel="noopener noreferrer"
+                       @click.stop
+                       class="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#fc5648] hover:text-[#d94439] transition">
+                        Más información
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                    </a>
+                    @endif
                 </div>
             </div>
 
@@ -291,6 +303,15 @@
                     <span x-show="images[current].fecha" x-text="'📅 ' + images[current].fecha"></span>
                     <span x-show="images[current].hora"  x-text="'🕐 ' + images[current].hora"></span>
                 </div>
+                <a x-show="images[current].enlace"
+                   :href="images[current].enlace"
+                   target="_blank" rel="noopener noreferrer"
+                   class="mt-1 inline-flex items-center gap-1.5 text-xs font-bold bg-white/10 hover:bg-white/20 text-white px-4 py-1.5 rounded-full transition">
+                    Más información
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                </a>
             </div>
             <p class="text-white/40 text-sm">
                 <span x-text="current + 1"></span> / {{ $allImages->count() }}

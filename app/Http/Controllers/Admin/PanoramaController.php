@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Panorama;
 use App\Models\PanoramaImagen;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class PanoramaController extends Controller
@@ -29,6 +30,7 @@ class PanoramaController extends Controller
             'fecha'       => 'required|date',
             'fecha_fin'   => 'nullable|date|after_or_equal:fecha',
             'hora'        => 'nullable|string|max:20',
+            'enlace'      => 'nullable|url|max:500',
             'categoria'   => 'nullable|string|in:' . implode(',', array_keys(\App\Models\Panorama::CATEGORIAS)),
             'orden'       => 'nullable|integer|min:0',
             'activo'      => 'nullable|boolean',
@@ -42,15 +44,38 @@ class PanoramaController extends Controller
         $data['orden']       = $request->input('orden', 0);
 
         if ($request->hasFile('imagen')) {
-            $data['imagen'] = $request->file('imagen')->store('panoramas', 'public');
+            $file = $request->file('imagen');
+            Log::info('[Panorama][store] portada', [
+                'original' => $file->getClientOriginalName(),
+                'size'     => $file->getSize(),
+                'mime'     => $file->getMimeType(),
+                'disk_root'=> Storage::disk('public')->path(''),
+            ]);
+            try {
+                $data['imagen'] = $file->store('panoramas', 'public');
+                Log::info('[Panorama][store] portada guardada', ['ruta' => $data['imagen']]);
+            } catch (\Throwable $e) {
+                Log::error('[Panorama][store] error al guardar portada', ['error' => $e->getMessage()]);
+                return back()->withInput()->withErrors(['imagen' => 'Error al guardar la imagen: ' . $e->getMessage()]);
+            }
         }
 
         $panorama = Panorama::create($data);
 
         if ($request->hasFile('imagenes')) {
             foreach ($request->file('imagenes') as $i => $file) {
-                $ruta = $file->store('panoramas', 'public');
-                $panorama->imagenes()->create(['ruta' => $ruta, 'orden' => $i]);
+                Log::info('[Panorama][store] adicional #' . $i, [
+                    'original' => $file->getClientOriginalName(),
+                    'size'     => $file->getSize(),
+                    'mime'     => $file->getMimeType(),
+                ]);
+                try {
+                    $ruta = $file->store('panoramas', 'public');
+                    $panorama->imagenes()->create(['ruta' => $ruta, 'orden' => $i]);
+                    Log::info('[Panorama][store] adicional guardada', ['ruta' => $ruta]);
+                } catch (\Throwable $e) {
+                    Log::error('[Panorama][store] error adicional #' . $i, ['error' => $e->getMessage()]);
+                }
             }
         }
 
@@ -71,6 +96,7 @@ class PanoramaController extends Controller
             'fecha'       => 'required|date',
             'fecha_fin'   => 'nullable|date|after_or_equal:fecha',
             'hora'        => 'nullable|string|max:20',
+            'enlace'      => 'nullable|url|max:500',
             'categoria'   => 'nullable|string|in:' . implode(',', array_keys(\App\Models\Panorama::CATEGORIAS)),
             'orden'       => 'nullable|integer|min:0',
             'activo'      => 'nullable|boolean',
@@ -84,10 +110,24 @@ class PanoramaController extends Controller
         $data['orden']       = $request->input('orden', 0);
 
         if ($request->hasFile('imagen')) {
-            if ($panorama->imagen) {
-                Storage::disk('public')->delete($panorama->imagen);
+            $file = $request->file('imagen');
+            Log::info('[Panorama][update] portada', [
+                'panorama_id' => $panorama->id,
+                'original'    => $file->getClientOriginalName(),
+                'size'        => $file->getSize(),
+                'mime'        => $file->getMimeType(),
+                'disk_root'   => Storage::disk('public')->path(''),
+            ]);
+            try {
+                if ($panorama->imagen) {
+                    Storage::disk('public')->delete($panorama->imagen);
+                }
+                $data['imagen'] = $file->store('panoramas', 'public');
+                Log::info('[Panorama][update] portada guardada', ['ruta' => $data['imagen']]);
+            } catch (\Throwable $e) {
+                Log::error('[Panorama][update] error al guardar portada', ['error' => $e->getMessage()]);
+                return back()->withInput()->withErrors(['imagen' => 'Error al guardar la imagen: ' . $e->getMessage()]);
             }
-            $data['imagen'] = $request->file('imagen')->store('panoramas', 'public');
         }
 
         $panorama->update($data);
@@ -95,8 +135,19 @@ class PanoramaController extends Controller
         if ($request->hasFile('imagenes')) {
             $offset = $panorama->imagenes()->max('orden') + 1;
             foreach ($request->file('imagenes') as $i => $file) {
-                $ruta = $file->store('panoramas', 'public');
-                $panorama->imagenes()->create(['ruta' => $ruta, 'orden' => $offset + $i]);
+                Log::info('[Panorama][update] adicional #' . $i, [
+                    'panorama_id' => $panorama->id,
+                    'original'    => $file->getClientOriginalName(),
+                    'size'        => $file->getSize(),
+                    'mime'        => $file->getMimeType(),
+                ]);
+                try {
+                    $ruta = $file->store('panoramas', 'public');
+                    $panorama->imagenes()->create(['ruta' => $ruta, 'orden' => $offset + $i]);
+                    Log::info('[Panorama][update] adicional guardada', ['ruta' => $ruta]);
+                } catch (\Throwable $e) {
+                    Log::error('[Panorama][update] error adicional #' . $i, ['error' => $e->getMessage()]);
+                }
             }
         }
 
