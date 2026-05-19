@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Configuracion;
 use App\Models\Panorama;
 use App\Models\PanoramaImagen;
 use Illuminate\Http\Request;
@@ -13,8 +14,16 @@ class PanoramaController extends Controller
 {
     public function index()
     {
-        $panoramas = Panorama::orderBy('orden')->orderBy('id')->get();
-        return view('admin.panoramas.index', compact('panoramas'));
+        $panoramas    = Panorama::orderBy('orden')->orderBy('id')->get();
+        $limiteDias   = (int) Configuracion::get('panoramas_limite_dias', 15);
+        return view('admin.panoramas.index', compact('panoramas', 'limiteDias'));
+    }
+
+    public function configuracion(Request $request)
+    {
+        $request->validate(['panoramas_limite_dias' => 'required|integer|min:1|max:365']);
+        Configuracion::set('panoramas_limite_dias', $request->input('panoramas_limite_dias'));
+        return back()->with('success', 'Configuración guardada.');
     }
 
     public function create()

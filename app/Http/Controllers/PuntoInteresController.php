@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Configuracion;
 use App\Models\PuntoInteres;
 use App\Models\Categoria;
 use Illuminate\Http\Request;
@@ -155,8 +156,9 @@ class PuntoInteresController extends Controller
 
     public function panoramas()
     {
-        $panoramas = \App\Models\Panorama::activos()->reorder()->orderBy('fecha')->orderBy('hora')->with('imagenes')->get();
-        return view('panoramas.index', compact('panoramas'));
+        $limite    = (int) Configuracion::get('panoramas_limite_dias', 15);
+        $panoramas = \App\Models\Panorama::activos($limite)->reorder()->orderBy('fecha')->orderBy('hora')->with('imagenes')->get();
+        return view('panoramas.index', compact('panoramas', 'limite'));
     }
 
     /**

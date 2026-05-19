@@ -90,7 +90,7 @@
     {{-- Header --}}
     <section class="mb-6 text-center">
         <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">🧭 Panoramas</h1>
-        <p class="text-gray-500 text-base">Valparaíso · próximos 15 días</p>
+        <p class="text-gray-500 text-base">Valparaíso · próximos {{ $limite }} días</p>
     </section>
 
     {{-- Filtro de categorías --}}
