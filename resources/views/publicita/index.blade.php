@@ -1,6 +1,6 @@
 @extends('layouts.pindoor')
 
-@section('title', 'Registra tu negocio — Pindoor.cl')
+@section('title', 'Registro — Pindoor.cl')
 @section('canonical', route('publicita.index'))
 @section('bodyClass', 'bg-gray-50 text-gray-900 font-sans antialiased')
 
@@ -18,7 +18,7 @@
             <div class="bg-[#fc5648] p-2 rounded-lg shadow-lg text-xl">📍</div>
             <div>
                 <h1 class="text-xl font-black tracking-tight">
-                    Ponle el <span class="text-[#fc5648]">pin</span> a tu negocio — <span class="text-white/70 font-normal">Gratis</span>
+                    Ponle el <span class="text-[#fc5648]">pin</span> a tu espacio — <span class="text-white/70 font-normal">Gratis</span>
                 </h1>
                 <p class="text-xs text-gray-400">La vitrina más grande de Valparaíso para turistas y locales.</p>
             </div>
@@ -28,7 +28,7 @@
             <a href="{{ route('login') }}" class="text-sm font-bold text-gray-300 hover:text-white transition">Iniciar Sesión</a>
             <a href="{{ route('register') }}"
                class="bg-[#fc5648] hover:bg-[#ff6b5b] text-white font-bold px-6 py-2.5 rounded-xl shadow-[0_8px_15px_rgba(252,86,72,0.3)] transition-all hover:-translate-y-0.5 active:translate-y-0">
-                Registrar mi Local →
+                Registrar mi Espacio →
             </a>
         </div>
     </header>
@@ -70,8 +70,8 @@
         <main class="flex-1 overflow-y-auto bg-white p-8">
             <div class="flex items-end justify-between mb-6">
                 <div>
-                    <h2 class="text-2xl font-black text-gray-900">Así se ve tu local</h2>
-                    <p class="text-gray-500 text-sm">Ejemplos ficticios.</p>
+                    <h2 class="text-2xl font-black text-gray-900">Así se ve tu espacio</h2>
+                    <p class="text-gray-500 text-sm">Hostal | Cafetería | Restaurante | Centro Cultural</p>
                 </div>
                 <div class="flex gap-2">
                     <span class="w-3 h-3 rounded-full bg-green-400 animate-pulse"></span>
@@ -142,7 +142,7 @@
      ══════════════════════════════════════════ --}}
 <div class="lg:hidden flex flex-col bg-white">
     <section class="bg-[#fc5648] text-white py-16 px-6 text-center">
-        <h1 class="text-4xl font-black mb-4">Ponle el pin a tu negocio</h1>
+        <h1 class="text-4xl font-black mb-4">Ponle el pin a tu espacio</h1>
         <p class="text-white/90 text-lg mb-8">Únete gratis a la red turística de Valparaíso.</p>
         <a href="{{ route('register') }}" class="inline-block bg-white text-[#fc5648] font-bold px-8 py-4 rounded-2xl shadow-xl">Registro Gratis →</a>
     </section>
@@ -151,7 +151,8 @@
     {{-- Lista de ejemplos en móvil (seccion simplificada para carga rápida) --}}
     @if(isset($atractivos))
     <section class="p-6">
-        <h2 class="text-xl font-bold mb-6">Así se verá tu ficha</h2>
+        <h2 class="text-2xl font-black text-gray-900">Así se ve tu espacio</h2>
+        <p class="text-gray-500 text-sm">Hostal | Cafetería | Restaurante | Centro Cultural</p>
         <div class="space-y-4">
             @foreach($atractivos->take(4) as $atractivo)
             <a href="{{ route('atractivos.show', $atractivo->slug ?? $atractivo->id) }}" class="flex bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">

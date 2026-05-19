@@ -29,7 +29,7 @@
             {{-- Texto --}}
             <div class="relative z-10">
                 <h1 class="text-white text-4xl font-bold leading-tight mb-4">
-                    Tu negocio,<br>visible en Valparaíso
+                    Tu espacio,<br>visible en Valparaíso
                 </h1>
                 <p class="text-white/80 text-base leading-relaxed mb-8">
                     Carta, menú del día, ofertas y agenda.<br>Todo en un solo lugar.

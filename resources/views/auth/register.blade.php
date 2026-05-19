@@ -6,7 +6,7 @@
             <a href="/" class="inline-flex items-center mb-4">
                 <span class="text-white font-bold text-2xl tracking-tight">Pin</span><span class="text-white/65 font-bold text-2xl tracking-tight">door</span>
             </a>
-            <h2 class="text-white text-xl font-bold leading-snug mb-2">Tu negocio, visible en Valparaíso</h2>
+            <h2 class="text-white text-xl font-bold leading-snug mb-2">Tu espacio, visible en Valparaíso</h2>
             <p class="text-white/80 text-sm leading-relaxed mb-4">Carta, menú del día, ofertas y agenda. Sin depender de redes sociales.</p>
             <ul class="space-y-2">
                 <li class="flex items-center gap-2 text-white/80 text-sm">
@@ -26,7 +26,7 @@
     </div>
 
     <div class="mb-6">
-        <h2 class="text-xl font-bold text-gray-900">Registra tu negocio</h2>
+        <h2 class="text-xl font-bold text-gray-900">Registra tu espacio</h2>
         <p class="text-sm text-gray-500 mt-1">Crea tu perfil gratuito en Pindoor</p>
     </div>
 
