@@ -17,6 +17,8 @@ class Panorama extends Model
         'feria'       => ['label' => 'Feria',       'emoji' => '🛍️'],
         'tour'        => ['label' => 'Tour',        'emoji' => '🗺️'],
         'infantil'    => ['label' => 'Infantil',    'emoji' => '🧸'],
+        'taller'      => ['label' => 'Taller',      'emoji' => '🛠️'],
+
     ];
 
     protected $fillable = [
