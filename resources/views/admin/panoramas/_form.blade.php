@@ -130,21 +130,15 @@
     @if(isset($panorama) && $panorama->relationLoaded('imagenes') && $panorama->imagenes->isNotEmpty())
         <div class="flex flex-wrap gap-3 mb-3">
             @foreach($panorama->imagenes as $img)
-                <div class="relative group">
+                <div class="relative group" id="img-wrap-{{ $img->id }}">
                     <img src="{{ asset('storage/' . $img->ruta) }}"
                          alt="Imagen"
                          class="h-28 w-28 object-cover rounded-xl border border-gray-200">
-                    <form action="{{ route('admin.panoramas.imagenes.destroy', $img) }}"
-                          method="POST"
-                          onsubmit="return confirm('¿Eliminar esta imagen?')"
-                          class="absolute top-1 right-1">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit"
-                                class="bg-white bg-opacity-90 text-red-500 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow hover:bg-red-500 hover:text-white transition opacity-0 group-hover:opacity-100">
-                            ✕
-                        </button>
-                    </form>
+                    <button type="button"
+                            onclick="eliminarImagen({{ $img->id }}, '{{ route('admin.panoramas.imagenes.destroy', $img) }}', '{{ csrf_token() }}')"
+                            class="absolute top-1 right-1 bg-white bg-opacity-90 text-red-500 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow hover:bg-red-500 hover:text-white transition opacity-0 group-hover:opacity-100">
+                        ✕
+                    </button>
                 </div>
             @endforeach
         </div>
@@ -221,6 +215,23 @@
         container.classList.add('flex');
     });
 })();
+
+function eliminarImagen(id, url, token) {
+    if (!confirm('¿Eliminar esta imagen?')) return;
+
+    fetch(url, {
+        method: 'DELETE',
+        headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
+    })
+    .then(res => {
+        if (!res.ok) throw new Error('Error ' + res.status);
+        document.getElementById('img-wrap-' + id)?.remove();
+    })
+    .catch(err => {
+        console.error('[Panorama] error eliminando imagen', err);
+        alert('No se pudo eliminar la imagen. Intenta de nuevo.');
+    });
+}
 </script>
 
 {{-- Activo --}}

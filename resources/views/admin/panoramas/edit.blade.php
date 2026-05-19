@@ -30,6 +30,7 @@
 
                     <div class="flex gap-3 pt-2">
                         <button type="submit"
+                                onclick="console.log('Guardar cambios')"
                                 class="bg-[#fc5648] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#d94439] transition">
                             Guardar cambios
                         </button>

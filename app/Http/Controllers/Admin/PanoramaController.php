@@ -183,6 +183,10 @@ class PanoramaController extends Controller
         Storage::disk('public')->delete($imagen->ruta);
         $imagen->delete();
 
+        if (request()->expectsJson()) {
+            return response()->json(['ok' => true]);
+        }
+
         return back()->with('success', 'Imagen eliminada.');
     }
 
