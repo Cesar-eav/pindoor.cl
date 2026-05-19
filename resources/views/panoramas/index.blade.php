@@ -22,13 +22,39 @@
     // Agrupar por fecha (string YYYY-MM-DD como clave)
     $porDia = $coleccion->groupBy(fn($p) => $p->fecha->toDateString());
 
-    // Todos los ítems indexados para el lightbox (filtrados)
-    $items = $coleccion->values();
+    // Lista plana de todas las imágenes para el lightbox (portada + adicionales)
+    $allImages     = collect();
+    $startIndexMap = []; // panorama_id → índice en $allImages
 
-    // Mapa fecha → índice inicial en $items (para el lightbox desde el strip)
+    foreach ($coleccion->values() as $p) {
+        $startIndexMap[$p->id] = $allImages->count();
+
+        $info = [
+            'titulo'    => $p->titulo,
+            'ubicacion' => $p->ubicacion,
+            'fecha'     => $p->fecha?->translatedFormat('l j \d\e F \d\e Y'),
+            'hora'      => $p->hora,
+        ];
+
+        if ($p->imagen) {
+            $allImages->push(array_merge($info, ['src' => asset('storage/'.$p->imagen)]));
+        }
+
+        foreach ($p->imagenes as $img) {
+            $allImages->push(array_merge($info, ['src' => asset('storage/'.$img->ruta)]));
+        }
+
+        // Si no tiene ninguna imagen, agregar entrada sin src para mantener el slot
+        if (!$p->imagen && $p->imagenes->isEmpty()) {
+            $allImages->push(array_merge($info, ['src' => null]));
+        }
+    }
+
+    // Mapa fecha → índice inicial del primer panorama de ese día en $allImages
     $indicesPorDia = [];
     foreach ($porDia as $fecha => $grupo) {
-        $indicesPorDia[$fecha] = $items->search(fn($p) => $p->fecha->toDateString() === $fecha);
+        $primer = $grupo->first();
+        $indicesPorDia[$fecha] = $startIndexMap[$primer->id] ?? 0;
     }
 
     function etiquetaDia($fecha, $hoy, $manana): string {
@@ -49,13 +75,7 @@
     x-data="{
         open: false,
         current: 0,
-        images: {{ $items->map(fn($p) => [
-            'src'      => $p->imagen ? asset('storage/'.$p->imagen) : null,
-            'titulo'   => $p->titulo,
-            'ubicacion'=> $p->ubicacion,
-            'fecha'    => $p->fecha?->translatedFormat('l j \d\e F \d\e Y'),
-            'hora'     => $p->hora,
-        ])->toJson() }},
+        images: {{ $allImages->toJson() }},
         openAt(i) { this.current = i; this.open = true; },
         prev() { this.current = (this.current - 1 + this.images.length) % this.images.length; },
         next() { this.current = (this.current + 1) % this.images.length; },
@@ -159,7 +179,7 @@
         {{-- Cards del día --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             @foreach($grupo as $panorama)
-            @php $idx = $indiceBase + $loop->index; @endphp
+            @php $idx = $startIndexMap[$panorama->id] ?? 0; @endphp
 
             <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-zoom-in
                         {{ $esHoy ? 'ring-1 ring-[#fc5648]/20' : '' }}"
@@ -186,6 +206,17 @@
                     @if($panorama->es_gratuito)
                     <div class="absolute top-2 right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg">
                         🎟️ Gratis
+                    </div>
+                    @endif
+
+                    {{-- Badge cantidad de imágenes (abajo izquierda) --}}
+                    @php $totalFotos = ($panorama->imagen ? 1 : 0) + $panorama->imagenes->count(); @endphp
+                    @if($totalFotos > 1)
+                    <div class="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        {{ $totalFotos }}
                     </div>
                     @endif
 
@@ -262,7 +293,7 @@
                 </div>
             </div>
             <p class="text-white/40 text-sm">
-                <span x-text="current + 1"></span> / {{ $items->count() }}
+                <span x-text="current + 1"></span> / {{ $allImages->count() }}
             </p>
         </div>
 

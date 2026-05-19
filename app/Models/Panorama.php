@@ -18,6 +18,7 @@ class Panorama extends Model
         'tour'        => ['label' => 'Tour',        'emoji' => '🗺️'],
         'infantil'    => ['label' => 'Infantil',    'emoji' => '🧸'],
         'taller'      => ['label' => 'Taller',      'emoji' => '🛠️'],
+        'conferencia' => ['label' => 'Conferencia',      'emoji' => '🎓'],
 
     ];
 
@@ -40,6 +41,11 @@ class Panorama extends Model
         'activo'      => 'boolean',
         'es_gratuito' => 'boolean',
     ];
+
+    public function imagenes()
+    {
+        return $this->hasMany(PanoramaImagen::class)->orderBy('orden');
+    }
 
     public function scopeActivos($query, $limite = 15)
     {

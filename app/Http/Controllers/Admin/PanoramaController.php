@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Panorama;
+use App\Models\PanoramaImagen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -33,6 +34,7 @@ class PanoramaController extends Controller
             'activo'      => 'nullable|boolean',
             'es_gratuito' => 'nullable|boolean',
             'imagen'      => 'nullable|image|max:4096',
+            'imagenes.*'  => 'nullable|image|max:4096',
         ]);
 
         $data['activo']      = $request->boolean('activo', true);
@@ -43,13 +45,21 @@ class PanoramaController extends Controller
             $data['imagen'] = $request->file('imagen')->store('panoramas', 'public');
         }
 
-        Panorama::create($data);
+        $panorama = Panorama::create($data);
+
+        if ($request->hasFile('imagenes')) {
+            foreach ($request->file('imagenes') as $i => $file) {
+                $ruta = $file->store('panoramas', 'public');
+                $panorama->imagenes()->create(['ruta' => $ruta, 'orden' => $i]);
+            }
+        }
 
         return redirect()->route('admin.panoramas.index')->with('success', 'Panorama creado correctamente.');
     }
 
     public function edit(Panorama $panorama)
     {
+        $panorama->load('imagenes');
         return view('admin.panoramas.edit', compact('panorama'));
     }
 
@@ -66,6 +76,7 @@ class PanoramaController extends Controller
             'activo'      => 'nullable|boolean',
             'es_gratuito' => 'nullable|boolean',
             'imagen'      => 'nullable|image|max:4096',
+            'imagenes.*'  => 'nullable|image|max:4096',
         ]);
 
         $data['activo']      = $request->boolean('activo', true);
@@ -81,6 +92,14 @@ class PanoramaController extends Controller
 
         $panorama->update($data);
 
+        if ($request->hasFile('imagenes')) {
+            $offset = $panorama->imagenes()->max('orden') + 1;
+            foreach ($request->file('imagenes') as $i => $file) {
+                $ruta = $file->store('panoramas', 'public');
+                $panorama->imagenes()->create(['ruta' => $ruta, 'orden' => $offset + $i]);
+            }
+        }
+
         return redirect()->route('admin.panoramas.index')->with('success', 'Panorama actualizado correctamente.');
     }
 
@@ -90,9 +109,21 @@ class PanoramaController extends Controller
             Storage::disk('public')->delete($panorama->imagen);
         }
 
+        foreach ($panorama->imagenes as $imagen) {
+            Storage::disk('public')->delete($imagen->ruta);
+        }
+
         $panorama->delete();
 
         return redirect()->route('admin.panoramas.index')->with('success', 'Panorama eliminado.');
+    }
+
+    public function destroyImagen(PanoramaImagen $imagen)
+    {
+        Storage::disk('public')->delete($imagen->ruta);
+        $imagen->delete();
+
+        return back()->with('success', 'Imagen eliminada.');
     }
 
     public function toggle(Panorama $panorama)

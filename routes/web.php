@@ -68,6 +68,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     // Panoramas — La Brújula
     Route::resource('panoramas', PanoramaController::class)->except(['show']);
     Route::patch('/panoramas/{panorama}/toggle', [PanoramaController::class, 'toggle'])->name('panoramas.toggle');
+    Route::delete('/panoramas/imagenes/{imagen}', [PanoramaController::class, 'destroyImagen'])->name('panoramas.imagenes.destroy');
 
     // Leads de Publicita
     Route::get('/leads', [AdminController::class, 'leads'])->name('leads');

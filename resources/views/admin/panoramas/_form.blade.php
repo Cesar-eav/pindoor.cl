@@ -82,9 +82,9 @@
 </div>
 
 
-{{-- Imagen --}}
+{{-- Imagen portada --}}
 <div>
-    <label class="block text-sm font-semibold text-gray-700 mb-2">Imagen</label>
+    <label class="block text-sm font-semibold text-gray-700 mb-2">Imagen portada</label>
 
     @if(isset($panorama->imagen) && $panorama->imagen)
         <div class="mb-3">
@@ -105,6 +105,45 @@
     <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP — máx. 4 MB</p>
 
     @error('imagen') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+</div>
+
+{{-- Imágenes adicionales --}}
+<div>
+    <label class="block text-sm font-semibold text-gray-700 mb-2">Imágenes adicionales</label>
+
+    @if(isset($panorama) && $panorama->relationLoaded('imagenes') && $panorama->imagenes->isNotEmpty())
+        <div class="flex flex-wrap gap-3 mb-3">
+            @foreach($panorama->imagenes as $img)
+                <div class="relative group">
+                    <img src="{{ asset('storage/' . $img->ruta) }}"
+                         alt="Imagen"
+                         class="h-28 w-28 object-cover rounded-xl border border-gray-200">
+                    <form action="{{ route('admin.panoramas.imagenes.destroy', $img) }}"
+                          method="POST"
+                          onsubmit="return confirm('¿Eliminar esta imagen?')"
+                          class="absolute top-1 right-1">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                                class="bg-white bg-opacity-90 text-red-500 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow hover:bg-red-500 hover:text-white transition opacity-0 group-hover:opacity-100">
+                            ✕
+                        </button>
+                    </form>
+                </div>
+            @endforeach
+        </div>
+    @endif
+
+    <input type="file" name="imagenes[]" accept="image/*" multiple
+           class="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-xl file:border-0
+                  file:text-sm file:font-bold
+                  file:bg-[#fff0ef] file:text-[#fc5648]
+                  hover:file:bg-[#ffe0dd] cursor-pointer">
+    <p class="text-xs text-gray-400 mt-1">Puedes seleccionar varias imágenes a la vez — JPG, PNG, WEBP — máx. 4 MB c/u</p>
+
+    @error('imagenes.*') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
 </div>
 
 {{-- Activo --}}

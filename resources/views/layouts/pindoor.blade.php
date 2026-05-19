@@ -45,7 +45,7 @@
 </div>
 
 <div id="drawer"
-     class="fixed top-0 right-0 bottom-0 w-72 bg-white z-50 shadow-2xl translate-x-full md:hidden flex flex-col"
+     class="fixed top-0 right-0 bottom-0 w-72 bg-white z-50 shadow-2xl translate-x-full md:hidden flex flex-col font-sans"
      style="transition: transform .28s cubic-bezier(.4,0,.2,1);">
     <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
         <span class="font-bold text-gray-800">Explorar</span>
@@ -96,18 +96,75 @@
             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Explorar</p>
             <div class="space-y-1">
                 <a href="{{ route('puntos.index') }}"
-                   class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition text-gray-700">
-                    <span class="text-xl">🏠</span>
+                   class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition text-gray-600">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
                     <span class="text-sm font-semibold">Inicio</span>
                 </a>
-                <a href="{{ route('atractivos.panoramas') }}"
-                   class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition text-gray-700">
-                    <span class="text-xl">🖼️</span>
-                    <span class="text-sm font-semibold">Panoramas</span>
-                </a>
+
+                {{-- Panoramas con subcategorías --}}
+                @php
+                    $panoramasActivos = \App\Models\Panorama::activos()->get();
+                    $conteoCategoriasDrawer = $panoramasActivos->groupBy('categoria')->map->count();
+                    $conteoGratisDrawer     = $panoramasActivos->where('es_gratuito', true)->count();
+                    $totalPanoramasDrawer   = $panoramasActivos->count();
+                @endphp
+                <div x-data="{ open: {{ request()->routeIs('atractivos.panoramas') ? 'true' : 'false' }} }">
+                    <button @click="open = !open"
+                            class="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition text-gray-600">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <span class="text-sm font-semibold flex-1 text-left">Panoramas</span>
+                        @if($totalPanoramasDrawer > 0)
+                        <span class="text-[10px] font-bold bg-[#fc5648] text-white rounded-full px-1.5 py-0.5 leading-none">{{ $totalPanoramasDrawer }}</span>
+                        @endif
+                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" class="pl-8 pb-1 space-y-0.5">
+                        <a href="{{ route('atractivos.panoramas') }}"
+                           onclick="closeDrawer()"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition
+                                  {{ !request('categoria') && request()->routeIs('atractivos.panoramas') ? 'text-[#fc5648] bg-[#fff0ef]' : 'text-gray-600 hover:bg-gray-50' }}">
+                            <span class="flex-1">Todos</span>
+                            @if($totalPanoramasDrawer > 0)
+                            <span class="text-[10px] text-gray-400 font-normal">{{ $totalPanoramasDrawer }}</span>
+                            @endif
+                        </a>
+                        @foreach(\App\Models\Panorama::CATEGORIAS as $slug => $cat)
+                        @if(($conteoCategoriasDrawer[$slug] ?? 0) > 0)
+                        <a href="{{ route('atractivos.panoramas', ['categoria' => $slug]) }}"
+                           onclick="closeDrawer()"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition
+                                  {{ request('categoria') === $slug ? 'text-[#fc5648] bg-[#fff0ef]' : 'text-gray-600 hover:bg-gray-50' }}">
+                            <span>{{ $cat['emoji'] }}</span>
+                            <span class="flex-1">{{ $cat['label'] }}</span>
+                            <span class="text-[10px] text-gray-400 font-normal">{{ $conteoCategoriasDrawer[$slug] }}</span>
+                        </a>
+                        @endif
+                        @endforeach
+                        @if($conteoGratisDrawer > 0)
+                        <a href="{{ route('atractivos.panoramas', ['categoria' => 'gratuito']) }}"
+                           onclick="closeDrawer()"
+                           class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition
+                                  {{ request('categoria') === 'gratuito' ? 'text-green-700 bg-green-50' : 'text-green-700 hover:bg-green-50' }}">
+                            <span>🎟️</span>
+                            <span class="flex-1">Gratis</span>
+                            <span class="text-[10px] font-normal opacity-70">{{ $conteoGratisDrawer }}</span>
+                        </a>
+                        @endif
+                    </div>
+                </div>
+
                 <a href="{{ route('publicita.index') }}"
-                   class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition text-gray-700">
-                    <span class="text-xl">📣</span>
+                   class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition text-gray-600">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+                    </svg>
                     <span class="text-sm font-semibold">Registra tu negocio</span>
                 </a>
             </div>
