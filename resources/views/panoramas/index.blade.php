@@ -130,7 +130,7 @@
 
     {{-- ── Strip de días navegable ─────────────────────────────────────────── --}}
     <div class="sticky top-14 md:top-0 z-20 bg-gray-100/90 backdrop-blur-sm py-3 mb-8 -mx-4 px-4">
-        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+        <div id="dias-strip" class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
             @foreach($porDia as $fechaStr => $grupo)
             @php
                 $fecha  = Carbon::parse($fechaStr);
@@ -140,7 +140,8 @@
                 $num    = $fecha->format('j');
             @endphp
             <a href="#dia-{{ $fechaStr }}"
-               class="flex-shrink-0 flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl text-xs font-bold transition-all
+               data-dia="{{ $fechaStr }}"
+               class="dia-pill shrink-0 flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl text-xs font-bold transition-all
                       {{ $esHoy  ? 'bg-[#fc5648] text-white shadow-md shadow-[#fc5648]/30' :
                          ($esMana ? 'bg-gray-900 text-white' : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-400') }}">
                 <span class="text-[10px] tracking-widest uppercase leading-none">{{ $label }}</span>
@@ -163,7 +164,7 @@
         $indiceBase  = $indicesPorDia[$fechaStr];
     @endphp
 
-    <section id="dia-{{ $fechaStr }}" class="mb-12 scroll-mt-36 md:scroll-mt-20">
+    <section id="dia-{{ $fechaStr }}" data-fecha="{{ $fechaStr }}" class="mb-12">
 
         {{-- Encabezado del día --}}
         <div class="flex items-center gap-3 mb-5">
@@ -333,4 +334,83 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
+
+<script>
+(function () {
+    const pills    = document.querySelectorAll('.dia-pill');
+    const strip    = document.getElementById('dias-strip');
+    const secciones = document.querySelectorAll('section[data-fecha]');
+
+    // Guarda el style original de cada pill (colores Blade)
+    pills.forEach(p => { p.dataset.origStyle = p.getAttribute('style') || ''; });
+
+    let fechaActiva  = null;
+    let ignorarScroll = false; // bloquea el observer mientras scrolleamos por clic
+
+    // ── Pintar pill activa ───────────────────────────────────────────────────
+    function marcarPill(fecha) {
+        if (fecha === fechaActiva) return;
+        fechaActiva = fecha;
+
+        pills.forEach(p => {
+            p.style.cssText = p.dataset.dia === fecha
+                ? 'background:#fc5648;color:white;border-color:#fc5648;box-shadow:0 4px 12px rgba(252,86,72,.3);'
+                : p.dataset.origStyle;
+        });
+
+        // Desplaza la pill al centro del strip horizontal (sin afectar el scroll vertical)
+        const activa = strip?.querySelector(`.dia-pill[data-dia="${fecha}"]`);
+        if (activa && strip) {
+            const pillCenter  = activa.offsetLeft + activa.offsetWidth / 2;
+            const stripCenter = strip.offsetWidth / 2;
+            strip.scrollTo({ left: pillCenter - stripCenter, behavior: 'smooth' });
+        }
+    }
+
+    // ── Altura de los headers sticky/fixed sobre el contenido ───────────────
+    function stickyOffset() {
+        const appbar    = document.querySelector('header[class*="sticky"]');
+        const stripWrap = strip?.closest('[class*="sticky"]');
+        return (appbar?.offsetHeight ?? 0) + (stripWrap?.offsetHeight ?? 0) + 8;
+    }
+
+    // ── Clic en pill ────────────────────────────────────────────────────────
+    pills.forEach(pill => {
+        pill.addEventListener('click', e => {
+            e.preventDefault();
+            marcarPill(pill.dataset.dia);
+
+            const target = document.getElementById('dia-' + pill.dataset.dia);
+            if (!target) return;
+
+            ignorarScroll = true;
+            const top = target.getBoundingClientRect().top + window.scrollY - stickyOffset();
+            window.scrollTo({ top, behavior: 'smooth' });
+
+            // Reactiva el observer una vez que el scroll suave termina (~700 ms)
+            clearTimeout(pill._timer);
+            pill._timer = setTimeout(() => { ignorarScroll = false; }, 700);
+        });
+    });
+
+    // ── IntersectionObserver (scroll manual) ────────────────────────────────
+    if (secciones.length) {
+        const observer = new IntersectionObserver(entries => {
+            if (ignorarScroll) return;
+
+            // De todas las secciones visibles en la zona, tomar la más alta en pantalla
+            let mejor = null;
+            entries.forEach(e => {
+                if (!e.isIntersecting) return;
+                if (!mejor || e.boundingClientRect.top < mejor.boundingClientRect.top) mejor = e;
+            });
+            if (mejor) marcarPill(mejor.target.dataset.fecha);
+
+        }, { rootMargin: '-15% 0px -55% 0px', threshold: 0 });
+
+        secciones.forEach(s => observer.observe(s));
+        marcarPill(secciones[0].dataset.fecha);
+    }
+})();
+</script>
 @endsection
