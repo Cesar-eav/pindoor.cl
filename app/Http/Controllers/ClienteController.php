@@ -23,7 +23,9 @@ class ClienteController extends Controller
 
     public function onboarding()
     {
-        $categorias = Categoria::orderBy('nombre')->get();
+        $categorias = Categoria::whereIn('slug', ['cafeterias', 'cultura', 'museos', 'picadas', 'comer', 'alojar'])
+            ->orderBy('nombre')
+            ->get();
         return view('cliente.onboarding', compact('categorias'));
     }
 
