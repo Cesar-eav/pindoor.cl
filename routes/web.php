@@ -10,6 +10,7 @@ use App\Http\Controllers\PublicitaController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Admin\CategoriaController;
 use App\Http\Controllers\Admin\PanoramaController;
+use App\Http\Controllers\ArtistaController;
 use Illuminate\Support\Facades\Route;
 
 /* --- RUTAS PÚBLICAS (TURISTAS) --- */
@@ -28,8 +29,14 @@ Route::get('/atractivos/categoria/{categoria}', [PuntoInteresController::class, 
 Route::get('/atractivos/ciudad/{ciudad}', [PuntoInteresController::class, 'filtrarPorCiudad'])->name('atractivos.ciudad');
 Route::get('/panoramas', [PuntoInteresController::class, 'panoramas'])->name('atractivos.panoramas');
 Route::get('/registro', [PublicitaController::class, 'index'])->name('publicita.index');
-//Route::get('/ejemplos', [PublicitaController::class, 'index'])->name('publicita.index');
 Route::post('/publicita', [PublicitaController::class, 'store'])->name('publicita.store');
+
+// Registro artista
+Route::get('/registro-artista',  [ArtistaController::class, 'showRegister'])->name('artista.register');
+Route::post('/registro-artista', [ArtistaController::class, 'register'])->name('artista.register.store');
+
+// Directorio público de artistas
+Route::get('/artistas', [ArtistaController::class, 'directorio'])->name('artistas.index');
 
 
 
@@ -38,6 +45,7 @@ Route::get('/dashboard', function () {
     $type = auth()->user()->type ?? '';
     if ($type === 'admin')   return redirect()->route('admin.stats');
     if ($type === 'cliente') return redirect()->route('cliente.perfil');
+    if ($type === 'artista') return redirect()->route('artista.perfil');
     return redirect()->route('puntos.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -120,5 +128,20 @@ Route::middleware(['auth', 'verified', 'role:cliente'])->prefix('cliente')->name
     Route::post('/eventos/{punto}/guardar', [ClienteEventosController::class, 'guardarEvento'])->name('eventos.guardar');
     Route::delete('/eventos/{punto}/{evento}', [ClienteEventosController::class, 'eliminarEvento'])->name('eventos.eliminar');
 });
+
+/* --- RUTAS ARTISTAS --- */
+Route::middleware(['auth', 'verified', 'role:artista'])->prefix('artista')->name('artista.')->group(function () {
+    Route::get('/nuevo',  [ArtistaController::class, 'onboarding'])->name('nuevo');
+    Route::post('/nuevo', [ArtistaController::class, 'crearPerfil'])->name('crear');
+
+    Route::get('/perfil',              [ArtistaController::class, 'perfil'])->name('perfil');
+    Route::put('/perfil/actualizar',   [ArtistaController::class, 'actualizarPerfil'])->name('perfil.actualizar');
+
+    Route::post('/perfil/imagenes',           [ArtistaController::class, 'subirImagen'])->name('imagen.subir');
+    Route::delete('/perfil/imagenes/{imagen}', [ArtistaController::class, 'eliminarImagen'])->name('imagen.eliminar');
+});
+
+// Perfil público artista — debe ir DESPUÉS del grupo protegido para que /artista/nuevo no sea capturado como slug
+Route::get('/artista/{slug}', [ArtistaController::class, 'show'])->name('artista.show');
 
 require __DIR__.'/auth.php';

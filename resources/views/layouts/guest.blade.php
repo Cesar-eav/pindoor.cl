@@ -12,21 +12,21 @@
     <body class="font-sans antialiased min-h-screen flex relative overflow-x-hidden">
 
         {{-- Panel izquierdo (solo desktop) --}}
+        @isset($panelLeft)
+            {{ $panelLeft }}
+        @else
         <div class="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 relative overflow-hidden"
              style="background: linear-gradient(155deg, #ff6b5b 0%, #fc5648 45%, #e83a2c 100%)">
 
-            {{-- Manchas decorativas sutiles --}}
             <div class="absolute -top-24 -left-24 w-72 h-72 bg-white/5 rounded-full"></div>
             <div class="absolute bottom-0 left-1/4 w-48 h-48 bg-black/5 rounded-full"></div>
 
-            {{-- Logo --}}
             <div class="relative z-10">
                 <a href="/" class="inline-flex items-center">
                     <span class="text-white font-bold text-3xl tracking-tight">Pin</span><span class="text-white/65 font-bold text-3xl tracking-tight">door</span>
                 </a>
             </div>
 
-            {{-- Texto --}}
             <div class="relative z-10">
                 <h1 class="text-white text-4xl font-bold leading-tight mb-4">
                     Tu espacio,<br>visible en Valparaíso
@@ -52,9 +52,10 @@
 
             <p class="relative z-10 text-white/35 text-sm">© {{ date('Y') }} Pindoor · Valparaíso, Chile</p>
         </div>
+        @endisset
 
-        {{-- Círculos en arco vertical sobre el límite (solo desktop) --}}
-        @if($featuredPuntos->count())
+        {{-- Círculos en arco vertical sobre el límite (solo desktop, solo panel de negocios) --}}
+        @if(!isset($panelLeft) && $featuredPuntos->count())
         @php
             // Arco que baja hacia el centro y sube en los extremos (bowing hacia el formulario)
             $offsets = [-10, 4, 16, 16, 4, -10]; // px hacia la derecha
