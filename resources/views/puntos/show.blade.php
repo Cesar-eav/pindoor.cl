@@ -203,7 +203,7 @@
                 <button @click="vista = 'agenda'"
                     :class="vista === 'agenda' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
-                    📅 Agenda Arriba
+                    📅 Agenda
                 </button>
                 @endif
             </div>
@@ -344,7 +344,7 @@
                     <div x-show="vista === 'contenido'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
 
                         {{-- CABECERA DEL NEGOCIO --}}
-                        @if($punto->es_cliente)
+                        @if($punto->es_cliente || $punto->categoria_id==7)
                         <div class="flex gap-4 items-start bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-8">
                             @if($punto->imagen_perfil)
                                 <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
@@ -1142,7 +1142,7 @@
                 {{-- COLUMNA DERECHA: sidebar --}}
                 <aside class="lg:col-span-4 hidden md:block">
                     <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/50 border border-white sticky top-8">
-                        
+      
                         {{-- Logo del negocio (solo si es cliente) --}}
                         @if($punto->es_cliente && $punto->imagen_perfil)
                             <div class="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
@@ -1155,6 +1155,7 @@
                                 </div>
                             </div>
                         @endif
+
 
 
                         <h2 class="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-6">Ubicación</h2>
