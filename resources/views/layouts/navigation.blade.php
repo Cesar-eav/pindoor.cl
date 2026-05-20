@@ -34,6 +34,9 @@
                         <x-nav-link :href="route('admin.panoramas.index')" :active="request()->routeIs('admin.panoramas.*')">
                             Panoramas
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.artistas')" :active="request()->routeIs('admin.artistas*')">
+                            Artistas
+                        </x-nav-link>
 
                     @elseif(auth()->user()->type === 'cliente')
                         <x-nav-link :href="route('cliente.perfil')" :active="request()->routeIs('cliente.*')">
@@ -116,6 +119,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.panoramas.index')" :active="request()->routeIs('admin.panoramas.*')">
                     Panoramas
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.artistas')" :active="request()->routeIs('admin.artistas*')">
+                    Artistas
                 </x-responsive-nav-link>
 
             @elseif(auth()->user()->type === 'cliente')

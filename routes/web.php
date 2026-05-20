@@ -79,6 +79,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::delete('/panoramas/imagenes/{imagen}', [PanoramaController::class, 'destroyImagen'])->name('panoramas.imagenes.destroy');
     Route::post('/panoramas/configuracion', [PanoramaController::class, 'configuracion'])->name('panoramas.configuracion');
 
+    // Artistas
+    Route::get('/artistas', [\App\Http\Controllers\AdminController::class, 'artistas'])->name('artistas');
+    Route::patch('/artistas/{artista}/toggle', [\App\Http\Controllers\AdminController::class, 'toggleArtista'])->name('artistas.toggle');
+    Route::delete('/artistas/{artista}', [\App\Http\Controllers\AdminController::class, 'destroyArtista'])->name('artistas.destroy');
+
     // Leads de Publicita
     Route::get('/leads', [AdminController::class, 'leads'])->name('leads');
     Route::patch('/leads/{lead}/toggle', [AdminController::class, 'toggleLead'])->name('leads.toggle');

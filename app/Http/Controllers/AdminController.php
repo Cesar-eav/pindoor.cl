@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PuntoInteres;
+use App\Models\Artista;
 use App\Models\Categoria;
 use App\Models\LeadPublicita;
 use App\Models\User;
@@ -278,6 +279,35 @@ class AdminController extends Controller
     {
         $punto->update(['activo' => !$punto->activo]);
         return back()->with('success', 'Estado actualizado correctamente.');
+    }
+
+    public function artistas()
+    {
+        $artistas = Artista::with('usuario')
+            ->latest()
+            ->paginate(25);
+
+        return view('admin.artistas', compact('artistas'));
+    }
+
+    public function toggleArtista(Artista $artista)
+    {
+        $artista->update(['activo' => !$artista->activo]);
+        return back()->with('success', 'Estado del artista actualizado.');
+    }
+
+    public function destroyArtista(Artista $artista)
+    {
+        if ($artista->imagen_perfil) {
+            \Storage::disk('public')->delete($artista->imagen_perfil);
+        }
+        foreach ($artista->imagenes as $img) {
+            \Storage::disk('public')->delete($img->ruta);
+        }
+        $artista->imagenes()->delete();
+        $artista->delete();
+
+        return back()->with('success', 'Perfil de artista eliminado.');
     }
 
     public function storePunto(Request $request)
