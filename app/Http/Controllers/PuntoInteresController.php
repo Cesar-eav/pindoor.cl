@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Configuracion;
 use App\Models\PuntoInteres;
+use App\Models\Panorama;
 use App\Models\Categoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -76,7 +77,19 @@ class PuntoInteresController extends Controller
                 'es_cliente'   => (bool) $p->es_cliente,
             ]);
 
-        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'puntosMapData'));
+        $panoramas = collect();
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $panoramas = Panorama::where('activo', true)
+                ->where('fecha', '>=', now()->toDateString())
+                ->where(fn($q) => $q->where('titulo', 'like', "%{$s}%")
+                                    ->orWhere('ubicacion', 'like', "%{$s}%"))
+                ->orderBy('fecha')
+                ->limit(6)
+                ->get();
+        }
+
+        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'puntosMapData', 'panoramas'));
 
     } catch (\Exception $e) {
         \Log::error('Error en index: ' . $e->getMessage());
@@ -152,6 +165,13 @@ class PuntoInteresController extends Controller
 
         return redirect()->route('cliente.mis-puntos')
                          ->with('success', 'El local ha sido retirado del mapa.');
+    }
+
+    public function showPanorama(\App\Models\Panorama $panorama)
+    {
+        abort_if(!$panorama->activo, 404);
+        $panorama->load('imagenes');
+        return view('panoramas.show', compact('panorama'));
     }
 
     public function panoramas()

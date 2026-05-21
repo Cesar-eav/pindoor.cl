@@ -215,7 +215,7 @@
                     <div class="mt-12 mb-4 flex justify-center">
                         {{ $atractivos->links() }}
                     </div>
-                @else
+                @elseif(empty($panoramas) || $panoramas->isEmpty())
                     <div class="bg-white rounded-2xl shadow-sm p-16 text-center border-2 border-dashed border-gray-200">
                         <div class="text-5xl mb-4">🕵️‍♂️</div>
                         <h3 class="text-xl font-bold text-gray-800 mb-2">Sin resultados</h3>
@@ -225,6 +225,46 @@
                             Ver todos
                         </a>
                     </div>
+                @endif
+
+                {{-- Panoramas en búsqueda --}}
+                @if(isset($panoramas) && $panoramas->isNotEmpty())
+                <div class="mt-10">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-base font-bold text-gray-700">
+                            🗓 Panoramas con "{{ request('search') }}"
+                        </h2>
+                        <a href="{{ route('atractivos.panoramas') }}" class="text-xs text-[#fc5648] font-semibold hover:underline">
+                            Ver todos →
+                        </a>
+                    </div>
+                    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                        @foreach($panoramas as $panorama)
+                        <a href="{{ route('panoramas.show', $panorama) }}"
+                           class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition overflow-hidden group">
+                            @if($panorama->imagen)
+                                <img src="{{ asset('storage/' . $panorama->imagen) }}"
+                                     alt="{{ $panorama->titulo }}"
+                                     class="w-full h-36 object-cover group-hover:scale-105 transition duration-300">
+                            @else
+                                <div class="w-full h-36 bg-linear-to-br from-[#fff0ef] to-[#ffe4e1] flex items-center justify-center text-3xl">🗓</div>
+                            @endif
+                            <div class="p-3">
+                                <p class="font-bold text-gray-900 text-sm leading-snug line-clamp-2">{{ $panorama->titulo }}</p>
+                                <p class="text-xs text-[#fc5648] font-semibold mt-1">
+                                    {{ \Carbon\Carbon::parse($panorama->fecha)->locale('es')->isoFormat('D MMM') }}
+                                    @if($panorama->fecha_fin && $panorama->fecha_fin !== $panorama->fecha)
+                                        — {{ \Carbon\Carbon::parse($panorama->fecha_fin)->locale('es')->isoFormat('D MMM') }}
+                                    @endif
+                                </p>
+                                @if($panorama->ubicacion)
+                                    <p class="text-xs text-gray-400 mt-0.5 truncate">📍 {{ $panorama->ubicacion }}</p>
+                                @endif
+                            </div>
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
                 @endif
             </div>
         </div>{{-- /vista-listado --}}
