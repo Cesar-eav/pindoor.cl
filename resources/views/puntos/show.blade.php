@@ -1276,9 +1276,20 @@
     @php
         $hayAcciones = $punto->tieneOfertaActiva() || $punto->tieneMenu()
                     || $punto->tieneCarta()         || $punto->tieneAvisos()
-                    || $punto->tienePromociones()   || ($punto->lat && $punto->lng)
+                    || $punto->tienePromociones()
                     || ($punto->moduloActivo('agenda') && $punto->eventosProximos()->count());
     @endphp
+    @if($punto->lat && $punto->lng)
+    <a href="https://www.google.com/maps?q={{ $punto->lat }},{{ $punto->lng }}"
+       target="_blank" rel="noopener"
+       class="lg:hidden fixed bottom-6 left-4 z-50 flex items-center gap-2 bg-white text-gray-800 text-sm font-bold px-4 py-3 rounded-full shadow-xl border border-gray-200 hover:bg-gray-50 transition">
+        <svg class="w-4 h-4 text-[#fc5648] shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+        </svg>
+        Ir al mapa
+    </a>
+    @endif
+
     @if($hayAcciones)
     <div class="lg:hidden fixed bottom-6 right-4 z-50"
          x-data="{ abierto: false }"
@@ -1343,14 +1354,6 @@
             </button>
             @endif
 
-            @if($punto->lat && $punto->lng)
-            <a href="https://www.google.com/maps?q={{ $punto->lat }},{{ $punto->lng }}"
-               target="_blank" rel="noopener"
-               class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-gray-50 transition">
-                <span class="w-2 h-2 rounded-full bg-[#fc5648] shrink-0"></span>
-                📍 Ir al mapa
-            </a>
-            @endif
         </div>
 
         {{-- Botón principal --}}
