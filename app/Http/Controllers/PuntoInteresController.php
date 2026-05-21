@@ -18,7 +18,7 @@ class PuntoInteresController extends Controller
     try {
         $query = PuntoInteres::query()
             ->where('activo', 1)
-            ->whereNotIn('id', [81,80,64,87])
+            //->whereNotIn('id', [81,80,64,87])
             ->where('eliminado', false);
 
         if ($request->filled('category')) {
