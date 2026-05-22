@@ -11,6 +11,7 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Admin\CategoriaController;
 use App\Http\Controllers\Admin\PanoramaController;
 use App\Http\Controllers\ArtistaController;
+use App\Http\Controllers\ContactoController;
 use Illuminate\Support\Facades\Route;
 
 /* --- RUTAS PÚBLICAS (TURISTAS) --- */
@@ -31,6 +32,10 @@ Route::get('/panoramas', [PuntoInteresController::class, 'panoramas'])->name('at
 Route::get('/panoramas/{panorama}', [PuntoInteresController::class, 'showPanorama'])->name('panoramas.show');
 Route::get('/registro', [PublicitaController::class, 'index'])->name('publicita.index');
 Route::post('/publicita', [PublicitaController::class, 'store'])->name('publicita.store');
+
+// Contacto clientes y artistas
+Route::get('/contacto', [ContactoController::class, 'index'])->name('contacto.index');
+Route::post('/contacto', [ContactoController::class, 'store'])->name('contacto.store');
 
 // Registro artista
 Route::get('/registro-artista',  [ArtistaController::class, 'showRegister'])->name('artista.register');
