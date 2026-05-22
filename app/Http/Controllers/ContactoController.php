@@ -48,7 +48,7 @@ class ContactoController extends Controller
             'mensaje'        => $request->mensaje,
         ]);
 
-        Mail::to('soporte@pindoor.cl')->send(new NuevoContacto($lead));
+        Mail::to(['soporte@pindoor.cl', 'cesar.eav@gmail.com'])->send(new NuevoContacto($lead));
 
         return back()->with('success', '¡Mensaje enviado! Te contactaremos pronto.');
     }
