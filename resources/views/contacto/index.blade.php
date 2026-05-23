@@ -22,9 +22,29 @@
             <h1 class="text-4xl md:text-5xl font-black leading-tight mb-4">
                 ¿Tienes un <span class="text-[#fc5648]">local</span><br>o eres <span class="text-[#fc5648]">artista</span>?
             </h1>
-            <p class="text-white/60 text-base md:text-lg">
+            <p class="text-white/60 text-base md:text-lg mb-8">
                 Cuéntanos quién eres y te contactamos para mostrarte cómo crecer en la red Pindoor.
             </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <a href="https://wa.me/56930821653" target="_blank" rel="noopener"
+                   class="flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold px-6 py-3.5 rounded-2xl shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 text-sm">
+                    <svg class="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.549 4.103 1.508 5.829L.057 23.25c-.079.326.235.64.561.561l5.422-1.451A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.806 9.806 0 01-5.028-1.38l-.36-.214-3.732.999 1-3.63-.234-.374A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
+                    </svg>
+                    Escríbenos por WhatsApp
+                </a>
+                <a href="{{ route('register') }}"
+                   class="flex items-center gap-2 bg-[#fc5648] hover:bg-[#ff6b5b] text-white font-bold px-6 py-3.5 rounded-2xl shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 text-sm">
+                    Registro local →
+                </a>
+                <a href="{{ route('artista.register') }}"
+                   class="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-6 py-3.5 rounded-2xl shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 text-sm border border-white/20">
+                    Registro artista →
+                </a>
+            </div>
+            <p class="text-white text-md mt-4">O completa el formulario y te contactamos nosotros.</p>
         </div>
     </header>
 
@@ -156,6 +176,7 @@
                             class="w-full bg-gray-900 hover:bg-black text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 text-sm tracking-wide">
                         Enviar solicitud →
                     </button>
+
                 </form>
             </div>
 
@@ -264,6 +285,26 @@
                             style="background: linear-gradient(135deg, #fc5648 0%, #d94035 100%)">
                         Enviar solicitud →
                     </button>
+
+                    <div class="flex items-center gap-3 text-gray-300 text-xs">
+                        <span class="flex-1 border-t border-gray-200"></span>
+                        o
+                        <span class="flex-1 border-t border-gray-200"></span>
+                    </div>
+
+                    <a href="https://wa.me/56930821653" target="_blank" rel="noopener"
+                       class="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold py-3.5 rounded-xl transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 text-sm shadow-md">
+                        <svg class="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.549 4.103 1.508 5.829L.057 23.25c-.079.326.235.64.561.561l5.422-1.451A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.806 9.806 0 01-5.028-1.38l-.36-.214-3.732.999 1-3.63-.234-.374A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
+                        </svg>
+                        Escríbenos por WhatsApp
+                    </a>
+
+                    <p class="text-center text-xs text-gray-400">
+                        ¿No quieres esperar?
+                        <a href="{{ route('artista.register') }}" class="font-bold text-[#fc5648] hover:underline">¡Regístrate ahora!</a>
+                    </p>
                 </form>
             </div>
 
@@ -296,18 +337,6 @@
     WhatsApp
 </a>
 
-{{-- Enlace WhatsApp desktop (dentro del contenido) --}}
-<div class="hidden md:block max-w-2xl mx-auto px-4 pb-8">
-    <a href="https://wa.me/56930821653"
-       target="_blank" rel="noopener"
-       class="flex items-center justify-center gap-3 w-full bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 text-sm">
-        <svg class="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.549 4.103 1.508 5.829L.057 23.25c-.079.326.235.64.561.561l5.422-1.451A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.806 9.806 0 01-5.028-1.38l-.36-.214-3.732.999 1-3.63-.234-.374A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
-        </svg>
-        ¿Prefieres escribirnos? +56 9 3082 1653
-    </a>
-</div>
 
 @section('scripts')
 <script>
