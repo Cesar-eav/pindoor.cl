@@ -19,7 +19,8 @@ class Panorama extends Model
         'infantil'    => ['label' => 'Infantil',    'emoji' => '🧸'],
         'taller'      => ['label' => 'Taller',      'emoji' => '🛠️'],
         'conferencia' => ['label' => 'Conferencia',      'emoji' => '🎓'],
-        'exposicion' => ['label' => 'Exposición',      'emoji' => '🧐'],
+        'exposicion'  => ['label' => 'Exposición',      'emoji' => '🧐'],
+        'otros'       => ['label' => 'Otros',      'emoji' => '🫘'],
         
 
     ];
