@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\NuevoContacto;
 use App\Models\LeadContacto;
+use App\Models\PuntoInteres;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -11,7 +12,13 @@ class ContactoController extends Controller
 {
     public function index()
     {
-        return view('contacto.index');
+        $atractivos = PuntoInteres::query()
+            ->where('activo', 1)
+            ->whereIn('id', [64, 80, 81, 87])
+            ->where('eliminado', false)
+            ->get();
+
+        return view('contacto.index', compact('atractivos'));
     }
 
     public function store(Request $request)

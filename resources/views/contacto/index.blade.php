@@ -45,8 +45,69 @@
                 </a>
             </div>
             <p class="text-white text-md mt-4">O completa el formulario y te contactamos nosotros.</p>
+            <p class="text-white text-md mt-2">
+                ¿Ya eres parte de Pindoor?
+                <a href="{{ route('login') }}" class="text-white/70 font-bold hover:text-white underline underline-offset-2 transition">Inicia sesión</a>
+            </p>
         </div>
     </header>
+
+    @if(isset($atractivos) && $atractivos->count())
+    <section class="py-10 px-4 bg-white border-b border-gray-100">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-6">
+                <h2 class="text-2xl font-black text-gray-900">Así se ve tu espacio en Pindoor</h2>
+                <p class="text-gray-500 text-sm mt-1">Hostal · Cafetería · Restaurante · Centro Cultural · Tienda</p>
+            </div>
+
+            {{-- Móvil: scroll horizontal --}}
+            <div class="md:hidden flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
+                @foreach($atractivos->take(5) as $atractivo)
+                <a href="{{ route('atractivos.show', $atractivo->slug ?? $atractivo->id) }}"
+                   class="flex-none w-32 bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
+                    @if($atractivo->imagenPrincipal)
+                        <img src="{{ asset('storage/' . $atractivo->imagenPrincipal->ruta) }}"
+                             alt="{{ $atractivo->title }}" class="w-full h-24 object-cover">
+                    @else
+                        <div class="w-full h-24 bg-gray-100 flex items-center justify-center text-2xl">📍</div>
+                    @endif
+                    <div class="p-2">
+                        <h3 class="text-xs font-bold leading-tight line-clamp-2">{{ $atractivo->title }}</h3>
+                        @if($atractivo->sector)
+                        <p class="text-[10px] text-[#fc5648] mt-0.5">{{ $atractivo->sector }}</p>
+                        @endif
+                    </div>
+                </a>
+                @endforeach
+            </div>
+
+            {{-- Desktop: grid compacta --}}
+            <div class="hidden md:grid md:grid-cols-3 lg:grid-cols-5 gap-6">
+                @foreach($atractivos->take(5) as $atractivo)
+                <a href="{{ route('atractivos.show', $atractivo->slug ?? $atractivo->id) }}"
+                   class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 group">
+                    @if($atractivo->imagenPrincipal)
+                        <img src="{{ asset('storage/' . $atractivo->imagenPrincipal->ruta) }}"
+                             alt="{{ $atractivo->title }}"
+                             class="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-500">
+                    @else
+                        <div class="w-full h-36 bg-gray-100 flex items-center justify-center text-4xl">📍</div>
+                    @endif
+                    <div class="p-4">
+                        <h3 class="font-bold text-gray-900 text-sm leading-tight">{{ $atractivo->title }}</h3>
+                        @if($atractivo->sector)
+                        <p class="text-xs text-[#fc5648] font-semibold mt-1">{{ $atractivo->sector }}</p>
+                        @endif
+                        @if($atractivo->direccion)
+                        <p class="text-xs text-gray-400 mt-0.5 truncate">{{ $atractivo->direccion }}</p>
+                        @endif
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
 
     <main class="max-w-2xl mx-auto px-4 py-10">
 
@@ -339,6 +400,10 @@
 
 
 @section('scripts')
+<style>
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
 <script>
 function switchTab(tab) {
     const panels  = { cliente: document.getElementById('panel-cliente'),  artista: document.getElementById('panel-artista') };
