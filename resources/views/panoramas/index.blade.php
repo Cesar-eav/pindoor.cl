@@ -5,71 +5,6 @@
 @section('bodyClass', 'bg-gray-100 text-gray-900 font-serif')
 
 @section('content')
-@php
-    use Carbon\Carbon;
-
-    $hoy    = Carbon::today();
-    $manana = Carbon::tomorrow();
-
-    $categorias  = \App\Models\Panorama::CATEGORIAS;
-    $catActiva = request('categoria');
-    $coleccion = match(true) {
-        $catActiva === 'gratuito' => $panoramas->where('es_gratuito', true),
-        (bool) $catActiva        => $panoramas->where('categoria', $catActiva),
-        default                  => $panoramas,
-    };
-
-    // Agrupar por fecha (string YYYY-MM-DD como clave)
-    $porDia = $coleccion->groupBy(fn($p) => $p->fecha->toDateString());
-
-    // Lista plana de todas las imágenes para el lightbox (portada + adicionales)
-    $allImages     = collect();
-    $startIndexMap = []; // panorama_id → índice en $allImages
-
-    foreach ($coleccion->values() as $p) {
-        $startIndexMap[$p->id] = $allImages->count();
-
-        $info = [
-            'titulo'    => $p->titulo,
-            'ubicacion' => $p->ubicacion,
-            'fecha'     => $p->fecha?->translatedFormat('l j \d\e F \d\e Y'),
-            'hora'      => $p->hora,
-            'enlace'    => $p->enlace,
-        ];
-
-        if ($p->imagen) {
-            $allImages->push(array_merge($info, ['src' => asset('storage/'.$p->imagen)]));
-        }
-
-        foreach ($p->imagenes as $img) {
-            $allImages->push(array_merge($info, ['src' => asset('storage/'.$img->ruta)]));
-        }
-
-        // Si no tiene ninguna imagen, agregar entrada sin src para mantener el slot
-        if (!$p->imagen && $p->imagenes->isEmpty()) {
-            $allImages->push(array_merge($info, ['src' => null]));
-        }
-    }
-
-    // Mapa fecha → índice inicial del primer panorama de ese día en $allImages
-    $indicesPorDia = [];
-    foreach ($porDia as $fecha => $grupo) {
-        $primer = $grupo->first();
-        $indicesPorDia[$fecha] = $startIndexMap[$primer->id] ?? 0;
-    }
-
-    function etiquetaDia($fecha, $hoy, $manana): string {
-        if ($fecha->isSameDay($hoy))    return 'HOY';
-        if ($fecha->isSameDay($manana)) return 'MAÑANA';
-        return mb_strtoupper($fecha->translatedFormat('D'));
-    }
-
-    function tituloDia($fecha, $hoy, $manana): string {
-        if ($fecha->isSameDay($hoy))    return 'Hoy · ' . $fecha->translatedFormat('l j \d\e F');
-        if ($fecha->isSameDay($manana)) return 'Mañana · ' . $fecha->translatedFormat('l j \d\e F');
-        return ucfirst($fecha->translatedFormat('l j \d\e F'));
-    }
-@endphp
 
 <div
     class="max-w-5xl mx-auto px-4 py-8"
@@ -132,23 +67,15 @@
     <div class="sticky top-14 md:top-0 z-20 bg-gray-100/90 backdrop-blur-sm py-3 mb-8 -mx-4 px-4">
         <div id="dias-strip" class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
             @foreach($porDia as $fechaStr => $grupo)
-            @php
-                $fecha  = Carbon::parse($fechaStr);
-                $esHoy  = $fecha->isSameDay($hoy);
-                $esMana = $fecha->isSameDay($manana);
-                $label  = etiquetaDia($fecha, $hoy, $manana);
-                $num    = $fecha->format('j');
-            @endphp
+            @php $meta = $diasMeta[$fechaStr]; @endphp
             <a href="#dia-{{ $fechaStr }}"
                data-dia="{{ $fechaStr }}"
                class="dia-pill shrink-0 flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl text-xs font-bold transition-all
-                      {{ $esHoy  ? 'bg-[#fc5648] text-white shadow-md shadow-[#fc5648]/30' :
-                         ($esMana ? 'bg-gray-900 text-white' : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-400') }}">
-                <span class="text-[10px] tracking-widest uppercase leading-none">{{ $label }}</span>
-                <span class="text-lg leading-tight font-black">{{ $num }}</span>
-                <span class="text-[9px] leading-none opacity-70">
-                    {{ mb_strtoupper($fecha->translatedFormat('M')) }}
-                </span>
+                      {{ $meta['esHoy']  ? 'bg-[#fc5648] text-white shadow-md shadow-[#fc5648]/30' :
+                         ($meta['esMana'] ? 'bg-gray-900 text-white' : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-400') }}">
+                <span class="text-[10px] tracking-widest uppercase leading-none">{{ $meta['label'] }}</span>
+                <span class="text-lg leading-tight font-black">{{ $meta['num'] }}</span>
+                <span class="text-[9px] leading-none opacity-70">{{ $meta['mes'] }}</span>
             </a>
             @endforeach
         </div>
@@ -156,24 +83,18 @@
 
     {{-- ── Secciones por día ───────────────────────────────────────────────── --}}
     @foreach($porDia as $fechaStr => $grupo)
-    @php
-        $fecha       = Carbon::parse($fechaStr);
-        $esHoy       = $fecha->isSameDay($hoy);
-        $esMana      = $fecha->isSameDay($manana);
-        $tituloSeccion = tituloDia($fecha, $hoy, $manana);
-        $indiceBase  = $indicesPorDia[$fechaStr];
-    @endphp
+    @php $meta = $diasMeta[$fechaStr]; @endphp
 
     <section id="dia-{{ $fechaStr }}" data-fecha="{{ $fechaStr }}" class="mb-12">
 
         {{-- Encabezado del día --}}
         <div class="flex items-center gap-3 mb-5">
-            @if($esHoy)
+            @if($meta['esHoy'])
                 <span class="bg-[#fc5648] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow">HOY</span>
-            @elseif($esMana)
+            @elseif($meta['esMana'])
                 <span class="bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">MAÑANA</span>
             @endif
-            <h2 class="text-lg font-bold text-gray-800 capitalize">{{ $tituloSeccion }}</h2>
+            <h2 class="text-lg font-bold text-gray-800 capitalize">{{ $meta['titulo'] }}</h2>
             <div class="flex-1 h-px bg-gray-200"></div>
             <span class="text-xs text-gray-400 font-semibold">{{ $grupo->count() }} {{ $grupo->count() === 1 ? 'evento' : 'eventos' }}</span>
         </div>
@@ -184,7 +105,7 @@
             @php $idx = $startIndexMap[$panorama->id] ?? 0; @endphp
 
             <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-zoom-in
-                        {{ $esHoy ? 'ring-1 ring-[#fc5648]/20' : '' }}"
+                        {{ $meta['esHoy'] ? 'ring-1 ring-[#fc5648]/20' : '' }}"
                  @click="openAt({{ $idx }})">
 
                 {{-- Imagen --}}

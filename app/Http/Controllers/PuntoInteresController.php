@@ -6,6 +6,7 @@ use App\Models\Configuracion;
 use App\Models\PuntoInteres;
 use App\Models\Panorama;
 use App\Models\Categoria;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +19,7 @@ class PuntoInteresController extends Controller
     try {
         $query = PuntoInteres::query()
             ->where('activo', 1)
-            //->whereNotIn('id', [81,80,64,87])
+            ->whereNotIn('id', [81,80,64,87])
             ->where('eliminado', false);
 
         if ($request->filled('category')) {
@@ -174,11 +175,95 @@ class PuntoInteresController extends Controller
         return view('panoramas.show', compact('panorama'));
     }
 
-    public function panoramas()
+    public function panoramas(Request $request)
     {
         $limite    = (int) Configuracion::get('panoramas_limite_dias', 15);
-        $panoramas = \App\Models\Panorama::activos($limite)->reorder()->orderBy('fecha')->orderBy('hora')->with('imagenes')->get();
-        return view('panoramas.index', compact('panoramas', 'limite'));
+        $panoramas = Panorama::activos($limite)->reorder()->orderBy('fecha')->orderBy('hora')->with('imagenes')->get();
+
+        $hoy       = Carbon::today();
+        $manana    = Carbon::tomorrow();
+        $tope      = $hoy->copy()->addDays($limite);
+        $categorias = Panorama::CATEGORIAS;
+        $catActiva  = $request->input('categoria');
+
+        $coleccion = match(true) {
+            $catActiva === 'gratuito' => $panoramas->where('es_gratuito', true),
+            (bool) $catActiva        => $panoramas->where('categoria', $catActiva),
+            default                  => $panoramas,
+        };
+
+        // Expandir panoramas multi-día
+        $porDia = collect();
+        foreach ($coleccion as $p) {
+            $inicio = $p->fecha->copy();
+            $fin    = ($p->fecha_fin && $p->fecha_fin->gt($inicio))
+                        ? ($p->fecha_fin->lt($tope) ? $p->fecha_fin : $tope)
+                        : $inicio->copy();
+            $desde  = $inicio->lt($hoy) ? $hoy->copy() : $inicio->copy();
+            for ($dia = $desde->copy(); $dia->lte($fin); $dia->addDay()) {
+                $key = $dia->toDateString();
+                if (!$porDia->has($key)) $porDia[$key] = collect();
+                $porDia[$key]->push($p);
+            }
+        }
+        $porDia = $porDia->sortKeys();
+
+        // Datos de display por día (etiquetas, títulos)
+        $diasMeta = [];
+        foreach ($porDia as $fechaStr => $_) {
+            $f      = Carbon::parse($fechaStr);
+            $esHoy  = $f->isSameDay($hoy);
+            $esMana = $f->isSameDay($manana);
+            $diasMeta[$fechaStr] = [
+                'esHoy'  => $esHoy,
+                'esMana' => $esMana,
+                'label'  => $esHoy ? 'HOY' : ($esMana ? 'MAÑANA' : mb_strtoupper($f->translatedFormat('D'))),
+                'num'    => $f->format('j'),
+                'mes'    => mb_strtoupper($f->translatedFormat('M')),
+                'titulo' => $esHoy  ? 'Hoy · '     . $f->translatedFormat('l j \d\e F')
+                          : ($esMana ? 'Mañana · ' . $f->translatedFormat('l j \d\e F')
+                          : ucfirst($f->translatedFormat('l j \d\e F'))),
+            ];
+        }
+
+        // Lista de imágenes para el lightbox
+        $allImages     = collect();
+        $startIndexMap = [];
+        foreach ($coleccion->values() as $p) {
+            $startIndexMap[$p->id] = $allImages->count();
+            $fechaLabel = $p->fecha?->translatedFormat('l j \d\e F \d\e Y');
+            if ($p->fecha_fin && $p->fecha_fin->gt($p->fecha)) {
+                $fechaLabel = $p->fecha->translatedFormat('j \d\e F')
+                            . ' al '
+                            . $p->fecha_fin->translatedFormat('j \d\e F \d\e Y');
+            }
+            $info = [
+                'titulo'    => $p->titulo,
+                'ubicacion' => $p->ubicacion,
+                'fecha'     => $fechaLabel,
+                'hora'      => $p->hora,
+                'enlace'    => $p->enlace,
+            ];
+            if ($p->imagen) {
+                $allImages->push(array_merge($info, ['src' => asset('storage/' . $p->imagen)]));
+            }
+            foreach ($p->imagenes as $img) {
+                $allImages->push(array_merge($info, ['src' => asset('storage/' . $img->ruta)]));
+            }
+            if (!$p->imagen && $p->imagenes->isEmpty()) {
+                $allImages->push(array_merge($info, ['src' => null]));
+            }
+        }
+
+        $indicesPorDia = [];
+        foreach ($porDia as $fechaStr => $grupo) {
+            $indicesPorDia[$fechaStr] = $startIndexMap[$grupo->first()->id] ?? 0;
+        }
+
+        return view('panoramas.index', compact(
+            'panoramas', 'limite', 'categorias', 'catActiva',
+            'porDia', 'diasMeta', 'allImages', 'startIndexMap', 'indicesPorDia'
+        ));
     }
 
     /**
