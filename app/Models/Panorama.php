@@ -25,11 +25,17 @@ class Panorama extends Model
 
     ];
 
+    const DIAS = [
+        1 => 'Lun', 2 => 'Mar', 3 => 'Mié',
+        4 => 'Jue', 5 => 'Vie', 6 => 'Sáb', 7 => 'Dom',
+    ];
+
     protected $fillable = [
         'titulo',
         'ubicacion',
         'fecha',
         'fecha_fin',
+        'dias_semana',
         'hora',
         'categoria',
         'es_gratuito',
@@ -42,6 +48,7 @@ class Panorama extends Model
     protected $casts = [
         'fecha'       => 'date',
         'fecha_fin'   => 'date',
+        'dias_semana' => 'array',
         'activo'      => 'boolean',
         'es_gratuito' => 'boolean',
     ];

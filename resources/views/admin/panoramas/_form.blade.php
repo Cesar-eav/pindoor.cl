@@ -71,6 +71,52 @@
     </div>
 </div>
 
+{{-- Recurrencia --}}
+@php
+    $diasGuardados = old('dias_semana', isset($panorama) ? ($panorama->dias_semana ?? []) : []);
+    $tieneRecurrencia = !empty($diasGuardados);
+@endphp
+<div class="border border-gray-200 rounded-xl p-4 space-y-3">
+    <label class="flex items-center gap-2.5 cursor-pointer">
+        <input type="checkbox" id="toggle-recurrencia"
+               {{ $tieneRecurrencia ? 'checked' : '' }}
+               class="w-4 h-4 accent-[#fc5648] rounded">
+        <span class="text-sm font-semibold text-gray-700">🔁 Repite en días específicos</span>
+    </label>
+
+    <div id="dias-selector" class="{{ $tieneRecurrencia ? '' : 'hidden' }} space-y-2">
+        <p class="text-xs text-gray-400">
+            Selecciona los días de la semana en que ocurre este evento dentro del rango de fechas.
+        </p>
+        <div class="flex gap-2 flex-wrap">
+            @foreach(\App\Models\Panorama::DIAS as $num => $label)
+            <label class="relative cursor-pointer">
+                <input type="checkbox" name="dias_semana[]" value="{{ $num }}"
+                       id="dia-{{ $num }}"
+                       {{ in_array($num, (array) $diasGuardados) ? 'checked' : '' }}
+                       class="sr-only peer">
+                <span class="flex items-center justify-center w-12 h-12 rounded-xl border-2 text-sm font-bold transition-all
+                             border-gray-200 text-gray-400
+                             peer-checked:bg-[#fc5648] peer-checked:border-[#fc5648] peer-checked:text-white
+                             hover:border-[#fc5648] hover:text-[#fc5648]">
+                    {{ $label }}
+                </span>
+            </label>
+            @endforeach
+        </div>
+        <p class="text-xs text-gray-400">La <strong>Fecha inicio</strong> y <strong>Fecha fin</strong> definen el periodo del ciclo.</p>
+    </div>
+</div>
+
+<script>
+document.getElementById('toggle-recurrencia').addEventListener('change', function () {
+    document.getElementById('dias-selector').classList.toggle('hidden', !this.checked);
+    if (!this.checked) {
+        document.querySelectorAll('[name="dias_semana[]"]').forEach(cb => cb.checked = false);
+    }
+});
+</script>
+
 {{-- Hora --}}
 <div>
     <label class="block text-sm font-semibold text-gray-700 mb-1">Hora</label>

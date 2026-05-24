@@ -6,17 +6,52 @@ use App\Http\Controllers\Controller;
 use App\Models\Configuracion;
 use App\Models\Panorama;
 use App\Models\PanoramaImagen;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class PanoramaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $panoramas    = Panorama::orderBy('orden')->orderBy('id')->get();
-        $limiteDias   = (int) Configuracion::get('panoramas_limite_dias', 15);
-        return view('admin.panoramas.index', compact('panoramas', 'limiteDias'));
+        $search    = $request->input('search');
+        $categoria = $request->input('categoria');
+
+        $query = Panorama::orderBy('fecha')->orderBy('hora')->orderBy('id');
+
+        if ($search) {
+            $query->where(fn($q) => $q->where('titulo', 'like', "%{$search}%")
+                                      ->orWhere('ubicacion', 'like', "%{$search}%"));
+        }
+        if ($categoria === 'gratuito') {
+            $query->where('es_gratuito', true);
+        } elseif ($categoria) {
+            $query->where('categoria', $categoria);
+        }
+
+        $panoramas  = $query->get();
+        $limiteDias = (int) Configuracion::get('panoramas_limite_dias', 15);
+        $categorias = Panorama::CATEGORIAS;
+        $hoy        = Carbon::today();
+        $semana     = $hoy->copy()->addDays(7);
+
+        $grupos = [
+            'hoy'      => $panoramas->filter(fn($p) => $p->fecha && (
+                              $p->fecha->isSameDay($hoy) ||
+                              ($p->fecha->lt($hoy) && $p->fecha_fin && $p->fecha_fin->gte($hoy))
+                          )),
+            'semana'   => $panoramas->filter(fn($p) => $p->fecha &&
+                              $p->fecha->gt($hoy) && $p->fecha->lte($semana)),
+            'proximos' => $panoramas->filter(fn($p) => $p->fecha && $p->fecha->gt($semana)),
+            'pasados'  => $panoramas->filter(fn($p) => $p->fecha && $p->fecha->lt($hoy) &&
+                              (!$p->fecha_fin || $p->fecha_fin->lt($hoy))),
+            'sin_fecha'=> $panoramas->filter(fn($p) => !$p->fecha),
+        ];
+
+        return view('admin.panoramas.index', compact(
+            'panoramas', 'limiteDias', 'grupos', 'hoy', 'categorias', 'search', 'categoria'
+        ));
     }
 
     public function configuracion(Request $request)
@@ -36,21 +71,26 @@ class PanoramaController extends Controller
         $data = $request->validate([
             'titulo'      => 'required|string|max:255',
             'ubicacion'   => 'nullable|string|max:255',
-            'fecha'       => 'required|date',
-            'fecha_fin'   => 'nullable|date|after_or_equal:fecha',
-            'hora'        => 'nullable|string|max:100',
-            'enlace'      => 'nullable|url|max:500',
-            'categoria'   => 'nullable|string|in:' . implode(',', array_keys(\App\Models\Panorama::CATEGORIAS)),
-            'orden'       => 'nullable|integer|min:0',
-            'activo'      => 'nullable|boolean',
-            'es_gratuito' => 'nullable|boolean',
-            'imagen'      => 'nullable|image|max:4096',
-            'imagenes.*'  => 'nullable|image|max:4096',
+            'fecha'          => 'required|date',
+            'fecha_fin'      => 'nullable|date|after_or_equal:fecha',
+            'dias_semana'    => 'nullable|array',
+            'dias_semana.*'  => 'integer|between:1,7',
+            'hora'           => 'nullable|string|max:100',
+            'enlace'         => 'nullable|url|max:500',
+            'categoria'      => 'nullable|string|in:' . implode(',', array_keys(\App\Models\Panorama::CATEGORIAS)),
+            'orden'          => 'nullable|integer|min:0',
+            'activo'         => 'nullable|boolean',
+            'es_gratuito'    => 'nullable|boolean',
+            'imagen'         => 'nullable|image|max:4096',
+            'imagenes.*'     => 'nullable|image|max:4096',
         ]);
 
         $data['activo']      = $request->boolean('activo', true);
         $data['es_gratuito'] = $request->boolean('es_gratuito', false);
         $data['orden']       = $request->input('orden', 0);
+        $data['dias_semana'] = $request->has('dias_semana')
+            ? array_map('intval', $request->input('dias_semana'))
+            : null;
 
         if ($request->hasFile('imagen')) {
             $file = $request->file('imagen');
@@ -102,21 +142,26 @@ class PanoramaController extends Controller
         $data = $request->validate([
             'titulo'      => 'required|string|max:255',
             'ubicacion'   => 'nullable|string|max:255',
-            'fecha'       => 'required|date',
-            'fecha_fin'   => 'nullable|date|after_or_equal:fecha',
-            'hora'        => 'nullable|string|max:100',
-            'enlace'      => 'nullable|url|max:500',
-            'categoria'   => 'nullable|string|in:' . implode(',', array_keys(\App\Models\Panorama::CATEGORIAS)),
-            'orden'       => 'nullable|integer|min:0',
-            'activo'      => 'nullable|boolean',
-            'es_gratuito' => 'nullable|boolean',
-            'imagen'      => 'nullable|image|max:4096',
-            'imagenes.*'  => 'nullable|image|max:4096',
+            'fecha'          => 'required|date',
+            'fecha_fin'      => 'nullable|date|after_or_equal:fecha',
+            'dias_semana'    => 'nullable|array',
+            'dias_semana.*'  => 'integer|between:1,7',
+            'hora'           => 'nullable|string|max:100',
+            'enlace'         => 'nullable|url|max:500',
+            'categoria'      => 'nullable|string|in:' . implode(',', array_keys(\App\Models\Panorama::CATEGORIAS)),
+            'orden'          => 'nullable|integer|min:0',
+            'activo'         => 'nullable|boolean',
+            'es_gratuito'    => 'nullable|boolean',
+            'imagen'         => 'nullable|image|max:4096',
+            'imagenes.*'     => 'nullable|image|max:4096',
         ]);
 
         $data['activo']      = $request->boolean('activo', true);
         $data['es_gratuito'] = $request->boolean('es_gratuito', false);
         $data['orden']       = $request->input('orden', 0);
+        $data['dias_semana'] = $request->has('dias_semana')
+            ? array_map('intval', $request->input('dias_semana'))
+            : null;
 
         if ($request->hasFile('imagen')) {
             $file = $request->file('imagen');

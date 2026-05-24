@@ -200,7 +200,11 @@ class PuntoInteresController extends Controller
                         ? ($p->fecha_fin->lt($tope) ? $p->fecha_fin : $tope)
                         : $inicio->copy();
             $desde  = $inicio->lt($hoy) ? $hoy->copy() : $inicio->copy();
+            $diasRecurrentes = !empty($p->dias_semana) ? $p->dias_semana : null;
             for ($dia = $desde->copy(); $dia->lte($fin); $dia->addDay()) {
+                if ($diasRecurrentes && !in_array($dia->isoWeekday(), $diasRecurrentes)) {
+                    continue;
+                }
                 $key = $dia->toDateString();
                 if (!$porDia->has($key)) $porDia[$key] = collect();
                 $porDia[$key]->push($p);

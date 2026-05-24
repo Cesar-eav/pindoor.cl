@@ -24,8 +24,8 @@
 
     {{-- Header --}}
     <section class="mb-6 text-center">
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">🧭 Panoramas</h1>
-        <p class="text-gray-500 text-base">Valparaíso · próximos {{ $limite }} días</p>
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">Panoramas</h1>
+        <p class="text-red-500 text-lg">Valparaíso · próximos <span class="text-black font-extrabold text-2xl">{{ $limite }}</span> días</p>
     </section>
 
     {{-- Filtro de categorías --}}
@@ -71,8 +71,7 @@
             <a href="#dia-{{ $fechaStr }}"
                data-dia="{{ $fechaStr }}"
                class="dia-pill shrink-0 flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl text-xs font-bold transition-all
-                      {{ $meta['esHoy']  ? 'bg-[#fc5648] text-white shadow-md shadow-[#fc5648]/30' :
-                         ($meta['esMana'] ? 'bg-gray-900 text-white' : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-400') }}">
+                      bg-white text-gray-500 border border-gray-200 hover:border-gray-400">
                 <span class="text-[10px] tracking-widest uppercase leading-none">{{ $meta['label'] }}</span>
                 <span class="text-lg leading-tight font-black">{{ $meta['num'] }}</span>
                 <span class="text-[9px] leading-none opacity-70">{{ $meta['mes'] }}</span>
@@ -120,7 +119,7 @@
 
                     {{-- Badge categoría (arriba izquierda) --}}
                     @if($panorama->categoria && isset($categorias[$panorama->categoria]))
-                    <div class="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-lg">
+                    <div class="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white text-md font-bold px-2 py-0.5 rounded-lg">
                         {{ $categorias[$panorama->categoria]['emoji'] }} {{ $categorias[$panorama->categoria]['label'] }}
                     </div>
                     @endif
