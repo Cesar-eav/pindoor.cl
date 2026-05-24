@@ -30,7 +30,7 @@
         <p class="text-sm text-gray-500 mt-1">Crea tu perfil gratuito en Pindoor</p>
     </div>
 
-    <form method="POST" action="{{ route('register') }}">
+    <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
         @csrf
         <div style="display:none" aria-hidden="true">
             <input type="text" name="website" tabindex="-1" autocomplete="off">
@@ -48,6 +48,21 @@
             <x-text-input id="email" class="block mt-1 w-full" type="email" name="email"
                           :value="old('email')" required autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <x-input-label for="imagen_logo" value="Logo o imagen de tu negocio (opcional)" />
+            <div class="mt-1 flex items-center gap-3">
+                <label for="imagen_logo"
+                       class="cursor-pointer flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-600 hover:border-[#fc5648] hover:text-[#fc5648] transition bg-white">
+                    <span id="logo-icon">📷</span>
+                    <span id="logo-label">Seleccionar imagen</span>
+                </label>
+                <input id="imagen_logo" name="imagen_logo" type="file" accept="image/*" class="hidden"
+                       onchange="document.getElementById('logo-label').textContent = this.files[0]?.name ?? 'Seleccionar imagen'; document.getElementById('logo-icon').textContent = '✅'">
+            </div>
+            <p class="mt-1 text-xs text-gray-400">JPG, PNG o WebP · máx. 4 MB</p>
+            <x-input-error :messages="$errors->get('imagen_logo')" class="mt-2" />
         </div>
 
         <div class="mt-4">

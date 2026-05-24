@@ -23,7 +23,7 @@ class ClienteController extends Controller
 
     public function onboarding()
     {
-        $categorias = Categoria::whereIn('slug', ['cafeterias', 'cultura', 'museos', 'picadas', 'comer', 'alojar'])
+        $categorias = Categoria::whereIn('slug', ['cafeterias', 'cultura', 'museos', 'picadas', 'comer', 'alojar', 'tiendas', 'artesania'])
             ->orderBy('nombre')
             ->get();
         return view('cliente.onboarding', compact('categorias'));

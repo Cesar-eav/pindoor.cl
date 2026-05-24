@@ -47,15 +47,30 @@
                     {{-- Formulario vincular existente --}}
                     <form x-show="modo === 'existente'" method="POST" action="{{ route('admin.clientes.activar', $punto) }}">
                         @csrf
-                        <div>
+                        <div class="space-y-3">
                             <x-input-label for="user_id_existente" value="Seleccionar usuario cliente" />
-                            <select name="user_id_existente" id="user_id_existente" required
-                                    class="block mt-1 w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-pindoor-accent">
-                                <option value="">— Selecciona —</option>
+                            {{-- Lista visual de usuarios con sus logos --}}
+                            <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
                                 @foreach($usuariosSinPunto as $u)
-                                    <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->email }})</option>
+                                <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 cursor-pointer hover:border-[#fc5648] hover:bg-red-50 transition has-[:checked]:border-[#fc5648] has-[:checked]:bg-red-50">
+                                    <input type="radio" name="user_id_existente" value="{{ $u->id }}" required class="accent-[#fc5648]">
+                                    @if($u->imagen_logo)
+                                        <img src="{{ asset('storage/' . $u->imagen_logo) }}"
+                                             alt="{{ $u->name }}"
+                                             class="w-10 h-10 rounded-lg object-cover border border-gray-200 shrink-0">
+                                    @else
+                                        <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-xl shrink-0">👤</div>
+                                    @endif
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-semibold text-gray-900">{{ $u->name }}</p>
+                                        <p class="text-xs text-gray-400 truncate">{{ $u->email }}</p>
+                                    </div>
+                                    @if($u->imagen_logo)
+                                        <span class="ml-auto text-[10px] bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full shrink-0">Logo ✓</span>
+                                    @endif
+                                </label>
                                 @endforeach
-                            </select>
+                            </div>
                         </div>
                         <div class="flex justify-between items-center mt-6">
                             <a href="{{ route('admin.clientes') }}" class="text-sm text-gray-500 hover:text-gray-700">&larr; Volver</a>

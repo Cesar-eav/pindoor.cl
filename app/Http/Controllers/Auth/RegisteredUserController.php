@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -38,15 +39,22 @@ class RegisteredUserController extends Controller
         }
 
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'name'        => ['required', 'string', 'max:255'],
+            'email'       => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'password'    => ['required', 'confirmed', Rules\Password::defaults()],
+            'imagen_logo' => ['nullable', 'image', 'max:4096'],
         ]);
 
+        $logoPath = null;
+        if ($request->hasFile('imagen_logo')) {
+            $logoPath = $request->file('imagen_logo')->store('logos', 'public');
+        }
+
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name'        => $request->name,
+            'email'       => $request->email,
+            'password'    => Hash::make($request->password),
+            'imagen_logo' => $logoPath,
         ]);
 
         event(new Registered($user));

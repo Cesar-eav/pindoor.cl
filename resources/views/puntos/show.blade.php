@@ -104,7 +104,9 @@
             {{-- Tabs móvil --}}
             @php
                 $alojamiento    = $punto->dato('alojamiento');
-                $tieneTabsExtra = $punto->tieneOfertaActiva()
+                $tieneProductos  = $punto->productos()->exists();
+                $tieneTabsExtra = $tieneProductos
+                    || $punto->tieneOfertaActiva()
                     || $punto->tieneCarta()
                     || $punto->tieneMenu()
                     || $punto->tieneAvisos()
@@ -124,6 +126,14 @@
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
                     Descripción
                 </button>
+                @if($tieneProductos)
+                <button
+                    @click="vista = 'catalogo'"
+                    :class="vista === 'catalogo' ? 'bg-[#fc5648] text-white' : 'bg-white text-gray-600 border border-gray-200'"
+                    class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
+                    🛍️ Catálogo
+                </button>
+                @endif
                 @if($punto->tieneOfertaActiva())
                 <button
                     @click="vista = 'oferta'"
@@ -223,6 +233,17 @@
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
                         <span>📖</span> Descripción
                     </button>
+
+                    @if($tieneProductos)
+                    <button
+                        @click="vista = 'catalogo'"
+                        :class="vista === 'catalogo'
+                            ? 'bg-[#fc5648] text-white shadow-lg'
+                            : 'bg-white text-gray-600 border border-gray-200 hover:border-[#fc5648]'"
+                        class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
+                        <span>🛍️</span> Catálogo
+                    </button>
+                    @endif
 
                     @if($punto->tieneOfertaActiva())
                     <button
@@ -531,6 +552,37 @@
 
                     {{-- PANEL: Oferta del día --}}
                     @if($punto->tieneOfertaActiva())
+                    {{-- Panel catálogo de productos --}}
+                    @if($tieneProductos)
+                    <div x-show="vista === 'catalogo'" x-cloak
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0">
+                        <h2 class="text-xl font-black text-gray-900 mb-5">🛍️ Catálogo</h2>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            @foreach($punto->productos as $producto)
+                            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                                @if($producto->imagen)
+                                    <img src="{{ $producto->imagen_url }}" alt="{{ $producto->nombre }}"
+                                         class="w-full aspect-square object-cover">
+                                @else
+                                    <div class="w-full aspect-square bg-gray-100 flex items-center justify-center text-4xl">📦</div>
+                                @endif
+                                <div class="p-3">
+                                    <p class="font-bold text-gray-900 text-sm leading-tight">{{ $producto->nombre }}</p>
+                                    @if($producto->precio)
+                                    <p class="text-sm font-black text-[#fc5648] mt-1">{{ $producto->precio }}</p>
+                                    @endif
+                                    @if($producto->descripcion)
+                                    <p class="text-xs text-gray-400 mt-1 leading-snug">{{ $producto->descripcion }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
                     <div x-show="vista === 'oferta'" x-cloak
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-1"

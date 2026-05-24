@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ClienteMuseoController;
 use App\Http\Controllers\ClienteEventosController;
+use App\Http\Controllers\ClienteProductosController;
 use App\Http\Controllers\PublicitaController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Admin\CategoriaController;
@@ -138,6 +139,12 @@ Route::middleware(['auth', 'verified', 'role:cliente'])->prefix('cliente')->name
     Route::get('/eventos/{punto}', [ClienteEventosController::class, 'index'])->name('eventos');
     Route::post('/eventos/{punto}/guardar', [ClienteEventosController::class, 'guardarEvento'])->name('eventos.guardar');
     Route::delete('/eventos/{punto}/{evento}', [ClienteEventosController::class, 'eliminarEvento'])->name('eventos.eliminar');
+
+    // Catálogo de productos (tiendas / artesanía)
+    Route::get('/productos',                        [ClienteProductosController::class, 'index'])->name('productos.index');
+    Route::post('/productos',                       [ClienteProductosController::class, 'store'])->name('productos.store');
+    Route::post('/productos/{producto}',            [ClienteProductosController::class, 'update'])->name('productos.update');
+    Route::delete('/productos/{producto}',          [ClienteProductosController::class, 'destroy'])->name('productos.destroy');
 });
 
 /* --- RUTAS ARTISTAS --- */

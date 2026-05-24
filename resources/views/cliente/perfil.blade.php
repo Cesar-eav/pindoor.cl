@@ -83,6 +83,9 @@
                         @if(in_array('agenda', $modulos))
                         <a href="{{ route('cliente.eventos', $punto) }}" class="nav-pill">📅 Eventos</a>
                         @endif
+                        @if(in_array($punto->categoria_id, [17, 18]))
+                        <a href="{{ route('cliente.productos.index') }}" class="nav-pill">🛍️ Catálogo</a>
+                        @endif
                         <a href="#descripcion" class="nav-pill">📝 Descripción</a>
                     </div>
                 </div>
@@ -343,8 +346,8 @@
                         @endif
                     </div>
 
-                    {{-- Módulos de contenido (carta, museo, agenda) --}}
-                    @if(in_array('carta', $modulos) || in_array('entradas', $modulos) || in_array('exposiciones', $modulos) || in_array('agenda', $modulos))
+                    {{-- Módulos de contenido (carta, museo, agenda, catálogo) --}}
+                    @if(in_array('carta', $modulos) || in_array('entradas', $modulos) || in_array('exposiciones', $modulos) || in_array('agenda', $modulos) || in_array($punto->categoria_id, [13, 14]))
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
                         <h4 class="font-bold text-gray-800 mb-3">Contenido del espacio</h4>
                         <div class="space-y-1.5">
@@ -382,6 +385,20 @@
                                     <p class="text-xs text-gray-400">Obras, conciertos y más</p>
                                 </div>
                                 <span class="text-gray-300 group-hover:text-blue-400 text-lg leading-none">›</span>
+                            </a>
+                            @endif
+                            @if(in_array($punto->categoria_id, [13, 14]))
+                            @php $totalProductos = $punto->productos()->count(); @endphp
+                            <a href="{{ route('cliente.productos.index') }}"
+                               class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-[#fc5648] hover:bg-red-50 transition group">
+                                <span class="text-xl">🛍️</span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-gray-800">Catálogo de productos</p>
+                                    <p class="text-xs {{ $totalProductos ? 'text-green-600' : 'text-gray-400' }}">
+                                        {{ $totalProductos ? $totalProductos . ' producto' . ($totalProductos !== 1 ? 's' : '') : 'Sin productos aún' }}
+                                    </p>
+                                </div>
+                                <span class="text-gray-300 group-hover:text-[#fc5648] text-lg leading-none">›</span>
                             </a>
                             @endif
                         </div>

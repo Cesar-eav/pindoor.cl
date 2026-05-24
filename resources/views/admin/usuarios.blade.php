@@ -20,7 +20,18 @@
                     <tbody class="divide-y divide-gray-100 text-sm">
                         @foreach($usuarios as $user)
                         <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-4 font-medium text-gray-900">{{ $user->name }}</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    @if($user->imagen_logo)
+                                        <img src="{{ asset('storage/' . $user->imagen_logo) }}"
+                                             alt="Logo {{ $user->name }}"
+                                             class="w-9 h-9 rounded-lg object-cover border border-gray-200 shrink-0">
+                                    @else
+                                        <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-lg shrink-0">👤</div>
+                                    @endif
+                                    <span class="font-medium text-gray-900">{{ $user->name }}</span>
+                                </div>
+                            </td>
                             <td class="px-6 py-4 text-gray-600">{{ $user->email }}</td>
                             <td class="px-6 py-4">
                                 <span class="px-2 py-1 rounded-full text-xs font-bold {{ $user->type == 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">

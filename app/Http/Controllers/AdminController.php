@@ -184,7 +184,7 @@ class AdminController extends Controller
         // Puntos que aún no son clientes, solo categorías de negocios
         $puntosDisponibles = PuntoInteres::where('es_cliente', false)
             ->where('eliminado', false)
-            ->whereIn('categoria_id', [2, 5, 7, 8, 10, 11])
+            ->whereIn('categoria_id', [2, 5, 7, 8, 10, 11, 12, 13, 14])
             ->orderBy('title')
             ->get();
 
@@ -210,11 +210,16 @@ class AdminController extends Controller
             $user = User::findOrFail($request->user_id_existente);
             $user->update(['type' => 'cliente']);
 
-            $punto->update([
+            $puntoData = [
                 'user_id'             => $user->id,
                 'es_cliente'          => true,
                 'modulos_habilitados' => PuntoInteres::modulosDefault($punto->categoria_id),
-            ]);
+            ];
+            if ($user->imagen_logo && !$punto->imagen_perfil) {
+                $puntoData['imagen_perfil'] = $user->imagen_logo;
+            }
+
+            $punto->update($puntoData);
 
             return redirect()->route('admin.clientes')
                 ->with('success', "Punto \"{$punto->title}\" vinculado a {$user->email}.");

@@ -74,8 +74,16 @@
                                     <td class="px-6 py-4 text-gray-500">{{ $punto->sector }}</td>
                                     <td class="px-6 py-4">
                                         @if($punto->user && $punto->user->type === 'cliente')
-                                            <div class="font-medium text-gray-800">{{ $punto->user->name }}</div>
-                                            <div class="text-xs text-gray-400">{{ $punto->user->email }}</div>
+                                            <div class="flex items-center gap-2">
+                                                @if($punto->user->imagen_logo)
+                                                    <img src="{{ asset('storage/' . $punto->user->imagen_logo) }}"
+                                                         class="w-7 h-7 rounded-md object-cover border border-gray-200 shrink-0">
+                                                @endif
+                                                <div>
+                                                    <div class="font-medium text-gray-800">{{ $punto->user->name }}</div>
+                                                    <div class="text-xs text-gray-400">{{ $punto->user->email }}</div>
+                                                </div>
+                                            </div>
                                         @else
                                             <a href="{{ route('admin.clientes.activar.form', $punto) }}"
                                                class="text-xs text-pindoor-accent font-bold hover:underline">

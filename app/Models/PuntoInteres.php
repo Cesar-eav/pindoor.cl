@@ -133,6 +133,11 @@ class PuntoInteres extends Model
         return $this->hasMany(ImagenPunto::class, 'punto_interes_id');
     }
 
+    public function productos()
+    {
+        return $this->hasMany(PuntoProducto::class, 'punto_interes_id')->orderBy('orden');
+    }
+
     public function imagenPrincipal()
     {
         return $this->hasOne(ImagenPunto::class, 'punto_interes_id')
