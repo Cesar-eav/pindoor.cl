@@ -40,8 +40,11 @@ class PanoramaController extends Controller
         $semanaStr = $semana->toDateString();
 
         $grupos = [
-            'hoy'      => $panoramas->filter(fn($p) => $p->fecha &&
-                              $p->fecha->toDateString() === $hoyStr),
+            'hoy'      => $panoramas->filter(fn($p) => $p->fecha && (
+                              $p->fecha->toDateString() === $hoyStr ||
+                              ($p->fecha->toDateString() < $hoyStr && $p->fecha_fin &&
+                               $p->fecha_fin->toDateString() === $hoyStr)
+                          )),
 
             'semana'   => $panoramas->filter(fn($p) => $p->fecha &&
                               $p->fecha->toDateString() > $hoyStr &&
