@@ -36,16 +36,21 @@ class PanoramaController extends Controller
         $hoy        = Carbon::today();
         $semana     = $hoy->copy()->addDays(7);
 
+        $hoyStr    = $hoy->toDateString();
+        $semanaStr = $semana->toDateString();
+
         $grupos = [
-            'hoy'      => $panoramas->filter(fn($p) => $p->fecha && (
-                              $p->fecha->isSameDay($hoy) ||
-                              ($p->fecha->lt($hoy) && $p->fecha_fin && $p->fecha_fin->gte($hoy))
-                          )),
+            'hoy'      => $panoramas->filter(fn($p) => $p->fecha &&
+                              $p->fecha->toDateString() === $hoyStr),
+
             'semana'   => $panoramas->filter(fn($p) => $p->fecha &&
-                              $p->fecha->gt($hoy) && $p->fecha->lte($semana)),
-            'proximos' => $panoramas->filter(fn($p) => $p->fecha && $p->fecha->gt($semana)),
-            'pasados'  => $panoramas->filter(fn($p) => $p->fecha && $p->fecha->lt($hoy) &&
-                              (!$p->fecha_fin || $p->fecha_fin->lt($hoy))),
+                              $p->fecha->toDateString() > $hoyStr &&
+                              $p->fecha->toDateString() <= $semanaStr),
+            'proximos' => $panoramas->filter(fn($p) => $p->fecha &&
+                              $p->fecha->toDateString() > $semanaStr),
+            'pasados'  => $panoramas->filter(fn($p) => $p->fecha &&
+                              $p->fecha->toDateString() < $hoyStr &&
+                              (!$p->fecha_fin || $p->fecha_fin->toDateString() < $hoyStr)),
             'sin_fecha'=> $panoramas->filter(fn($p) => !$p->fecha),
         ];
 

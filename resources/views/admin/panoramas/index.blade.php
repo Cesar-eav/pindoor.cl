@@ -95,11 +95,12 @@
 
             @php
             $secciones = [
-                'hoy'      => ['label' => 'Hoy',         'color' => 'bg-[#fc5648]',  'text' => 'text-white',       'open' => true],
-                'semana'   => ['label' => 'Esta semana', 'color' => 'bg-amber-400',  'text' => 'text-amber-900',   'open' => true],
-                'proximos' => ['label' => 'Próximos',    'color' => 'bg-blue-500',   'text' => 'text-white',       'open' => true],
-                'pasados'  => ['label' => 'Pasados',     'color' => 'bg-gray-300',   'text' => 'text-gray-600',    'open' => false],
-                'sin_fecha'=> ['label' => 'Sin fecha',   'color' => 'bg-gray-200',   'text' => 'text-gray-500',    'open' => true],
+                'hoy'      => ['label' => 'Hoy',         'color' => 'bg-[#fc5648]',  'text' => 'text-white',     'open' => true],
+
+                'semana'   => ['label' => 'Esta semana', 'color' => 'bg-amber-400',  'text' => 'text-amber-900', 'open' => true],
+                'proximos' => ['label' => 'Próximos',    'color' => 'bg-blue-500',   'text' => 'text-white',     'open' => true],
+                'pasados'  => ['label' => 'Pasados',     'color' => 'bg-gray-300',   'text' => 'text-gray-600',  'open' => false],
+                'sin_fecha'=> ['label' => 'Sin fecha',   'color' => 'bg-gray-200',   'text' => 'text-gray-500',  'open' => true],
             ];
             @endphp
 
