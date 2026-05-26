@@ -37,6 +37,9 @@
                         <x-nav-link :href="route('admin.artistas')" :active="request()->routeIs('admin.artistas*')">
                             Artistas
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.blog.index')" :active="request()->routeIs('admin.blog*')">
+                            Blog
+                        </x-nav-link>
 
                     @elseif(auth()->user()->type === 'cliente')
                         <x-nav-link :href="route('cliente.perfil')" :active="request()->routeIs('cliente.*')">
@@ -122,6 +125,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.artistas')" :active="request()->routeIs('admin.artistas*')">
                     Artistas
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.blog.index')" :active="request()->routeIs('admin.blog*')">
+                    Blog
                 </x-responsive-nav-link>
 
             @elseif(auth()->user()->type === 'cliente')

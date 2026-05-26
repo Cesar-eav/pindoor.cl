@@ -12,7 +12,9 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Admin\CategoriaController;
 use App\Http\Controllers\Admin\PanoramaController;
 use App\Http\Controllers\ArtistaController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactoController;
+use App\Http\Controllers\Admin\PostController;
 use Illuminate\Support\Facades\Route;
 
 /* --- RUTAS PÚBLICAS (TURISTAS) --- */
@@ -32,6 +34,9 @@ Route::get('/atractivos/categoria/{categoria}', [PuntoInteresController::class, 
 Route::get('/atractivos/ciudad/{ciudad}', [PuntoInteresController::class, 'filtrarPorCiudad'])->name('atractivos.ciudad');
 Route::get('/panoramas', [PuntoInteresController::class, 'panoramas'])->name('atractivos.panoramas');
 Route::get('/panoramas/{panorama}', [PuntoInteresController::class, 'showPanorama'])->name('panoramas.show');
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+
 Route::get('/registro', [PublicitaController::class, 'index'])->name('publicita.index');
 Route::post('/publicita', [PublicitaController::class, 'store'])->name('publicita.store');
 
@@ -80,6 +85,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Categorías
     Route::resource('categorias', CategoriaController::class)->except(['show']);
+
+    // Blog
+    Route::post('/blog/imagen', [PostController::class, 'uploadImagen'])->name('blog.imagen');
+    Route::resource('blog', PostController::class)->except(['show']);
 
     // Panoramas — La Brújula
     Route::resource('panoramas', PanoramaController::class)->except(['show']);
