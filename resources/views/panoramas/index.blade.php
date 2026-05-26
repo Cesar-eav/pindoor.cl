@@ -12,22 +12,39 @@
         open: false,
         current: 0,
         images: {{ $allImages->toJson() }},
-        openAt(i) { this.current = i; this.open = true; },
+        openAt(i) { this.current = i; this.open = true; history.pushState({ lightbox: true }, ''); },
         prev() { this.current = (this.current - 1 + this.images.length) % this.images.length; },
         next() { this.current = (this.current + 1) % this.images.length; },
-        close() { this.open = false; }
+        close() { if (this.open) { this.open = false; history.back(); } }
     }"
     @keydown.escape.window="close()"
     @keydown.arrow-left.window="open && prev()"
     @keydown.arrow-right.window="open && next()"
+    @popstate.window="open && (open = false)"
 >
 
     {{-- Header --}}
-    <section class="mb-6 text-center">
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">Panoramas</h1>
-        <p class="text-red-500 text-lg">Valparaíso · próximos <span class="text-black font-extrabold text-2xl">{{ $limite }}</span> días</p>
-    </section>
+{{-- Header --}}
+<section class="mb-8 text-center max-w-2xl mx-auto px-4 font-sans">
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-950 mb-3 ">
+        Pa<span class="text-[#fc5648]">no</span>ra<span class="text-[#fc5648]">ma</span>s
+    </h1>
+            {{-- <span class="text-[#FF5A43]  font-bold">Valparaíso</span> --}}
 
+    <p class="text-slate-500 text-base md:text-lg font-medium inline-flex flex-wrap items-center justify-center gap-2 bg-slate-50 border border-slate-100 rounded-full px-6 py-2 shadow-sm">
+        {{-- <span class="text-slate-300">•</span> --}}
+        <span>
+            <strong class="text-slate-950 font-extrabold text-2xl align-bottom">{{ $panoramas->count() }}</strong> 
+            panoramas en los próximos
+        </span>
+        <span>
+            <strong class="text-[#FF5A43] font-extrabold text-2xl align-bottom ">{{ $limite }}</strong> 
+            días
+        </span>
+            
+
+    </p>
+</section>
     {{-- Filtro de categorías --}}
     @if($panoramas->isNotEmpty())
     <div class="flex flex-wrap gap-2 justify-center mb-6">
