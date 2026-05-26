@@ -561,23 +561,24 @@
                         <h2 class="text-xl font-black text-gray-900 mb-5">🛍️ Catálogo</h2>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                             @foreach($punto->productos as $producto)
-                            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                            <a href="{{ route('puntos.producto', [$punto->slug ?? $punto->id, $producto->id]) }}"
+                               class="group bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
                                 @if($producto->imagen)
                                     <img src="{{ $producto->imagen_url }}" alt="{{ $producto->nombre }}"
-                                         class="w-full aspect-square object-cover">
+                                         class="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300">
                                 @else
                                     <div class="w-full aspect-square bg-gray-100 flex items-center justify-center text-4xl">📦</div>
                                 @endif
                                 <div class="p-3">
-                                    <p class="font-bold text-gray-900 text-sm leading-tight">{{ $producto->nombre }}</p>
+                                    <p class="font-bold text-gray-900 text-sm leading-tight group-hover:text-pindoor-accent transition">{{ $producto->nombre }}</p>
                                     @if($producto->precio)
                                     <p class="text-sm font-black text-[#fc5648] mt-1">{{ $producto->precio }}</p>
                                     @endif
                                     @if($producto->descripcion)
-                                    <p class="text-xs text-gray-400 mt-1 leading-snug">{{ $producto->descripcion }}</p>
+                                    <p class="text-xs text-gray-400 mt-1 leading-snug line-clamp-2">{{ $producto->descripcion }}</p>
                                     @endif
                                 </div>
-                            </div>
+                            </a>
                             @endforeach
                         </div>
                     </div>

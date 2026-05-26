@@ -22,6 +22,7 @@ Route::get('/', [PuntoInteresController::class, 'index'])->name('puntos.index');
 // El turista busca y ve, pero no edita
 Route::get('/buscar', [PuntoInteresController::class, 'index'])->name('puntos.buscar');
 Route::get('/lugar/{slug}', [PuntoInteresController::class, 'show'])->name('puntos.show');
+Route::get('/lugar/{slug}/producto/{producto}', [PuntoInteresController::class, 'showProducto'])->name('puntos.producto');
 
 
 Route::get('/labrujula', fn() => redirect('/', 301));

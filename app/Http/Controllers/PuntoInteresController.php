@@ -6,6 +6,7 @@ use App\Models\Configuracion;
 use App\Models\PuntoInteres;
 use App\Models\Panorama;
 use App\Models\Categoria;
+use App\Models\PuntoProducto;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -300,5 +301,18 @@ class PuntoInteresController extends Controller
         }
 
         return view('puntos.show', compact('punto', 'cercanos'));
+    }
+
+    public function showProducto($slug, PuntoProducto $producto)
+    {
+        $punto = PuntoInteres::with(['categoria', 'imagenes', 'productos'])
+                             ->where('slug', $slug)
+                             ->where('activo', true)
+                             ->where('eliminado', false)
+                             ->firstOrFail();
+
+        abort_if($producto->punto_interes_id !== $punto->id, 404);
+
+        return view('puntos.producto', compact('punto', 'producto'));
     }
 }
