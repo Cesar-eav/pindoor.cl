@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -r \"echo extension_loaded\\('gd'\\) ? 'GD ok' : 'no GD';\")",
+      "Bash(php -r \"echo extension_loaded\\('gd'\\) ? 'GD ok' : 'no GD'; echo PHP_EOL; print_r\\(gd_info\\(\\)\\);\")",
+      "Bash(python3 -c \"from PIL import Image; img = Image.open\\('/var/www/html/pindoor/public/favicon.ico'\\); img.save\\('/var/www/html/pindoor/public/favicon.png', 'PNG'\\); print\\('ok'\\)\")",
+      "Bash(git -C /var/www/html/pindoor status public/favicon.png)",
+      "Bash(git -C /var/www/html/pindoor add public/favicon.png resources/views/layouts/pindoor.blade.php resources/views/layouts/app.blade.php)",
+      "Bash(git -C /var/www/html/pindoor commit -m ' *)"
+    ]
+  }
+}
