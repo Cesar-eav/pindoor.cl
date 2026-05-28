@@ -135,6 +135,7 @@ class ExperienciaController extends Controller
             'dias_semana.*'=> 'integer|between:1,7',
             'hora'         => 'nullable|string|max:100',
             'enlace'       => 'nullable|url|max:500',
+            'whatsapp'     => 'nullable|string|max:30',
             'orden'        => 'nullable|integer|min:0',
             'activo'       => 'nullable|boolean',
             'imagen'       => 'nullable|image|max:4096',

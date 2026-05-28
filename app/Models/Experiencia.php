@@ -47,6 +47,7 @@ class Experiencia extends Model
         'dias_semana',
         'hora',
         'enlace',
+        'whatsapp',
         'imagen',
         'activo',
         'orden',
@@ -73,6 +74,13 @@ class Experiencia extends Model
         if ($this->es_gratuito) return 'Gratis';
         if ($this->precio)     return '$' . number_format($this->precio, 0, ',', '.');
         return null;
+    }
+
+    public function getWhatsappUrlAttribute(): ?string
+    {
+        if (!$this->whatsapp) return null;
+        $numero = preg_replace('/\D/', '', $this->whatsapp);
+        return 'https://wa.me/' . $numero;
     }
 
     public function getDiasSemanaLabelAttribute(): string
