@@ -15,6 +15,7 @@ use App\Http\Controllers\ArtistaController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\Admin\PostController;
+use App\Http\Controllers\Admin\ExperienciaController;
 use Illuminate\Support\Facades\Route;
 
 /* --- RUTAS PÚBLICAS (TURISTAS) --- */
@@ -34,6 +35,8 @@ Route::get('/atractivos/categoria/{categoria}', [PuntoInteresController::class, 
 Route::get('/atractivos/ciudad/{ciudad}', [PuntoInteresController::class, 'filtrarPorCiudad'])->name('atractivos.ciudad');
 Route::get('/panoramas', [PuntoInteresController::class, 'panoramas'])->name('atractivos.panoramas');
 Route::get('/panoramas/{panorama}', [PuntoInteresController::class, 'showPanorama'])->name('panoramas.show');
+Route::get('/experiencias', [PuntoInteresController::class, 'experiencias'])->name('experiencias.index');
+Route::get('/experiencias/{experiencia}', [PuntoInteresController::class, 'showExperiencia'])->name('experiencias.show');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
@@ -95,6 +98,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::patch('/panoramas/{panorama}/toggle', [PanoramaController::class, 'toggle'])->name('panoramas.toggle');
     Route::delete('/panoramas/imagenes/{imagen}', [PanoramaController::class, 'destroyImagen'])->name('panoramas.imagenes.destroy');
     Route::post('/panoramas/configuracion', [PanoramaController::class, 'configuracion'])->name('panoramas.configuracion');
+
+    // Experiencias
+    Route::resource('experiencias', ExperienciaController::class)->except(['show']);
+    Route::patch('/experiencias/{experiencia}/toggle', [ExperienciaController::class, 'toggle'])->name('experiencias.toggle');
+    Route::delete('/experiencias/imagenes/{imagen}', [ExperienciaController::class, 'destroyImagen'])->name('experiencias.imagenes.destroy');
 
     // Artistas
     Route::get('/artistas', [\App\Http\Controllers\AdminController::class, 'artistas'])->name('artistas');

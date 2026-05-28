@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Configuracion;
 use App\Models\PuntoInteres;
 use App\Models\Panorama;
+use App\Models\Experiencia;
 use App\Models\Categoria;
 use App\Models\PuntoProducto;
 use Carbon\Carbon;
@@ -301,6 +302,52 @@ class PuntoInteresController extends Controller
         }
 
         return view('puntos.show', compact('punto', 'cercanos'));
+    }
+
+    public function experiencias(Request $request)
+    {
+        $catActiva    = $request->input('categoria');
+        $experiencias = Experiencia::activas()->with('imagenes')->get();
+        $categorias   = Experiencia::CATEGORIAS;
+
+        $coleccion = match(true) {
+            $catActiva === 'gratuito' => $experiencias->where('es_gratuito', true),
+            (bool) $catActiva        => $experiencias->where('categoria', $catActiva),
+            default                  => $experiencias,
+        };
+
+        $allImages     = collect();
+        $startIndexMap = [];
+        foreach ($coleccion->values() as $e) {
+            $startIndexMap[$e->id] = $allImages->count();
+            $info = [
+                'titulo'    => $e->titulo,
+                'proveedor' => $e->proveedor,
+                'ubicacion' => $e->ubicacion,
+                'precio'    => $e->precio_formateado,
+                'enlace'    => $e->enlace,
+            ];
+            if ($e->imagen) {
+                $allImages->push(array_merge($info, ['src' => asset('storage/' . $e->imagen)]));
+            }
+            foreach ($e->imagenes as $img) {
+                $allImages->push(array_merge($info, ['src' => asset('storage/' . $img->ruta)]));
+            }
+            if (!$e->imagen && $e->imagenes->isEmpty()) {
+                $allImages->push(array_merge($info, ['src' => null]));
+            }
+        }
+
+        return view('experiencias.index', compact(
+            'experiencias', 'coleccion', 'categorias', 'catActiva', 'allImages', 'startIndexMap'
+        ));
+    }
+
+    public function showExperiencia(Experiencia $experiencia)
+    {
+        abort_if(!$experiencia->activo, 404);
+        $experiencia->load('imagenes');
+        return view('experiencias.show', compact('experiencia'));
     }
 
     public function showProducto($slug, PuntoProducto $producto)

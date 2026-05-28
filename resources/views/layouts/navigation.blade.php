@@ -34,6 +34,9 @@
                         <x-nav-link :href="route('admin.panoramas.index')" :active="request()->routeIs('admin.panoramas.*')">
                             Panoramas
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.experiencias.index')" :active="request()->routeIs('admin.experiencias.*')">
+                            Experiencias
+                        </x-nav-link>
                         <x-nav-link :href="route('admin.artistas')" :active="request()->routeIs('admin.artistas*')">
                             Artistas
                         </x-nav-link>
@@ -122,6 +125,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.panoramas.index')" :active="request()->routeIs('admin.panoramas.*')">
                     Panoramas
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.experiencias.index')" :active="request()->routeIs('admin.experiencias.*')">
+                    Experiencias
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.artistas')" :active="request()->routeIs('admin.artistas*')">
                     Artistas
