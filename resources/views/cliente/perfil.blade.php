@@ -57,6 +57,91 @@
                 </a>
             </div>
 
+            @php
+                // ── Campos críticos que el turista necesita ver ──────────────────
+                $punto->loadMissing('imagenes');
+                $datoCarta = in_array('carta', $modulos) ? $punto->dato('carta') : null;
+
+                $checks = [
+                    'imagen_perfil' => [
+                        'ok'    => (bool) $punto->imagen_perfil,
+                        'label' => 'Logo / foto de perfil',
+                        'href'  => route('cliente.perfil.editar', $punto),
+                        'tab'   => null,
+                    ],
+                    'description' => [
+                        'ok'    => !empty(trim(strip_tags($punto->description ?? ''))),
+                        'label' => 'Descripción del espacio',
+                        'href'  => '#descripcion',
+                        'tab'   => 'descripcion',
+                    ],
+                    'galeria' => [
+                        'ok'    => $punto->imagenes->isNotEmpty(),
+                        'label' => 'Al menos 1 foto en la galería',
+                        'href'  => '#galeria',
+                        'tab'   => 'galeria',
+                    ],
+                    'horario' => [
+                        'ok'    => !empty(trim($punto->horario ?? '')),
+                        'label' => 'Horario de atención',
+                        'href'  => route('cliente.perfil.editar', $punto),
+                        'tab'   => null,
+                    ],
+                    'direccion' => [
+                        'ok'    => !empty(trim($punto->direccion ?? '')),
+                        'label' => 'Dirección',
+                        'href'  => route('cliente.perfil.editar', $punto),
+                        'tab'   => null,
+                    ],
+                ];
+                if ($datoCarta !== null) {
+                    $checks['carta'] = [
+                        'ok'    => !empty($datoCarta['url'] ?? '') || !empty($datoCarta['texto'] ?? ''),
+                        'label' => 'Carta / Menú',
+                        'href'  => route('cliente.perfil.editar', $punto) . '#seccion-carta',
+                        'tab'   => 'carta',
+                    ];
+                }
+                $pendientes   = collect($checks)->where('ok', false);
+                $tabsWarning  = $pendientes->pluck('tab')->filter()->values()->toArray();
+            @endphp
+
+            {{-- Banner de completitud ──────────────────────────────────────────── --}}
+            @if($pendientes->isNotEmpty())
+            <div x-data="{ open: true }" x-show="open" class="mb-4">
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl shrink-0 mt-0.5">⚠️</span>
+                            <div>
+                                <p class="text-sm font-bold text-amber-800 mb-2">
+                                    Faltan {{ $pendientes->count() }} dato{{ $pendientes->count() > 1 ? 's' : '' }} importantes para que los turistas puedan encontrarte
+                                </p>
+                                <ul class="space-y-1">
+                                    @foreach($pendientes as $check)
+                                    <li>
+                                        <a href="{{ $check['href'] }}"
+                                           class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 hover:text-amber-900 hover:underline transition">
+                                            <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                                            </svg>
+                                            {{ $check['label'] }}
+                                        </a>
+                                    </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                        <button @click="open = false" class="text-amber-400 hover:text-amber-600 transition shrink-0 mt-0.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             {{-- Quick-nav (sticky) --}}
             <div class="sticky top-0 z-20 -mx-4 sm:mx-0 bg-white/90 backdrop-blur border-b border-gray-200 mb-6">
                 <div class="overflow-x-auto px-4 sm:px-0">
@@ -73,9 +158,19 @@
                         @if(in_array('promociones', $modulos))
                         <a href="#promociones" class="nav-pill">🎁 Promociones</a>
                         @endif
-                        <a href="#galeria" class="nav-pill">🖼️ Galería</a>
+                        <a href="#galeria" class="nav-pill relative">
+                            🖼️ Galería
+                            @if(in_array('galeria', $tabsWarning))
+                            <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-400 text-white rounded-full text-[8px] font-black flex items-center justify-center leading-none">!</span>
+                            @endif
+                        </a>
                         @if(in_array('carta', $modulos))
-                        <a href="{{ route('cliente.perfil.editar', $punto) }}#seccion-carta" class="nav-pill">🍽️ Carta</a>
+                        <a href="{{ route('cliente.perfil.editar', $punto) }}#seccion-carta" class="nav-pill relative">
+                            🍽️ Carta
+                            @if(in_array('carta', $tabsWarning))
+                            <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-400 text-white rounded-full text-[8px] font-black flex items-center justify-center leading-none">!</span>
+                            @endif
+                        </a>
                         @endif
                         @if(in_array('entradas', $modulos) || in_array('exposiciones', $modulos))
                         <a href="{{ route('cliente.museo', $punto) }}" class="nav-pill">🎟️ Museo</a>
@@ -86,7 +181,12 @@
                         @if(in_array($punto->categoria_id, [17, 18]))
                         <a href="{{ route('cliente.productos.index') }}" class="nav-pill">🛍️ Catálogo</a>
                         @endif
-                        <a href="#descripcion" class="nav-pill">📝 Descripción</a>
+                        <a href="#descripcion" class="nav-pill relative">
+                            📝 Descripción
+                            @if(in_array('descripcion', $tabsWarning))
+                            <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-400 text-white rounded-full text-[8px] font-black flex items-center justify-center leading-none">!</span>
+                            @endif
+                        </a>
                     </div>
                 </div>
             </div>
