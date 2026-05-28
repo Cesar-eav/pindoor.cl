@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Configuracion;
 use App\Models\PuntoInteres;
+use App\Models\ModuloItem;
 use App\Models\Panorama;
 use App\Models\Experiencia;
 use App\Models\Categoria;
@@ -187,6 +188,44 @@ class PuntoInteresController extends Controller
         $tope      = $hoy->copy()->addDays($limite);
         $categorias = Panorama::CATEGORIAS;
         $catActiva  = $request->input('categoria');
+
+        // Eventos de agenda de clientes → convertir a instancias Panorama para reutilizar la vista
+        $tipoACat = [
+            'concierto'  => 'musica',   'teatro'     => 'teatro',
+            'cine'       => 'cine',     'exposicion' => 'exposicion',
+            'taller'     => 'taller',   'danza'      => 'danza',
+            'conferencia'=> 'conferencia',
+        ];
+        $eventosCliente = ModuloItem::where('modulo', 'eventos')
+            ->where('activo', true)
+            ->whereNotNull('fecha')
+            ->whereBetween('fecha', [$hoy, $tope])
+            ->whereHas('punto', fn($q) => $q->where('activo', true)->where('eliminado', false))
+            ->with('punto')
+            ->get()
+            ->map(function (ModuloItem $item) use ($tipoACat) {
+                $fake = new Panorama();
+                $fake->fill([
+                    'titulo'      => $item->campo('titulo', ''),
+                    'ubicacion'   => $item->punto?->nombre,
+                    'fecha'       => $item->fecha->format('Y-m-d'),
+                    'fecha_fin'   => null,
+                    'dias_semana' => null,
+                    'hora'        => $item->campo('hora'),
+                    'categoria'   => $tipoACat[$item->campo('tipo', 'otro')] ?? 'otros',
+                    'es_gratuito' => (float)($item->campo('precio', 1)) === 0.0,
+                    'enlace'      => $item->campo('url_entradas'),
+                    'imagen'      => $item->imagen,
+                    'activo'      => true,
+                ]);
+                $fake->setAttribute('id', 'ev_' . $item->id);
+                $fake->setRelation('imagenes', collect());
+                return $fake;
+            });
+
+        $panoramas = $panoramas->merge($eventosCliente)
+            ->sortBy(fn($p) => $p->fecha->format('Y-m-d') . ($p->hora ?? '99:99'))
+            ->values();
 
         $coleccion = match(true) {
             $catActiva === 'gratuito' => $panoramas->where('es_gratuito', true),
