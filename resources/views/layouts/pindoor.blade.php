@@ -176,7 +176,7 @@
                     <span class="text-sm font-semibold">Registrate </span>
                 </a> --}}
 
-                {{-- <a href="{{ route('experiencias.index') }}"
+                <a href="{{ route('experiencias.index') }}"
                    onclick="closeDrawer()"
                    class="flex items-center gap-3 px-3 py-3 rounded-xl transition
                           {{ request()->routeIs('experiencias.*') ? 'bg-[#fff0ef] text-[#fc5648]' : 'hover:bg-gray-50 text-gray-600' }}">
@@ -185,7 +185,7 @@
                               d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                     <span class="text-sm font-semibold">Experiencias</span>
-                </a> --}}
+                </a> 
 
                 <a href="{{ route('blog.index') }}"
                    onclick="closeDrawer()"
