@@ -321,11 +321,12 @@ class PuntoInteresController extends Controller
         foreach ($coleccion->values() as $e) {
             $startIndexMap[$e->id] = $allImages->count();
             $info = [
-                'titulo'    => $e->titulo,
-                'proveedor' => $e->proveedor,
-                'ubicacion' => $e->ubicacion,
-                'precio'    => $e->precio_formateado,
-                'enlace'    => $e->enlace,
+                'titulo'     => $e->titulo,
+                'proveedor'  => $e->proveedor,
+                'ubicacion'  => $e->ubicacion,
+                'precio'     => $e->precio_formateado,
+                'enlace'     => $e->enlace,
+                'whatsapp'   => $e->whatsapp_url,
             ];
             if ($e->imagen) {
                 $allImages->push(array_merge($info, ['src' => asset('storage/' . $e->imagen)]));
