@@ -118,10 +118,16 @@
                             </div>
                         </div>
 
+                        {{-- Errores de validación --}}
+                        <div id="form-errors" class="hidden mb-6 bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-4">
+                            <p class="text-sm font-bold mb-1">Por favor completa los campos obligatorios:</p>
+                            <ul id="form-errors-list" class="text-sm list-disc list-inside space-y-0.5"></ul>
+                        </div>
+
                         <div class="flex justify-end">
                             <button
                                 type="button"
-                                onclick="window.dispatchEvent(new CustomEvent('trigger-pindoor-submit'))"
+                                onclick="validarYEnviar()"
                                 class="bg-pindoor-accent text-white px-8 py-3 rounded-2xl font-bold shadow-lg hover:bg-red-600 transition">
                                 Publicar Punto Público
                             </button>
@@ -259,23 +265,64 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Si hay contenido previo (errores de validación), cargarlo
     const hidden = document.getElementById('description-input');
     if (hidden.value) quill.root.innerHTML = hidden.value;
 
-    // Antes de enviar el form, pasar el HTML al textarea oculto
-    document.getElementById('main-form').addEventListener('trigger-pindoor-submit', () => {
-        hidden.value = quill.root.innerHTML;
-    });
-
-    // También capturar el submit normal por si acaso
     document.getElementById('main-form').addEventListener('submit', () => {
         hidden.value = quill.root.innerHTML;
     });
 
-    // El botón usa CustomEvent, interceptarlo antes de que Vue lo procese
     window.addEventListener('trigger-pindoor-submit', () => {
         hidden.value = quill.root.innerHTML;
     }, true);
+
+    window.validarYEnviar = function () {
+        hidden.value = quill.root.innerHTML;
+
+        const campos = [
+            { id: 'title',        label: 'Nombre del Punto' },
+            { name: 'categoria_id', label: 'Categoría' },
+            { name: 'sector',     label: 'Sector / Cerro' },
+        ];
+
+        const errores = [];
+
+        // Limpiar estado previo
+        document.querySelectorAll('.campo-error').forEach(el => {
+            el.classList.remove('campo-error', 'border-red-400', 'ring-1', 'ring-red-400');
+        });
+
+        campos.forEach(({ id, name, label }) => {
+            const el = id
+                ? document.getElementById(id)
+                : document.querySelector(`[name="${name}"]`);
+            if (!el || !el.value.trim()) {
+                errores.push(label);
+                if (el) {
+                    el.classList.add('campo-error', 'border-red-400', 'ring-1', 'ring-red-400');
+                }
+            }
+        });
+
+        // Validar descripción (Quill)
+        const textoDesc = quill.getText().trim();
+        if (!textoDesc) {
+            errores.push('Reseña o descripción');
+            document.getElementById('description-editor').classList.add('campo-error', 'border-red-400', 'ring-1', 'ring-red-400');
+        }
+
+        const banner = document.getElementById('form-errors');
+        const lista  = document.getElementById('form-errors-list');
+
+        if (errores.length > 0) {
+            lista.innerHTML = errores.map(e => `<li>${e}</li>`).join('');
+            banner.classList.remove('hidden');
+            banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        banner.classList.add('hidden');
+        window.dispatchEvent(new CustomEvent('trigger-pindoor-submit'));
+    };
 });
 </script>
