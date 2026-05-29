@@ -46,7 +46,11 @@ $sectores = [
 ];
 @endphp
 
-<select name="sector" class="block mt-1 w-full bg-white border border-slate-200 text-gray-900 rounded-lg focus:border-pindoor-accent focus:ring-pindoor-accent transition">
+<select name="sector" required
+        class="block mt-1 w-full bg-white border border-slate-200 text-gray-900 rounded-lg focus:border-pindoor-accent focus:ring-pindoor-accent transition">
+    <option value="" disabled @isset($selected) {{ $selected ? '' : 'selected' }} @else selected @endisset>
+        — Elige un sector —
+    </option>
     @foreach($sectores as $val => $label)
         <option value="{{ $val }}" @isset($selected) @selected($selected == $val) @endisset>
             {{ $label }}
