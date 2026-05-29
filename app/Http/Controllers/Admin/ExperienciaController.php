@@ -29,9 +29,10 @@ class ExperienciaController extends Controller
         }
 
         $experiencias = $query->get();
+        $pendientes   = Experiencia::pendientes()->get();
         $categorias   = Experiencia::CATEGORIAS;
 
-        return view('admin.experiencias.index', compact('experiencias', 'categorias', 'search', 'categoria'));
+        return view('admin.experiencias.index', compact('experiencias', 'pendientes', 'categorias', 'search', 'categoria'));
     }
 
     public function create()
@@ -118,6 +119,18 @@ class ExperienciaController extends Controller
         return back()->with('success', 'Visibilidad actualizada.');
     }
 
+    public function aprobar(Experiencia $experiencia)
+    {
+        $experiencia->update(['estado' => 'aprobada', 'activo' => true]);
+        return back()->with('success', 'Experiencia aprobada y publicada.');
+    }
+
+    public function rechazar(Experiencia $experiencia)
+    {
+        $experiencia->update(['estado' => 'rechazada', 'activo' => false]);
+        return back()->with('success', 'Experiencia rechazada.');
+    }
+
     private function validar(Request $request): array
     {
         return $request->validate([
@@ -136,6 +149,8 @@ class ExperienciaController extends Controller
             'hora'         => 'nullable|string|max:100',
             'enlace'       => 'nullable|url|max:500',
             'whatsapp'     => 'nullable|string|max:30',
+            'fecha_inicio' => 'nullable|date',
+            'fecha_fin'    => 'nullable|date|after_or_equal:fecha_inicio',
             'orden'        => 'nullable|integer|min:0',
             'activo'       => 'nullable|boolean',
             'imagen'       => 'nullable|image|max:4096',

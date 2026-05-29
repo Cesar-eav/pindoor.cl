@@ -18,6 +18,84 @@
                 </div>
             @endif
 
+            {{-- Pendientes de revisión --}}
+            @if($pendientes->isNotEmpty())
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 space-y-3">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+                    <h3 class="font-bold text-amber-900 text-sm">
+                        {{ $pendientes->count() }} {{ $pendientes->count() === 1 ? 'experiencia pendiente' : 'experiencias pendientes' }} de revisión
+                    </h3>
+                </div>
+                @foreach($pendientes as $p)
+                @php $pcat = $p->categoria ? (\App\Models\Experiencia::CATEGORIAS[$p->categoria] ?? null) : null; @endphp
+                <div class="bg-white rounded-xl border border-amber-100 flex items-stretch overflow-hidden shadow-sm">
+                    {{-- Imagen --}}
+                    <div class="shrink-0 w-16 self-stretch">
+                        @if($p->imagen)
+                            <img src="{{ asset('storage/' . $p->imagen) }}" alt="{{ $p->titulo }}"
+                                 class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full bg-amber-50 flex items-center justify-center text-2xl">
+                                {{ $pcat ? $pcat['emoji'] : '✨' }}
+                            </div>
+                        @endif
+                    </div>
+                    {{-- Info --}}
+                    <div class="flex-1 px-4 py-3 min-w-0">
+                        <p class="font-semibold text-gray-800 leading-snug truncate">{{ $p->titulo }}</p>
+                        @if($p->proveedor)
+                        <p class="text-xs text-gray-500 mt-0.5">👤 {{ $p->proveedor }}</p>
+                        @endif
+                        <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                            @if($pcat)
+                            <span class="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ $pcat['emoji'] }} {{ $pcat['label'] }}</span>
+                            @endif
+                            @if(!empty($p->dias_semana))
+                            <span class="text-[10px] text-gray-500">🔁 {{ $p->dias_semana_label }}</span>
+                            @endif
+                            @if($p->hora)
+                            <span class="text-[10px] text-gray-500">🕐 {{ $p->hora }}</span>
+                            @endif
+                            @if($p->ubicacion)
+                            <span class="text-[10px] text-gray-400">📍 {{ $p->ubicacion }}</span>
+                            @endif
+                            @if($p->email_contacto)
+                            <span class="text-[10px] text-blue-600">✉️ {{ $p->email_contacto }}</span>
+                            @endif
+                            @if($p->whatsapp)
+                            <span class="text-[10px] text-green-600">💬 {{ $p->whatsapp }}</span>
+                            @endif
+                        </div>
+                        @if($p->descripcion)
+                        <p class="text-xs text-gray-400 mt-1 line-clamp-2">{{ $p->descripcion }}</p>
+                        @endif
+                    </div>
+                    {{-- Acciones --}}
+                    <div class="flex flex-col items-end justify-center px-4 py-3 shrink-0 gap-2">
+                        <form action="{{ route('admin.experiencias.aprobar', $p) }}" method="POST">
+                            @csrf @method('PATCH')
+                            <button type="submit"
+                                    class="text-xs font-bold bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition">
+                                ✓ Aprobar
+                            </button>
+                        </form>
+                        <form action="{{ route('admin.experiencias.rechazar', $p) }}" method="POST"
+                              onsubmit="return confirm('¿Rechazar «{{ addslashes($p->titulo) }}»?')">
+                            @csrf @method('PATCH')
+                            <button type="submit"
+                                    class="text-xs font-bold text-red-400 hover:text-red-600 transition">
+                                ✗ Rechazar
+                            </button>
+                        </form>
+                        <a href="{{ route('admin.experiencias.edit', $p) }}"
+                           class="text-xs font-bold text-blue-500 hover:underline">Ver completo</a>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @endif
+
             {{-- Búsqueda y filtros --}}
             <form method="GET" action="{{ route('admin.experiencias.index') }}"
                   class="bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-4 space-y-3">

@@ -48,15 +48,21 @@ class Experiencia extends Model
         'hora',
         'enlace',
         'whatsapp',
+        'email_contacto',
         'imagen',
         'activo',
+        'estado',
         'orden',
+        'fecha_inicio',
+        'fecha_fin',
     ];
 
     protected $casts = [
-        'dias_semana' => 'array',
-        'activo'      => 'boolean',
-        'es_gratuito' => 'boolean',
+        'dias_semana'  => 'array',
+        'activo'       => 'boolean',
+        'es_gratuito'  => 'boolean',
+        'fecha_inicio' => 'date',
+        'fecha_fin'    => 'date',
     ];
 
     public function imagenes()
@@ -66,7 +72,12 @@ class Experiencia extends Model
 
     public function scopeActivas($query)
     {
-        return $query->where('activo', true)->orderBy('orden')->orderBy('titulo');
+        return $query->where('activo', true)->where('estado', 'aprobada')->orderBy('orden')->orderBy('titulo');
+    }
+
+    public function scopePendientes($query)
+    {
+        return $query->where('estado', 'pendiente')->latest();
     }
 
     public function getPrecioFormateadoAttribute(): ?string
@@ -87,6 +98,19 @@ class Experiencia extends Model
     {
         if (empty($this->dias_semana)) return '';
         return implode(' · ', array_map(fn($d) => self::DIAS[$d] ?? $d, $this->dias_semana));
+    }
+
+    public function getPeriodoLabelAttribute(): ?string
+    {
+        $ini = $this->fecha_inicio;
+        $fin = $this->fecha_fin;
+        if ($ini && $fin) {
+            return 'Del ' . $ini->translatedFormat('j \d\e F')
+                 . ' al '  . $fin->translatedFormat('j \d\e F \d\e Y');
+        }
+        if ($ini) return 'A partir del ' . $ini->translatedFormat('j \d\e F \d\e Y');
+        if ($fin) return 'Hasta el '     . $fin->translatedFormat('j \d\e F \d\e Y');
+        return null;
     }
 
     protected static function booted(): void

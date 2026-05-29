@@ -103,7 +103,7 @@
             @endif
 
             {{-- Horario --}}
-            @if(!empty($experiencia->dias_semana) || $experiencia->hora || $experiencia->duracion)
+            @if(!empty($experiencia->dias_semana) || $experiencia->hora || $experiencia->duracion || $experiencia->periodo_label)
             <div class="flex items-start gap-3">
                 <div class="w-9 h-9 rounded-xl bg-[#fff0ef] flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4 text-[#fc5648]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,8 +112,11 @@
                     </svg>
                 </div>
                 <div class="space-y-0.5">
+                    @if($experiencia->periodo_label)
+                    <p class="text-sm font-semibold text-[#fc5648]">📅 {{ $experiencia->periodo_label }}</p>
+                    @endif
                     @if(!empty($experiencia->dias_semana))
-                    <p class="text-sm font-semibold text-gray-800">{{ $experiencia->dias_semana_label }}</p>
+                    <p class="text-sm font-semibold text-gray-800">🔁 {{ $experiencia->dias_semana_label }}</p>
                     @endif
                     @if($experiencia->hora)
                     <p class="text-sm text-gray-500">🕐 {{ $experiencia->hora }}</p>

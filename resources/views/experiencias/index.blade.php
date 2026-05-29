@@ -26,12 +26,18 @@
         <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-950 mb-3">
             Expe<span class="text-[#fc5648]">rien</span>cias
         </h1>
-        {{-- <p class="text-slate-500 text-base md:text-lg font-medium inline-flex flex-wrap items-center justify-center gap-2 bg-slate-50 border border-slate-100 rounded-full px-6 py-2 shadow-sm">
-            <span>
-                <strong class="text-slate-950 font-extrabold text-2xl align-bottom">{{ $experiencias->count() }}</strong>
-                experiencias para vivir en Valparaíso
-            </span>
-        </p> --}}
+        <p class="text-gray-500 text-sm md:text-base leading-relaxed mb-5">
+            Actividades donde <strong class="text-gray-800">participas activamente</strong>:
+            clases de cueca, talleres de cerámica, tours guiados, culinaria y más.
+            Se repiten en el tiempo, para que puedas unirte cuando quieras.
+        </p>
+        <a href="{{ route('experiencias.proponer') }}"
+           class="inline-flex items-center gap-2 bg-[#fc5648] hover:bg-[#d94439] text-white font-bold text-sm px-5 py-2.5 rounded-full transition shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            ¿Ofreces una experiencia? Compártela
+        </a>
     </section>
 
     {{-- Filtros --}}
@@ -145,6 +151,9 @@
                     @if($exp->duracion)
                     <span class="text-xs text-gray-500">⏱ {{ $exp->duracion }}</span>
                     @endif
+                    @if($exp->periodo_label)
+                    <span class="text-xs text-gray-400">📅 {{ $exp->periodo_label }}</span>
+                    @endif
                 </div>
 
                 @if($exp->ubicacion)
@@ -255,6 +264,20 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
         </button>
+    </div>
+
+    {{-- CTA inferior --}}
+    <div class="mt-12 bg-white rounded-3xl border border-gray-100 shadow-sm px-6 py-8 text-center max-w-lg mx-auto">
+        <div class="text-4xl mb-3">🎯</div>
+        <h3 class="font-extrabold text-gray-900 text-lg mb-2">¿Ofreces una experiencia?</h3>
+        <p class="text-sm text-gray-500 mb-4 leading-relaxed">
+            Si tienes clases, talleres u otras actividades recurrentes en Valparaíso,
+            cuéntanos y la publicamos en Pindoor.
+        </p>
+        <a href="{{ route('experiencias.proponer') }}"
+           class="inline-flex items-center gap-2 bg-[#fc5648] hover:bg-[#d94439] text-white font-bold text-sm px-6 py-2.5 rounded-full transition">
+            Proponer mi experiencia
+        </a>
     </div>
 
     @endif

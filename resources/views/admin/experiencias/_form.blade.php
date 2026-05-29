@@ -164,6 +164,28 @@ document.getElementById('toggle-dias').addEventListener('change', function () {
     </div>
 </div>
 
+{{-- Período de vigencia --}}
+<div class="border border-gray-200 rounded-xl p-4 space-y-3">
+    <p class="text-sm font-semibold text-gray-700">📅 Período de vigencia <span class="font-normal text-gray-400">(opcional)</span></p>
+    <p class="text-xs text-gray-400">Si la experiencia solo se da durante ciertos meses, indica el rango. Ej: todos los martes de junio a agosto.</p>
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Desde</label>
+            <input type="date" name="fecha_inicio"
+                   value="{{ old('fecha_inicio', isset($experiencia->fecha_inicio) ? $experiencia->fecha_inicio?->format('Y-m-d') : '') }}"
+                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+            @error('fecha_inicio') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Hasta</label>
+            <input type="date" name="fecha_fin"
+                   value="{{ old('fecha_fin', isset($experiencia->fecha_fin) ? $experiencia->fecha_fin?->format('Y-m-d') : '') }}"
+                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+            @error('fecha_fin') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+        </div>
+    </div>
+</div>
+
 {{-- Enlace + WhatsApp --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div>

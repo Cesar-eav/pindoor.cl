@@ -36,6 +36,8 @@ Route::get('/atractivos/ciudad/{ciudad}', [PuntoInteresController::class, 'filtr
 Route::get('/panoramas', [PuntoInteresController::class, 'panoramas'])->name('atractivos.panoramas');
 Route::get('/panoramas/{panorama}', [PuntoInteresController::class, 'showPanorama'])->name('panoramas.show');
 Route::get('/experiencias', [PuntoInteresController::class, 'experiencias'])->name('experiencias.index');
+Route::get('/experiencias/proponer', [PuntoInteresController::class, 'proponerForm'])->name('experiencias.proponer');
+Route::post('/experiencias/proponer', [PuntoInteresController::class, 'proponerStore'])->name('experiencias.proponer.store');
 Route::get('/experiencias/{experiencia}', [PuntoInteresController::class, 'showExperiencia'])->name('experiencias.show');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
@@ -102,6 +104,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     // Experiencias
     Route::resource('experiencias', ExperienciaController::class)->except(['show']);
     Route::patch('/experiencias/{experiencia}/toggle', [ExperienciaController::class, 'toggle'])->name('experiencias.toggle');
+    Route::patch('/experiencias/{experiencia}/aprobar', [ExperienciaController::class, 'aprobar'])->name('experiencias.aprobar');
+    Route::patch('/experiencias/{experiencia}/rechazar', [ExperienciaController::class, 'rechazar'])->name('experiencias.rechazar');
     Route::delete('/experiencias/imagenes/{imagen}', [ExperienciaController::class, 'destroyImagen'])->name('experiencias.imagenes.destroy');
 
     // Artistas

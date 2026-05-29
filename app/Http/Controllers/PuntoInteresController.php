@@ -9,10 +9,12 @@ use App\Models\Panorama;
 use App\Models\Experiencia;
 use App\Models\Categoria;
 use App\Models\PuntoProducto;
+use App\Mail\NuevaExperienciaPropuesta;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class PuntoInteresController extends Controller
 {
@@ -388,6 +390,62 @@ class PuntoInteresController extends Controller
         abort_if(!$experiencia->activo, 404);
         $experiencia->load('imagenes');
         return view('experiencias.show', compact('experiencia'));
+    }
+
+    public function proponerForm()
+    {
+        $categorias = Experiencia::CATEGORIAS;
+        $niveles    = Experiencia::NIVELES;
+        $dias       = Experiencia::DIAS;
+        return view('experiencias.proponer', compact('categorias', 'niveles', 'dias'));
+    }
+
+    public function proponerStore(Request $request)
+    {
+        $request->validate([
+            'titulo'         => 'required|string|max:255',
+            'proveedor'      => 'required|string|max:200',
+            'descripcion'    => 'required|string|max:2000',
+            'categoria'      => 'required|in:' . implode(',', array_keys(Experiencia::CATEGORIAS)),
+            'dias_semana'    => 'nullable|array',
+            'dias_semana.*'  => 'integer|between:1,7',
+            'hora'           => 'nullable|string|max:100',
+            'ubicacion'      => 'nullable|string|max:255',
+            'nivel'          => 'nullable|in:' . implode(',', array_keys(Experiencia::NIVELES)),
+            'precio'         => 'nullable|integer|min:0',
+            'duracion'       => 'nullable|string|max:50',
+            'capacidad'      => 'nullable|integer|min:1',
+            'enlace'         => 'nullable|url|max:500',
+            'whatsapp'       => 'nullable|string|max:30',
+            'email_contacto' => 'nullable|email|max:200',
+            'fecha_inicio'   => 'nullable|date',
+            'fecha_fin'      => 'nullable|date|after_or_equal:fecha_inicio',
+            'imagen'         => 'nullable|image|max:4096',
+        ]);
+
+        $data = $request->only([
+            'titulo', 'proveedor', 'descripcion', 'categoria',
+            'hora', 'ubicacion', 'nivel', 'duracion', 'capacidad',
+            'enlace', 'whatsapp', 'email_contacto', 'fecha_inicio', 'fecha_fin',
+        ]);
+        $data['dias_semana'] = $request->dias_semana ?? [];
+        $data['es_gratuito'] = $request->boolean('es_gratuito');
+        $data['precio']      = $data['es_gratuito'] ? null : $request->precio;
+        $data['estado']      = 'pendiente';
+        $data['activo']      = false;
+        $data['orden']       = 99;
+
+        if ($request->hasFile('imagen')) {
+            $data['imagen'] = $request->file('imagen')->store('experiencias', 'public');
+        }
+
+        $experiencia = Experiencia::create($data);
+
+        Mail::to(['cesar.eav@gmail.com', 'danielapazcabrera89@gmail.com'])
+            ->send(new NuevaExperienciaPropuesta($experiencia));
+
+        return redirect()->route('experiencias.proponer')
+            ->with('success', '¡Gracias! Tu experiencia ha sido enviada. La revisaremos pronto y te contactaremos.');
     }
 
     public function showProducto($slug, PuntoProducto $producto)
