@@ -33,6 +33,7 @@ $sectores = [
     'Cerro Polanco'          => 'Cerro Polanco',
     'Cerro Ramaditas'        => 'Cerro Ramaditas',
     'Cerro Rocuant'          => 'Cerro Rocuant',
+    'Cerro Rodelillo'        => 'Cerro Rocuant',
     'Cerro Rodríguez'        => 'Cerro Rodríguez',
     'Cerro San Juan de Dios' => 'Cerro San Juan de Dios',
     'Cerro San Roque'        => 'Cerro San Roque',
