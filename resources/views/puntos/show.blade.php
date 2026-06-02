@@ -101,6 +101,33 @@
                 <span class="text-pindoor-accent">{{ $punto->title }}</span>
             </nav>
 
+            {{-- Aviso especial para ascensores --}}
+            @if($punto->categoria?->slug === 'ascensores')
+            <div class="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-5 space-y-3">
+                <div class="flex items-start gap-3">
+                    <span class="text-2xl leading-none mt-0.5">⚠️</span>
+                    <div class="space-y-2 text-sm text-amber-900">
+                        <p class="font-bold text-base">Antes de venir, ten esto en cuenta</p>
+                        <p>
+                            Lamentablemente, muchos ascensores de Valparaíso llevan años fuera de servicio
+                            y no ha habido una política pública a la altura para recuperarlos.
+                            Aunque este ascensor figure como operativo, <strong>no hay un 100% de garantía
+                            de que esté funcionando el día que vayas</strong>.
+                        </p>
+                        <div class="bg-amber-100 rounded-xl px-4 py-3 space-y-1">
+                            <p class="font-bold text-amber-800">🕐 Horario habitual</p>
+                            <p>Lunes a viernes: <strong>07:00 – 21:30 hrs</strong></p>
+                            <p>Sábado, domingo y festivos: <strong>08:00 – 21:30 hrs</strong></p>
+                        </div>
+                        <p class="text-amber-700 text-xs">
+                            🔧 Las mantenciones se realizan <strong>una vez al mes en día de semana</strong>,
+                            lo que puede dejarlo fuera de servicio por horas. Ojalá no te toque ese día.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             {{-- Tabs móvil --}}
             @php
                 $alojamiento    = $punto->dato('alojamiento');
