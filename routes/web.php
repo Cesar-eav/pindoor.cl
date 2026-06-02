@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 
 /* --- RUTAS PÚBLICAS (TURISTAS) --- */
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/offline', fn() => view('offline'))->name('offline');
 Route::get('/', [PuntoInteresController::class, 'index'])->name('puntos.index');
 
 // El turista busca y ve, pero no edita
