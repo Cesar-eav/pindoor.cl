@@ -74,6 +74,89 @@
                       hover:file:bg-[#ffe0dd] cursor-pointer">
     </div>
 
+    {{-- Componente Alpine de galería --}}
+    <script>
+    window.__storageUrl = {{ json_encode(asset('storage')) }};
+    window.galeriaManager = function(imagenesExistentes) {
+        return {
+            existentes: (imagenesExistentes || []).map(function(img, idx) {
+                return {
+                    idx: idx,
+                    url: window.__storageUrl + '/' + (typeof img === 'string' ? img : img.ruta),
+                    posicion: (typeof img === 'object' && img.posicion) ? String(img.posicion) : '',
+                    eliminar: false,
+                };
+            }),
+            previews: {},
+            activasExistentes: 0,
+            totalUsados: 0,
+            slotsNuevos: [],
+
+            init: function() {
+                var self = this;
+                self._recompute();
+                self.$watch('existentes', function() { self._recompute(); });
+                self.$watch('previews',   function() { self._recompute(); });
+            },
+
+            _recompute: function() {
+                this.activasExistentes = this.existentes.filter(function(i){ return !i.eliminar; }).length;
+                this.totalUsados       = this.activasExistentes + Object.keys(this.previews).length;
+                var n = 5 - this.activasExistentes;
+                this.slotsNuevos = Array.from({ length: n < 0 ? 0 : n }, function(_, i){ return i + 1; });
+            },
+
+            marcarEliminar: function(idx) {
+                this.existentes[idx].eliminar = !this.existentes[idx].eliminar;
+                this._recompute();
+            },
+
+            cargarMultiples: function(event) {
+                var self = this;
+                var files = Array.from(event.target.files);
+                var slots = self.slotsNuevos.filter(function(s){ return !self.previews[s]; });
+                files.slice(0, slots.length).forEach(function(file, i) {
+                    var slot  = slots[i];
+                    var input = document.getElementById('slot-input-' + slot);
+                    if (input) { var dt = new DataTransfer(); dt.items.add(file); input.files = dt.files; }
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        self.previews = Object.assign({}, self.previews, { [slot]: e.target.result });
+                    };
+                    reader.readAsDataURL(file);
+                });
+                event.target.value = '';
+            },
+
+            previewUno: function(event, slot) {
+                var self = this;
+                var file = event.target.files[0];
+                if (!file) {
+                    var p = Object.assign({}, self.previews);
+                    delete p[slot];
+                    self.previews = p;
+                    return;
+                }
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    self.previews = Object.assign({}, self.previews, { [slot]: e.target.result });
+                };
+                reader.readAsDataURL(file);
+            },
+
+            limpiarSlot: function(slot) {
+                var input = document.getElementById('slot-input-' + slot);
+                if (input) { input.value = ''; try { input.files = new DataTransfer().files; } catch(e) {} }
+                var posInput = document.getElementById('posicion-nueva-' + slot);
+                if (posInput) posInput.value = '';
+                var p = Object.assign({}, this.previews);
+                delete p[slot];
+                this.previews = p;
+            },
+        };
+    };
+    </script>
+
     {{-- Galería de imágenes (hasta 5) --}}
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6"
          x-data="galeriaManager(@json($post?->imagenes ?? []))">
@@ -88,6 +171,11 @@
         <p class="text-xs text-gray-400 mb-4">
             Sube hasta 5 fotos. Indica el número de párrafo tras el que debe aparecer, o déjalo vacío para distribución automática.
         </p>
+
+        {{-- Aviso cuando todos los slots están ocupados --}}
+        <div x-show="totalUsados >= 5 && activasExistentes >= 5" class="mb-4 bg-amber-50 border border-amber-200 text-amber-700 rounded-xl px-4 py-2.5 text-xs font-medium">
+            Ya hay 5 imágenes. Para añadir una nueva, marca con ✕ la que quieras reemplazar y se liberará un slot.
+        </div>
 
         {{-- Botón carga múltiple --}}
         <div class="mb-5" x-show="totalUsados < 5">
@@ -110,25 +198,25 @@
             {{-- ── Imágenes existentes ── --}}
             <template x-for="(img, idx) in existentes" :key="'e'+idx">
                 <div>
-                    <div class="relative group aspect-square rounded-2xl overflow-hidden border-2 bg-gray-50"
+                    <div class="relative aspect-square rounded-2xl overflow-hidden border-2 bg-gray-50"
                          :class="img.eliminar ? 'border-red-300' : 'border-gray-100'">
                         <img :src="img.url" alt="" class="w-full h-full object-cover">
 
-                        {{-- Overlay --}}
-                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition
-                                    flex items-center justify-center">
-                            <button type="button" @click="marcarEliminar(idx)"
-                                    class="opacity-0 group-hover:opacity-100 transition
-                                           bg-red-500 text-white rounded-full w-8 h-8
-                                           flex items-center justify-center text-sm font-bold shadow">
-                                ✕
-                            </button>
-                        </div>
+                        {{-- Botón ✕ siempre visible en esquina --}}
+                        <button type="button" @click="marcarEliminar(idx)"
+                                x-show="!img.eliminar"
+                                class="absolute top-1.5 right-1.5 bg-red-500 hover:bg-red-600 text-white
+                                       rounded-full w-7 h-7 flex items-center justify-center
+                                       text-xs font-bold shadow-md transition z-10">
+                            ✕
+                        </button>
 
                         {{-- Tachado si marcada para borrar --}}
                         <div x-show="img.eliminar"
-                             class="absolute inset-0 bg-red-500/60 flex items-center justify-center">
-                            <span class="text-white font-black text-xs">ELIMINAR</span>
+                             class="absolute inset-0 bg-red-500/70 flex flex-col items-center justify-center gap-1 cursor-pointer"
+                             @click="marcarEliminar(idx)">
+                            <span class="text-white font-black text-xs">BORRAR</span>
+                            <span class="text-white/80 text-[10px]">clic para deshacer</span>
                         </div>
 
                         <template x-if="img.eliminar">
@@ -138,12 +226,16 @@
 
                     {{-- Posición para imagen existente --}}
                     <div x-show="!img.eliminar" class="mt-1.5">
+                        <p class="text-[10px] text-gray-400 font-semibold text-center mb-0.5">Tras párrafo nº</p>
                         <input type="number" min="1" max="99"
                                :name="'posicion_existente_' + idx"
                                x-model="img.posicion"
-                               placeholder="Párrafo (auto)"
+                               placeholder="auto"
                                class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg
                                       focus:ring-1 focus:ring-[#fc5648] outline-none text-center">
+                    </div>
+                    <div x-show="img.eliminar" class="mt-1.5 text-center">
+                        <span class="text-[10px] text-red-400 font-semibold">Se eliminará al guardar</span>
                     </div>
                 </div>
             </template>
