@@ -56,7 +56,7 @@ class PuntoInteresController extends Controller
 
         $atractivos = $query
             ->with(['categoria', 'imagenPrincipal'])
-            ->paginate(45)
+            ->paginate(46)
             ->withQueryString();
 
         $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->where('activo', 1)->where('eliminado', false)])

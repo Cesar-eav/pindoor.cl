@@ -14,8 +14,8 @@
 </div>
 
 {{-- Próximos panoramas --}}
-@if(isset($proximosPanoramas) && $proximosPanoramas->isNotEmpty())
-<div class="px-3 pt-3">
+@if(isset($proximosPanoramas) && $proximosPanoramas->isNotEmpty() && !request()->filled('lat'))
+<div id="panoramas-mobile-section" class="px-3 pt-3">
     <div class="flex items-center gap-2 mb-2">
         <span class="w-1 h-4 rounded-full bg-[#fc5648] shrink-0"></span>
         <span class="text-md font-bold text-gray-900 tracking-tight">Panoramas</span>
@@ -64,11 +64,11 @@
     {{-- Grid con scroll interno --}}
     <div class="overflow-y-auto max-h-120 rounded-2xl" style="-ms-overflow-style:none;scrollbar-width:none;">
         <div class="grid grid-cols-2 gap-3">
-        @foreach($atractivos->take(50) as $atractivo)
+        @foreach($atractivos->take(51) as $atractivo)
             @include('puntos.partials._card_mobile')
         @endforeach
         </div>
-        @if($atractivos->total() > 50)
+        @if($atractivos->total() > 51)
         <div class="mt-3 text-center">
             <a href="{{ route('puntos.explorar', request()->only(['search','category'])) }}"
                class="inline-block text-xs font-bold text-white bg-[#fc5648] px-5 py-2 rounded-full shadow">
