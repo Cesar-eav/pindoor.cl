@@ -34,7 +34,7 @@
     <x-nav_lateral />
 
     {{-- Contenido principal --}}
-    <div class="flex-1 min-w-0 md:ml-56">
+    <div class="flex-1 min-w-0 md:ml-56 pb-16 md:pb-0">
         <x-mobile.appbar>
             <x-slot:actions>
                 @yield('appbar-actions')
@@ -45,7 +45,95 @@
     </div>
 </div>
 
-{{-- ── Drawer mobile (global) ──────────────────────────────────────────── --}}
+{{-- ── Bottom Nav mobile (global) ───────────────────────────────────────── --}}
+
+{{-- Overlay FAB --}}
+<div id="fab-overlay" onclick="closeFab()"
+     class="hidden fixed inset-0 z-40 md:hidden"></div>
+
+{{-- FAB expandido: GPS + Contacto --}}
+<div id="fab-menu"
+     class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-3 md:hidden">
+    <form id="filterForm-mobile" action="{{ route('puntos.index') }}" method="GET">
+        <input type="hidden" id="lat-m" name="lat" value="{{ request('lat') }}">
+        <input type="hidden" id="lng-m" name="lng" value="{{ request('lng') }}">
+        <button type="button" id="btn-gps-m"
+                class="flex items-center gap-2 bg-gray-900 text-white px-5 py-3 rounded-2xl font-bold text-sm shadow-xl">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            Cerca de mí
+        </button>
+    </form>
+    <a href="{{ route('contacto.index') }}" onclick="closeFab()"
+       class="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-5 py-3 rounded-2xl font-bold text-sm shadow-xl">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        Contacto
+    </a>
+</div>
+
+{{-- Barra inferior --}}
+<nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#fc5648] shadow-[0_-2px_16px_rgba(252,86,72,0.35)]">
+    <div class="flex items-end justify-around px-2 pt-2 pb-3">
+
+        {{-- Información --}}
+        <a href="#" class="flex flex-col items-center gap-1 px-2 opacity-40 pointer-events-none" title="Próximamente">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="text-[10px] font-semibold text-white">Info</span>
+        </a>
+
+        {{-- Lupa / Buscar --}}
+        <a href="{{ route('puntos.buscar.vista') }}"
+           class="flex flex-col items-center gap-1 px-2 text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <span class="text-[10px] font-semibold">Buscar</span>
+        </a>
+
+        {{-- Botón (+) central --}}
+        <button onclick="toggleFab()" id="fab-btn"
+                class="relative -mt-5 w-14 h-14 rounded-full bg-white text-[#fc5648] shadow-lg flex items-center justify-center transition-transform duration-200">
+            <svg id="fab-icon-plus" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+            </svg>
+            <svg id="fab-icon-close" class="w-7 h-7 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+
+        {{-- Mapa --}}
+        <button onclick="if(typeof setView==='function'){setView('mapa')}else{window.location='{{ route('puntos.index') }}?vista=mapa'}"
+                class="flex flex-col items-center gap-1 px-2 text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                      d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+            </svg>
+            <span class="text-[10px] font-semibold">Mapa</span>
+        </button>
+
+        {{-- Instagram --}}
+        <a href="https://www.instagram.com/pindoor.cl/" target="_blank" rel="noopener noreferrer"
+           class="flex flex-col items-center gap-1 px-2 text-white">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+            <span class="text-[10px] font-semibold">Instagram</span>
+        </a>
+
+    </div>
+</nav>
+
+{{-- Drawer (mantenido para desktop, oculto en mobile) --}}
 <div id="drawer-overlay"
      onclick="closeDrawer()"
      class="hidden fixed inset-0 bg-black/40 z-50 md:hidden">
@@ -238,12 +326,36 @@
         }
     }
     function openDrawer() {
-        document.getElementById('drawer-overlay').classList.remove('hidden');
-        document.getElementById('drawer').classList.remove('translate-x-full');
+        document.getElementById('drawer-overlay')?.classList.remove('hidden');
+        document.getElementById('drawer')?.classList.remove('translate-x-full');
     }
     function closeDrawer() {
-        document.getElementById('drawer-overlay').classList.add('hidden');
-        document.getElementById('drawer').classList.add('translate-x-full');
+        document.getElementById('drawer-overlay')?.classList.add('hidden');
+        document.getElementById('drawer')?.classList.add('translate-x-full');
+    }
+    function toggleFab() {
+        const menu    = document.getElementById('fab-menu');
+        const overlay = document.getElementById('fab-overlay');
+        const plus    = document.getElementById('fab-icon-plus');
+        const close   = document.getElementById('fab-icon-close');
+        const isOpen  = !menu.classList.contains('hidden');
+        if (isOpen) {
+            menu.classList.add('hidden');
+            overlay.classList.add('hidden');
+            plus.classList.remove('hidden');
+            close.classList.add('hidden');
+        } else {
+            menu.classList.remove('hidden');
+            overlay.classList.remove('hidden');
+            plus.classList.add('hidden');
+            close.classList.remove('hidden');
+        }
+    }
+    function closeFab() {
+        document.getElementById('fab-menu')?.classList.add('hidden');
+        document.getElementById('fab-overlay')?.classList.add('hidden');
+        document.getElementById('fab-icon-plus')?.classList.remove('hidden');
+        document.getElementById('fab-icon-close')?.classList.add('hidden');
     }
 </script>
 

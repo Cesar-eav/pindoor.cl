@@ -115,6 +115,34 @@ class PuntoInteresController extends Controller
 
 
 
+    public function buscar(Request $request)
+    {
+        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->where('activo', 1)->where('eliminado', false)])
+            ->having('puntos_interes_count', '>', 0)
+            ->orderByDesc('puntos_interes_count')
+            ->get();
+
+        $grupos = [
+            'alimentacion' => ['label' => 'Comer & Beber',  'emoji' => '🍽️', 'items' => collect()],
+            'alojamiento'  => ['label' => 'Dónde dormir',   'emoji' => '🛏️', 'items' => collect()],
+            'cliente'      => ['label' => 'Comprar',        'emoji' => '🛍️', 'items' => collect()],
+            'visitar'      => ['label' => 'Visitar',        'emoji' => '🏛️', 'items' => collect()],
+        ];
+
+        foreach ($categorias as $cat) {
+            $tipo = $cat->tipo;
+            if ($tipo && isset($grupos[$tipo])) {
+                $grupos[$tipo]['items']->push($cat);
+            } else {
+                $grupos['visitar']['items']->push($cat);
+            }
+        }
+
+        $grupos = array_filter($grupos, fn($g) => $g['items']->isNotEmpty());
+
+        return view('puntos.buscar', compact('grupos'));
+    }
+
     public function explorar(Request $request)
     {
         $query = PuntoInteres::query()

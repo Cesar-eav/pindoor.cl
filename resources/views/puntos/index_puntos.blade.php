@@ -61,41 +61,31 @@
 {{-- ══ MOBILE (< md) ══════════════════════════════════════════════════════ --}}
 <div class="md:hidden flex flex-col min-h-screen font-sans">
 
-    {{-- Toggle Listado / Mapa / GPS --}}
-    <div class="inline-flex bg-gray-200 p-1 rounded-xl gap-1 justify-center">
-        <button id="btn-listado-m" onclick="setView('listado')"
-                class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all bg-white shadow text-[#fc5648]">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-            </svg>
-            Listado
-        </button>
-        <button id="btn-mapa-m" onclick="setView('mapa')"
-                class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all text-gray-500 hover:text-gray-700">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-            </svg>
-            Mapa
-        </button>
-        <button type="button" onclick="geolocateMobile(this)"
-                class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all
-                       {{ request('lat') ? 'bg-[#fc5648] text-white shadow' : 'text-gray-500 hover:text-gray-700' }}">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-            {{ request('lat') ? 'Cerca de ti' : 'GPS' }}
-        </button>
-    </div>
-
-    @include('puntos.partials._pills')
     @include('puntos.partials._listado_mobile')
 
     {{-- Mapa mobile --}}
-    <div id="vista-mapa-mobile" class="hidden flex-1">
-        <div id="mapa-mobile" style="height:70vh;"></div>
+    <div id="vista-mapa-mobile" class="hidden flex-1 flex-col">
+
+        {{-- Pills de categoría sobre el mapa --}}
+        <div class="overflow-x-auto no-scrollbar bg-white border-b border-gray-100 px-3 py-2 shrink-0"
+             style="-ms-overflow-style:none;scrollbar-width:none;">
+            <div class="flex gap-2 w-max">
+                <button data-slug="" onclick="filtrarMapa('')"
+                        class="pill-mapa px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors
+                               bg-gray-900 text-white border-gray-900 whitespace-nowrap">
+                    Todos
+                </button>
+                @foreach($categorias as $cat)
+                <button data-slug="{{ $cat->slug }}" onclick="filtrarMapa('{{ $cat->slug }}')"
+                        class="pill-mapa px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors
+                               bg-white text-gray-500 border-gray-300 whitespace-nowrap">
+                    {{ $cat->nombre }}
+                </button>
+                @endforeach
+            </div>
+        </div>
+
+        <div id="mapa-mobile" class="flex-1" style="min-height:0;"></div>
     </div>
 
 </div>{{-- /mobile --}}

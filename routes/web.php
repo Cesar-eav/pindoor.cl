@@ -35,6 +35,7 @@ Route::get('/atractivos/{atractivo}', fn($slug) => redirect()->route('puntos.sho
 Route::get('/atractivos/categoria/{categoria}', [PuntoInteresController::class, 'filtrarPorCategoria'])->name('atractivos.categoria');
 Route::get('/atractivos/ciudad/{ciudad}', [PuntoInteresController::class, 'filtrarPorCiudad'])->name('atractivos.ciudad');
 Route::get('/explorar', [PuntoInteresController::class, 'explorar'])->name('puntos.explorar');
+Route::get('/categorias', [PuntoInteresController::class, 'buscar'])->name('puntos.buscar.vista');
 Route::get('/panoramas', [PuntoInteresController::class, 'panoramas'])->name('atractivos.panoramas');
 Route::get('/panoramas/{panorama}', [PuntoInteresController::class, 'showPanorama'])->name('panoramas.show');
 Route::get('/experiencias', [PuntoInteresController::class, 'experiencias'])->name('experiencias.index');
