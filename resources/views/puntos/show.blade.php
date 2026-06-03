@@ -103,16 +103,17 @@
 
             {{-- Aviso especial para ascensores --}}
             @if($punto->categoria?->slug === 'ascensores')
+            @php $esOperativo = str_contains($punto->description ?? '', '*OPERATIVO*'); @endphp
+            @if($esOperativo)
             <div class="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-5 space-y-3">
                 <div class="flex items-start gap-3">
                     <span class="text-2xl leading-none mt-0.5">⚠️</span>
                     <div class="space-y-2 text-sm text-amber-900">
                         <p class="font-bold text-base">Antes de venir, ten esto en cuenta</p>
                         <p>
-                            Lamentablemente, muchos ascensores de Valparaíso llevan años fuera de servicio
-                            y no ha habido una política pública a la altura para recuperarlos.
-                            Aunque este ascensor figure como operativo, <strong>no hay un 100% de garantía
-                            de que esté funcionando el día que vayas</strong>.
+                            Aunque este ascensor figura como operativo, <strong>no hay un 100% de garantía
+                            de que esté funcionando el día que vayas</strong>. Lamentablemente, no ha habido
+                            una política pública a la altura para garantizar su funcionamiento continuo.
                         </p>
                         <div class="bg-amber-100 rounded-xl px-4 py-3 space-y-1">
                             <p class="font-bold text-amber-800">🕐 Horario habitual</p>
@@ -126,6 +127,21 @@
                     </div>
                 </div>
             </div>
+            @else
+            <div class="mb-6 bg-red-50 border border-red-200 rounded-2xl p-5">
+                <div class="flex items-start gap-3">
+                    <span class="text-2xl leading-none mt-0.5">🚫</span>
+                    <div class="space-y-1 text-sm text-red-900">
+                        <p class="font-bold text-base">Ascensor fuera de servicio</p>
+                        <p>
+                            Este ascensor se encuentra actualmente <strong>fuera de servicio</strong>.
+                            Lamentablemente, muchos ascensores de Valparaíso llevan años sin funcionar
+                            y no ha habido una política pública a la altura para recuperarlos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            @endif
             @endif
 
             {{-- Tabs móvil --}}
@@ -551,7 +567,7 @@
                             </div>
 
                             <div class="richtext serif-text text-lg text-gray-700 leading-relaxed">
-                                {!! ($punto->description) !!}
+                                {!! str_replace('*OPERATIVO*', '', $punto->description) !!}
                             </div>
 
 
