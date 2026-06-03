@@ -3,7 +3,7 @@
 @section('title', $panorama->titulo . ' — Pindoor')
 @section('description', $panorama->ubicacion ? $panorama->titulo . ' en ' . $panorama->ubicacion . '. ' . \Carbon\Carbon::parse($panorama->fecha)->locale('es')->isoFormat('D [de] MMMM [de] YYYY') : $panorama->titulo)
 @section('canonical', route('panoramas.show', $panorama))
-@section('bodyClass', 'bg-gray-100 text-gray-900 font-sans')
+@section('bodyClass', 'bg-gray-100 text-gray-900')
 
 @section('content')
 @php use Carbon\Carbon; @endphp

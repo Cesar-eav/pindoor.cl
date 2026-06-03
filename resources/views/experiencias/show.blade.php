@@ -5,7 +5,7 @@
 @section('description', $experiencia->descripcion
     ? \Illuminate\Support\Str::limit($experiencia->descripcion, 160)
     : $experiencia->titulo . ($experiencia->proveedor ? ' por ' . $experiencia->proveedor : '') . ' en Valparaíso.')
-@section('bodyClass', 'bg-gray-100 text-gray-900 font-sans')
+@section('bodyClass', 'bg-gray-100 text-gray-900')
 
 @section('head')
 @if($experiencia->imagen)

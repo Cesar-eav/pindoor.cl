@@ -1,7 +1,7 @@
 @extends('layouts.pindoor')
 
 @section('title', 'Buscar — Pindoor')
-@section('bodyClass', 'bg-gray-50 text-gray-900 font-sans')
+@section('bodyClass', 'bg-gray-50 text-gray-900')
 
 @section('content')
 <div class="max-w-2xl mx-auto px-4 pt-5 pb-10">

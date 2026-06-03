@@ -3,7 +3,7 @@
 @section('title', 'Experiencias — Pindoor.cl')
 @section('canonical', route('experiencias.index'))
 @section('description', 'Descubre experiencias únicas en Valparaíso: clases de cueca, talleres de arte, tours culturales, gastronomía y más. Para turistas y locales.')
-@section('bodyClass', 'bg-gray-100 text-gray-900 font-sans')
+@section('bodyClass', 'bg-gray-100 text-gray-900')
 
 @section('content')
 <div class="max-w-5xl mx-auto px-4 py-8"
@@ -22,7 +22,7 @@
      @popstate.window="open && (open = false)">
 
     {{-- Header --}}
-    <section class="mb-8 text-center max-w-2xl mx-auto px-4 font-sans">
+    <section class="mb-8 text-center max-w-2xl mx-auto px-4">
         <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-950 mb-3">
             Expe<span class="text-[#fc5648]">rien</span>cias
         </h1>

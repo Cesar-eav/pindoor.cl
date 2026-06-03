@@ -27,7 +27,7 @@
     <script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","wajfuymjy1");</script>
     @endif
 </head>
-<body class="@yield('bodyClass', 'bg-gray-100 text-gray-900 font-serif')">
+<body class="font-sans @yield('bodyClass', 'bg-gray-100 text-gray-900')">
 
 <div class="flex min-h-screen">
     {{-- Sidebar lateral: solo desktop --}}
@@ -57,7 +57,7 @@
     <form id="filterForm-mobile" action="{{ route('puntos.index') }}" method="GET">
         <input type="hidden" id="lat-m" name="lat" value="{{ request('lat') }}">
         <input type="hidden" id="lng-m" name="lng" value="{{ request('lng') }}">
-        <button type="button" id="btn-gps-m"
+        <button type="button" id="btn-gps-m" onclick="geolocateFab(this)"
                 class="flex items-center gap-2 bg-gray-900 text-white px-5 py-3 rounded-2xl font-bold text-sm shadow-xl">
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -71,9 +71,9 @@
        class="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-5 py-3 rounded-2xl font-bold text-sm shadow-xl">
         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
         </svg>
-        Contacto
+        Contáctanos
     </a>
 </div>
 
@@ -356,6 +356,25 @@
         document.getElementById('fab-overlay')?.classList.add('hidden');
         document.getElementById('fab-icon-plus')?.classList.remove('hidden');
         document.getElementById('fab-icon-close')?.classList.add('hidden');
+    }
+    function geolocateFab(btn) {
+        if (!navigator.geolocation) { alert('Tu navegador no soporta geolocalización.'); return; }
+        const orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '⌛ Localizando…';
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                document.getElementById('lat-m').value = pos.coords.latitude;
+                document.getElementById('lng-m').value = pos.coords.longitude;
+                document.getElementById('filterForm-mobile').submit();
+            },
+            () => {
+                alert('No se pudo obtener tu ubicación.');
+                btn.disabled = false;
+                btn.innerHTML = orig;
+            },
+            { enableHighAccuracy: true, timeout: 8000 }
+        );
     }
 </script>
 

@@ -1,4 +1,4 @@
-<article class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col font-sans">
+<article class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col">
     <div class="relative">
         <a href="{{ route('atractivos.show', $atractivo->slug ?? $atractivo->id) }}" class="block overflow-hidden">
             @if($atractivo->imagenPrincipal)

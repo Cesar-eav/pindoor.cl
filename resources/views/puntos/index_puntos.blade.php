@@ -8,7 +8,7 @@
 @section('title', 'Pindoor · Guía de lugares en Valparaíso')
 @section('description', 'Explora restaurantes, cafeterías, hoteles, museos, bares y atracciones turísticas en Valparaíso. Filtra por categoría, busca por nombre o activa el GPS para ver qué tienes cerca.')
 @section('canonical', route('puntos.index'))
-@section('bodyClass', 'bg-gray-100 text-gray-900 font-serif')
+@section('bodyClass', 'bg-gray-100 text-gray-900')
 
 @section('head')
     <meta property="og:type" content="website" />
@@ -59,7 +59,7 @@
 @section('content')
 
 {{-- ══ MOBILE (< md) ══════════════════════════════════════════════════════ --}}
-<div class="md:hidden flex flex-col min-h-screen font-sans">
+<div class="md:hidden flex flex-col min-h-screen">
 
     @include('puntos.partials._listado_mobile')
 

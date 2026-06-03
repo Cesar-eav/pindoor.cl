@@ -3,7 +3,7 @@
 @section('title', 'Artistas en Valparaíso — Pindoor')
 @section('description', 'Descubre artistas de Valparaíso: músicos, artistas visuales, fotógrafos, bailarines y más.')
 @section('canonical', route('artistas.index'))
-@section('bodyClass', 'bg-gray-100 text-gray-900 font-sans')
+@section('bodyClass', 'bg-gray-100 text-gray-900')
 
 @section('content')
 <div class="max-w-4xl mx-auto px-4 py-8">
