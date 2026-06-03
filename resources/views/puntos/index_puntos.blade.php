@@ -59,7 +59,7 @@
 @section('content')
 
 {{-- ══ MOBILE (< md) ══════════════════════════════════════════════════════ --}}
-<div class="md:hidden flex flex-col min-h-screen">
+<div class="md:hidden flex flex-col min-h-screen font-sans">
 
     {{-- Toggle Listado / Mapa / GPS --}}
     <div class="inline-flex bg-gray-200 p-1 rounded-xl gap-1 justify-center">

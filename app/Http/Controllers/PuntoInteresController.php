@@ -6,6 +6,7 @@ use App\Models\Configuracion;
 use App\Models\PuntoInteres;
 use App\Models\ModuloItem;
 use App\Models\Panorama;
+use App\Models\Post;
 use App\Models\Experiencia;
 use App\Models\Categoria;
 use App\Models\PuntoProducto;
@@ -95,7 +96,15 @@ class PuntoInteresController extends Controller
                 ->get();
         }
 
-        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'puntosMapData', 'panoramas'));
+        $proximosPanoramas = Panorama::where('activo', true)
+            ->where('fecha', '>=', now()->toDateString())
+            ->orderBy('fecha')
+            ->limit(10)
+            ->get();
+
+        $ultimoPost = Post::publicados()->first();
+
+        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost'));
 
     } catch (\Exception $e) {
         \Log::error('Error en index: ' . $e->getMessage());
@@ -105,6 +114,41 @@ class PuntoInteresController extends Controller
 
 
 
+
+    public function explorar(Request $request)
+    {
+        $query = PuntoInteres::query()
+            ->where('activo', 1)
+            ->whereNotIn('id', [81,80,64,87,115])
+            ->where('eliminado', false);
+
+        if ($request->filled('category')) {
+            $query->whereHas('categoria', fn($q) => $q->where('slug', $request->category));
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('descripcion_busqueda', 'like', "%{$search}%")
+                  ->orWhere('tags', 'like', "%{$search}%");
+            });
+        }
+
+        $query->latest('updated_at');
+
+        $atractivos = $query
+            ->with(['categoria', 'imagenPrincipal'])
+            ->paginate(20)
+            ->withQueryString();
+
+        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->where('activo', 1)->where('eliminado', false)])
+            ->orderByDesc('puntos_interes_count')
+            ->get();
+
+        return view('puntos.explorar', compact('atractivos', 'categorias'));
+    }
 
     /**
      * Guarda el nuevo punto de interés en la base de datos.
