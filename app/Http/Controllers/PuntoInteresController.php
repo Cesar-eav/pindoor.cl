@@ -117,7 +117,7 @@ class PuntoInteresController extends Controller
 
     public function buscar(Request $request)
     {
-        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->where('activo', 1)->where('eliminado', false)])
+        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->where('activo', 1)->where('eliminado', false)->whereNotIn('id', [81,80,64,87,115])])
             ->having('puntos_interes_count', '>', 0)
             ->orderByDesc('puntos_interes_count')
             ->get();
