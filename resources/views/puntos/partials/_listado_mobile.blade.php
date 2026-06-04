@@ -50,7 +50,7 @@
 
     {{-- Última entrada del blog --}}
     @if(isset($ultimoPost) && $ultimoPost)
-    <div class="mt-5">
+    <div id="blog-mobile-section" class="mt-5">
         <div class="flex items-center gap-2 mb-3">
             <span class="w-1 h-4 rounded-full bg-[#fc5648] shrink-0"></span>
             <h2 class="text-sm font-bold text-gray-900 tracking-tight">Blog</h2>

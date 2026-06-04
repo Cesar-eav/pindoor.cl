@@ -35,6 +35,8 @@ function setView(vista) {
     }
 
     const elPanoramasM = document.getElementById('panoramas-mobile-section');
+    const elBlogM     = document.getElementById('blog-mobile-section');
+    const elFiltroM   = document.getElementById('filtro-activo-mobile');
 
     if (vista === 'mapa') {
         if (mobile) {
@@ -42,6 +44,8 @@ function setView(vista) {
             elMapaM?.classList.remove('hidden');
             elMapaM?.classList.add('flex');
             elPanoramasM?.classList.add('hidden');
+            elBlogM?.classList.add('hidden');
+            elFiltroM?.classList.add('hidden');
         } else {
             elListado?.classList.add('hidden');
             elMapa?.classList.remove('hidden');
@@ -68,6 +72,8 @@ function setView(vista) {
             elMapaM?.classList.remove('flex');
             elListadoM?.classList.remove('hidden');
             elPanoramasM?.classList.remove('hidden');
+            elBlogM?.classList.remove('hidden');
+            elFiltroM?.classList.remove('hidden');
         } else {
             elMapa?.classList.add('hidden');
             elListado?.classList.remove('hidden');
