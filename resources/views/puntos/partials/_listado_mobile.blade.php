@@ -48,6 +48,37 @@
 </div>
 @endif
 
+    {{-- Última entrada del blog --}}
+    @if(isset($ultimoPost) && $ultimoPost)
+    <div class="mt-5">
+        <div class="flex items-center gap-2 mb-3">
+            <span class="w-1 h-4 rounded-full bg-[#fc5648] shrink-0"></span>
+            <h2 class="text-sm font-bold text-gray-900 tracking-tight">Blog</h2>
+            <span class="flex-1 h-px bg-gray-200"></span>
+            <a href="{{ route('blog.index') }}" class="text-[11px] font-semibold text-[#fc5648] shrink-0">Ver todos →</a>
+        </div>
+
+        <a href="{{ route('blog.show', $ultimoPost->slug) }}"
+           class="block relative  overflow-hidden shadow-sm min-h-40">
+            @if($ultimoPost->imagen_portada)
+                <img src="{{ asset('storage/' . $ultimoPost->imagen_portada) }}"
+                     alt="{{ $ultimoPost->titulo }}"
+                     class="absolute inset-0 w-full h-full object-cover">
+            @else
+                <div class="absolute inset-0 bg-gray-800"></div>
+            @endif
+            <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent"></div>
+            <div class="relative z-10 p-4 flex flex-col justify-end min-h-40">
+                <span class="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">Última entrada</span>
+                <h3 class="text-sm font-bold text-white leading-snug line-clamp-2">{{ $ultimoPost->titulo }}</h3>
+                @if($ultimoPost->resumen)
+                <p class="text-[11px] text-white/75 mt-1 line-clamp-2">{{ $ultimoPost->resumen }}</p>
+                @endif
+            </div>
+        </a>
+    </div>
+    @endif
+
 {{-- Resultados --}}
 <div id="vista-listado-mobile" class="flex-1 px-3 pt-4 pb-6">
 
@@ -78,29 +109,16 @@
         @endif
     </div>
 
-    {{-- Última entrada del blog --}}
-    @if(isset($ultimoPost) && $ultimoPost)
-    <a href="{{ route('blog.show', $ultimoPost->slug) }}"
-       class="mt-5 block relative rounded-2xl overflow-hidden shadow-sm min-h-40">
-        @if($ultimoPost->imagen_portada)
-            <img src="{{ asset('storage/' . $ultimoPost->imagen_portada) }}"
-                 alt="{{ $ultimoPost->titulo }}"
-                 class="absolute inset-0 w-full h-full object-cover">
-        @else
-            <div class="absolute inset-0 bg-gray-800"></div>
-        @endif
-        {{-- Gradiente oscuro --}}
-        <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent"></div>
-        {{-- Texto encima --}}
-        <div class="relative z-10 p-4 flex flex-col justify-end min-h-40">
-            <span class="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">Blog</span>
-            <h3 class="text-sm font-bold text-white leading-snug line-clamp-2">{{ $ultimoPost->titulo }}</h3>
-            @if($ultimoPost->resumen)
-            <p class="text-[11px] text-white/75 mt-1 line-clamp-2">{{ $ultimoPost->resumen }}</p>
-            @endif
-        </div>
-    </a>
-    @endif
+
+
+    {{-- Mensaje fase piloto --}}
+    <div class="mt-6 mb-2 px-4 py-4 bg-[#fff0ef] rounded-2xl text-center">
+        <p class="text-xs text-gray-700 leading-relaxed">
+            Pindoor está en <span class="font-bold text-[#fc5648]">fase piloto</span>. Estamos creciendo y mejorando cada día.
+            Si tienes sugerencias o quieres sumarte,
+            <a href="{{ route('contacto.index') }}" class="font-bold text-[#fc5648] underline underline-offset-2">contáctanos</a>.
+        </p>
+    </div>
 
     @elseif(empty($panoramas) || $panoramas->isEmpty())
         <div class="text-center py-16">
