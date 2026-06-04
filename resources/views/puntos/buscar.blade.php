@@ -16,7 +16,6 @@
             </svg>
             <input type="text" name="search" value="{{ request('search') }}"
                    placeholder="Café, mirador, museo, ascensor…"
-                   autofocus
                    class="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-200 bg-white shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-[#fc5648]/40">
         </div>
         <button type="submit"
