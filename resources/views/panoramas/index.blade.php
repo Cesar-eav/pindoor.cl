@@ -81,7 +81,7 @@
     @else
 
     {{-- ── Strip de días navegable ─────────────────────────────────────────── --}}
-    <div class="sticky top-14 md:top-0 z-20 bg-gray-100/90 backdrop-blur-sm py-3 mb-8 -mx-4 px-4">
+    <div class="sticky top-12 md:top-0 z-20 bg-gray-100/90 backdrop-blur-sm py-3 mb-8 -mx-4 px-4">
         <div id="dias-strip" class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
             @foreach($porDia as $fechaStr => $grupo)
             @php $meta = $diasMeta[$fechaStr]; @endphp
@@ -101,7 +101,7 @@
     @foreach($porDia as $fechaStr => $grupo)
     @php $meta = $diasMeta[$fechaStr]; @endphp
 
-    <section id="dia-{{ $fechaStr }}" data-fecha="{{ $fechaStr }}" class="mb-12">
+    <section id="dia-{{ $fechaStr }}" data-fecha="{{ $fechaStr }}" class="mb-12 z-50">
 
         {{-- Encabezado del día --}}
         <div class="flex items-center gap-3 mb-5">
@@ -141,14 +141,14 @@
 
                     {{-- Badge categoría (arriba izquierda) --}}
                     @if($panorama->categoria && isset($categorias[$panorama->categoria]))
-                    <div class="absolute top-2 left-2 z-20 bg-black/60 backdrop-blur-sm text-white md:text-sm text-lg font-bold px-2 py-0.5 rounded-lg">
+                    <div class="absolute top-2 left-2 z-10 bg-black/60 backdrop-blur-sm text-white md:text-sm text-lg font-bold px-2 py-0.5 rounded-lg">
                         {{ $categorias[$panorama->categoria]['emoji'] }} {{ $categorias[$panorama->categoria]['label'] }}
                     </div>
                     @endif
 
                     {{-- Badge gratuito (arriba derecha) --}}
                     @if($panorama->es_gratuito)
-                    <div class="absolute top-2 right-2 z-20 bg-green-500 text-white md:text-[12px] text-[15px] font-bold px-2 py-0.5 rounded-lg">
+                    <div class="absolute top-2 right-2 z-10 bg-green-500 text-white md:text-[12px] text-[15px] font-bold px-2 py-0.5 rounded-lg">
                         🎟️ Gratis
                     </div>
                     @endif
@@ -166,8 +166,8 @@
 
                     {{-- Badge hora (abajo derecha) --}}
                     @if($panorama->hora)
-                    <div class="absolute bottom-2 right-2 z-20 bg-black/60 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-lg">
-                        🕐 {{ $panorama->hora }}
+                    <div class="absolute bottom-2 right-2 z-10 bg-black/60 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-lg">
+                        🕐 {{ $panorama->hora }}  
                     </div>
                     @endif
                 </div>
