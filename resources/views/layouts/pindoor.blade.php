@@ -51,30 +51,45 @@
 <div id="fab-overlay" onclick="closeFab()"
      class="hidden fixed inset-0 z-40 md:hidden"></div>
 
-{{-- FAB expandido: GPS + Contacto --}}
+{{-- FAB expandido: fila horizontal --}}
 <div id="fab-menu"
-     class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-3 md:hidden">
+     class="hidden fixed bottom-20 left-0 right-0 z-50 justify-center gap-3 px-4 md:hidden">
+
+    {{-- GPS --}}
     <form id="filterForm-mobile" action="{{ route('puntos.index') }}" method="GET">
         <input type="hidden" id="lat-m" name="lat" value="{{ request('lat') }}">
         <input type="hidden" id="lng-m" name="lng" value="{{ request('lng') }}">
         <button type="button" id="btn-gps-m" onclick="geolocateFab(this)"
-                class="flex items-center gap-2 bg-gray-900 text-white px-5 py-3 rounded-2xl font-bold text-sm shadow-xl">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="flex flex-col items-center gap-1.5 bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-xl min-w-19">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
-            Cerca de mí
+            <span class="text-[10px] font-bold leading-none">Cerca de mí</span>
         </button>
     </form>
+
+    {{-- Experiencias --}}
+    <a href="{{ route('experiencias.index') }}" onclick="closeFab()"
+       class="flex flex-col items-center gap-1.5 bg-[#fc5648] text-white px-5 py-3.5 rounded-2xl shadow-xl min-w-19">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span class="text-[10px] font-bold leading-none">Experiencias</span>
+    </a>
+
+    {{-- Contacto --}}
     <a href="{{ route('contacto.index') }}" onclick="closeFab()"
-       class="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-5 py-3 rounded-2xl font-bold text-sm shadow-xl">
-        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+       class="flex flex-col items-center gap-1.5 bg-white border border-gray-200 text-gray-700 px-5 py-3.5 rounded-2xl shadow-xl min-w-19">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
         </svg>
-        Contáctanos
+        <span class="text-[10px] font-bold leading-none">Contáctanos</span>
     </a>
+
 </div>
 
 {{-- Barra inferior --}}
@@ -341,18 +356,22 @@
         const isOpen  = !menu.classList.contains('hidden');
         if (isOpen) {
             menu.classList.add('hidden');
+            menu.classList.remove('flex');
             overlay.classList.add('hidden');
             plus.classList.remove('hidden');
             close.classList.add('hidden');
         } else {
             menu.classList.remove('hidden');
+            menu.classList.add('flex');
             overlay.classList.remove('hidden');
             plus.classList.add('hidden');
             close.classList.remove('hidden');
         }
     }
     function closeFab() {
-        document.getElementById('fab-menu')?.classList.add('hidden');
+        const menu = document.getElementById('fab-menu');
+        menu?.classList.add('hidden');
+        menu?.classList.remove('flex');
         document.getElementById('fab-overlay')?.classList.add('hidden');
         document.getElementById('fab-icon-plus')?.classList.remove('hidden');
         document.getElementById('fab-icon-close')?.classList.add('hidden');
