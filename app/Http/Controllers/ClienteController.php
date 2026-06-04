@@ -147,6 +147,8 @@ class ClienteController extends Controller
         $datosPunto = [
             'description'          => $request->description,
             'horario'              => $request->horario,
+            'sector'               => $request->sector,
+            'direccion'            => $request->direccion,
             'enlace'               => $request->enlace,
             'video_url'            => $request->video_url,
             'tags'                 => $request->tags

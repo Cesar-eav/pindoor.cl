@@ -13,7 +13,7 @@
     </x-slot>
 
     <div class="py-6">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
 
             @if(session('success'))
                 <div class="mb-4 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-5 py-3 font-medium">
@@ -53,34 +53,149 @@
                   enctype="multipart/form-data">
                 @csrf @method('PUT')
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="space-y-6">
 
-                    {{-- COLUMNA IZQUIERDA: contenido principal --}}
-                    <div class="lg:col-span-2 space-y-5">
+                    {{-- FILA 1: Descripción (2/3) + Logo & ficha (1/3) --}}
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
                         {{-- Descripción --}}
-                        <div id="descripcion" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 scroll-mt-20">
-                            <p class="text-xs text-gray-400 uppercase font-bold mb-4">Descripción del espacio</p>
+                        <div id="descripcion" class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-blue-100 p-6 scroll-mt-20">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="w-1 h-5 rounded-full bg-blue-400 shrink-0"></span>
+                                <p class="text-xs text-blue-600 uppercase font-bold tracking-wider">Descripción del espacio</p>
+                            </div>
                             <div id="description-editor"
                                  class="bg-white border border-gray-200 rounded-xl text-sm min-h-44"></div>
                             <textarea id="description" name="description" class="hidden">{!! old('description', $punto->description) !!}</textarea>
                         </div>
 
-                        {{-- Carta / Menú --}}
-                        @if(in_array('carta', $modulos))
-                        <div id="seccion-carta" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5 scroll-mt-20">
-                            <div>
-                                <p class="text-xs text-gray-400 uppercase font-bold mb-1">Carta / Menú</p>
-                                <p class="text-xs text-gray-400">Se muestra en tu ficha pública con un botón "Ver carta".</p>
+                        {{-- Sidebar: ficha + logo --}}
+                        <div class="space-y-4">
+                            {{-- Info fija --}}
+                            <div class="bg-gray-50 border border-dashed border-gray-200 rounded-2xl p-4">
+                                <p class="text-xs text-gray-400 mb-2">Gestionado por el administrador</p>
+                                <p class="font-semibold text-gray-700 text-sm">{{ $punto->title }}</p>
+                                <p class="text-xs text-gray-400 mt-0.5">
+                                    {{ $punto->categoria?->icono }} {{ $punto->categoria?->nombre ?? '—' }}
+                                    @if($punto->sector) &middot; 📍 {{ $punto->sector }} @endif
+                                </p>
                             </div>
 
+                            {{-- Imagen de perfil --}}
+                            <div class="bg-white rounded-2xl shadow-sm border border-violet-100 p-5">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="w-1 h-5 rounded-full bg-violet-400 shrink-0"></span>
+                                    <p class="text-xs text-violet-600 uppercase font-bold tracking-wider">Logo / Imagen de perfil</p>
+                                </div>
+                                <div class="flex items-center gap-4 mb-3">
+                                    @if($punto->imagen_perfil)
+                                        <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
+                                             alt="Logo actual"
+                                             class="w-16 h-16 rounded-2xl object-cover border border-gray-100 shrink-0">
+                                    @else
+                                        <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center shrink-0 text-2xl">🏪</div>
+                                    @endif
+                                    <p class="text-xs text-gray-400 leading-relaxed">JPG, PNG o WEBP<br>Máx. 2 MB</p>
+                                </div>
+                                <input type="file" name="imagen_perfil" id="imagen_perfil"
+                                       accept="image/jpeg,image/png,image/jpg,image/webp"
+                                       class="block w-full text-sm text-gray-500
+                                              file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0
+                                              file:text-xs file:font-bold file:bg-gray-100 file:text-gray-700
+                                              hover:file:bg-gray-200 cursor-pointer" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- FILA 2: Ubicación | Contacto & medios | Búsqueda (3 columnas iguales) --}}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+
+                        {{-- Ubicación --}}
+                        <div class="bg-emerald-50 rounded-2xl border border-emerald-200 p-5 space-y-4">
+                            <div class="flex items-center gap-2">
+                                <span class="w-1 h-5 rounded-full bg-emerald-500 shrink-0"></span>
+                                <p class="text-xs text-emerald-700 uppercase font-bold tracking-wider">Ubicación</p>
+                            </div>
+                            <div>
+                                <x-input-label for="horario" value="Horario de atención" />
+                                <x-text-input id="horario" name="horario" class="block mt-1 w-full"
+                                              value="{{ old('horario', $punto->horario) }}"
+                                              placeholder="Lun–Vie 09:00–20:00" />
+                            </div>
+                            <div>
+                                <x-input-label for="sector" value="Sector / Cerro" />
+                                @include('admin.partials._sector-select', ['selected' => old('sector', $punto->sector)])
+                            </div>
+                            <div>
+                                <x-input-label for="direccion" value="Dirección" />
+                                <x-text-input id="direccion" name="direccion" class="block mt-1 w-full"
+                                              value="{{ old('direccion', $punto->direccion) }}"
+                                              placeholder="Calle Example 123, Valparaíso" />
+                            </div>
+                        </div>
+
+                        {{-- Contacto & medios --}}
+                        <div class="bg-sky-50 rounded-2xl border border-sky-200 p-5 space-y-4">
+                            <div class="flex items-center gap-2">
+                                <span class="w-1 h-5 rounded-full bg-sky-500 shrink-0"></span>
+                                <p class="text-xs text-sky-700 uppercase font-bold tracking-wider">Contacto & medios</p>
+                            </div>
+                            <div>
+                                <x-input-label for="enlace" value="Web o Instagram" />
+                                <x-text-input id="enlace" name="enlace" type="url" class="block mt-1 w-full"
+                                              value="{{ old('enlace', $punto->enlace) }}"
+                                              placeholder="https://instagram.com/minegocio" />
+                            </div>
+                            <div>
+                                <x-input-label for="tags" value="Etiquetas (separadas por coma)" />
+                                <x-text-input id="tags" name="tags" class="block mt-1 w-full"
+                                              value="{{ old('tags', is_array($punto->tags) ? implode(', ', $punto->tags) : '') }}"
+                                              placeholder="café, vegano, terraza, wifi" />
+                                <p class="text-xs text-gray-500 mt-1">Aparecen en tu ficha pública.</p>
+                            </div>
+                            <div>
+                                <x-input-label for="video_url" value="Video de YouTube" />
+                                <x-text-input id="video_url" name="video_url" type="url" class="block mt-1 w-full"
+                                              value="{{ old('video_url', $punto->video_url) }}"
+                                              placeholder="https://www.youtube.com/watch?v=..." />
+                                <p class="text-xs text-gray-500 mt-1">Se incrusta en tu ficha pública.</p>
+                            </div>
+                        </div>
+
+                        {{-- Búsqueda --}}
+                        <div id="busqueda" class="bg-amber-50 border border-amber-200 rounded-2xl p-5 space-y-3 scroll-mt-20">
+                            <div class="flex items-center gap-2">
+                                <span class="w-1 h-5 rounded-full bg-amber-400 shrink-0"></span>
+                                <p class="text-xs text-amber-700 uppercase font-bold tracking-wider">Perfil de búsqueda</p>
+                            </div>
+                            <p class="text-xs text-amber-600">
+                                <strong>No visible para turistas</strong>, pero clave para que te encuentren.
+                                Describe todo: tipo de café, comidas, ambiente, opciones especiales, etc.
+                            </p>
+                            <textarea id="descripcion_busqueda" name="descripcion_busqueda" rows="8"
+                                      class="block w-full border-amber-200 bg-white rounded-xl shadow-sm text-sm focus:ring-amber-400 resize-none"
+                                      placeholder="Cafetería especialidad, V60, chemex, leche de avena, desayunos, vegano, sin gluten, terraza, perros permitidos, wifi, trabajo remoto..."
+                            >{{ old('descripcion_busqueda', $punto->descripcion_busqueda) }}</textarea>
+                        </div>
+                    </div>
+
+                    {{-- FILA 3: Carta (ancho completo, condicional) --}}
+                    @if(in_array('carta', $modulos))
+                    <div id="seccion-carta" class="bg-white rounded-2xl shadow-sm border border-orange-100 p-6 space-y-5 scroll-mt-20">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="w-1 h-5 rounded-full bg-orange-400 shrink-0"></span>
+                                <p class="text-xs text-orange-600 uppercase font-bold tracking-wider">Carta / Menú</p>
+                            </div>
+                            <p class="text-xs text-gray-400 ml-3">Se muestra en tu ficha pública con un botón "Ver carta".</p>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div>
                                 <x-input-label for="carta" value="Descripción de la carta (texto libre)" />
                                 <div id="carta-editor"
                                      class="mt-1 bg-white border border-gray-200 rounded-xl text-sm min-h-44"></div>
                                 <textarea id="carta" name="carta" class="hidden">{!! old('carta', $datoCarta['texto'] ?? '') !!}</textarea>
                             </div>
-
                             <div>
                                 <x-input-label for="carta_pdf" value="Carta en PDF (opcional)" />
                                 @if($datoCarta['pdf_ruta'] ?? null)
@@ -102,186 +217,95 @@
                                 <p class="text-xs text-gray-400 mt-1">Solo PDF · Máx. 5 MB.</p>
                             </div>
                         </div>
-                        @endif
-
-                        {{-- Alojamiento --}}
-                        @if($tieneModuloAlojamiento)
-                        @php $catalogoServicios = App\Models\PuntoInteres::catalogoServicios(); @endphp
-                        <div id="alojamiento" class="bg-white rounded-2xl shadow-sm border border-indigo-100 p-6 space-y-6 scroll-mt-20">
-                            <div>
-                                <p class="text-xs text-indigo-600 uppercase font-bold mb-1">Alojamiento</p>
-                                <p class="text-xs text-gray-400">Información específica para huéspedes.</p>
-                            </div>
-
-                            @if(in_array('habitaciones', $modulos))
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div>
-                                    <x-input-label for="precio_desde" value="Precio desde" />
-                                    <x-text-input id="precio_desde" name="precio_desde" class="block mt-1 w-full"
-                                                  value="{{ old('precio_desde', $datoAlojamiento['precio_desde'] ?? '') }}"
-                                                  placeholder="Ej: $15.000 / noche" />
-                                </div>
-                                <div>
-                                    <x-input-label for="check_in" value="Check-in" />
-                                    <x-text-input id="check_in" name="check_in" class="block mt-1 w-full"
-                                                  value="{{ old('check_in', $datoAlojamiento['entrada'] ?? '') }}"
-                                                  placeholder="14:00" />
-                                </div>
-                                <div>
-                                    <x-input-label for="check_out" value="Check-out" />
-                                    <x-text-input id="check_out" name="check_out" class="block mt-1 w-full"
-                                                  value="{{ old('check_out', $datoAlojamiento['salida'] ?? '') }}"
-                                                  placeholder="11:00" />
-                                </div>
-                            </div>
-
-                            <div>
-                                <x-input-label for="habitaciones" value="Habitaciones disponibles" />
-                                <div id="habitaciones-editor"
-                                     class="mt-1 bg-white border border-gray-200 rounded-xl text-sm min-h-40"></div>
-                                <textarea id="habitaciones" name="habitaciones" class="hidden">{!! old('habitaciones', $datoAlojamiento['habitaciones'] ?? '') !!}</textarea>
-                            </div>
-                            @endif
-
-                            @if(in_array('servicios', $modulos))
-                            <div>
-                                <x-input-label value="Servicios incluidos" />
-                                <p class="text-xs text-gray-400 mt-1 mb-4">Selecciona todo lo que ofreces.</p>
-                                @php $seleccionados = old('servicios_incluidos', $datoAlojamiento['servicios'] ?? []); @endphp
-                                <div class="space-y-4">
-                                    @foreach($catalogoServicios as $grupo => $servicios)
-                                    <div class="border border-gray-200 rounded-xl overflow-hidden">
-                                        <div class="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                                            <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">{{ $grupo }}</p>
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-2 p-3">
-                                            @foreach($servicios as $slug => $servicio)
-                                            <label class="flex items-center gap-2 cursor-pointer bg-gray-50 hover:bg-indigo-50 border border-transparent hover:border-indigo-200 rounded-xl px-3 py-2 transition">
-                                                <input type="checkbox" name="servicios_incluidos[]" value="{{ $slug }}"
-                                                       @checked(in_array($slug, $seleccionados))
-                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-400">
-                                                <span class="text-lg">{{ $servicio['emoji'] }}</span>
-                                                <span class="text-xs font-medium text-gray-700">{{ $servicio['label'] }}</span>
-                                            </label>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                            @endif
-
-                            @if(in_array('politicas', $modulos))
-                            <div>
-                                <x-input-label for="politicas" value="Políticas del establecimiento" />
-                                <div id="politicas-editor"
-                                     class="mt-1 bg-white border border-gray-200 rounded-xl text-sm min-h-40"></div>
-                                <textarea id="politicas" name="politicas" class="hidden">{!! old('politicas', $datoAlojamiento['politicas'] ?? '') !!}</textarea>
-                            </div>
-                            @endif
-                        </div>
-                        @endif
-
-                        {{-- Perfil de búsqueda --}}
-                        <div id="busqueda" class="bg-amber-50 border border-amber-200 rounded-2xl p-6 scroll-mt-20">
-                            <p class="text-xs text-amber-700 uppercase font-bold mb-1">Perfil de búsqueda</p>
-                            <p class="text-xs text-amber-600 mb-4">
-                                <strong>No visible para turistas</strong>, pero clave para que te encuentren.
-                                Describe todo: tipo de café, comidas, ambiente, opciones especiales, etc.
-                            </p>
-                            <textarea id="descripcion_busqueda" name="descripcion_busqueda" rows="6"
-                                      class="block w-full border-amber-200 bg-white rounded-xl shadow-sm text-sm focus:ring-amber-400 resize-none"
-                                      placeholder="Cafetería especialidad, V60, chemex, leche de avena, desayunos, vegano, sin gluten, terraza, perros permitidos, wifi, trabajo remoto..."
-                            >{{ old('descripcion_busqueda', $punto->descripcion_busqueda) }}</textarea>
-                        </div>
-
-                        {{-- Botón móvil --}}
-                        <div class="flex justify-end pb-2 lg:hidden">
-                            <button type="submit"
-                                    class="px-6 py-2.5 bg-[#fc5648] text-white text-sm font-bold rounded-xl hover:opacity-90 transition">
-                                Guardar cambios
-                            </button>
-                        </div>
-
                     </div>
+                    @endif
 
-                    {{-- COLUMNA DERECHA: datos rápidos --}}
-                    <div class="space-y-5">
-
-                        {{-- Info fija --}}
-                        <div class="bg-gray-50 border border-dashed border-gray-200 rounded-2xl p-4">
-                            <p class="text-xs text-gray-400 mb-2">Gestionado por el administrador</p>
-                            <p class="font-semibold text-gray-700 text-sm">{{ $punto->title }}</p>
-                            <p class="text-xs text-gray-400 mt-0.5">
-                                {{ $punto->categoria?->icono }} {{ $punto->categoria?->nombre ?? '—' }}
-                                @if($punto->sector) &middot; 📍 {{ $punto->sector }} @endif
-                            </p>
+                    {{-- FILA 4: Alojamiento (ancho completo, condicional) --}}
+                    @if($tieneModuloAlojamiento)
+                    @php $catalogoServicios = App\Models\PuntoInteres::catalogoServicios(); @endphp
+                    <div id="alojamiento" class="bg-white rounded-2xl shadow-sm border border-indigo-100 p-6 space-y-6 scroll-mt-20">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="w-1 h-5 rounded-full bg-indigo-400 shrink-0"></span>
+                                <p class="text-xs text-indigo-600 uppercase font-bold tracking-wider">Alojamiento</p>
+                            </div>
+                            <p class="text-xs text-gray-400 ml-3">Información específica para huéspedes.</p>
                         </div>
 
-                        {{-- Imagen de perfil --}}
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                            <p class="text-xs text-gray-400 uppercase font-bold mb-3">Logo / Imagen de perfil</p>
-                            <div class="flex items-center gap-4 mb-3">
-                                @if($punto->imagen_perfil)
-                                    <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
-                                         alt="Logo actual"
-                                         class="w-16 h-16 rounded-2xl object-cover border border-gray-100 shrink-0">
-                                @else
-                                    <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center shrink-0 text-2xl">🏪</div>
-                                @endif
-                                <p class="text-xs text-gray-400 leading-relaxed">JPG, PNG o WEBP<br>Máx. 2 MB</p>
-                            </div>
-                            <input type="file" name="imagen_perfil" id="imagen_perfil"
-                                   accept="image/jpeg,image/png,image/jpg,image/webp"
-                                   class="block w-full text-sm text-gray-500
-                                          file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0
-                                          file:text-xs file:font-bold file:bg-gray-100 file:text-gray-700
-                                          hover:file:bg-gray-200 cursor-pointer" />
-                        </div>
-
-                        {{-- Datos de contacto y horario --}}
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
-                            <p class="text-xs text-gray-400 uppercase font-bold">Información de contacto</p>
-
+                        @if(in_array('habitaciones', $modulos))
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
-                                <x-input-label for="horario" value="Horario de atención" />
-                                <x-text-input id="horario" name="horario" class="block mt-1 w-full"
-                                              value="{{ old('horario', $punto->horario) }}"
-                                              placeholder="Lun–Vie 09:00–20:00" />
+                                <x-input-label for="precio_desde" value="Precio desde" />
+                                <x-text-input id="precio_desde" name="precio_desde" class="block mt-1 w-full"
+                                              value="{{ old('precio_desde', $datoAlojamiento['precio_desde'] ?? '') }}"
+                                              placeholder="Ej: $15.000 / noche" />
                             </div>
-
                             <div>
-                                <x-input-label for="enlace" value="Web o Instagram" />
-                                <x-text-input id="enlace" name="enlace" type="url" class="block mt-1 w-full"
-                                              value="{{ old('enlace', $punto->enlace) }}"
-                                              placeholder="https://instagram.com/minegocio" />
+                                <x-input-label for="check_in" value="Check-in" />
+                                <x-text-input id="check_in" name="check_in" class="block mt-1 w-full"
+                                              value="{{ old('check_in', $datoAlojamiento['entrada'] ?? '') }}"
+                                              placeholder="14:00" />
                             </div>
-
                             <div>
-                                <x-input-label for="tags" value="Etiquetas (separadas por coma)" />
-                                <x-text-input id="tags" name="tags" class="block mt-1 w-full"
-                                              value="{{ old('tags', is_array($punto->tags) ? implode(', ', $punto->tags) : '') }}"
-                                              placeholder="café, vegano, terraza, wifi" />
-                                <p class="text-xs text-gray-400 mt-1">Aparecen en tu ficha pública.</p>
-                            </div>
-
-                            <div>
-                                <x-input-label for="video_url" value="Video de YouTube" />
-                                <x-text-input id="video_url" name="video_url" type="url" class="block mt-1 w-full"
-                                              value="{{ old('video_url', $punto->video_url) }}"
-                                              placeholder="https://www.youtube.com/watch?v=..." />
-                                <p class="text-xs text-gray-400 mt-1">Se incrusta en tu ficha pública.</p>
+                                <x-input-label for="check_out" value="Check-out" />
+                                <x-text-input id="check_out" name="check_out" class="block mt-1 w-full"
+                                              value="{{ old('check_out', $datoAlojamiento['salida'] ?? '') }}"
+                                              placeholder="11:00" />
                             </div>
                         </div>
-
-                        {{-- Botón desktop (sticky) --}}
-                        <div class="hidden lg:block sticky bottom-4">
-                            <button type="submit"
-                                    class="w-full py-2.5 bg-[#fc5648] text-white text-sm font-bold rounded-xl hover:opacity-90 transition shadow-lg">
-                                Guardar cambios
-                            </button>
+                        <div>
+                            <x-input-label for="habitaciones" value="Habitaciones disponibles" />
+                            <div id="habitaciones-editor"
+                                 class="mt-1 bg-white border border-gray-200 rounded-xl text-sm min-h-40"></div>
+                            <textarea id="habitaciones" name="habitaciones" class="hidden">{!! old('habitaciones', $datoAlojamiento['habitaciones'] ?? '') !!}</textarea>
                         </div>
+                        @endif
 
+                        @if(in_array('servicios', $modulos))
+                        <div>
+                            <x-input-label value="Servicios incluidos" />
+                            <p class="text-xs text-gray-400 mt-1 mb-4">Selecciona todo lo que ofreces.</p>
+                            @php $seleccionados = old('servicios_incluidos', $datoAlojamiento['servicios'] ?? []); @endphp
+                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                                @foreach($catalogoServicios as $grupo => $servicios)
+                                <div class="border border-gray-200 rounded-xl overflow-hidden">
+                                    <div class="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                                        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">{{ $grupo }}</p>
+                                    </div>
+                                    <div class="grid grid-cols-1 gap-1 p-2">
+                                        @foreach($servicios as $slug => $servicio)
+                                        <label class="flex items-center gap-2 cursor-pointer bg-gray-50 hover:bg-indigo-50 border border-transparent hover:border-indigo-200 rounded-xl px-3 py-2 transition">
+                                            <input type="checkbox" name="servicios_incluidos[]" value="{{ $slug }}"
+                                                   @checked(in_array($slug, $seleccionados))
+                                                   class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-400">
+                                            <span class="text-lg">{{ $servicio['emoji'] }}</span>
+                                            <span class="text-xs font-medium text-gray-700">{{ $servicio['label'] }}</span>
+                                        </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        @if(in_array('politicas', $modulos))
+                        <div>
+                            <x-input-label for="politicas" value="Políticas del establecimiento" />
+                            <div id="politicas-editor"
+                                 class="mt-1 bg-white border border-gray-200 rounded-xl text-sm min-h-40"></div>
+                            <textarea id="politicas" name="politicas" class="hidden">{!! old('politicas', $datoAlojamiento['politicas'] ?? '') !!}</textarea>
+                        </div>
+                        @endif
+                    </div>
+                    @endif
+
+                    {{-- Botón guardar --}}
+                    <div class="flex justify-end pb-4">
+                        <button type="submit"
+                                class="px-8 py-2.5 bg-[#fc5648] text-white text-sm font-bold rounded-xl hover:opacity-90 transition shadow-lg">
+                            Guardar cambios
+                        </button>
                     </div>
 
                 </div>
