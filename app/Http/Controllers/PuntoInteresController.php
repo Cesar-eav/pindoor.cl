@@ -532,4 +532,25 @@ class PuntoInteresController extends Controller
 
         return view('puntos.producto', compact('punto', 'producto'));
     }
+
+    public function showExposicion($slug, ModuloItem $item)
+    {
+        $punto = PuntoInteres::with(['categoria', 'imagenPrincipal'])
+                             ->where('slug', $slug)
+                             ->where('activo', true)
+                             ->where('eliminado', false)
+                             ->firstOrFail();
+
+        abort_if($item->punto_interes_id !== $punto->id || $item->modulo !== 'exposiciones', 404);
+
+        $otras = ModuloItem::where('punto_interes_id', $punto->id)
+                           ->where('modulo', 'exposiciones')
+                           ->where('activo', true)
+                           ->where('id', '!=', $item->id)
+                           ->orderBy('orden')
+                           ->limit(4)
+                           ->get();
+
+        return view('puntos.exposicion', compact('punto', 'item', 'otras'));
+    }
 }

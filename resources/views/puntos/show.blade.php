@@ -1009,25 +1009,29 @@
                         </div>
 
                         @if($permanentes->count())
-                        <div class="mb-6">
+                        <div class="mb-8">
                             <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Permanentes</p>
-                            <div class="space-y-4">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                 @foreach($permanentes as $expo)
-                                <div class="bg-white rounded-2xl border border-blue-100 overflow-hidden flex gap-0">
+                                <a href="{{ route('puntos.exposicion', [$punto->slug, $expo->id]) }}"
+                                   class="bg-white rounded-2xl border border-blue-100 overflow-hidden shadow-sm flex flex-col hover:shadow-md transition">
                                     @if($expo->imagen)
-                                    <div class="w-24 shrink-0">
-                                        <img src="{{ asset('storage/' . $expo->imagen) }}" alt="{{ $expo->datos['titulo'] ?? '' }}"
-                                             class="w-full h-full object-cover">
+                                    <div class="aspect-[3/4] overflow-hidden bg-gray-100">
+                                        <img src="{{ asset('storage/' . $expo->imagen) }}"
+                                             alt="{{ $expo->datos['titulo'] ?? '' }}"
+                                             class="w-full h-full object-cover object-top">
                                     </div>
+                                    @else
+                                    <div class="aspect-[3/4] bg-blue-50 flex items-center justify-center text-4xl">🖼️</div>
                                     @endif
-                                    <div class="p-5 flex-1">
-                                        <span class="text-[10px] font-black uppercase bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Permanente</span>
-                                        <h3 class="font-extrabold text-gray-900 mt-2 text-base">{{ $expo->datos['titulo'] ?? '' }}</h3>
+                                    <div class="p-3 flex-1 flex flex-col">
+                                        <span class="text-[10px] font-black uppercase bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full self-start mb-1.5">Permanente</span>
+                                        <h3 class="font-extrabold text-gray-900 text-sm leading-snug">{{ $expo->datos['titulo'] ?? '' }}</h3>
                                         @if($expo->datos['descripcion'] ?? null)
-                                            <p class="text-sm text-gray-600 mt-1 leading-relaxed">{{ $expo->datos['descripcion'] }}</p>
+                                            <p class="text-xs text-gray-500 mt-1 leading-relaxed line-clamp-3">{{ $expo->datos['descripcion'] }}</p>
                                         @endif
                                     </div>
-                                </div>
+                                </a>
                                 @endforeach
                             </div>
                         </div>
@@ -1036,31 +1040,34 @@
                         @if($temporales->count())
                         <div>
                             <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Temporales</p>
-                            <div class="space-y-4">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                 @foreach($temporales as $expo)
-                                <div class="bg-white rounded-2xl border border-orange-100 overflow-hidden flex gap-0">
+                                <a href="{{ route('puntos.exposicion', [$punto->slug, $expo->id]) }}"
+                                   class="bg-white rounded-2xl border border-orange-100 overflow-hidden shadow-sm flex flex-col hover:shadow-md transition">
                                     @if($expo->imagen)
-                                    <div class="w-24 shrink-0">
-                                        <img src="{{ asset('storage/' . $expo->imagen) }}" alt="{{ $expo->datos['titulo'] ?? '' }}"
-                                             class="w-full h-full object-cover">
+                                    <div class="aspect-[3/4] overflow-hidden bg-gray-100">
+                                        <img src="{{ asset('storage/' . $expo->imagen) }}"
+                                             alt="{{ $expo->datos['titulo'] ?? '' }}"
+                                             class="w-full h-full object-cover object-top">
                                     </div>
+                                    @else
+                                    <div class="aspect-[3/4] bg-orange-50 flex items-center justify-center text-4xl">🗓️</div>
                                     @endif
-                                    <div class="p-5 flex-1">
-                                        <span class="text-[10px] font-black uppercase bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Temporal</span>
-                                        <h3 class="font-extrabold text-gray-900 mt-2 text-base">{{ $expo->datos['titulo'] ?? '' }}</h3>
+                                    <div class="p-3 flex-1 flex flex-col">
+                                        <span class="text-[10px] font-black uppercase bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full self-start mb-1.5">Temporal</span>
+                                        <h3 class="font-extrabold text-gray-900 text-sm leading-snug">{{ $expo->datos['titulo'] ?? '' }}</h3>
                                         @if($expo->datos['descripcion'] ?? null)
-                                            <p class="text-sm text-gray-600 mt-1 leading-relaxed">{{ $expo->datos['descripcion'] }}</p>
+                                            <p class="text-xs text-gray-500 mt-1 leading-relaxed line-clamp-3">{{ $expo->datos['descripcion'] }}</p>
                                         @endif
                                         @if(($expo->datos['fecha_inicio'] ?? null) || ($expo->datos['fecha_fin'] ?? null))
-                                        <p class="text-xs text-gray-400 mt-2">
+                                        <p class="text-[11px] text-gray-400 mt-auto pt-2">
                                             📅
                                             {{ $expo->datos['fecha_inicio'] ? \Carbon\Carbon::parse($expo->datos['fecha_inicio'])->translatedFormat('d M Y') : '—' }}
-                                            →
-                                            {{ $expo->datos['fecha_fin'] ? \Carbon\Carbon::parse($expo->datos['fecha_fin'])->translatedFormat('d M Y') : 'Sin fecha fin' }}
+                                            → {{ $expo->datos['fecha_fin'] ? \Carbon\Carbon::parse($expo->datos['fecha_fin'])->translatedFormat('d M Y') : 'Sin fecha fin' }}
                                         </p>
                                         @endif
                                     </div>
-                                </div>
+                                </a>
                                 @endforeach
                             </div>
                         </div>
