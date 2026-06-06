@@ -343,6 +343,7 @@
                     </button>
                     @endif
 
+
                     {{-- Alojamiento --}}
                     @if($punto->moduloActivo('habitaciones') && ($alojamiento['habitaciones'] ?? null))
                     <button @click="vista = 'habitaciones'"
@@ -1398,8 +1399,10 @@
     {{-- FAB colapsable móvil --}}
     @php
         $hayAcciones = $punto->tieneOfertaActiva() || $punto->tieneMenu()
-                    || $punto->tieneCarta()         || $punto->tieneAvisos()
+                    || $punto->tieneCarta()         
+                    || $punto->tieneAvisos()
                     || $punto->tienePromociones()
+                    || $punto->moduloActivo('exposiciones')
                     || ($punto->moduloActivo('agenda') && $punto->eventosProximos()->count());
     @endphp
     @if($punto->lat && $punto->lng)
@@ -1474,6 +1477,15 @@
                     class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-blue-50 transition border-b border-gray-100">
                 <span class="w-2 h-2 rounded-full bg-blue-600 shrink-0"></span>
                 📅 Agenda
+            </button>
+            @endif
+
+            {{-- //&& $punto->eventosProximos()->count() --}}
+            @if($punto->moduloActivo('exposiciones') )
+            <button @click="abierto = false; $dispatch('set-vista', 'exposiciones')"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-blue-50 transition border-b border-gray-100">
+                <span class="w-2 h-2 rounded-full bg-blue-600 shrink-0"></span>
+                Exposiciones
             </button>
             @endif
 
