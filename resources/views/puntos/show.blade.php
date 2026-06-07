@@ -1407,7 +1407,6 @@
     @endphp
     @if($punto->lat && $punto->lng)
     <a href="https://www.google.com/maps?q={{ $punto->lat }},{{ $punto->lng }}"
-       target="_blank" rel="noopener"
        class="lg:hidden fixed left-4 z-50 flex items-center gap-2 bg-white text-gray-800 text-sm font-bold px-4 py-3 rounded-full shadow-xl border border-gray-200 hover:bg-gray-50 transition"
        style="bottom: calc(80px + var(--inset-bottom, 0px))">
         <svg class="w-4 h-4 text-[#fc5648] shrink-0" fill="currentColor" viewBox="0 0 20 20">
