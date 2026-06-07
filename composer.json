@@ -12,6 +12,7 @@
         "laravel/sanctum": "^3.3",
         "laravel/socialite": "^5.27",
         "laravel/tinker": "^2.8",
+        "nativephp/mobile": "^3.3",
         "symfony/http-client": "^7.4",
         "symfony/mailgun-mailer": "^7.1"
     },
@@ -24,7 +25,6 @@
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^7.0",
         "phpunit/phpunit": "^10.1",
-        "nativephp/mobile": "^3.3",
         "spatie/laravel-ignition": "^2.0"
     },
     "autoload": {

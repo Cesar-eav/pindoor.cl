@@ -21,7 +21,13 @@ use Illuminate\Support\Facades\Route;
 /* --- RUTAS PÚBLICAS (TURISTAS) --- */
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/offline', fn() => view('offline'))->name('offline');
-Route::get('/', [PuntoInteresController::class, 'index'])->name('puntos.index');
+
+// En la app nativa redirige al sitio real (el WebView carga desde 127.0.0.1)
+if (str_starts_with(request()->getHost(), '127.')) {
+    Route::get('/{any?}', fn() => redirect('https://pindoor.cl' . request()->getRequestUri()))->where('any', '.*');
+} else {
+    Route::get('/', [PuntoInteresController::class, 'index'])->name('puntos.index');
+}
 
 // El turista busca y ve, pero no edita
 Route::get('/buscar', [PuntoInteresController::class, 'index'])->name('puntos.buscar');

@@ -166,7 +166,6 @@ return [
         'DB_HOST',
         'DB_PORT',
         'DB_DATABASE',
-        'APP_KEY',
         'MAIL_*',
         'GOOGLE_CLIENT_ID',
         'GOOGLE_CLIENT_SECRET',
