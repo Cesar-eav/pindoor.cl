@@ -24,6 +24,7 @@
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^7.0",
         "phpunit/phpunit": "^10.1",
+        "nativephp/mobile": "^3.3",
         "spatie/laravel-ignition": "^2.0"
     },
     "autoload": {

@@ -93,7 +93,7 @@
     </div>
 
     {{-- Grid con scroll interno --}}
-    <div class="overflow-y-auto max-h-120 rounded-2xl" style="-ms-overflow-style:none;scrollbar-width:none;">
+    <div class="overflow-y-auto max-h-250 rounded-2xl" style="-ms-overflow-style:none;scrollbar-width:none;">
         <div class="grid grid-cols-2 gap-3">
         @foreach($atractivos->take(51) as $atractivo)
             @include('puntos.partials._card_mobile')
