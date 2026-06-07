@@ -195,6 +195,131 @@
                 </form>
             </div>
 
+            {{-- Panoramas y Blog: solo sin filtros activos --}}
+            @if(!$hayFiltros)
+
+                {{-- Próximos panoramas --}}
+                @if(isset($proximosPanoramas) && $proximosPanoramas->isNotEmpty())
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-1 h-5 rounded-full bg-[#fc5648] shrink-0"></span>
+                        <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">Panoramas</h2>
+                        <span class="flex-1 h-px bg-gray-200"></span>
+                        <a href="{{ route('atractivos.panoramas') }}" class="text-sm font-semibold text-[#fc5648] hover:underline shrink-0">Ver todos →</a>
+                    </div>
+                    <div class="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide">
+                        @foreach($proximosPanoramas->take(15) as $p)
+                        <a href="{{ route('panoramas.show', $p) }}"
+                           class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition overflow-hidden group shrink-0 w-44 snap-start">
+                            @if($p->imagen)
+                                <img src="{{ asset('storage/' . $p->imagen) }}"
+                                     alt="{{ $p->titulo }}"
+                                     class="w-full h-32 object-cover group-hover:scale-105 transition duration-300">
+                            @else
+                                <div class="w-full h-32 bg-[#fff0ef] flex items-center justify-center text-3xl">🗓</div>
+                            @endif
+                            <div class="p-3">
+                                <p class="text-xs font-bold text-[#fc5648]">
+                                    {{ \Carbon\Carbon::parse($p->fecha)->locale('es')->isoFormat('D MMM') }}
+                                </p>
+                                <p class="text-sm font-bold text-gray-900 leading-snug line-clamp-2 mt-0.5">{{ $p->titulo }}</p>
+                                @if($p->ubicacion)
+                                    <p class="text-xs text-gray-400 truncate mt-1">📍 {{ $p->ubicacion }}</p>
+                                @endif
+                            </div>
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                {{-- Últimas entradas del blog --}}
+                @if(isset($ultimosPosts) && $ultimosPosts->isNotEmpty())
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-1 h-5 rounded-full bg-[#fc5648] shrink-0"></span>
+                        <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">Blog</h2>
+                        <span class="flex-1 h-px bg-gray-200"></span>
+                        <a href="{{ route('blog.index') }}" class="text-sm font-semibold text-[#fc5648] hover:underline shrink-0">Ver todos →</a>
+                    </div>
+
+                    @if($ultimosPosts->count() === 1)
+                        {{-- Solo 1 post: banner ancho --}}
+                        <a href="{{ route('blog.show', $ultimosPosts->first()->slug) }}"
+                           class="group relative block rounded-2xl overflow-hidden shadow-sm h-56">
+                            @if($ultimosPosts->first()->imagen_portada)
+                                <img src="{{ asset('storage/' . $ultimosPosts->first()->imagen_portada) }}"
+                                     alt="{{ $ultimosPosts->first()->titulo }}"
+                                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            @else
+                                <div class="absolute inset-0 bg-gray-800"></div>
+                            @endif
+                            <div class="absolute inset-0 bg-linear-to-r from-black/75 via-black/40 to-transparent"></div>
+                            <div class="relative z-10 h-full flex flex-col justify-end p-6 max-w-xl">
+                                <span class="text-[11px] font-bold text-white/60 uppercase tracking-widest mb-1">Última entrada</span>
+                                <h3 class="text-xl font-extrabold text-white leading-snug">{{ $ultimosPosts->first()->titulo }}</h3>
+                                @if($ultimosPosts->first()->resumen)
+                                    <p class="text-sm text-white/75 mt-1 line-clamp-2">{{ $ultimosPosts->first()->resumen }}</p>
+                                @endif
+                            </div>
+                        </a>
+
+                    @else
+                        {{-- 2 o 3 posts: primer post destacado + resto en columna --}}
+                        <div class="grid grid-cols-3 gap-4">
+                            {{-- Post principal --}}
+                            <a href="{{ route('blog.show', $ultimosPosts->first()->slug) }}"
+                               class="group col-span-2 relative block rounded-2xl overflow-hidden shadow-sm h-64">
+                                @if($ultimosPosts->first()->imagen_portada)
+                                    <img src="{{ asset('storage/' . $ultimosPosts->first()->imagen_portada) }}"
+                                         alt="{{ $ultimosPosts->first()->titulo }}"
+                                         class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                @else
+                                    <div class="absolute inset-0 bg-gray-800"></div>
+                                @endif
+                                <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent"></div>
+                                <div class="relative z-10 h-full flex flex-col justify-end p-5">
+                                    <span class="text-[11px] font-bold text-white/60 uppercase tracking-widest mb-1">Última entrada</span>
+                                    <h3 class="text-lg font-extrabold text-white leading-snug line-clamp-2">{{ $ultimosPosts->first()->titulo }}</h3>
+                                    @if($ultimosPosts->first()->resumen)
+                                        <p class="text-xs text-white/75 mt-1 line-clamp-2">{{ $ultimosPosts->first()->resumen }}</p>
+                                    @endif
+                                </div>
+                            </a>
+
+                            {{-- Posts secundarios --}}
+                            <div class="flex flex-col gap-4">
+                                @foreach($ultimosPosts->skip(1) as $post)
+                                <a href="{{ route('blog.show', $post->slug) }}"
+                                   class="group flex-1 relative block rounded-2xl overflow-hidden shadow-sm">
+                                    @if($post->imagen_portada)
+                                        <img src="{{ asset('storage/' . $post->imagen_portada) }}"
+                                             alt="{{ $post->titulo }}"
+                                             class="w-full h-full object-cover group-hover:scale-105 transition duration-500 min-h-28">
+                                    @else
+                                        <div class="w-full min-h-28 bg-gray-800"></div>
+                                    @endif
+                                    <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent"></div>
+                                    <div class="absolute bottom-0 left-0 right-0 p-3">
+                                        <h3 class="text-xs font-bold text-white leading-snug line-clamp-2">{{ $post->titulo }}</h3>
+                                    </div>
+                                </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                </div>
+                @endif
+
+                {{-- Cabecera sección atractivos --}}
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="w-1 h-5 rounded-full bg-gray-800 shrink-0"></span>
+                    <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">Atractivos</h2>
+                    <span class="flex-1 h-px bg-gray-200"></span>
+                </div>
+
+            @endif
+
             <div class="pb-12">
                 @if($atractivos->count())
                     <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
