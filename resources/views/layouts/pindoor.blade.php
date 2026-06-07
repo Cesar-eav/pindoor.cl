@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}" />
@@ -27,7 +27,7 @@
     <script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","wajfuymjy1");</script>
     @endif
 </head>
-<body class="font-sans @yield('bodyClass', 'bg-gray-100 text-gray-900')" style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);">
+<body class="font-sans @yield('bodyClass', 'bg-gray-100 text-gray-900')" style="padding-bottom: var(--inset-bottom, 0px);">
 
 <div class="flex min-h-screen">
     {{-- Sidebar lateral: solo desktop --}}
@@ -53,7 +53,8 @@
 
 {{-- FAB expandido: fila horizontal --}}
 <div id="fab-menu"
-     class="hidden fixed bottom-20 left-0 right-0 z-50 justify-center gap-3 px-4 md:hidden">
+     class="hidden fixed left-0 right-0 z-50 justify-center gap-3 px-4 md:hidden"
+     style="bottom: calc(80px + var(--inset-bottom, 0px))">
 
     {{-- GPS --}}
     <form id="filterForm-mobile" action="{{ route('puntos.index') }}" method="GET">
@@ -94,7 +95,7 @@
 
 {{-- Barra inferior --}}
 <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#fc5648] shadow-[0_-2px_16px_rgba(252,86,72,0.35)]">
-    <div class="flex items-end justify-around px-2 pt-2 pb-3">
+    <div class="flex items-end justify-around px-2 pt-2" style="padding-bottom: calc(12px + var(--inset-bottom, 0px))">
 
         {{-- Información --}}
         <a href="#" class="flex flex-col items-center gap-1 px-2 opacity-40 pointer-events-none" title="Próximamente">

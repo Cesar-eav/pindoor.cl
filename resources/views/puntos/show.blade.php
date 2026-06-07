@@ -1408,7 +1408,8 @@
     @if($punto->lat && $punto->lng)
     <a href="https://www.google.com/maps?q={{ $punto->lat }},{{ $punto->lng }}"
        target="_blank" rel="noopener"
-       class="lg:hidden fixed bottom-20 left-4 z-50 flex items-center gap-2 bg-white text-gray-800 text-sm font-bold px-4 py-3 rounded-full shadow-xl border border-gray-200 hover:bg-gray-50 transition">
+       class="lg:hidden fixed left-4 z-50 flex items-center gap-2 bg-white text-gray-800 text-sm font-bold px-4 py-3 rounded-full shadow-xl border border-gray-200 hover:bg-gray-50 transition"
+       style="bottom: calc(80px + var(--inset-bottom, 0px))">
         <svg class="w-4 h-4 text-[#fc5648] shrink-0" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
         </svg>
@@ -1417,7 +1418,8 @@
     @endif
 
     @if($hayAcciones)
-    <div class="lg:hidden fixed bottom-20 right-4 z-50"
+    <div class="lg:hidden fixed right-4 z-50"
+         style="bottom: calc(80px + var(--inset-bottom, 0px))"
          x-data="{ abierto: false }"
          @click.outside="abierto = false">
 

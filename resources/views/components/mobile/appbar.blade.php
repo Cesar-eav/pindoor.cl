@@ -1,5 +1,5 @@
 {{-- App Bar mobile —————————————————————————————————————————— --}}
-<header class="md:hidden sticky top-0 z-40 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between shadow-sm">
+<header class="md:hidden sticky top-0 z-40 bg-white border-b border-gray-100 px-4 pb-3 flex items-center justify-between shadow-sm" style="padding-top: calc(12px + var(--inset-top, 0px))">
     <a href="{{ route('puntos.index') }}" class="text-lg font-bold tracking-tight ">
         <span class="text-[#fc5648]">Pin</span>door
     </a>
