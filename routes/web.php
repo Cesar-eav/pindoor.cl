@@ -22,8 +22,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/offline', fn() => view('offline'))->name('offline');
 
-// En la app nativa (WebView carga desde 127.x.x.x) redirige via JS al sitio real
-if (str_starts_with(request()->getHost(), '127.')) {
+// En la app nativa (WebView carga desde 127.x.x.x en puerto no estándar) redirige via JS al sitio real
+// Excluye puertos de desarrollo local (artisan serve = 8000, vite = 5173, etc.)
+$devPorts = [80, 443, 8000, 8080, 3000, 5173];
+if (str_starts_with(request()->getHost(), '127.') && !in_array(request()->getPort(), $devPorts)) {
     Route::get('/{any?}', function () {
         $url = 'https://pindoor.cl' . request()->getRequestUri();
         return response("<script>window.location.replace(" . json_encode($url) . ");</script>");
