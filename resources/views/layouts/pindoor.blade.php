@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}" />
@@ -27,7 +27,7 @@
     <script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","wajfuymjy1");</script>
     @endif
 </head>
-<body class="font-sans @yield('bodyClass', 'bg-gray-100 text-gray-900')">
+<body class="font-sans @yield('bodyClass', 'bg-gray-100 text-gray-900')" style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);">
 
 <div class="flex min-h-screen">
     {{-- Sidebar lateral: solo desktop --}}

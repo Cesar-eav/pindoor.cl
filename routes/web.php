@@ -22,9 +22,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/offline', fn() => view('offline'))->name('offline');
 
-// En la app nativa redirige al sitio real (el WebView carga desde 127.0.0.1)
+// En la app nativa (WebView carga desde 127.x.x.x) redirige via JS al sitio real
 if (str_starts_with(request()->getHost(), '127.')) {
-    Route::get('/{any?}', fn() => redirect('https://pindoor.cl' . request()->getRequestUri()))->where('any', '.*');
+    Route::get('/{any?}', function () {
+        $url = 'https://pindoor.cl' . request()->getRequestUri();
+        return response("<script>window.location.replace(" . json_encode($url) . ");</script>");
+    })->where('any', '.*');
 } else {
     Route::get('/', [PuntoInteresController::class, 'index'])->name('puntos.index');
 }
