@@ -167,16 +167,22 @@ GET  /admin/stats               admin.stats
 - `$hayFiltros` — bool (lat, category o search activos)
 - `$categorias` — todas las categorías activas agrupadas
 
-## NativePHP Mobile (pendiente de instalar)
+## NativePHP Mobile
 
-- PHP 8.3 ya activo en CLI y Apache.
-- Plan: **Opción A** — la app NativePHP conecta con `pindoor.cl` como backend remoto.
 - App ID: `cl.pindoor.app`
-- Instalar con:
-  ```bash
-  composer require nativephp/mobile
-  php artisan native:install
-  ```
-- Agregar a `.env`: `NATIVEPHP_APP_ID=cl.pindoor.app`
-- En `config/nativephp.php`, limpiar `cleanup_env_keys` (DB_PASSWORD, APP_KEY, MAIL_*).
-- Build/distribución vía **Bifrost** (servicio cloud de NativePHP).
+- Proyecto Android en `nativephp/android/`
+- Keystore en `/home/cesar/pindoor.keystore` (credenciales en `nativephp/android/gradle.properties`)
+- Splash screen: `nativephp/android/app/src/main/res/drawable/splash.xml` (fondo rojo `#fc5648`)
+
+### Compilar APK
+
+```bash
+cd /var/www/html/pindoor/nativephp/android && JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ./gradlew clean assembleRelease
+```
+
+El APK firmado queda en:
+```
+nativephp/android/app/build/outputs/apk/release/app-release.apk
+```
+
+> **Importante:** Usar siempre `clean` antes de `assembleRelease`. Sin él el APK puede no funcionar correctamente.

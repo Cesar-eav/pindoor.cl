@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class ClienteController extends Controller
 {
@@ -62,7 +64,7 @@ class ClienteController extends Controller
             'modulos_habilitados'=> PuntoInteres::modulosDefecto($data['categoria_id']),
         ]);
 
-        $ruta = $request->file('imagen')->store('puntos', 'public');
+        $ruta = $this->guardarImagenComprimida($request->file('imagen'), 'puntos');
 
         ImagenPunto::create([
             'punto_interes_id' => $punto->id,
@@ -161,7 +163,7 @@ class ClienteController extends Controller
             if ($punto->imagen_perfil) {
                 Storage::disk('public')->delete($punto->imagen_perfil);
             }
-            $datosPunto['imagen_perfil'] = $request->file('imagen_perfil')->store('perfiles', 'public');
+            $datosPunto['imagen_perfil'] = $this->guardarImagenComprimida($request->file('imagen_perfil'), 'perfiles');
         }
 
         $punto->update($datosPunto);
@@ -291,7 +293,7 @@ class ClienteController extends Controller
         foreach ($archivos as $archivo) {
             ImagenPunto::create([
                 'punto_interes_id' => $punto->id,
-                'ruta'             => $archivo->store('puntos', 'public'),
+                'ruta'             => $this->guardarImagenComprimida($archivo, 'puntos'),
                 'es_principal'     => false,
                 'orden'            => $orden++,
             ]);
@@ -321,6 +323,23 @@ class ClienteController extends Controller
         }
 
         return back()->with('success', 'Foto eliminada.');
+    }
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+
+    private function guardarImagenComprimida($archivo, string $carpeta, int $maxWidth = 1600, int $calidad = 80): string
+    {
+        $manager  = new ImageManager(new Driver());
+        $nombre   = Str::uuid() . '.webp';
+        $ruta     = $carpeta . '/' . $nombre;
+
+        $encoded = $manager->read($archivo->getPathname())
+            ->scaleDown(width: $maxWidth)
+            ->toWebp(quality: $calidad);
+
+        Storage::disk('public')->put($ruta, $encoded);
+
+        return $ruta;
     }
 
     // ─── Actualizaciones rápidas ───────────────────────────────────────────────

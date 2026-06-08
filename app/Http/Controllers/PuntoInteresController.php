@@ -144,6 +144,11 @@ class PuntoInteresController extends Controller
         return view('puntos.buscar', compact('grupos'));
     }
 
+    public function filtrarPorCategoria(string $categoria)
+    {
+        return redirect()->route('puntos.index', ['category' => $categoria]);
+    }
+
     public function explorar(Request $request)
     {
         $query = PuntoInteres::query()
