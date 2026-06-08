@@ -116,7 +116,9 @@ class PuntoInteresController extends Controller
         $ultimosPosts = Post::publicados()->take(10)->get();
         $ultimoPost = $ultimosPosts->first();
 
-        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts'));
+        $ultimasExperiencias = Experiencia::activas()->latest()->take(2)->get();
+
+        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts', 'ultimasExperiencias'));
 
     } catch (\Exception $e) {
         \Log::error('Error en index: ' . $e->getMessage());
