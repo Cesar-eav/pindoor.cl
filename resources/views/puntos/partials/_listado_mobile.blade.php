@@ -83,6 +83,36 @@
     </div>
     @endif
 
+    {{-- Últimas experiencias --}}
+    @if(isset($ultimasExperiencias) && $ultimasExperiencias->isNotEmpty() && !request()->filled('category') && !request()->filled('search'))
+    <div class="mt-5">
+        <div class="flex items-center gap-2 mb-3 px-3">
+            <span class="w-1 h-4 rounded-full bg-[#fc5648] shrink-0"></span>
+            <h2 class="text-sm font-bold text-gray-900 tracking-tight">Experiencias</h2>
+            <span class="flex-1 h-px bg-gray-200"></span>
+            <a href="{{ route('experiencias.index') }}" class="text-[11px] font-semibold text-[#fc5648] shrink-0">Ver todas →</a>
+        </div>
+        <div class="flex gap-3 px-3" >
+            @foreach($ultimasExperiencias as $exp)
+            <a href="{{ route('experiencias.show', $exp) }}"
+               class="relative flex-1 rounded-2xl overflow-hidden shadow-sm" style="height:10rem;">
+                @if($exp->imagen)
+                    <img src="{{ asset('storage/' . $exp->imagen) }}"
+                         alt="{{ $exp->titulo }}"
+                         class="absolute inset-0 w-full h-full object-cover">
+                @else
+                    <div class="absolute inset-0 bg-[#fff0ef] flex items-center justify-center text-4xl">🧭</div>
+                @endif
+                <div class="absolute inset-0 bg-linear-to-t from-black/85 via-black/20 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-3">
+                    <h3 class="text-xs font-bold text-white leading-snug line-clamp-3">{{ $exp->titulo }}</h3>
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
 {{-- Resultados --}}
 <div id="vista-listado-mobile" class="flex-1 px-3 pt-4 pb-6">
 

@@ -207,10 +207,10 @@
                         <span class="flex-1 h-px bg-gray-200"></span>
                         <a href="{{ route('atractivos.panoramas') }}" class="text-sm font-semibold text-[#fc5648] hover:underline shrink-0">Ver todos →</a>
                     </div>
-                    <div class="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide">
+                    <div class="flex overflow-x-auto border border-gray-100 shadow-sm">
                         @foreach($proximosPanoramas->take(15) as $p)
                         <a href="{{ route('panoramas.show', $p) }}"
-                           class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition overflow-hidden group shrink-0 w-44 snap-start">
+                           class="bg-white hover:bg-gray-50 transition group shrink-0 w-44 snap-start border-r border-gray-100 last:border-r-0">
                             @if($p->imagen)
                                 <img src="{{ asset('storage/' . $p->imagen) }}"
                                      alt="{{ $p->titulo }}"
@@ -260,6 +260,42 @@
                                 <h3 class="text-sm font-extrabold text-white leading-snug line-clamp-3">{{ $post->titulo }}</h3>
                                 @if($post->resumen)
                                     <p class="text-xs text-white/70 mt-1 line-clamp-2">{{ $post->resumen }}</p>
+                                @endif
+                            </div>
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                {{-- Últimas experiencias --}}
+                @if(isset($ultimasExperiencias) && $ultimasExperiencias->isNotEmpty())
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-1 h-5 rounded-full bg-[#fc5648] shrink-0"></span>
+                        <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">Experiencias</h2>
+                        <span class="flex-1 h-px bg-gray-200"></span>
+                        <a href="{{ route('experiencias.index') }}" class="text-sm font-semibold text-[#fc5648] hover:underline shrink-0">Ver todas →</a>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        @foreach($ultimasExperiencias as $exp)
+                        <a href="{{ route('experiencias.show', $exp) }}"
+                           class="group relative rounded-2xl overflow-hidden shadow-sm" style="height:13rem;">
+                            @if($exp->imagen)
+                                <img src="{{ asset('storage/' . $exp->imagen) }}"
+                                     alt="{{ $exp->titulo }}"
+                                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            @else
+                                <div class="absolute inset-0 bg-[#fff0ef] flex items-center justify-center text-5xl">🧭</div>
+                            @endif
+                            <div class="absolute inset-0 bg-linear-to-t from-black/85 via-black/20 to-transparent"></div>
+                            <div class="absolute bottom-0 left-0 right-0 p-4">
+                                @if($exp->categoria)
+                                    <span class="text-[10px] font-bold text-white/60 uppercase tracking-widest">{{ $exp->categoria }}</span>
+                                @endif
+                                <h3 class="text-sm font-extrabold text-white leading-snug line-clamp-2 mt-0.5">{{ $exp->titulo }}</h3>
+                                @if($exp->ubicacion)
+                                    <p class="text-[11px] text-white/70 mt-1 truncate">📍 {{ $exp->ubicacion }}</p>
                                 @endif
                             </div>
                         </a>
