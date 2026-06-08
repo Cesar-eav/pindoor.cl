@@ -2,6 +2,7 @@
 
 namespace App\Models;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -32,6 +33,7 @@ class Panorama extends Model
 
     protected $fillable = [
         'titulo',
+        'slug',
         'ubicacion',
         'fecha',
         'fecha_fin',
@@ -44,6 +46,19 @@ class Panorama extends Model
         'activo',
         'orden',
     ];
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    protected static function booted(): void
+    {
+        static::created(function (self $p) {
+            $p->slug = Str::slug($p->titulo) . '-' . $p->id;
+            $p->saveQuietly();
+        });
+    }
 
     protected $casts = [
         'fecha'       => 'date',
