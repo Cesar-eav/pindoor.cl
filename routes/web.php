@@ -18,16 +18,6 @@ use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ExperienciaController;
 use Illuminate\Support\Facades\Route;
 
-// DEBUG TEMPORAL — eliminar una vez resuelto el problema de uploads en producción
-Route::get('/debug-php', function () {
-    return response()->json([
-        'sapi'   => php_sapi_name(),
-        'ini'    => php_ini_loaded_file(),
-        'upload' => ini_get('upload_max_filesize'),
-        'post'   => ini_get('post_max_size'),
-        'memory' => ini_get('memory_limit'),
-    ]);
-});
 
 /* --- RUTAS PÚBLICAS (TURISTAS) --- */
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');

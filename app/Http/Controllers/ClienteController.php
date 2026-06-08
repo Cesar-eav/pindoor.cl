@@ -10,9 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
-use Intervention\Image\Encoders\WebpEncoder;
 
 class ClienteController extends Controller
 {
@@ -330,14 +327,28 @@ class ClienteController extends Controller
 
     private function guardarImagenComprimida($archivo, string $carpeta, int $maxWidth = 1600, int $calidad = 80): string
     {
-        $manager = new ImageManager(new Driver());
-        $nombre  = Str::uuid() . '.webp';
-        $ruta    = $carpeta . '/' . $nombre;
+        $img = imagecreatefromstring(file_get_contents($archivo->getPathname()));
 
-        $image = $manager->decodePath($archivo->getPathname());
-        $image->scaleDown(width: $maxWidth);
-        $encoded = $image->encode(new WebpEncoder(quality: $calidad));
-        Storage::disk('public')->put($ruta, (string) $encoded);
+        $w = imagesx($img);
+        $h = imagesy($img);
+
+        if ($w > $maxWidth) {
+            $nuevoH = (int) round($h * $maxWidth / $w);
+            $redim  = imagecreatetruecolor($maxWidth, $nuevoH);
+            imagealphablending($redim, false);
+            imagesavealpha($redim, true);
+            imagecopyresampled($redim, $img, 0, 0, 0, 0, $maxWidth, $nuevoH, $w, $h);
+            imagedestroy($img);
+            $img = $redim;
+        }
+
+        ob_start();
+        imagewebp($img, null, $calidad);
+        $webp = ob_get_clean();
+        imagedestroy($img);
+
+        $ruta = $carpeta . '/' . Str::uuid() . '.webp';
+        Storage::disk('public')->put($ruta, $webp);
 
         return $ruta;
     }
