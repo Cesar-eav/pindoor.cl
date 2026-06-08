@@ -288,20 +288,20 @@
                             </a>
 
                             {{-- Posts secundarios --}}
-                            <div class="flex flex-col gap-4">
+                            <div class="flex flex-col gap-4 h-64">
                                 @foreach($ultimosPosts->skip(1) as $post)
                                 <a href="{{ route('blog.show', $post->slug) }}"
                                    class="group flex-1 relative block rounded-2xl overflow-hidden shadow-sm">
                                     @if($post->imagen_portada)
                                         <img src="{{ asset('storage/' . $post->imagen_portada) }}"
                                              alt="{{ $post->titulo }}"
-                                             class="w-full h-full object-cover group-hover:scale-105 transition duration-500 min-h-28">
+                                             class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                     @else
-                                        <div class="w-full min-h-28 bg-gray-800"></div>
+                                        <div class="absolute inset-0 bg-gray-800"></div>
                                     @endif
                                     <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent"></div>
                                     <div class="absolute bottom-0 left-0 right-0 p-3">
-                                        <h3 class="text-xs font-bold text-white leading-snug line-clamp-2">{{ $post->titulo }}</h3>
+                                        <h3 class="text-sm font-bold text-white leading-snug line-clamp-2">{{ $post->titulo }}</h3>
                                     </div>
                                 </a>
                                 @endforeach
