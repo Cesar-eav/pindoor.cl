@@ -112,6 +112,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::resource('blog', PostController::class)->except(['show']);
 
     // Panoramas — La Brújula
+    Route::get('/panoramas/ubicaciones', [PanoramaController::class, 'ubicaciones'])->name('panoramas.ubicaciones');
     Route::resource('panoramas', PanoramaController::class)->except(['show']);
     Route::patch('/panoramas/{panorama}/toggle', [PanoramaController::class, 'toggle'])->name('panoramas.toggle');
     Route::delete('/panoramas/imagenes/{imagen}', [PanoramaController::class, 'destroyImagen'])->name('panoramas.imagenes.destroy');

@@ -71,6 +71,21 @@ class PanoramaController extends Controller
         return back()->with('success', 'Configuración guardada.');
     }
 
+    public function ubicaciones(Request $request)
+    {
+        $q = trim($request->get('q', ''));
+
+        $results = Panorama::whereNotNull('ubicacion')
+            ->where('ubicacion', '!=', '')
+            ->when($q, fn($query) => $query->where('ubicacion', 'like', "%{$q}%"))
+            ->distinct()
+            ->orderBy('ubicacion')
+            ->limit(8)
+            ->pluck('ubicacion');
+
+        return response()->json($results);
+    }
+
     public function create()
     {
         return view('admin.panoramas.create');
