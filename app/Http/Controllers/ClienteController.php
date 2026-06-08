@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Encoders\WebpEncoder;
 
 class ClienteController extends Controller
 {
@@ -132,7 +133,7 @@ class ClienteController extends Controller
             'video_url'           => 'nullable|url|max:255',
             'tags'                => 'nullable|string',
             'descripcion_busqueda'=> 'nullable|string',
-            'imagen_perfil'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'imagen_perfil'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
             // Alimentación
             'carta'               => 'nullable|string',
             'carta_pdf'           => 'nullable|file|mimes:pdf|max:5120',
@@ -284,7 +285,7 @@ class ClienteController extends Controller
 
         $request->validate([
             'imagenes'   => 'required|array|max:10',
-            'imagenes.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            'imagenes.*' => 'image|mimes:jpeg,png,jpg,webp|max:10240',
         ]);
 
         $archivos = array_slice($request->file('imagenes'), 0, $disponibles);
@@ -329,15 +330,14 @@ class ClienteController extends Controller
 
     private function guardarImagenComprimida($archivo, string $carpeta, int $maxWidth = 1600, int $calidad = 80): string
     {
-        $manager  = new ImageManager(new Driver());
-        $nombre   = Str::uuid() . '.webp';
-        $ruta     = $carpeta . '/' . $nombre;
+        $manager = new ImageManager(new Driver());
+        $nombre  = Str::uuid() . '.webp';
+        $ruta    = $carpeta . '/' . $nombre;
 
-        $encoded = $manager->read($archivo->getPathname())
-            ->scaleDown(width: $maxWidth)
-            ->toWebp(quality: $calidad);
-
-        Storage::disk('public')->put($ruta, $encoded);
+        $image = $manager->decodePath($archivo->getPathname());
+        $image->scaleDown(width: $maxWidth);
+        $encoded = $image->encode(new WebpEncoder(quality: $calidad));
+        Storage::disk('public')->put($ruta, (string) $encoded);
 
         return $ruta;
     }
