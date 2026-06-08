@@ -113,7 +113,7 @@ class PuntoInteresController extends Controller
             ->take(20)
             ->values();
 
-        $ultimosPosts = Post::publicados()->take(3)->get();
+        $ultimosPosts = Post::publicados()->take(10)->get();
         $ultimoPost = $ultimosPosts->first();
 
         return view('puntos.index_puntos', compact('atractivos', 'categorias', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts'));
