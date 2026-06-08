@@ -1,90 +1,74 @@
-# Problema: Upload de imágenes falla en local con UPLOAD_ERR_INI_SIZE
+# Upload de imágenes: diagnóstico y solución ✅
 
 ## Síntoma
 
-Al subir imágenes desde el panel de cliente (galería del negocio), cualquier imagen mayor a ~2.2 MB genera un error 500. El log de Laravel muestra:
+Al subir imágenes desde el panel de cliente, cualquier imagen mayor a ~2.1 MB fallaba silenciosamente: el servidor respondía con un redirect (302) pero la imagen no se guardaba. El log de Laravel mostraba:
 
 ```
-[SUBIR] content_length=2620118
-[SUBIR] FILES_raw={"imagenes":{"name":["imagen.jpg"],"type":[""],"tmp_name":[""],"error":[1],"size":[0]}}
+[SUBIR] FILES_raw={"imagenes":{"name":["foto.jpg"],"type":[""],"tmp_name":[""],"error":[1],"size":[0]}}
 [SUBIR] upload_max=2M post_max=8M
 ```
 
-`error: 1` = `UPLOAD_ERR_INI_SIZE` — PHP rechazó el archivo antes de que llegue al controlador.
+`error: 1` = `UPLOAD_ERR_INI_SIZE` — PHP rechazó el archivo antes de que llegara al controlador.
 
-## Causa raíz identificada
+---
 
-El entorno local corre con **`php artisan serve`** (puerto 8000), que usa el servidor built-in de PHP. Este proceso usa el **php.ini del CLI**, no el de Apache.
+## Causa raíz (local)
 
-| php.ini | Ruta | upload_max_filesize | post_max_size |
-|---------|------|---------------------|---------------|
-| Apache  | `/etc/php/8.3/apache2/php.ini` | **10M** (ya corregido) | **15M** (ya corregido) |
-| CLI     | `/etc/php/8.3/cli/php.ini`     | **2M** (default — SIN corregir) | **8M** (default — SIN corregir) |
+**El entorno de desarrollo corre con `php artisan serve`**, que internamente lanza el servidor built-in de PHP (`php -S 127.0.0.1:8000`). Este proceso usa el **php.ini del CLI**, completamente separado del php.ini de Apache.
 
-Procesos activos relevantes:
+| SAPI | php.ini | upload_max_filesize |
+|------|---------|---------------------|
+| Apache (`:80`) | `/etc/php/8.3/apache2/php.ini` | 10M (corregido antes) |
+| artisan serve (`:8000`) | `/etc/php/8.3/cli/php.ini` | **2M** ← el problema |
+
+El diagnóstico se confirmó con la ruta `/debug-php`:
+```json
+{"sapi":"cli-server","ini":"/etc/php/8.3/cli/php.ini","upload":"2M","post":"8M"}
 ```
-php artisan serve           → php8.3 -S 127.0.0.1:8000 ...  ← este sirve la app
-php8.3 (Apache mod_php)     → sirve /var/www/html via :80
-```
 
-## Por qué nos confundió
+---
 
-- `public/phpcheck.php` fue probado vía **Apache** (`:80`) → mostraba 10M ✓
-- Los uploads van por **artisan serve** (`:8000`) → usa CLI php.ini → 2M ✗
-- `public/.htaccess` y `public/.user.ini` con `upload_max_filesize = 10M` **no aplican** al servidor built-in de PHP ni a `upload_max_filesize` (directiva `PHP_INI_SYSTEM`, no puede cambiarse vía `.user.ini`)
-- El php.ini de Apache fue editado correctamente pero no afecta artisan serve
+## Por qué costó encontrarlo
 
-## Lo que se intentó (sin éxito)
+- El archivo `phpcheck.php` fue probado vía Apache (`:80`) y mostraba 10M ✓ — daba falsa sensación de que todo estaba bien
+- Los uploads reales van por artisan serve (`:8000`) → usaba CLI php.ini → 2M ✗
+- `upload_max_filesize` es directiva `PHP_INI_SYSTEM`: **no se puede cambiar** via `.user.ini`, `php_value` en `.htaccess`, ni `ini_set()` en código. Solo el php.ini o `php_admin_value` en httpd.conf
+- Editar el php.ini de Apache no tiene ningún efecto sobre artisan serve
 
-1. Editar `/etc/php/8.2/apache2/php.ini` → incorrecto (Apache usa PHP 8.3)
-2. Editar `/etc/php/8.3/apache2/php.ini` → correcto, pero no es el que usa artisan serve
-3. Agregar `php_value` en `public/.htaccess` → ignorado (AllowOverride None + directiva SYSTEM)
-4. Crear `public/.user.ini` con `upload_max_filesize = 10M` → ignorado (directiva SYSTEM)
-5. `sudo systemctl restart apache2` → correcto para Apache, irrelevante para artisan serve
+---
 
-## Solución pendiente
-
-Editar `/etc/php/8.3/cli/php.ini` (requiere `sudo`):
-
-```
-# línea 865
-upload_max_filesize = 10M
-
-# línea 713
-post_max_size = 15M
-```
+## Solución aplicada
 
 ```bash
-sudo nano /etc/php/8.3/cli/php.ini
-# o
-sudo mousepad /etc/php/8.3/cli/php.ini
+# 1. Editar CLI php.ini
+sudo sed -i 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/' /etc/php/8.3/cli/php.ini
+sudo sed -i 's/^post_max_size = 8M/post_max_size = 15M/' /etc/php/8.3/cli/php.ini
+
+# 2. Matar el proceso de artisan serve (ver PID con: ss -tlnp | grep 8000)
+kill <PID>
+
+# 3. Relanzar
+cd /var/www/html/pindoor && php artisan serve
 ```
 
-Después reiniciar artisan serve (Ctrl+C y `php artisan serve` de nuevo).
+Verificar con `http://127.0.0.1:8000/debug-php` → debe mostrar `upload: 10M`.
 
-### Verificación
+---
 
-Crear `public/phpcheck2.php` **y probarlo en el puerto 8000** (no en Apache):
+## Estado: ✅ RESUELTO en local
 
-```php
-<?php
-header('Content-Type: text/plain');
-echo 'upload_max: ' . ini_get('upload_max_filesize') . "\n";
-echo 'post_max: ' . ini_get('post_max_size') . "\n";
-echo 'SAPI: ' . php_sapi_name() . "\n";
+- `/etc/php/8.3/cli/php.ini` → `upload_max_filesize = 10M`, `post_max_size = 15M`
+- Logs de debug eliminados de `ClienteController.php`
+- UI actualizada a "máx. 10 MB c/u"
+
+---
+
+## Producción (pindoor.cl, cPanel + LiteSpeed)
+
+El servidor de producción muestra límites correctos:
+```json
+{"sapi":"litespeed","ini":"/opt/cpanel/ea-php82/root/etc/php.ini","upload":"10M","post":"12M","memory":"2G"}
 ```
 
-Acceder a `http://127.0.0.1:8000/phpcheck2.php` — debe mostrar `cli-server` como SAPI y 10M.
-
-## Estado del código
-
-El controlador `ClienteController.php` tiene logs de debug activos que deben eliminarse una vez resuelto el problema:
-
-```php
-// subirImagen() — líneas ~277-279
-\Log::error('[SUBIR] content_length=...');
-\Log::error('[SUBIR] FILES_raw=...');
-\Log::error('[SUBIR] upload_max=...');
-
-// guardarImagenComprimida() — múltiples \Log::error("[IMG] ...")
-```
+El problema en producción **no es el tamaño** — es que **Intervention Image no está instalada** en el vendor del servidor compartido. Pendiente de resolver.
