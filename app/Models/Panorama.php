@@ -73,6 +73,25 @@ class Panorama extends Model
         return $this->hasMany(PanoramaImagen::class)->orderBy('orden');
     }
 
+    public function proximaOcurrencia(Carbon $desde): ?Carbon
+    {
+        if (empty($this->dias_semana)) {
+            return $this->fecha->gte($desde) ? $this->fecha->copy() : null;
+        }
+
+        $fin    = $this->fecha_fin ?? $this->fecha;
+        $cursor = $desde->copy();
+
+        while ($cursor->lte($fin)) {
+            if (in_array($cursor->isoWeekday(), $this->dias_semana)) {
+                return $cursor;
+            }
+            $cursor->addDay();
+        }
+
+        return null;
+    }
+
     public function scopeActivos($query, $limite = 15)
     {
         $hoy   = Carbon::today();

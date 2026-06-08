@@ -96,11 +96,22 @@ class PuntoInteresController extends Controller
                 ->get();
         }
 
+        $hoy = Carbon::today();
+
         $proximosPanoramas = Panorama::where('activo', true)
-            ->where('fecha', '>=', now()->toDateString())
-            ->orderBy('fecha')
-            ->limit(10)
-            ->get();
+            ->where(function ($q) use ($hoy) {
+                $q->whereNull('fecha_fin')->where('fecha', '>=', $hoy)
+                  ->orWhere('fecha_fin', '>=', $hoy);
+            })
+            ->get()
+            ->map(function ($p) use ($hoy) {
+                $p->fecha_proxima = $p->proximaOcurrencia($hoy);
+                return $p;
+            })
+            ->filter(fn($p) => $p->fecha_proxima !== null)
+            ->sortBy('fecha_proxima')
+            ->take(20)
+            ->values();
 
         $ultimosPosts = Post::publicados()->take(3)->get();
         $ultimoPost = $ultimosPosts->first();
