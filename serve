@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Reemplaza `php artisan serve` con límites de upload correctos.
+# Uso: ./serve
+exec php8.3 \
+  -d upload_max_filesize=10M \
+  -d post_max_size=15M \
+  -S 127.0.0.1:8080 \
+  vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php
