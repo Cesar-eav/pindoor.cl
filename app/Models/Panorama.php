@@ -54,6 +54,10 @@ class Panorama extends Model
 
     protected static function booted(): void
     {
+        static::creating(function (self $p) {
+            $p->slug = Str::slug($p->titulo) . '-' . uniqid();
+        });
+
         static::created(function (self $p) {
             $p->slug = Str::slug($p->titulo) . '-' . $p->id;
             $p->saveQuietly();
