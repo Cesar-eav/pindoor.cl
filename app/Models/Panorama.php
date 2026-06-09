@@ -9,21 +9,21 @@ use Illuminate\Database\Eloquent\Model;
 class Panorama extends Model
 {
     const CATEGORIAS = [
-        'musica'      => ['label' => 'Música',      'emoji' => '🎵'],
-        'teatro'      => ['label' => 'Teatro',      'emoji' => '🎭'],
-        'danza'       => ['label' => 'Danza',       'emoji' => '💃'],
-        'arte'        => ['label' => 'Arte',        'emoji' => '🎨'],
-        'cine'        => ['label' => 'Cine',        'emoji' => '🎬'],
-        'gastronomia' => ['label' => 'Gastronomía', 'emoji' => '🍽️'],
-        'feria'       => ['label' => 'Feria',       'emoji' => '🛍️'],
-        'tour'        => ['label' => 'Tour',        'emoji' => '🗺️'],
-        'infantil'    => ['label' => 'Infantil',    'emoji' => '🧸'],
-        'taller'      => ['label' => 'Taller',      'emoji' => '🛠️'],
-        'conferencia' => ['label' => 'Conferencia',      'emoji' => '🎓'],
-        'exposicion'  => ['label' => 'Exposición',      'emoji' => '🧐'],
-        'otros'       => ['label' => 'Otros',      'emoji' => '🫘'],
-        
-
+    'arte'        => ['label' => 'Arte',        'emoji' => '🎨'],    
+    'musica'      => ['label' => 'Música',      'emoji' => '🎵'],
+    'cine'        => ['label' => 'Cine',        'emoji' => '🎬'],
+    'conferencia' => ['label' => 'Conferencia',      'emoji' => '🎓'],
+    'danza'       => ['label' => 'Danza',       'emoji' => '💃'],
+    'exposicion'  => ['label' => 'Exposición',      'emoji' => '🧐'],
+    'feria'       => ['label' => 'Feria',       'emoji' => '🛍️'],
+    'gastronomia' => ['label' => 'Gastronomía', 'emoji' => '🍽️'],
+    'infantil'    => ['label' => 'Infantil',    'emoji' => '🧸'],
+    'literatura'  => ['label' => 'Literatura',  'emoji' => '📚'],
+    'standup'     => ['label' => 'Stand Up',    'emoji' => '🎤'],
+    'teatro'      => ['label' => 'Teatro',      'emoji' => '🎭'],            
+    'tour'        => ['label' => 'Tour',        'emoji' => '🗺️'],
+    'taller'      => ['label' => 'Taller',      'emoji' => '🛠️'],      
+    'otros'       => ['label' => 'Otros',      'emoji' => '🫘'],
     ];
 
     const DIAS = [
