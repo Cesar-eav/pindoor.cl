@@ -207,28 +207,47 @@
                         <span class="flex-1 h-px bg-gray-200"></span>
                         <a href="{{ route('atractivos.panoramas') }}" class="text-sm font-semibold text-[#fc5648] hover:underline shrink-0">Ver todos →</a>
                     </div>
-                    <div class="flex overflow-x-auto border border-gray-100 shadow-sm">
-                        @foreach($proximosPanoramas->take(15) as $p)
-                        <a href="{{ route('panoramas.show', $p) }}"
-                           class="bg-white hover:bg-gray-50 transition group shrink-0 w-44 snap-start border-r border-gray-100 last:border-r-0">
-                            @if($p->imagen)
-                                <img src="{{ asset('storage/' . $p->imagen) }}"
-                                     alt="{{ $p->titulo }}"
-                                     class="w-full h-32 object-cover group-hover:scale-105 transition duration-300">
-                            @else
-                                <div class="w-full h-32 bg-[#fff0ef] flex items-center justify-center text-3xl">🗓</div>
-                            @endif
-                            <div class="p-3">
-                                <p class="text-xs font-bold text-[#fc5648]">
-                                    {{ \Carbon\Carbon::parse($p->fecha)->locale('es')->isoFormat('D MMM') }}
-                                </p>
-                                <p class="text-sm font-bold text-gray-900 leading-snug line-clamp-2 mt-0.5">{{ $p->titulo }}</p>
-                                @if($p->ubicacion)
-                                    <p class="text-xs text-gray-400 truncate mt-1">📍 {{ $p->ubicacion }}</p>
+                    <div class="overflow-x-auto border border-gray-100 shadow-sm"
+                         style="scrollbar-width:none"
+                         x-data="{
+                             stopped: false,
+                             last: null,
+                             init() {
+                                 const el = this.$el;
+                                 const step = (ts) => {
+                                     if (this.last !== null && !this.stopped) {
+                                         el.scrollLeft += 30 * (ts - this.last) / 1000;
+                                     }
+                                     this.last = ts;
+                                     requestAnimationFrame(step);
+                                 };
+                                 requestAnimationFrame(step);
+                             }
+                         }"
+                         @click="stopped = true">
+                        <div class="flex">
+                            @foreach($proximosPanoramas->take(30) as $p)
+                            <a href="{{ route('panoramas.show', $p) }}"
+                               class="bg-white hover:bg-gray-50 transition group shrink-0 w-44 border-r border-gray-100">
+                                @if($p->imagen)
+                                    <img src="{{ asset('storage/' . $p->imagen) }}"
+                                         alt="{{ $p->titulo }}"
+                                         class="w-full h-32 object-cover group-hover:scale-105 transition duration-300">
+                                @else
+                                    <div class="w-full h-32 bg-[#fff0ef] flex items-center justify-center text-3xl">🗓</div>
                                 @endif
-                            </div>
-                        </a>
-                        @endforeach
+                                <div class="p-3">
+                                    <p class="text-xs font-bold text-[#fc5648]">
+                                        {{ \Carbon\Carbon::parse($p->fecha)->locale('es')->isoFormat('D MMM') }}
+                                    </p>
+                                    <p class="text-sm font-bold text-gray-900 leading-snug line-clamp-2 mt-0.5">{{ $p->titulo }}</p>
+                                    @if($p->ubicacion)
+                                        <p class="text-xs text-gray-400 truncate mt-1">📍 {{ $p->ubicacion }}</p>
+                                    @endif
+                                </div>
+                            </a>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
                 @endif

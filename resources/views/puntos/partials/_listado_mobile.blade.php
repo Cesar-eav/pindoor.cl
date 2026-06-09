@@ -22,7 +22,25 @@
         <span class="flex-1 h-px bg-gray-200"></span>
         <a href="{{ route('atractivos.panoramas') }}" class="text-[11px] text-[#fc5648] font-semibold shrink-0">Ver todos →</a>
     </div>
-    <div class="flex overflow-x-auto pb-1 scrollbar-hide">
+    <div class="overflow-x-auto pb-1 scrollbar-hide"
+         style="scrollbar-width:none"
+         x-data="{
+             stopped: false,
+             last: null,
+             init() {
+                 const el = this.$el;
+                 const step = (ts) => {
+                     if (this.last !== null && !this.stopped) {
+                         el.scrollLeft += 30 * (ts - this.last) / 1000;
+                     }
+                     this.last = ts;
+                     requestAnimationFrame(step);
+                 };
+                 requestAnimationFrame(step);
+             }
+         }"
+         @click="stopped = true">
+        <div class="flex">
         @foreach($proximosPanoramas as $p)
         <a href="{{ route('panoramas.show', $p) }}"
            class="flex-none w-36 bg-white border border-gray-100 shadow-sm overflow-hidden">
@@ -44,6 +62,7 @@
             </div>
         </a>
         @endforeach
+        </div>
     </div>
 </div>
 @endif

@@ -51,12 +51,13 @@ class PuntoInteresController extends Controller
                   ->selectRaw('*, ST_Distance_Sphere(POINT(lng, lat), POINT(?, ?)) as distancia', [$lng, $lat])
                   ->orderBy('distancia', 'asc');
         } else {
-            $query->latest('updated_at');
+            $query->inRandomOrder();
         }
 
         $atractivos = $query
+        
             ->with(['categoria', 'imagenPrincipal'])
-            ->paginate(46)
+            ->paginate(48)
             ->withQueryString();
 
         $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->where('activo', 1)->where('eliminado', false)])
@@ -110,7 +111,7 @@ class PuntoInteresController extends Controller
             })
             ->filter(fn($p) => $p->fecha_proxima !== null)
             ->sortBy('fecha_proxima')
-            ->take(20)
+            ->take(30)
             ->values();
 
         $ultimosPosts = Post::publicados()->take(10)->get();
