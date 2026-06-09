@@ -97,7 +97,7 @@
 
         <div class="flex items-center justify-between my-6">
             <h1 class="text-3xl font-bold text-gray-900">
-                ¿Qué quieres <span class="text-red-400">hacer</span> hoy?
+                ¿Qué quieres <span class="text-red-400">hacer</span> en <span class="text-red-400">Valparaíso</span>?
             </h1>
             <div class="inline-flex bg-gray-200 p-1 rounded-xl gap-1">
                 <button id="btn-listado" onclick="setView('listado')"
