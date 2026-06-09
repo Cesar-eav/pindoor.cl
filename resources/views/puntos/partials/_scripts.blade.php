@@ -34,9 +34,10 @@ function setView(vista) {
         navInicio?.classList.remove(...inactiveNav);
     }
 
-    const elPanoramasM = document.getElementById('panoramas-mobile-section');
-    const elBlogM     = document.getElementById('blog-mobile-section');
-    const elFiltroM   = document.getElementById('filtro-activo-mobile');
+    const elPanoramasM     = document.getElementById('panoramas-mobile-section');
+    const elBlogM         = document.getElementById('blog-mobile-section');
+    const elExperienciasM = document.getElementById('experiencias-mobile-section');
+    const elFiltroM       = document.getElementById('filtro-activo-mobile');
 
     if (vista === 'mapa') {
         if (mobile) {
@@ -45,6 +46,7 @@ function setView(vista) {
             elMapaM?.classList.add('flex');
             elPanoramasM?.classList.add('hidden');
             elBlogM?.classList.add('hidden');
+            elExperienciasM?.classList.add('hidden');
             elFiltroM?.classList.add('hidden');
         } else {
             elListado?.classList.add('hidden');
@@ -73,6 +75,7 @@ function setView(vista) {
             elListadoM?.classList.remove('hidden');
             elPanoramasM?.classList.remove('hidden');
             elBlogM?.classList.remove('hidden');
+            elExperienciasM?.classList.remove('hidden');
             elFiltroM?.classList.remove('hidden');
         } else {
             elMapa?.classList.add('hidden');
