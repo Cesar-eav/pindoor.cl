@@ -209,14 +209,17 @@
                         <a href="{{ route('atractivos.panoramas') }}" class="text-sm font-semibold text-[#fc5648] hover:underline shrink-0">Ver todos →</a>
                     </div>
                     <div class="overflow-x-auto border border-gray-100 shadow-sm"
-                         style="scrollbar-width:none"
+                         style="scrollbar-width:none;cursor:grab"
                          x-data="{
                              stopped: false,
+                             dragging: false,
+                             dragStartX: 0,
+                             dragScrollLeft: 0,
                              last: null,
                              init() {
                                  const el = this.$el;
                                  const step = (ts) => {
-                                     if (this.last !== null && !this.stopped) {
+                                     if (this.last !== null && !this.stopped && !this.dragging) {
                                          el.scrollLeft += 30 * (ts - this.last) / 1000;
                                      }
                                      this.last = ts;
@@ -225,7 +228,11 @@
                                  requestAnimationFrame(step);
                              }
                          }"
-                         @click="stopped = true">
+                         @mouseenter="stopped = true"
+                         @mouseleave="stopped = false; dragging = false; last = null; $el.style.cursor = 'grab'"
+                         @mousedown.prevent="dragging = true; dragStartX = $event.pageX - $el.offsetLeft; dragScrollLeft = $el.scrollLeft; $el.style.cursor = 'grabbing'"
+                         @mouseup="dragging = false; $el.style.cursor = 'grab'"
+                         @mousemove="if (dragging) { $el.scrollLeft = dragScrollLeft - ($event.pageX - $el.offsetLeft - dragStartX) * 1.5 }">
                         <div class="flex">
                             @foreach($proximosPanoramas->take(30) as $p)
                             <a href="{{ route('panoramas.show', $p) }}"
