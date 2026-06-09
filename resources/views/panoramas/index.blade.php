@@ -103,7 +103,7 @@
             @endphp
             <a href="{{ $exp->enlace ?: route('atractivos.panoramas') }}"
                @if($exp->enlace) target="_blank" rel="noopener noreferrer" @endif
-               class="group relative block shrink-0 rounded-2xl overflow-hidden shadow-sm bg-gray-900" style="width:15rem;height:15rem;">
+               class="group relative block shrink-0 rounded-2xl overflow-hidden shadow-sm bg-gray-900" style="width:12rem;height:18rem;">
 
                 @if($exp->imagen)
                     <img src="{{ asset('storage/' . $exp->imagen) }}"
@@ -142,12 +142,7 @@
                     </p>
                     <h3 class="font-extrabold text-white leading-snug line-clamp-2">{{ $exp->titulo }}</h3>
                     @if($exp->ubicacion)
-                    <p class="text-xs text-white/60 mt-1.5 flex items-center gap-1">
-                        <svg class="w-3 h-3 shrink-0 text-[#fc5648]" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                        </svg>
-                        {{ $exp->ubicacion }}
-                    </p>
+  
                     @endif
                 </div>
             </a>
