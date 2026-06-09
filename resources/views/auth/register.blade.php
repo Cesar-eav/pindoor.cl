@@ -30,7 +30,34 @@
         <p class="text-sm text-gray-500 mt-1">Crea tu perfil gratuito en Pindoor</p>
     </div>
 
-    <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data"
+          x-data="{
+              loading: false,
+              progress: 0,
+              label: 'Subiendo imagen...',
+              startProgress() {
+                  this.loading = true;
+                  this.progress = 0;
+                  const phase1 = setInterval(() => {
+                      if (this.progress < 60) {
+                          this.progress = Math.min(60, this.progress + Math.random() * 8 + 3);
+                          this.label = 'Subiendo imagen...';
+                      } else {
+                          clearInterval(phase1);
+                          const phase2 = setInterval(() => {
+                              if (this.progress < 85) {
+                                  this.progress = Math.min(85, this.progress + Math.random() * 1.5 + 0.3);
+                                  this.label = 'Procesando imagen...';
+                              } else {
+                                  clearInterval(phase2);
+                                  this.label = 'Finalizando...';
+                              }
+                          }, 500);
+                      }
+                  }, 180);
+              }
+          }"
+          @submit="startProgress">
         @csrf
         <div style="display:none" aria-hidden="true">
             <input type="text" name="website" tabindex="-1" autocomplete="off">
@@ -61,7 +88,7 @@
                 <input id="imagen_logo" name="imagen_logo" type="file" accept="image/*" class="hidden"
                        onchange="document.getElementById('logo-label').textContent = this.files[0]?.name ?? 'Seleccionar imagen'; document.getElementById('logo-icon').textContent = '✅'">
             </div>
-            <p class="mt-1 text-xs text-gray-400">JPG, PNG o WebP · máx. 4 MB</p>
+            <p class="mt-1 text-xs text-gray-400">JPG, PNG o WebP · máx. 10 MB</p>
             <x-input-error :messages="$errors->get('imagen_logo')" class="mt-2" />
         </div>
 
@@ -79,8 +106,30 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
-        <div class="flex justify-end mt-6">
-            <x-primary-button>Crear cuenta</x-primary-button>
+        <div class="mt-6">
+            <div x-show="loading" class="mb-4">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-xs text-gray-500" x-text="label"></span>
+                    <span class="text-xs font-semibold text-[#fc5648]" x-text="Math.floor(progress) + '%'"></span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                    <div class="h-2 rounded-full bg-[#fc5648] transition-all duration-300"
+                         x-bind:style="'width:' + progress + '%'"></div>
+                </div>
+                <p class="mt-2 text-xs text-gray-400">Esto puede demorar dependiendo del peso del logo.</p>
+            </div>
+            <div class="flex justify-end">
+                <x-primary-button x-bind:disabled="loading">
+                    <span x-show="!loading">Crear cuenta</span>
+                    <span x-show="loading" class="flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                        </svg>
+                        <span x-text="label"></span>
+                    </span>
+                </x-primary-button>
+            </div>
         </div>
     </form>
 
