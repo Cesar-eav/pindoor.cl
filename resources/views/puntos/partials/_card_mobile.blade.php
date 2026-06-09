@@ -1,4 +1,4 @@
-<article class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col font-sans">
+<article class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col">
     <div class="relative">
         <a href="{{ route('atractivos.show', $atractivo->slug ?? $atractivo->id) }}" class="block overflow-hidden">
             @if($atractivo->imagenPrincipal)
@@ -12,7 +12,7 @@
 
         @if($atractivo->categoria)
         <span class="absolute top-3 left-3 bg-[#fc5648] text-white text-[9px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full shadow">
-            {{ $atractivo->categoria->nombre }}
+            {{ $atractivo->categoria->nombre }} 
         </span>
         @endif
 

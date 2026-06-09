@@ -8,7 +8,7 @@
 @section('title', 'Pindoor · Guía de lugares en Valparaíso')
 @section('description', 'Explora restaurantes, cafeterías, hoteles, museos, bares y atracciones turísticas en Valparaíso. Filtra por categoría, busca por nombre o activa el GPS para ver qué tienes cerca.')
 @section('canonical', route('puntos.index'))
-@section('bodyClass', 'bg-gray-100 text-gray-900 font-serif')
+@section('bodyClass', 'bg-gray-100 text-gray-900')
 
 @section('head')
     <meta property="og:type" content="website" />
@@ -59,43 +59,33 @@
 @section('content')
 
 {{-- ══ MOBILE (< md) ══════════════════════════════════════════════════════ --}}
-<div class="md:hidden flex flex-col min-h-screen font-sans">
+<div class="md:hidden flex flex-col min-h-screen">
 
-    {{-- Toggle Listado / Mapa / GPS --}}
-    <div class="inline-flex bg-gray-200 p-1 rounded-xl gap-1 justify-center">
-        <button id="btn-listado-m" onclick="setView('listado')"
-                class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all bg-white shadow text-[#fc5648]">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-            </svg>
-            Listado
-        </button>
-        <button id="btn-mapa-m" onclick="setView('mapa')"
-                class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all text-gray-500 hover:text-gray-700">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-            </svg>
-            Mapa
-        </button>
-        <button type="button" onclick="geolocateMobile(this)"
-                class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all
-                       {{ request('lat') ? 'bg-[#fc5648] text-white shadow' : 'text-gray-500 hover:text-gray-700' }}">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-            {{ request('lat') ? 'Cerca de ti' : 'GPS' }}
-        </button>
-    </div>
-
-    @include('puntos.partials._pills')
     @include('puntos.partials._listado_mobile')
 
     {{-- Mapa mobile --}}
-    <div id="vista-mapa-mobile" class="hidden flex-1">
-        <div id="mapa-mobile" style="height:70vh;"></div>
+    <div id="vista-mapa-mobile" class="hidden flex-1 flex-col">
+
+        {{-- Pills de categoría sobre el mapa --}}
+        <div class="overflow-x-auto no-scrollbar bg-white border-b border-gray-100 px-3 py-2 shrink-0"
+             style="-ms-overflow-style:none;scrollbar-width:none;">
+            <div class="flex gap-2 w-max">
+                <button data-slug="" onclick="filtrarMapa('')"
+                        class="pill-mapa px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors
+                               bg-gray-900 text-white border-gray-900 whitespace-nowrap">
+                    Todos
+                </button>
+                @foreach($categorias as $cat)
+                <button data-slug="{{ $cat->slug }}" onclick="filtrarMapa('{{ $cat->slug }}')"
+                        class="pill-mapa px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors
+                               bg-white text-gray-500 border-gray-300 whitespace-nowrap">
+                    {{ $cat->nombre }}
+                </button>
+                @endforeach
+            </div>
+        </div>
+
+        <div id="mapa-mobile" class="flex-1" style="min-height:0;"></div>
     </div>
 
 </div>{{-- /mobile --}}
@@ -107,7 +97,7 @@
 
         <div class="flex items-center justify-between my-6">
             <h1 class="text-3xl font-bold text-gray-900">
-                ¿Qué quieres <span class="text-red-400">conocer</span> hoy?
+                ¿Qué quieres <span class="text-red-400">hacer</span> en <span class="text-red-400">Valparaíso</span>?
             </h1>
             <div class="inline-flex bg-gray-200 p-1 rounded-xl gap-1">
                 <button id="btn-listado" onclick="setView('listado')"
@@ -147,6 +137,7 @@
             </div>
 
             <div id="mapa-principal"></div>
+            
             <p class="text-xs text-gray-400 text-center mt-2">
                 <span id="mapa-contador">{{ count($puntosMapData) }}</span> puntos · Clic en un marcador para ver el detalle
             </p>
@@ -204,6 +195,118 @@
                     @endif
                 </form>
             </div>
+
+            {{-- Panoramas y Blog: solo sin filtros activos --}}
+            @if(!$hayFiltros)
+
+                {{-- Próximos panoramas --}}
+                @if(isset($proximosPanoramas) && $proximosPanoramas->isNotEmpty())
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-1 h-5 rounded-full bg-[#fc5648] shrink-0"></span>
+                        <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">Panoramas</h2>
+                        <span class="flex-1 h-px bg-gray-200"></span>
+                        <a href="{{ route('atractivos.panoramas') }}" class="text-sm font-semibold text-[#fc5648] hover:underline shrink-0">Ver todos →</a>
+                    </div>
+                    <div class="overflow-x-auto border border-gray-100 shadow-sm"
+                         style="scrollbar-width:none;cursor:grab"
+                         x-data="{
+                             stopped: false,
+                             dragging: false,
+                             dragStartX: 0,
+                             dragScrollLeft: 0,
+                             last: null,
+                             init() {
+                                 const el = this.$el;
+                                 const step = (ts) => {
+                                     if (this.last !== null && !this.stopped && !this.dragging) {
+                                         el.scrollLeft += 30 * (ts - this.last) / 1000;
+                                     }
+                                     this.last = ts;
+                                     requestAnimationFrame(step);
+                                 };
+                                 requestAnimationFrame(step);
+                             }
+                         }"
+                         @mouseenter="stopped = true"
+                         @mouseleave="stopped = false; dragging = false; last = null; $el.style.cursor = 'grab'"
+                         @mousedown.prevent="dragging = true; dragStartX = $event.pageX - $el.offsetLeft; dragScrollLeft = $el.scrollLeft; $el.style.cursor = 'grabbing'"
+                         @mouseup="dragging = false; $el.style.cursor = 'grab'"
+                         @mousemove="if (dragging) { $el.scrollLeft = dragScrollLeft - ($event.pageX - $el.offsetLeft - dragStartX) * 1.5 }">
+                        <div class="flex">
+                            @foreach($proximosPanoramas->take(30) as $p)
+                            <a href="{{ route('panoramas.show', $p) }}"
+                               class="bg-white hover:bg-gray-50 transition group shrink-0 w-44 border-r border-gray-100">
+                                @if($p->imagen)
+                                    <img src="{{ asset('storage/' . $p->imagen) }}"
+                                         alt="{{ $p->titulo }}"
+                                         class="w-full h-32 object-cover group-hover:scale-105 transition duration-300">
+                                @else
+                                    <div class="w-full h-32 bg-[#fff0ef] flex items-center justify-center text-3xl">🗓</div>
+                                @endif
+                                <div class="p-3">
+                                    <p class="text-xs font-bold text-[#fc5648]">
+                                        {{ \Carbon\Carbon::parse($p->fecha)->locale('es')->isoFormat('D MMM') }}
+                                    </p>
+                                    <p class="text-sm font-bold text-gray-900 leading-snug line-clamp-2 mt-0.5">{{ $p->titulo }}</p>
+                                    @if($p->ubicacion)
+                                        <p class="text-xs text-gray-400 truncate mt-1">📍 {{ $p->ubicacion }}</p>
+                                    @endif
+                                </div>
+                            </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Últimas entradas del blog --}}
+                @if(isset($ultimosPosts) && $ultimosPosts->isNotEmpty())
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-1 h-5 rounded-full bg-[#fc5648] shrink-0"></span>
+                        <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">Blog</h2>
+                        <span class="flex-1 h-px bg-gray-200"></span>
+                        <a href="{{ route('blog.index') }}" class="text-sm font-semibold text-[#fc5648] hover:underline shrink-0">Ver todos →</a>
+                    </div>
+
+                    <div class="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2"
+                         style="scrollbar-width:none">
+                        @foreach($ultimosPosts as $post)
+                        <a href="{{ route('blog.show', $post->slug) }}"
+                           class="group relative shrink-0 w-72 rounded-2xl overflow-hidden shadow-sm h-52 snap-start">
+                            @if($post->imagen_portada)
+                                <img src="{{ asset('storage/' . $post->imagen_portada) }}"
+                                     alt="{{ $post->titulo }}"
+                                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            @else
+                                <div class="absolute inset-0 bg-gray-800"></div>
+                            @endif
+                            <div class="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent"></div>
+                            <div class="relative z-10 h-full flex flex-col justify-end p-4">
+                                <h3 class="text-sm font-extrabold text-white leading-snug line-clamp-3">{{ $post->titulo }}</h3>
+                                @if($post->resumen)
+                                    <p class="text-xs text-white/70 mt-1 line-clamp-2">{{ $post->resumen }}</p>
+                                @endif
+                            </div>
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
+
+                
+                @endif
+
+
+
+                {{-- Cabecera sección atractivos --}}
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="w-1 h-5 rounded-full bg-gray-800 shrink-0"></span>
+                    <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">Atractivos</h2>
+                    <span class="flex-1 h-px bg-gray-200"></span>
+                </div>
+
+            @endif
 
             <div class="pb-12">
                 @if($atractivos->count())

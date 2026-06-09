@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -42,12 +43,18 @@ class RegisteredUserController extends Controller
             'name'        => ['required', 'string', 'max:255'],
             'email'       => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password'    => ['required', 'confirmed', Rules\Password::defaults()],
-            'imagen_logo' => ['nullable', 'image', 'max:4096'],
+            'imagen_logo' => ['nullable', 'image', 'max:10240'],
         ]);
 
         $logoPath = null;
         if ($request->hasFile('imagen_logo')) {
-            $logoPath = $request->file('imagen_logo')->store('logos', 'public');
+            try {
+                $logoPath = $this->guardarImagenComprimida($request->file('imagen_logo'), 'logos');
+            } catch (\Throwable $e) {
+                return back()->withInput()->withErrors([
+                    'imagen_logo' => 'No se pudo procesar la imagen. Intenta con una imagen más liviana o en formato JPG/PNG.',
+                ]);
+            }
         }
 
         $user = User::create([
@@ -65,5 +72,33 @@ class RegisteredUserController extends Controller
         Auth::login($user);
 
         return redirect(RouteServiceProvider::HOME);
+    }
+
+    private function guardarImagenComprimida($archivo, string $carpeta, int $maxWidth = 1600, int $calidad = 80): string
+    {
+        $img = imagecreatefromstring(file_get_contents($archivo->getPathname()));
+
+        $w = imagesx($img);
+        $h = imagesy($img);
+
+        if ($w > $maxWidth) {
+            $nuevoH = (int) round($h * $maxWidth / $w);
+            $redim  = imagecreatetruecolor($maxWidth, $nuevoH);
+            imagealphablending($redim, false);
+            imagesavealpha($redim, true);
+            imagecopyresampled($redim, $img, 0, 0, 0, 0, $maxWidth, $nuevoH, $w, $h);
+            imagedestroy($img);
+            $img = $redim;
+        }
+
+        ob_start();
+        imagewebp($img, null, $calidad);
+        $webp = ob_get_clean();
+        imagedestroy($img);
+
+        $ruta = $carpeta . '/' . Str::uuid() . '.webp';
+        Storage::disk('public')->put($ruta, $webp);
+
+        return $ruta;
     }
 }

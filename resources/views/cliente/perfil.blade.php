@@ -418,7 +418,7 @@
                                 <div id="upload-placeholder">
                                     <p class="text-2xl mb-1">📷</p>
                                     <p class="text-xs font-semibold text-gray-600">Haz clic o arrastra fotos aquí</p>
-                                    <p class="text-[11px] text-gray-400 mt-0.5">JPG, PNG o WebP · máx. 2 MB c/u</p>
+                                    <p class="text-[11px] text-gray-400 mt-0.5">JPG, PNG o WebP · máx. 10 MB c/u</p>
                                     <p class="text-[11px] text-[#fc5648] font-medium mt-0.5">Hasta {{ $disponibles }} {{ $disponibles === 1 ? 'foto' : 'fotos' }} más</p>
                                 </div>
                                 <div id="upload-selection" class="hidden">

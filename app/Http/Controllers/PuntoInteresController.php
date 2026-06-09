@@ -51,12 +51,13 @@ class PuntoInteresController extends Controller
                   ->selectRaw('*, ST_Distance_Sphere(POINT(lng, lat), POINT(?, ?)) as distancia', [$lng, $lat])
                   ->orderBy('distancia', 'asc');
         } else {
-            $query->latest('updated_at');
+            $query->latest();
         }
 
         $atractivos = $query
+        
             ->with(['categoria', 'imagenPrincipal'])
-            ->paginate(46)
+            ->paginate(48)
             ->withQueryString();
 
         $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->where('activo', 1)->where('eliminado', false)])
@@ -96,15 +97,29 @@ class PuntoInteresController extends Controller
                 ->get();
         }
 
+        $hoy = Carbon::today();
+
         $proximosPanoramas = Panorama::where('activo', true)
-            ->where('fecha', '>=', now()->toDateString())
-            ->orderBy('fecha')
-            ->limit(10)
-            ->get();
+            ->where(function ($q) use ($hoy) {
+                $q->whereNull('fecha_fin')->where('fecha', '>=', $hoy)
+                  ->orWhere('fecha_fin', '>=', $hoy);
+            })
+            ->get()
+            ->map(function ($p) use ($hoy) {
+                $p->fecha_proxima = $p->proximaOcurrencia($hoy);
+                return $p;
+            })
+            ->filter(fn($p) => $p->fecha_proxima !== null)
+            ->sortBy('fecha_proxima')
+            ->take(30)
+            ->values();
 
-        $ultimoPost = Post::publicados()->first();
+        $ultimosPosts = Post::publicados()->take(10)->get();
+        $ultimoPost = $ultimosPosts->first();
 
-        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost'));
+        $ultimasExperiencias = Experiencia::activas()->latest()->take(2)->get();
+
+        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts', 'ultimasExperiencias'));
 
     } catch (\Exception $e) {
         \Log::error('Error en index: ' . $e->getMessage());
@@ -114,6 +129,39 @@ class PuntoInteresController extends Controller
 
 
 
+
+    public function buscar(Request $request)
+    {
+        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->where('activo', 1)->where('eliminado', false)->whereNotIn('id', [81,80,64,87,115])])
+            ->having('puntos_interes_count', '>', 0)
+            ->orderByDesc('puntos_interes_count')
+            ->get();
+
+        $grupos = [
+            'alimentacion' => ['label' => 'Comer & Beber',  'emoji' => '🍽️', 'items' => collect()],
+            'alojamiento'  => ['label' => 'Dónde dormir',   'emoji' => '🛏️', 'items' => collect()],
+            'cliente'      => ['label' => 'Comprar',        'emoji' => '🛍️', 'items' => collect()],
+            'visitar'      => ['label' => 'Visitar',        'emoji' => '🏛️', 'items' => collect()],
+        ];
+
+        foreach ($categorias as $cat) {
+            $tipo = $cat->tipo;
+            if ($tipo && isset($grupos[$tipo])) {
+                $grupos[$tipo]['items']->push($cat);
+            } else {
+                $grupos['visitar']['items']->push($cat);
+            }
+        }
+
+        $grupos = array_filter($grupos, fn($g) => $g['items']->isNotEmpty());
+
+        return view('puntos.buscar', compact('grupos'));
+    }
+
+    public function filtrarPorCategoria(string $categoria)
+    {
+        return redirect()->route('puntos.index', ['category' => $categoria]);
+    }
 
     public function explorar(Request $request)
     {
@@ -273,10 +321,14 @@ class PuntoInteresController extends Controller
             ->sortBy(fn($p) => $p->fecha->format('Y-m-d') . ($p->hora ?? '99:99'))
             ->values();
 
+        // Exposiciones: sección propia, no en el calendario diario
+        $exposiciones = $panoramas->where('categoria', 'exposicion')->values();
+
         $coleccion = match(true) {
-            $catActiva === 'gratuito' => $panoramas->where('es_gratuito', true),
-            (bool) $catActiva        => $panoramas->where('categoria', $catActiva),
-            default                  => $panoramas,
+            $catActiva === 'gratuito'   => $panoramas->where('es_gratuito', true)->where('categoria', '!=', 'exposicion'),
+            $catActiva === 'exposicion' => collect(),
+            (bool) $catActiva          => $panoramas->where('categoria', $catActiva),
+            default                    => $panoramas->where('categoria', '!=', 'exposicion'),
         };
 
         // Expandir panoramas multi-día
@@ -351,9 +403,27 @@ class PuntoInteresController extends Controller
             $indicesPorDia[$fechaStr] = $startIndexMap[$grupo->first()->id] ?? 0;
         }
 
+        // Agrupar días por mes para navegación
+        $mesesMeta  = [];
+        $mesPorDia  = [];
+        foreach ($porDia as $fechaStr => $_) {
+            $f      = Carbon::parse($fechaStr);
+            $mesKey = $f->format('Y-m');
+            $mesPorDia[$fechaStr] = $mesKey;
+            if (!isset($mesesMeta[$mesKey])) {
+                $mesesMeta[$mesKey] = [
+                    'key'     => $mesKey,
+                    'label'   => mb_strtoupper($f->translatedFormat('M')),
+                    'titulo'  => ucfirst($f->translatedFormat('F Y')),
+                    'primero' => $fechaStr,
+                ];
+            }
+        }
+
         return view('panoramas.index', compact(
             'panoramas', 'limite', 'categorias', 'catActiva',
-            'porDia', 'diasMeta', 'allImages', 'startIndexMap', 'indicesPorDia'
+            'porDia', 'diasMeta', 'allImages', 'startIndexMap', 'indicesPorDia',
+            'exposiciones', 'mesesMeta', 'mesPorDia'
         ));
     }
 
@@ -503,5 +573,26 @@ class PuntoInteresController extends Controller
         abort_if($producto->punto_interes_id !== $punto->id, 404);
 
         return view('puntos.producto', compact('punto', 'producto'));
+    }
+
+    public function showExposicion($slug, ModuloItem $item)
+    {
+        $punto = PuntoInteres::with(['categoria', 'imagenPrincipal'])
+                             ->where('slug', $slug)
+                             ->where('activo', true)
+                             ->where('eliminado', false)
+                             ->firstOrFail();
+
+        abort_if($item->punto_interes_id !== $punto->id || $item->modulo !== 'exposiciones', 404);
+
+        $otras = ModuloItem::where('punto_interes_id', $punto->id)
+                           ->where('modulo', 'exposiciones')
+                           ->where('activo', true)
+                           ->where('id', '!=', $item->id)
+                           ->orderBy('orden')
+                           ->limit(4)
+                           ->get();
+
+        return view('puntos.exposicion', compact('punto', 'item', 'otras'));
     }
 }

@@ -11,15 +11,73 @@
     @error('titulo') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
 </div>
 
-{{-- Ubicación --}}
-<div>
+{{-- Ubicación con autocompletado --}}
+<div x-data="ubicacionAC('{{ old('ubicacion', $panorama->ubicacion ?? '') }}')" class="relative">
     <label class="block text-sm font-semibold text-gray-700 mb-1">Ubicación</label>
     <input type="text" name="ubicacion"
-           value="{{ old('ubicacion', $panorama->ubicacion ?? '') }}"
+           x-model="query"
+           @input.debounce.300ms="buscar"
+           @keydown.escape="cerrar"
+           @keydown.arrow-down.prevent="mover(1)"
+           @keydown.arrow-up.prevent="mover(-1)"
+           @keydown.enter.prevent="seleccionar()"
+           @click.outside="cerrar"
+           autocomplete="off"
            placeholder="Teatro Municipal, Parque Cultural…"
            class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+
+    <ul x-show="abierto && sugerencias.length"
+        x-transition
+        class="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden text-sm">
+        <template x-for="(s, i) in sugerencias" :key="s">
+            <li @click="elegir(s)"
+                :class="i === activo ? 'bg-[#fff0ef] text-[#fc5648]' : 'text-gray-700 hover:bg-gray-50'"
+                class="px-4 py-2.5 cursor-pointer"
+                x-text="s">
+            </li>
+        </template>
+    </ul>
     @error('ubicacion') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
 </div>
+
+<script>
+function ubicacionAC(inicial) {
+    return {
+        query: inicial,
+        sugerencias: [],
+        abierto: false,
+        activo: -1,
+
+        async buscar() {
+            if (this.query.length < 2) { this.cerrar(); return; }
+            const res = await fetch(`/admin/panoramas/ubicaciones?q=${encodeURIComponent(this.query)}`);
+            this.sugerencias = await res.json();
+            this.abierto = this.sugerencias.length > 0;
+            this.activo = -1;
+        },
+
+        elegir(valor) {
+            this.query = valor;
+            this.cerrar();
+        },
+
+        seleccionar() {
+            if (this.activo >= 0 && this.sugerencias[this.activo]) {
+                this.elegir(this.sugerencias[this.activo]);
+            }
+        },
+
+        mover(dir) {
+            this.activo = Math.max(-1, Math.min(this.sugerencias.length - 1, this.activo + dir));
+        },
+
+        cerrar() {
+            this.abierto = false;
+            this.activo = -1;
+        },
+    };
+}
+</script>
 
 {{-- Categoría + Gratuito --}}
 <div class="grid grid-cols-2 gap-4">

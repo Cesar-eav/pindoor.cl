@@ -15,10 +15,8 @@ function setView(vista) {
     const elMapa     = document.getElementById('vista-mapa');
     const elListadoM = document.getElementById('vista-listado-mobile');
     const elMapaM    = document.getElementById('vista-mapa-mobile');
-    const btnL       = document.getElementById('btn-listado');
-    const btnM       = document.getElementById('btn-mapa');
-    const btnLM      = document.getElementById('btn-listado-m');
-    const btnMM      = document.getElementById('btn-mapa-m');
+    const btnL = document.getElementById('btn-listado');
+    const btnM = document.getElementById('btn-mapa');
 
     const navInicio = document.getElementById('nav-inicio');
     const navMapa   = document.getElementById('nav-explorar-mapa');
@@ -36,17 +34,20 @@ function setView(vista) {
         navInicio?.classList.remove(...inactiveNav);
     }
 
-    const elPanoramasM = document.getElementById('panoramas-mobile-section');
+    const elPanoramasM     = document.getElementById('panoramas-mobile-section');
+    const elBlogM         = document.getElementById('blog-mobile-section');
+    const elExperienciasM = document.getElementById('experiencias-mobile-section');
+    const elFiltroM       = document.getElementById('filtro-activo-mobile');
 
     if (vista === 'mapa') {
         if (mobile) {
             elListadoM?.classList.add('hidden');
             elMapaM?.classList.remove('hidden');
+            elMapaM?.classList.add('flex');
             elPanoramasM?.classList.add('hidden');
-            btnMM?.classList.add('bg-white', 'shadow', 'text-[#fc5648]');
-            btnMM?.classList.remove('text-gray-500', 'hover:text-gray-700');
-            btnLM?.classList.remove('bg-white', 'shadow', 'text-[#fc5648]');
-            btnLM?.classList.add('text-gray-500', 'hover:text-gray-700');
+            elBlogM?.classList.add('hidden');
+            elExperienciasM?.classList.add('hidden');
+            elFiltroM?.classList.add('hidden');
         } else {
             elListado?.classList.add('hidden');
             elMapa?.classList.remove('hidden');
@@ -61,7 +62,6 @@ function setView(vista) {
             void document.getElementById(containerId)?.offsetHeight;
             iniciarMapa(containerId);
         }
-        // Re-ajustar tamaño y animar zoom a GPS una vez el contenedor esté visible
         setTimeout(() => {
             mapaLeaflet?.invalidateSize();
             if (GPS_LAT && GPS_LNG) {
@@ -71,12 +71,12 @@ function setView(vista) {
     } else {
         if (mobile) {
             elMapaM?.classList.add('hidden');
+            elMapaM?.classList.remove('flex');
             elListadoM?.classList.remove('hidden');
             elPanoramasM?.classList.remove('hidden');
-            btnLM?.classList.add('bg-white', 'shadow', 'text-[#fc5648]');
-            btnLM?.classList.remove('text-gray-500', 'hover:text-gray-700');
-            btnMM?.classList.remove('bg-white', 'shadow', 'text-[#fc5648]');
-            btnMM?.classList.add('text-gray-500', 'hover:text-gray-700');
+            elBlogM?.classList.remove('hidden');
+            elExperienciasM?.classList.remove('hidden');
+            elFiltroM?.classList.remove('hidden');
         } else {
             elMapa?.classList.add('hidden');
             elListado?.classList.remove('hidden');

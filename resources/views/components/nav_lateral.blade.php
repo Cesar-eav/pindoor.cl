@@ -1,5 +1,5 @@
 {{-- Sidebar lateral — solo visible en md+ --}}
-<aside class="hidden md:flex flex-col w-56 fixed top-0 left-0 h-full bg-white border-r border-gray-100 z-40 font-sans">
+<aside class="hidden md:flex flex-col w-56 fixed top-0 left-0 h-full bg-white border-r border-gray-100 z-40">
 
     {{-- Brand --}}
     <div class="px-5 py-5 border-b border-gray-100">

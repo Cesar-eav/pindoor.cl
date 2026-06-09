@@ -41,9 +41,11 @@ class PanoramaController extends Controller
 
         $grupos = [
             'hoy'      => $panoramas->filter(fn($p) => $p->fecha && (
+
                               $p->fecha->toDateString() === $hoyStr ||
                               ($p->fecha->toDateString() < $hoyStr && $p->fecha_fin &&
-                               $p->fecha_fin->toDateString() === $hoyStr)
+                              
+                               $p->fecha_fin->toDateString() >= $hoyStr)
                           )),
 
             'semana'   => $panoramas->filter(fn($p) => $p->fecha &&
@@ -67,6 +69,21 @@ class PanoramaController extends Controller
         $request->validate(['panoramas_limite_dias' => 'required|integer|min:1|max:365']);
         Configuracion::set('panoramas_limite_dias', $request->input('panoramas_limite_dias'));
         return back()->with('success', 'Configuración guardada.');
+    }
+
+    public function ubicaciones(Request $request)
+    {
+        $q = trim($request->get('q', ''));
+
+        $results = Panorama::whereNotNull('ubicacion')
+            ->where('ubicacion', '!=', '')
+            ->when($q, fn($query) => $query->where('ubicacion', 'like', "%{$q}%"))
+            ->distinct()
+            ->orderBy('ubicacion')
+            ->limit(8)
+            ->pluck('ubicacion');
+
+        return response()->json($results);
     }
 
     public function create()

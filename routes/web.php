@@ -18,15 +18,28 @@ use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ExperienciaController;
 use Illuminate\Support\Facades\Route;
 
+
 /* --- RUTAS PÚBLICAS (TURISTAS) --- */
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/offline', fn() => view('offline'))->name('offline');
-Route::get('/', [PuntoInteresController::class, 'index'])->name('puntos.index');
+
+// En la app nativa (WebView carga desde 127.x.x.x en puerto no estándar) redirige via JS al sitio real
+// Excluye puertos de desarrollo local (artisan serve = 8000, vite = 5173, etc.)
+$devPorts = [80, 443, 8000, 8080, 3000, 5173];
+if (str_starts_with(request()->getHost(), '127.') && !in_array(request()->getPort(), $devPorts)) {
+    Route::get('/{any?}', function () {
+        $url = 'https://pindoor.cl' . request()->getRequestUri();
+        return response("<script>window.location.replace(" . json_encode($url) . ");</script>");
+    })->where('any', '.*');
+} else {
+    Route::get('/', [PuntoInteresController::class, 'index'])->name('puntos.index');
+}
 
 // El turista busca y ve, pero no edita
 Route::get('/buscar', [PuntoInteresController::class, 'index'])->name('puntos.buscar');
 Route::get('/lugar/{slug}', [PuntoInteresController::class, 'show'])->name('puntos.show');
 Route::get('/lugar/{slug}/producto/{producto}', [PuntoInteresController::class, 'showProducto'])->name('puntos.producto');
+Route::get('/lugar/{slug}/exposicion/{item}', [PuntoInteresController::class, 'showExposicion'])->name('puntos.exposicion');
 
 
 Route::get('/labrujula', fn() => redirect('/', 301));
@@ -35,6 +48,7 @@ Route::get('/atractivos/{atractivo}', fn($slug) => redirect()->route('puntos.sho
 Route::get('/atractivos/categoria/{categoria}', [PuntoInteresController::class, 'filtrarPorCategoria'])->name('atractivos.categoria');
 Route::get('/atractivos/ciudad/{ciudad}', [PuntoInteresController::class, 'filtrarPorCiudad'])->name('atractivos.ciudad');
 Route::get('/explorar', [PuntoInteresController::class, 'explorar'])->name('puntos.explorar');
+Route::get('/categorias', [PuntoInteresController::class, 'buscar'])->name('puntos.buscar.vista');
 Route::get('/panoramas', [PuntoInteresController::class, 'panoramas'])->name('atractivos.panoramas');
 Route::get('/panoramas/{panorama}', [PuntoInteresController::class, 'showPanorama'])->name('panoramas.show');
 Route::get('/experiencias', [PuntoInteresController::class, 'experiencias'])->name('experiencias.index');
@@ -98,6 +112,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::resource('blog', PostController::class)->except(['show']);
 
     // Panoramas — La Brújula
+    Route::get('/panoramas/ubicaciones', [PanoramaController::class, 'ubicaciones'])->name('panoramas.ubicaciones');
     Route::resource('panoramas', PanoramaController::class)->except(['show']);
     Route::patch('/panoramas/{panorama}/toggle', [PanoramaController::class, 'toggle'])->name('panoramas.toggle');
     Route::delete('/panoramas/imagenes/{imagen}', [PanoramaController::class, 'destroyImagen'])->name('panoramas.imagenes.destroy');

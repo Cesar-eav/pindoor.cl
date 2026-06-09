@@ -62,7 +62,7 @@ class ClienteController extends Controller
             'modulos_habilitados'=> PuntoInteres::modulosDefecto($data['categoria_id']),
         ]);
 
-        $ruta = $request->file('imagen')->store('puntos', 'public');
+        $ruta = $this->guardarImagenComprimida($request->file('imagen'), 'puntos');
 
         ImagenPunto::create([
             'punto_interes_id' => $punto->id,
@@ -130,7 +130,7 @@ class ClienteController extends Controller
             'video_url'           => 'nullable|url|max:255',
             'tags'                => 'nullable|string',
             'descripcion_busqueda'=> 'nullable|string',
-            'imagen_perfil'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'imagen_perfil'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
             // Alimentación
             'carta'               => 'nullable|string',
             'carta_pdf'           => 'nullable|file|mimes:pdf|max:5120',
@@ -147,6 +147,8 @@ class ClienteController extends Controller
         $datosPunto = [
             'description'          => $request->description,
             'horario'              => $request->horario,
+            'sector'               => $request->sector,
+            'direccion'            => $request->direccion,
             'enlace'               => $request->enlace,
             'video_url'            => $request->video_url,
             'tags'                 => $request->tags
@@ -159,7 +161,7 @@ class ClienteController extends Controller
             if ($punto->imagen_perfil) {
                 Storage::disk('public')->delete($punto->imagen_perfil);
             }
-            $datosPunto['imagen_perfil'] = $request->file('imagen_perfil')->store('perfiles', 'public');
+            $datosPunto['imagen_perfil'] = $this->guardarImagenComprimida($request->file('imagen_perfil'), 'perfiles');
         }
 
         $punto->update($datosPunto);
@@ -280,7 +282,7 @@ class ClienteController extends Controller
 
         $request->validate([
             'imagenes'   => 'required|array|max:10',
-            'imagenes.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            'imagenes.*' => 'image|mimes:jpeg,png,jpg,webp|max:10240',
         ]);
 
         $archivos = array_slice($request->file('imagenes'), 0, $disponibles);
@@ -289,7 +291,7 @@ class ClienteController extends Controller
         foreach ($archivos as $archivo) {
             ImagenPunto::create([
                 'punto_interes_id' => $punto->id,
-                'ruta'             => $archivo->store('puntos', 'public'),
+                'ruta'             => $this->guardarImagenComprimida($archivo, 'puntos'),
                 'es_principal'     => false,
                 'orden'            => $orden++,
             ]);
@@ -319,6 +321,36 @@ class ClienteController extends Controller
         }
 
         return back()->with('success', 'Foto eliminada.');
+    }
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+
+    private function guardarImagenComprimida($archivo, string $carpeta, int $maxWidth = 1600, int $calidad = 80): string
+    {
+        $img = imagecreatefromstring(file_get_contents($archivo->getPathname()));
+
+        $w = imagesx($img);
+        $h = imagesy($img);
+
+        if ($w > $maxWidth) {
+            $nuevoH = (int) round($h * $maxWidth / $w);
+            $redim  = imagecreatetruecolor($maxWidth, $nuevoH);
+            imagealphablending($redim, false);
+            imagesavealpha($redim, true);
+            imagecopyresampled($redim, $img, 0, 0, 0, 0, $maxWidth, $nuevoH, $w, $h);
+            imagedestroy($img);
+            $img = $redim;
+        }
+
+        ob_start();
+        imagewebp($img, null, $calidad);
+        $webp = ob_get_clean();
+        imagedestroy($img);
+
+        $ruta = $carpeta . '/' . Str::uuid() . '.webp';
+        Storage::disk('public')->put($ruta, $webp);
+
+        return $ruta;
     }
 
     // ─── Actualizaciones rápidas ───────────────────────────────────────────────

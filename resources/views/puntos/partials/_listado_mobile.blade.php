@@ -14,7 +14,7 @@
 </div>
 
 {{-- Próximos panoramas --}}
-@if(isset($proximosPanoramas) && $proximosPanoramas->isNotEmpty() && !request()->filled('lat'))
+@if(isset($proximosPanoramas) && $proximosPanoramas->isNotEmpty() && !request()->filled('lat') && !request()->filled('category') && !request()->filled('search'))
 <div id="panoramas-mobile-section" class="px-3 pt-3">
     <div class="flex items-center gap-2 mb-2">
         <span class="w-1 h-4 rounded-full bg-[#fc5648] shrink-0"></span>
@@ -22,7 +22,25 @@
         <span class="flex-1 h-px bg-gray-200"></span>
         <a href="{{ route('atractivos.panoramas') }}" class="text-[11px] text-[#fc5648] font-semibold shrink-0">Ver todos →</a>
     </div>
-    <div class="flex overflow-x-auto pb-1 scrollbar-hide">
+    <div class="overflow-x-auto pb-1 scrollbar-hide"
+         style="scrollbar-width:none"
+         x-data="{
+             stopped: false,
+             last: null,
+             init() {
+                 const el = this.$el;
+                 const step = (ts) => {
+                     if (this.last !== null && !this.stopped) {
+                         el.scrollLeft += 30 * (ts - this.last) / 1000;
+                     }
+                     this.last = ts;
+                     requestAnimationFrame(step);
+                 };
+                 requestAnimationFrame(step);
+             }
+         }"
+         @click="stopped = true">
+        <div class="flex">
         @foreach($proximosPanoramas as $p)
         <a href="{{ route('panoramas.show', $p) }}"
            class="flex-none w-36 bg-white border border-gray-100 shadow-sm overflow-hidden">
@@ -44,9 +62,75 @@
             </div>
         </a>
         @endforeach
+        </div>
     </div>
 </div>
 @endif
+
+    {{-- Entradas del blog --}}
+    @if(isset($ultimosPosts) && $ultimosPosts->isNotEmpty() && !request()->filled('category') && !request()->filled('search'))
+    <div id="blog-mobile-section" class="mt-5">
+        <div class="flex items-center gap-2 mb-3 px-3">
+            <span class="w-1 h-4 rounded-full bg-[#fc5648] shrink-0"></span>
+            <h2 class="text-sm font-bold text-gray-900 tracking-tight">Blog</h2>
+            <span class="flex-1 h-px bg-gray-200"></span>
+            <a href="{{ route('blog.index') }}" class="text-[11px] font-semibold text-[#fc5648] shrink-0">Ver todos →</a>
+        </div>
+
+        <div class="flex gap-3 overflow-x-auto pb-2 px-3" style="-ms-overflow-style:none;scrollbar-width:none;">
+            @foreach($ultimosPosts as $post)
+            <a href="{{ route('blog.show', $post->slug) }}"
+               class="relative shrink-0 rounded-2xl overflow-hidden shadow-sm"
+               style="width:72vw;height:11rem;">
+                @if($post->imagen_portada)
+                    <img src="{{ asset('storage/' . $post->imagen_portada) }}"
+                         alt="{{ $post->titulo }}"
+                         class="absolute inset-0 w-full h-full object-cover">
+                @else
+                    <div class="absolute inset-0 bg-gray-800"></div>
+                @endif
+                <div class="absolute inset-0 bg-linear-to-t from-black/85 via-black/25 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-4">
+                    <h3 class="text-sm font-bold text-white leading-snug line-clamp-3">{{ $post->titulo }}</h3>
+                    @if($post->resumen)
+                        <p class="text-[11px] text-white/70 mt-1 line-clamp-2">{{ $post->resumen }}</p>
+                    @endif
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Últimas experiencias --}}
+    @if(isset($ultimasExperiencias) && $ultimasExperiencias->isNotEmpty() && !request()->filled('category') && !request()->filled('search'))
+    <div id="experiencias-mobile-section" class="mt-5">
+        <div class="flex items-center gap-2 mb-3 px-3">
+            <span class="w-1 h-4 rounded-full bg-[#fc5648] shrink-0"></span>
+            <h2 class="text-sm font-bold text-gray-900 tracking-tight">Experiencias</h2>
+            <span class="flex-1 h-px bg-gray-200"></span>
+            <a href="{{ route('experiencias.index') }}" class="text-[11px] font-semibold text-[#fc5648] shrink-0">Ver todas →</a>
+        </div>
+        <div class="flex gap-3 px-3" >
+            @foreach($ultimasExperiencias as $exp)
+            <a href="{{ route('experiencias.show', $exp) }}"
+               class="relative flex-1 rounded-2xl overflow-hidden shadow-sm" style="height:10rem;">
+                @if($exp->imagen)
+                    <img src="{{ asset('storage/' . $exp->imagen) }}"
+                         alt="{{ $exp->titulo }}"
+                         class="absolute inset-0 w-full h-full object-cover">
+                @else
+                    <div class="absolute inset-0 bg-[#fff0ef] flex items-center justify-center text-4xl">🧭</div>
+                @endif
+                <div class="absolute inset-0 bg-linear-to-t from-black/85 via-black/20 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-3">
+                    <h3 class="text-xs font-bold text-white leading-snug line-clamp-3">{{ $exp->titulo }}</h3>
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
 
 {{-- Resultados --}}
 <div id="vista-listado-mobile" class="flex-1 px-3 pt-4 pb-6">
@@ -62,7 +146,7 @@
     </div>
 
     {{-- Grid con scroll interno --}}
-    <div class="overflow-y-auto max-h-120 rounded-2xl" style="-ms-overflow-style:none;scrollbar-width:none;">
+    <div class="overflow-y-auto max-h-250 rounded-2xl" style="-ms-overflow-style:none;scrollbar-width:none;">
         <div class="grid grid-cols-2 gap-3">
         @foreach($atractivos->take(51) as $atractivo)
             @include('puntos.partials._card_mobile')
@@ -78,29 +162,16 @@
         @endif
     </div>
 
-    {{-- Última entrada del blog --}}
-    @if(isset($ultimoPost) && $ultimoPost)
-    <a href="{{ route('blog.show', $ultimoPost->slug) }}"
-       class="mt-5 block relative rounded-2xl overflow-hidden shadow-sm min-h-40">
-        @if($ultimoPost->imagen_portada)
-            <img src="{{ asset('storage/' . $ultimoPost->imagen_portada) }}"
-                 alt="{{ $ultimoPost->titulo }}"
-                 class="absolute inset-0 w-full h-full object-cover">
-        @else
-            <div class="absolute inset-0 bg-gray-800"></div>
-        @endif
-        {{-- Gradiente oscuro --}}
-        <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent"></div>
-        {{-- Texto encima --}}
-        <div class="relative z-10 p-4 flex flex-col justify-end min-h-40">
-            <span class="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">Blog</span>
-            <h3 class="text-sm font-bold text-white leading-snug line-clamp-2">{{ $ultimoPost->titulo }}</h3>
-            @if($ultimoPost->resumen)
-            <p class="text-[11px] text-white/75 mt-1 line-clamp-2">{{ $ultimoPost->resumen }}</p>
-            @endif
-        </div>
-    </a>
-    @endif
+
+
+    {{-- Mensaje fase piloto --}}
+    <div class="mt-6 mb-2 px-4 py-4 bg-[#fff0ef] rounded-2xl text-center">
+        <p class="text-xs text-gray-700 leading-relaxed">
+            Pindoor está en <span class="font-bold text-[#fc5648]">fase piloto</span>. Estamos creciendo y mejorando cada día.
+            Si tienes sugerencias o quieres sumarte,
+            <a href="{{ route('contacto.index') }}" class="font-bold text-[#fc5648] underline underline-offset-2">contáctanos</a>.
+        </p>
+    </div>
 
     @elseif(empty($panoramas) || $panoramas->isEmpty())
         <div class="text-center py-16">

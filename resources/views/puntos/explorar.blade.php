@@ -2,7 +2,7 @@
 
 @section('title', 'Explorar atractivos — Pindoor')
 @section('description', 'Todos los lugares, restaurantes, cafeterías, museos y atracciones de Valparaíso.')
-@section('bodyClass', 'bg-gray-50 text-gray-900 font-serif')
+@section('bodyClass', 'bg-gray-50 text-gray-900')
 
 @section('content')
 <div class="max-w-2xl mx-auto px-3 py-4">
