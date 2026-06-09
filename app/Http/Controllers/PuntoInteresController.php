@@ -402,10 +402,27 @@ class PuntoInteresController extends Controller
             $indicesPorDia[$fechaStr] = $startIndexMap[$grupo->first()->id] ?? 0;
         }
 
+        // Agrupar días por mes para navegación
+        $mesesMeta  = [];
+        $mesPorDia  = [];
+        foreach ($porDia as $fechaStr => $_) {
+            $f      = Carbon::parse($fechaStr);
+            $mesKey = $f->format('Y-m');
+            $mesPorDia[$fechaStr] = $mesKey;
+            if (!isset($mesesMeta[$mesKey])) {
+                $mesesMeta[$mesKey] = [
+                    'key'     => $mesKey,
+                    'label'   => mb_strtoupper($f->translatedFormat('M')),
+                    'titulo'  => ucfirst($f->translatedFormat('F Y')),
+                    'primero' => $fechaStr,
+                ];
+            }
+        }
+
         return view('panoramas.index', compact(
             'panoramas', 'limite', 'categorias', 'catActiva',
             'porDia', 'diasMeta', 'allImages', 'startIndexMap', 'indicesPorDia',
-            'exposiciones'
+            'exposiciones', 'mesesMeta', 'mesPorDia'
         ));
     }
 
