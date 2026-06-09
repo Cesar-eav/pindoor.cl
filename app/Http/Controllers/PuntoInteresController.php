@@ -320,10 +320,14 @@ class PuntoInteresController extends Controller
             ->sortBy(fn($p) => $p->fecha->format('Y-m-d') . ($p->hora ?? '99:99'))
             ->values();
 
+        // Exposiciones: sección propia, no en el calendario diario
+        $exposiciones = $panoramas->where('categoria', 'exposicion')->values();
+
         $coleccion = match(true) {
-            $catActiva === 'gratuito' => $panoramas->where('es_gratuito', true),
-            (bool) $catActiva        => $panoramas->where('categoria', $catActiva),
-            default                  => $panoramas,
+            $catActiva === 'gratuito'   => $panoramas->where('es_gratuito', true)->where('categoria', '!=', 'exposicion'),
+            $catActiva === 'exposicion' => collect(),
+            (bool) $catActiva          => $panoramas->where('categoria', $catActiva),
+            default                    => $panoramas->where('categoria', '!=', 'exposicion'),
         };
 
         // Expandir panoramas multi-día
@@ -400,7 +404,8 @@ class PuntoInteresController extends Controller
 
         return view('panoramas.index', compact(
             'panoramas', 'limite', 'categorias', 'catActiva',
-            'porDia', 'diasMeta', 'allImages', 'startIndexMap', 'indicesPorDia'
+            'porDia', 'diasMeta', 'allImages', 'startIndexMap', 'indicesPorDia',
+            'exposiciones'
         ));
     }
 

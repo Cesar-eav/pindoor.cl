@@ -32,17 +32,21 @@
             {{-- <span class="text-[#FF5A43]  font-bold">Valparaíso</span> --}}
 
     <p class="text-slate-500 text-base md:text-lg font-medium inline-flex flex-wrap items-center justify-center gap-2 bg-slate-50 border border-slate-100 rounded-full px-6 py-2 shadow-sm">
-        {{-- <span class="text-slate-300">•</span> --}}
         <span>
-            <strong class="text-slate-950 font-extrabold text-2xl align-bottom">{{ $panoramas->count() }}</strong> 
-            panoramas en los próximos
+            <strong class="text-slate-950 font-extrabold text-2xl align-bottom">{{ $panoramas->where('categoria','!=','exposicion')->count() }}</strong>
+            eventos en los próximos
         </span>
         <span>
-            <strong class="text-[#FF5A43] font-extrabold text-2xl align-bottom ">{{ $limite }}</strong> 
+            <strong class="text-[#FF5A43] font-extrabold text-2xl align-bottom">{{ $limite }}</strong>
             días
         </span>
-            
-
+        @if($exposiciones->isNotEmpty())
+        <span class="text-slate-300">·</span>
+        <span>
+            <strong class="text-slate-950 font-extrabold text-2xl align-bottom">{{ $exposiciones->count() }}</strong>
+            en cartelera
+        </span>
+        @endif
     </p>
 </section>
     {{-- Filtro de categorías --}}
@@ -79,6 +83,78 @@
             <p class="text-sm text-gray-400">Vuelve pronto para ver las novedades.</p>
         </div>
     @else
+
+    {{-- ── En cartelera (exposiciones) ────────────────────────────────────── --}}
+    @if($exposiciones->isNotEmpty() && (!$catActiva || $catActiva === 'exposicion'))
+    <section class="mb-10">
+        <div class="flex items-center gap-3 mb-4">
+            <span class="text-lg">🎭</span>
+            <h2 class="text-base font-extrabold text-gray-900 tracking-tight">En cartelera</h2>
+            <div class="flex-1 h-px bg-gray-200"></div>
+            <span class="text-xs text-gray-400 font-semibold">{{ $exposiciones->count() }} {{ $exposiciones->count() === 1 ? 'exposición' : 'exposiciones' }}</span>
+        </div>
+        <div class="flex gap-4 overflow-x-auto pb-2" style="scrollbar-width:none">
+            @foreach($exposiciones as $exp)
+            @php
+                $hoyExp   = \Carbon\Carbon::today();
+                $iniciada = $exp->fecha->lte($hoyExp);
+                $hasta    = $exp->fecha_fin ?? $exp->fecha;
+                $diasRest = $hoyExp->diffInDays($hasta, false);
+            @endphp
+            <a href="{{ $exp->enlace ?: route('atractivos.panoramas') }}"
+               @if($exp->enlace) target="_blank" rel="noopener noreferrer" @endif
+               class="group relative block shrink-0 rounded-2xl overflow-hidden shadow-sm bg-gray-900" style="width:15rem;height:15rem;">
+
+                @if($exp->imagen)
+                    <img src="{{ asset('storage/' . $exp->imagen) }}"
+                         alt="{{ $exp->titulo }}"
+                         class="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:opacity-90 group-hover:scale-105 transition duration-500">
+                @endif
+                <div class="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent"></div>
+
+                {{-- Badge vigencia --}}
+                <div class="absolute top-3 left-3 z-10">
+                    @if($diasRest <= 7 && $diasRest >= 0)
+                        <span class="bg-[#fc5648] text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
+                            Últimos {{ $diasRest === 0 ? 'hoy' : ($diasRest === 1 ? '1 día' : $diasRest.' días') }}
+                        </span>
+                    @elseif(!$iniciada)
+                        <span class="bg-gray-800/80 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
+                            Próximamente
+                        </span>
+                    @else
+                        <span class="bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
+                            En curso
+                        </span>
+                    @endif
+                    @if($exp->es_gratuito)
+                        <span class="ml-1 bg-green-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full">Gratis</span>
+                    @endif
+                </div>
+
+                <div class="absolute bottom-0 left-0 right-0 p-4">
+                    <p class="text-[11px] font-bold text-white/60 uppercase tracking-widest mb-1">
+                        @if($iniciada)
+                            Hasta el {{ $hasta->translatedFormat('j \d\e F') }}
+                        @else
+                            Del {{ $exp->fecha->translatedFormat('j \d\e F') }} al {{ $hasta->translatedFormat('j \d\e F') }}
+                        @endif
+                    </p>
+                    <h3 class="font-extrabold text-white leading-snug line-clamp-2">{{ $exp->titulo }}</h3>
+                    @if($exp->ubicacion)
+                    <p class="text-xs text-white/60 mt-1.5 flex items-center gap-1">
+                        <svg class="w-3 h-3 shrink-0 text-[#fc5648]" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                        </svg>
+                        {{ $exp->ubicacion }}
+                    </p>
+                    @endif
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </section>
+    @endif
 
     {{-- ── Strip de días navegable ─────────────────────────────────────────── --}}
     <div class="sticky top-12 md:top-0 z-20 bg-gray-100/90 backdrop-blur-sm py-3 mb-8 -mx-4 px-4">
