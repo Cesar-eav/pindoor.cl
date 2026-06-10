@@ -240,13 +240,17 @@ function geolocateMobile(btn) {
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    // Desktop GPS
-    const btnGps = document.getElementById('btn-gps');
-    const fForm  = document.getElementById('filterForm');
-    if (btnGps && fForm) {
-        btnGps.addEventListener('click', () => geolocate(
-            document.getElementById('lat'), document.getElementById('lng'), fForm, btnGps
-        ));
+    // Desktop GPS — Livewire
+    const btnGpsLw = document.getElementById('btn-gps-lw');
+    if (btnGpsLw) {
+        btnGpsLw.addEventListener('click', () => {
+            if (!navigator.geolocation) { alert('Tu navegador no soporta geolocalización.'); return; }
+            btnGpsLw.disabled = true;
+            navigator.geolocation.getCurrentPosition(
+                pos => Livewire.dispatch('gps-update', { lat: pos.coords.latitude, lng: pos.coords.longitude }),
+                ()  => { btnGpsLw.disabled = false; }
+            );
+        });
     }
 
     // Mobile GPS (botón del drawer)
@@ -256,19 +260,6 @@ document.addEventListener('DOMContentLoaded', function () {
         btnGpsM.addEventListener('click', () => geolocate(
             document.getElementById('lat-m'), document.getElementById('lng-m'), fFormM, btnGpsM
         ));
-    }
-
-    // Desktop: auto-submit al cambiar categoría
-    const categoryFilter = document.getElementById('categoryFilter');
-    const searchFilter   = document.getElementById('searchFilter');
-    const initialCat     = categoryFilter?.value ?? '';
-    if (categoryFilter) {
-        categoryFilter.addEventListener('change', e => {
-            if (e.isTrusted && e.target.value !== initialCat) {
-                searchFilter?.parentNode.removeChild(searchFilter);
-                fForm.submit();
-            }
-        });
     }
 
     // Pills de categoría en mapa desktop

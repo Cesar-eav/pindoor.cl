@@ -22,6 +22,7 @@
     <meta property="og:site_name" content="Pindoor" />
     <meta property="og:locale" content="es_CL" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
     @yield('head')
     @if(app()->environment('production'))
     <script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","wajfuymjy1");</script>
@@ -406,5 +407,6 @@ if ('serviceWorker' in navigator) {
     });
 }
 </script>
+@livewireScripts
 </body>
 </html>

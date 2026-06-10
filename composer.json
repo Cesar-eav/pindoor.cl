@@ -13,6 +13,7 @@
         "laravel/sanctum": "^3.3",
         "laravel/socialite": "^5.27",
         "laravel/tinker": "^2.8",
+        "livewire/livewire": "^4.3",
         "nativephp/mobile": "^3.3",
         "symfony/http-client": "^7.4",
         "symfony/mailgun-mailer": "^7.1"
