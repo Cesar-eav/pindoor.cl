@@ -145,22 +145,20 @@
            class="text-[11px] font-semibold text-[#fc5648] shrink-0">Ver todos →</a>
     </div>
 
-    {{-- Grid con scroll interno --}}
-    <div class="overflow-y-auto max-h-250 rounded-2xl" style="-ms-overflow-style:none;scrollbar-width:none;">
-        <div class="grid grid-cols-2 gap-3">
+    <div class="grid grid-cols-2 gap-3">
         @foreach($atractivos->take(51) as $atractivo)
             @include('puntos.partials._card_mobile')
         @endforeach
-        </div>
-        @if($atractivos->total() > 51)
-        <div class="mt-3 text-center">
-            <a href="{{ route('puntos.explorar', request()->only(['search','category'])) }}"
-               class="inline-block text-xs font-bold text-white bg-[#fc5648] px-5 py-2 rounded-full shadow">
-                Ver todos los atractivos
-            </a>
-        </div>
-        @endif
     </div>
+
+    @if($atractivos->total() > 51)
+    <div class="mt-3 text-center">
+        <a href="{{ route('puntos.explorar', request()->only(['search','category'])) }}"
+           class="inline-block text-xs font-bold text-white bg-[#fc5648] px-5 py-2 rounded-full shadow">
+            Ver todos los atractivos
+        </a>
+    </div>
+    @endif
 
 
 
