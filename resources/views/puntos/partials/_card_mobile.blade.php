@@ -1,6 +1,6 @@
 <article class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col">
     <div class="relative">
-        <a href="{{ route('atractivos.show', $atractivo->slug ?? $atractivo->id) }}" class="block overflow-hidden">
+        <a href="{{ route('atractivos.show', $atractivo->slug ?? $atractivo->id) }}" wire:navigate class="block overflow-hidden">
             @if($atractivo->imagenPrincipal)
                 <img src="{{ asset('storage/' . $atractivo->imagenPrincipal->ruta) }}"
                      alt="{{ $atractivo->title }}"
@@ -36,7 +36,7 @@
         @endif
         <h3 class="text-xs font-bold text-gray-900 leading-tight line-clamp-2">
             <a href="{{ route('atractivos.show', $atractivo->slug ?? $atractivo->id) }}"
-               class="hover:text-[#fc5648] transition">{{ $atractivo->title }}</a>
+               wire:navigate class="hover:text-[#fc5648] transition">{{ $atractivo->title }}</a>
         </h3>
         @if($atractivo->sector)
         <p class="text-[10px] text-[#fc5648] font-semibold mt-0.5 truncate">{{ $atractivo->sector }}</p>
