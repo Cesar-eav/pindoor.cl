@@ -64,7 +64,7 @@ class AtractivosGrid extends Component
                 ->selectRaw('*, ST_Distance_Sphere(POINT(lng, lat), POINT(?, ?)) as distancia', [$this->lng, $this->lat])
                 ->orderBy('distancia');
         } else {
-            $query->latest();
+            $query->orderBy('updated_at', 'desc');
         }
 
         $atractivos = $query->with(['categoria', 'imagenPrincipal'])->paginate(48);
