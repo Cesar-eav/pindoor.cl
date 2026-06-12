@@ -1,8 +1,8 @@
 @extends('layouts.pindoor')
 
-@section('title', 'Blog — Pindoor.cl')
+@section('title', 'Blog · Historias y guías de Valparaíso | Pindoor')
 @section('canonical', route('blog.index'))
-@section('description', 'Historias, guías y rincones de Valparaíso.')
+@section('description', 'Historias, guías de viaje y rincones secretos de Valparaíso. Descubre los mejores cerros, cafés, murales y lugares únicos de la ciudad.')
 @section('bodyClass', 'bg-[#f9fafb] text-gray-900')
 
 @section('content')

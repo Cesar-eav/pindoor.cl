@@ -1,24 +1,30 @@
-@php use Illuminate\Support\Str; @endphp
+@php
+    use Illuminate\Support\Str;
+    $seoTitle = $post->titulo . ' · Blog Valparaíso | Pindoor';
+    $seoDesc  = $post->resumen
+        ? Str::limit($post->resumen, 155, '')
+        : Str::limit(strip_tags($post->contenido), 155, '');
+@endphp
 
 @extends('layouts.pindoor')
 
-@section('title', $post->titulo . ' — Blog Pindoor.cl')
+@section('title', $seoTitle)
 @section('canonical', route('blog.show', $post->slug))
-@section('description', $post->resumen ? Str::limit($post->resumen, 160) : Str::limit(strip_tags($post->contenido), 160))
+@section('description', $seoDesc)
 @section('bodyClass', 'bg-[#f9fafb] text-gray-900')
 
 @section('head')
     @php $canonicalUrl = route('blog.show', $post->slug); @endphp
     <meta property="og:type"        content="article" />
     <meta property="og:url"         content="{{ $canonicalUrl }}" />
-    <meta property="og:title"       content="{{ $post->titulo }} — Blog Pindoor.cl" />
-    <meta property="og:description" content="{{ $post->resumen ?? Str::limit(strip_tags($post->contenido), 160) }}" />
+    <meta property="og:title"       content="{{ $seoTitle }}" />
+    <meta property="og:description" content="{{ $seoDesc }}" />
     @if($post->imagen_portada_url)
     <meta property="og:image"       content="{{ $post->imagen_portada_url }}" />
     @endif
     <meta name="twitter:card"        content="summary_large_image" />
-    <meta name="twitter:title"       content="{{ $post->titulo }}" />
-    <meta name="twitter:description" content="{{ $post->resumen ?? Str::limit(strip_tags($post->contenido), 160) }}" />
+    <meta name="twitter:title"       content="{{ $seoTitle }}" />
+    <meta name="twitter:description" content="{{ $seoDesc }}" />
     @if($post->imagen_portada_url)
     <meta name="twitter:image"       content="{{ $post->imagen_portada_url }}" />
     @endif

@@ -1,12 +1,19 @@
-@php use Illuminate\Support\Str; @endphp
+@php
+    use Illuminate\Support\Str;
+    $seoLugar   = trim(($punto->sector ?: $punto->ciudad ?: 'Valparaíso'));
+    $seoCateg   = $punto->categoria?->nombre ?? '';
+    $seoTitle   = $punto->title . ', ' . $seoLugar . ' — Pindoor';
+    $seoDesc    = ($seoCateg ? $seoCateg . ' en ' . $seoLugar . ', Valparaíso. ' : '')
+                . Str::limit(strip_tags(strip_tags($punto->description ?? '')), 110);
+@endphp
 
 @extends('layouts.pindoor')
 
-@section('title', $punto->title . ' — Pindoor.cl')
+@section('title', $seoTitle)
 
 @section('canonical', route('puntos.show', $punto->slug ?? $punto->id))
 
-@section('description', Str::limit(strip_tags($punto->description), 160))
+@section('description', $seoDesc)
 
 @section('bodyClass', 'bg-[#f9fafb] text-gray-900 leading-relaxed')
 
@@ -18,15 +25,15 @@
     @endphp
     <meta property="og:type" content="place" />
     <meta property="og:url" content="{{ $canonicalUrl }}" />
-    <meta property="og:title" content="{{ $punto->title }} — Pindoor.cl" />
-    <meta property="og:description" content="{{ Str::limit(strip_tags($punto->description), 160) }}" />
+    <meta property="og:title" content="{{ $seoTitle }}" />
+    <meta property="og:description" content="{{ $seoDesc }}" />
     @if($imagenUrl)
     <meta property="og:image" content="{{ $imagenUrl }}" />
     <meta property="og:image:alt" content="{{ $punto->title }}" />
     @endif
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="{{ $punto->title }} — Pindoor.cl" />
-    <meta name="twitter:description" content="{{ Str::limit(strip_tags($punto->description), 160) }}" />
+    <meta name="twitter:title" content="{{ $seoTitle }}" />
+    <meta name="twitter:description" content="{{ $seoDesc }}" />
     @if($imagenUrl)<meta name="twitter:image" content="{{ $imagenUrl }}" />@endif
     <script type="application/ld+json">
     {

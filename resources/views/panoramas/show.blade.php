@@ -1,7 +1,20 @@
+@php
+    $categLabel = \App\Models\Panorama::CATEGORIAS[$panorama->categoria]['label'] ?? null;
+    $fechaStr   = \Carbon\Carbon::parse($panorama->fecha)->locale('es')->isoFormat('D [de] MMMM [de] YYYY');
+    $seoTitle   = $panorama->titulo
+                . ($panorama->ubicacion ? ', ' . $panorama->ubicacion : ', Valparaíso')
+                . ' — Pindoor';
+    $seoDesc    = ($categLabel ? $categLabel . ' en Valparaíso. ' : '')
+                . $panorama->titulo
+                . ($panorama->ubicacion ? ' en ' . $panorama->ubicacion : '')
+                . ', el ' . $fechaStr
+                . ($panorama->es_gratuito ? '. Entrada gratuita.' : '.');
+@endphp
+
 @extends('layouts.pindoor')
 
-@section('title', $panorama->titulo . ' — Pindoor')
-@section('description', $panorama->ubicacion ? $panorama->titulo . ' en ' . $panorama->ubicacion . '. ' . \Carbon\Carbon::parse($panorama->fecha)->locale('es')->isoFormat('D [de] MMMM [de] YYYY') : $panorama->titulo)
+@section('title', $seoTitle)
+@section('description', $seoDesc)
 @section('canonical', route('panoramas.show', $panorama))
 @section('bodyClass', 'bg-gray-100 text-gray-900')
 

@@ -1,4 +1,18 @@
 {
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /var/www/html/pindoor/scripts/check-seo.sh",
+            "timeout": 10,
+            "statusMessage": "Verificando SEO..."
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(php -r \"echo extension_loaded\\('gd'\\) ? 'GD ok' : 'no GD';\")",
