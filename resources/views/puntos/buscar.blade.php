@@ -1,6 +1,7 @@
 @extends('layouts.pindoor')
 
 @section('title', 'Buscar — Pindoor')
+@section('canonical', route('puntos.buscar'))
 @section('bodyClass', 'bg-gray-50 text-gray-900')
 
 @section('content')

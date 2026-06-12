@@ -1,6 +1,7 @@
 @extends('layouts.pindoor')
 
 @section('title', 'Explorar atractivos — Pindoor')
+@section('canonical', route('puntos.explorar'))
 @section('description', 'Todos los lugares, restaurantes, cafeterías, museos y atracciones de Valparaíso.')
 @section('bodyClass', 'bg-gray-50 text-gray-900')
 

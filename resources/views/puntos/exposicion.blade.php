@@ -1,6 +1,7 @@
 @extends('layouts.pindoor')
 
 @section('title', ($item->datos['titulo'] ?? 'Exposición') . ' · ' . $punto->title . ' · Pindoor')
+@section('canonical', route('puntos.exposicion', [$punto->slug ?? $punto->id, $item->id]))
 @section('description', Str::limit(strip_tags($item->datos['descripcion'] ?? ''), 160))
 @section('bodyClass', 'bg-gray-50 text-gray-900')
 
@@ -129,13 +130,13 @@
             <a href="{{ route('puntos.exposicion', [$punto->slug, $otra->id]) }}"
                class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow transition flex flex-col">
                 @if($otra->imagen)
-                <div class="aspect-[3/4] overflow-hidden bg-gray-100">
+                <div class="aspect-3/4 overflow-hidden bg-gray-100">
                     <img src="{{ asset('storage/' . $otra->imagen) }}"
                          alt="{{ $otra->datos['titulo'] ?? '' }}"
                          class="w-full h-full object-cover object-top">
                 </div>
                 @else
-                <div class="aspect-[3/4] bg-gray-50 flex items-center justify-center text-3xl">🖼️</div>
+                <div class="aspect-3/4 bg-gray-50 flex items-center justify-center text-3xl">🖼️</div>
                 @endif
                 <div class="p-2.5">
                     @php $otraTipo = $otra->datos['tipo'] ?? 'permanente'; @endphp

@@ -2,6 +2,9 @@
 
 @section('title', 'Panoramas — Pindoor.cl')
 @section('canonical', route('atractivos.panoramas'))
+@if(request()->anyFilled(['categoria']))
+@section('robots', 'noindex, follow')
+@endif
 @section('bodyClass', 'bg-gray-100 text-gray-900')
 
 @section('content')

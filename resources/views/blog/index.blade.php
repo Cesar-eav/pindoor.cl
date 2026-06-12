@@ -1,6 +1,7 @@
 @extends('layouts.pindoor')
 
 @section('title', 'Blog — Pindoor.cl')
+@section('canonical', route('blog.index'))
 @section('description', 'Historias, guías y rincones de Valparaíso.')
 @section('bodyClass', 'bg-[#f9fafb] text-gray-900')
 
@@ -29,7 +30,7 @@
                   hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
 
             {{-- Portada --}}
-            <div class="aspect-[16/10] overflow-hidden bg-gray-100">
+            <div class="aspect-16/10 overflow-hidden bg-gray-100">
                 @if($post->imagen_portada_url)
                     <img src="{{ $post->imagen_portada_url }}" alt="{{ $post->titulo }}"
                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">

@@ -160,7 +160,7 @@ class PuntoInteresController extends Controller
 
     public function filtrarPorCategoria(string $categoria)
     {
-        return redirect()->route('puntos.index', ['category' => $categoria]);
+        return redirect()->route('puntos.index', ['category' => $categoria], 301);
     }
 
     public function explorar(Request $request)
