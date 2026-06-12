@@ -238,7 +238,35 @@ function geolocateMobile(btn) {
     }
 }
 
+function activarVistaMapa() {
+    const mobile = window.innerWidth < 768;
+    document.getElementById('vista-listado-mobile')?.classList.add('hidden');
+    document.getElementById('panoramas-mobile-section')?.classList.add('hidden');
+    document.getElementById('blog-mobile-section')?.classList.add('hidden');
+    document.getElementById('experiencias-mobile-section')?.classList.add('hidden');
+    document.getElementById('filtro-activo-mobile')?.classList.add('hidden');
+    const elMapaM = document.getElementById('vista-mapa-mobile');
+    if (elMapaM) { elMapaM.classList.remove('hidden'); elMapaM.classList.add('flex'); }
+    if (!mobile) {
+        document.getElementById('vista-listado')?.classList.add('hidden');
+        document.getElementById('vista-mapa')?.classList.remove('hidden');
+    }
+    history.replaceState(null, '', location.pathname);
+    const containerId = mobile ? 'mapa-mobile' : 'mapa-principal';
+    if (!mapaIniciado) { mapaIniciado = true; iniciarMapa(containerId); }
+}
+
+if (location.hash === '#mapa') {
+    if (typeof L !== 'undefined') {
+        activarVistaMapa();
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+
+    if (location.hash === '#mapa') {
+        activarVistaMapa();
+    }
 
     // Desktop GPS — Livewire
     const btnGpsLw = document.getElementById('btn-gps-lw');

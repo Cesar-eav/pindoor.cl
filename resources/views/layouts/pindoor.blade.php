@@ -10,6 +10,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Pindoor" />
+    <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
+    <link rel="dns-prefetch" href="https://basemaps.cartocdn.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Lora:wght@400;500&display=swap" rel="stylesheet">
@@ -129,7 +131,7 @@
         </button>
 
         {{-- Mapa --}}
-        <button onclick="if(typeof setView==='function'){setView('mapa')}else{window.location='{{ route('puntos.index') }}?vista=mapa'}"
+        <button onclick="if(typeof setView==='function'){setView('mapa')}else if(typeof Livewire!=='undefined'){Livewire.navigate('{{ route('puntos.index') }}#mapa')}else{window.location='{{ route('puntos.index') }}#mapa'}"
                 class="flex flex-col items-center gap-1 px-2 text-white">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -191,7 +193,7 @@
                     </svg>
                     <span class="text-xs font-bold text-[#fc5648]">Listado</span>
                 </a>
-                <a href="{{ route('puntos.index', ['vista' => 'mapa']) }}"
+                <a href="{{ route('puntos.index') }}#mapa"
                    onclick="if(typeof setView==='function'){event.preventDefault();setView('mapa');} closeDrawer();"
                    class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 border-gray-200 bg-gray-50">
                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
