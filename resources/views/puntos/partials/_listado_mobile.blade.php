@@ -133,6 +133,7 @@
     @endif
 
 {{-- Resultados --}}
+
 <div id="vista-listado-mobile" class="flex-1 px-3 pt-4 pb-6">
 
     @if($atractivos->count())
