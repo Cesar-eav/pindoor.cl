@@ -308,16 +308,11 @@
                     @endphp
 
                     <div class="mt-3 flex items-center gap-3 flex-wrap">
-                        @if($panorama->enlace)
-                        <a href="{{ $panorama->enlace }}" target="_blank" rel="noopener noreferrer"
+                        <a href="{{ $panorama->slug ? '/panoramas/' . $panorama->slug : '/lugar/' . $panorama->punto_slug . '#agenda' }}"
                            @click.stop
-                           class="inline-flex items-center gap-1.5 text-xs font-bold text-[#fc5648] hover:text-[#d94439] transition">
-                            Más información
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                            </svg>
+                           class="inline-flex items-center gap-1 text-xs font-bold text-[#fc5648] hover:text-[#d94439] transition">
+                            Ver más &rsaquo;
                         </a>
-                        @endif
                         <a href="{{ $gcUrl }}" target="_blank" rel="noopener noreferrer"
                            @click.stop
                            class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-blue-600 transition">

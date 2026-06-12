@@ -313,6 +313,7 @@ class PuntoInteresController extends Controller
                     'activo'      => true,
                 ]);
                 $fake->setAttribute('id', 'ev_' . $item->id);
+                $fake->setAttribute('punto_slug', $item->punto?->slug);
                 $fake->setRelation('imagenes', collect());
                 return $fake;
             });

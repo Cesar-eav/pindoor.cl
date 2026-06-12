@@ -87,7 +87,7 @@
     <div class="w-full mx-auto">
         {{-- Componente principal Alpine --}}
         <main
-            x-data="{ vista: 'contenido' }"
+            x-data="{ vista: ['agenda','catalogo','carta','menu','oferta','exposiciones'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'contenido' }"
             class="max-w-7xl mx-auto px-4 py-8 md:py-12"
         >
             {{-- Breadcrumbs --}}
