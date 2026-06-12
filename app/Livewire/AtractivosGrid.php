@@ -42,7 +42,7 @@ class AtractivosGrid extends Component
     {
         $query = PuntoInteres::query()
             ->where('activo', 1)
-            ->whereNotIn('id', [81, 80, 64, 87, 115])
+            ->whereNotIn('id', [81, 80, 64, 87, 115,128])
             ->where('eliminado', false);
 
         if ($this->category) {
