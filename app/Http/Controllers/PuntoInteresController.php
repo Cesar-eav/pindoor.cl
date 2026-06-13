@@ -89,6 +89,7 @@ class PuntoInteresController extends Controller
         if ($request->filled('search')) {
             $s = $request->search;
             $panoramas = Panorama::where('activo', true)
+                ->whereNotNull('dias_semana')
                 ->where('fecha', '>=', now()->toDateString())
                 ->where(fn($q) => $q->where('titulo', 'like', "%{$s}%")
                                     ->orWhere('ubicacion', 'like', "%{$s}%"))

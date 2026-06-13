@@ -15,7 +15,7 @@ class ContactoController extends Controller
         $atractivos = PuntoInteres::query()
             ->where('activo', 1)
             //->whereIn('id', [64, 80, 81, 87,74])
-            ->whereIn('id', [64, 80, 81, 87,115])
+            ->whereIn('id', [64, 80, 81, 87,128])
             ->where('eliminado', false)
             ->get();
 

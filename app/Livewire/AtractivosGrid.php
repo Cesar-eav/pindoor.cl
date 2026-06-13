@@ -90,6 +90,7 @@ class AtractivosGrid extends Component
 
         $hoy = Carbon::today();
         $proximosPanoramas = $hayFiltros ? collect() : Panorama::where('activo', true)
+            ->whereNull('dias_semana')
             ->where(fn($q) => $q->whereNull('fecha_fin')->where('fecha', '>=', $hoy)
                 ->orWhere('fecha_fin', '>=', $hoy))
             ->get()
