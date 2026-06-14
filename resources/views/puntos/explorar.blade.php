@@ -86,3 +86,24 @@
 
 </div>
 @endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const container = document.querySelector('.overflow-x-auto');
+    if (!container) return;
+
+    const saved = sessionStorage.getItem('explorar_pills_scroll');
+    if (saved !== null) {
+        container.scrollLeft = parseInt(saved);
+        sessionStorage.removeItem('explorar_pills_scroll');
+    }
+
+    container.querySelectorAll('a').forEach(pill => {
+        pill.addEventListener('click', () => {
+            sessionStorage.setItem('explorar_pills_scroll', container.scrollLeft);
+        });
+    });
+});
+</script>
+@endsection

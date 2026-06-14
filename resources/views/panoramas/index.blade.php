@@ -405,6 +405,21 @@
 
 <script>
 (function () {
+    // Preservar scroll de pills de categoría
+    const catsScroll = document.getElementById('cats-scroll');
+    if (catsScroll) {
+        const saved = sessionStorage.getItem('panoramas_cats_scroll');
+        if (saved !== null) {
+            catsScroll.scrollLeft = parseInt(saved);
+            sessionStorage.removeItem('panoramas_cats_scroll');
+        }
+        catsScroll.querySelectorAll('a').forEach(pill => {
+            pill.addEventListener('click', () => {
+                sessionStorage.setItem('panoramas_cats_scroll', catsScroll.scrollLeft);
+            });
+        });
+    }
+
     const diaPills   = document.querySelectorAll('.dia-pill');
     const mesPills   = document.querySelectorAll('.mes-pill');
     const diaStrip   = document.getElementById('dias-strip');
