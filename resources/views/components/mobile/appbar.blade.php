@@ -6,7 +6,7 @@
     <nav class="flex items-center gap-1">
         <a href="{{ route('puntos.explorar') }}"
            class="px-3 py-1.5 text-xs font-bold transition-colors
-                  {{ request()->routeIs('puntos.index') || request()->routeIs('puntos.buscar') ? 'bg-[#fc5648] text-white' : 'text-gray-500 hover:text-gray-800' }}">
+                  {{ request()->routeIs('puntos.explorar') || request()->routeIs('puntos.buscar') ? 'bg-[#fc5648] text-white' : 'text-gray-500 hover:text-gray-800' }}">
             Atractivos
         </a>
         <a href="{{ route('atractivos.panoramas') }}"
