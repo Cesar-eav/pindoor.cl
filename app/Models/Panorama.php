@@ -5,9 +5,14 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Translatable\HasTranslations;
 
 class Panorama extends Model
 {
+    use HasTranslations;
+
+    public array $translatable = ['titulo', 'ubicacion'];
+
     const CATEGORIAS = [
     'arte'        => ['label' => 'Arte',        'emoji' => '🎨'],    
     'musica'      => ['label' => 'Música',      'emoji' => '🎵'],

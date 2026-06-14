@@ -4,9 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Translatable\HasTranslations;
 
 class Experiencia extends Model
 {
+    use HasTranslations;
+
+    public array $translatable = ['titulo', 'descripcion'];
+
     const CATEGORIAS = [
         'danza'       => ['label' => 'Danza',       'emoji' => '💃'],
         'musica'      => ['label' => 'Música',       'emoji' => '🎵'],

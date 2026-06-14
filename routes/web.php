@@ -19,6 +19,14 @@ use App\Http\Controllers\Admin\ExperienciaController;
 use Illuminate\Support\Facades\Route;
 
 
+/* --- IDIOMA --- */
+Route::get('/lang/{locale}', function (string $locale) {
+    if (in_array($locale, ['es', 'en'])) {
+        session(['locale' => $locale]);
+    }
+    return redirect()->back();
+})->name('lang.switch');
+
 /* --- RUTAS PÚBLICAS (TURISTAS) --- */
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/offline', fn() => view('offline'))->name('offline');

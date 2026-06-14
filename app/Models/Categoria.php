@@ -3,9 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Translatable\HasTranslations;
 
 class Categoria extends Model
 {
+    use HasTranslations;
+
+    public array $translatable = ['nombre', 'descripcion'];
+
     protected $fillable = [
         'nombre',
         'slug',
