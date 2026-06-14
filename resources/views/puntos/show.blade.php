@@ -116,16 +116,16 @@
                 <div class="flex items-start gap-3">
                     <span class="text-2xl leading-none mt-0.5">⚠️</span>
                     <div class="space-y-2 text-sm text-amber-900">
-                        <p class="font-bold text-base">Antes de venir, ten esto en cuenta</p>
+                        <p class="font-bold text-base">{{ __('ui.lugar.ascensor_aviso_titulo') }}</p>
                         <p>
                             Aunque este ascensor figura como operativo, <strong>no hay un 100% de garantía
                             de que esté funcionando el día que vayas</strong>. Lamentablemente, no ha habido
                             una política pública a la altura para garantizar su funcionamiento continuo.
                         </p>
                         <div class="bg-amber-100 rounded-xl px-4 py-3 space-y-1">
-                            <p class="font-bold text-amber-800">🕐 Horario habitual</p>
-                            <p>Lunes a viernes: <strong>07:00 – 21:30 hrs</strong></p>
-                            <p>Sábado, domingo y festivos: <strong>08:00 – 21:30 hrs</strong></p>
+                            <p class="font-bold text-amber-800">{{ __('ui.lugar.ascensor_aviso_horario') }}</p>
+                            <p>{{ __('ui.lugar.ascensor_aviso_horario_semana') }}</p>
+                            <p>{{ __('ui.lugar.ascensor_aviso_horario_finde') }}</p>
                         </div>
                         <p class="text-amber-700 text-xs">
                             🔧 Las mantenciones se realizan <strong>una vez al mes en día de semana</strong>,
@@ -139,7 +139,7 @@
                 <div class="flex items-start gap-3">
                     <span class="text-2xl leading-none mt-0.5">🚫</span>
                     <div class="space-y-1 text-sm text-red-900">
-                        <p class="font-bold text-base">Ascensor fuera de servicio</p>
+                        <p class="font-bold text-base">{{ __('ui.lugar.ascensor_fuera_titulo') }}</p>
                         <p>
                             Este ascensor se encuentra actualmente <strong>fuera de servicio</strong>.
                             Lamentablemente, muchos ascensores de Valparaíso llevan años sin funcionar
@@ -174,14 +174,14 @@
                     @click="vista = 'contenido'"
                     :class="vista === 'contenido' ? 'bg-gray-900 text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
-                    Descripción
+                    {{ __('ui.lugar.tab_descripcion') }}
                 </button>
                 @if($tieneProductos)
                 <button
                     @click="vista = 'catalogo'"
                     :class="vista === 'catalogo' ? 'bg-[#fc5648] text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
-                    🛍️ Catálogo
+                    {{ __('ui.lugar.tab_catalogo') }}
                 </button>
                 @endif
                 @if($punto->tieneOfertaActiva())
@@ -189,7 +189,7 @@
                     @click="vista = 'oferta'"
                     :class="vista === 'oferta' ? 'bg-green-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
-                    Oferta del día
+                    {{ __('ui.lugar.tab_oferta') }}
                 </button>
                 @endif
                 @if($punto->tieneMenu())
@@ -197,7 +197,7 @@
                     @click="vista = 'menu'"
                     :class="vista === 'menu' ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
-                    Menú del día
+                    {{ __('ui.lugar.tab_menu') }}
                 </button>
                 @endif
                 @if($punto->tieneCarta())
@@ -205,7 +205,7 @@
                     @click="vista = 'carta'"
                     :class="vista === 'carta' ? 'bg-pindoor-accent text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
-                    Ver carta
+                    {{ __('ui.lugar.tab_carta') }}
                 </button>
                 @endif
                 @if($punto->tieneAvisos())
@@ -213,7 +213,7 @@
                     @click="vista = 'avisos'"
                     :class="vista === 'avisos' ? 'bg-gray-700 text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
-                    📢 Avisos
+                    {{ __('ui.lugar.tab_avisos') }}
                 </button>
                 @endif
                 @if($punto->tienePromociones())
@@ -221,7 +221,7 @@
                     @click="vista = 'promociones'"
                     :class="vista === 'promociones' ? 'bg-purple-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
-                    🎁 Promociones
+                    {{ __('ui.lugar.tab_promociones') }}
                 </button>
                 @endif
                 @if($punto->moduloActivo('habitaciones') && ($alojamiento['habitaciones'] ?? null))
@@ -249,21 +249,21 @@
                 <button @click="vista = 'entradas'"
                     :class="vista === 'entradas' ? 'bg-amber-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
-                    🎟️ Entradas
+                    {{ __('ui.lugar.tab_entradas') }}
                 </button>
                 @endif
                 @if($punto->moduloActivo('exposiciones') && $punto->items('exposiciones')->count())
                 <button @click="vista = 'exposiciones'"
                     :class="vista === 'exposiciones' ? 'bg-purple-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
-                    🖼️ Exposiciones
+                    {{ __('ui.lugar.tab_exposiciones') }}
                 </button>
                 @endif
                 @if($punto->moduloActivo('agenda') && $punto->eventosProximos()->count())
                 <button @click="vista = 'agenda'"
                     :class="vista === 'agenda' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200'"
                     class="flex-none py-2.5 px-4 rounded-xl text-sm font-bold transition">
-                    📅 Agenda
+                    {{ __('ui.lugar.tab_agenda') }}
                 </button>
                 @endif
             </div>
@@ -281,7 +281,7 @@
                             ? 'bg-gray-900 text-white shadow-lg'
                             : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-400'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>📖</span> Descripción
+                        <span>📖</span> {{ __('ui.lugar.tab_descripcion') }}
                     </button>
 
                     @if($tieneProductos)
@@ -291,7 +291,7 @@
                             ? 'bg-[#fc5648] text-white shadow-lg'
                             : 'bg-white text-gray-600 border border-gray-200 hover:border-[#fc5648]'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>🛍️</span> Catálogo
+                        <span>🛍️</span> {{ __('ui.lugar.tab_catalogo') }}
                     </button>
                     @endif
 
@@ -302,7 +302,7 @@
                             ? 'bg-green-600 text-white shadow-lg'
                             : 'bg-white text-gray-600 border border-gray-200 hover:border-green-500'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>🏷️</span> Oferta del día
+                        <span>🏷️</span> {{ __('ui.lugar.tab_oferta') }}
                     </button>
                     @endif
 
@@ -313,7 +313,7 @@
                             ? 'bg-orange-500 text-white shadow-lg'
                             : 'bg-white text-gray-600 border border-gray-200 hover:border-orange-400'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>🥘</span> Menú del día
+                        <span>🥘</span> {{ __('ui.lugar.tab_menu') }}
                     </button>
                     @endif
 
@@ -324,7 +324,7 @@
                             ? 'bg-pindoor-accent text-white shadow-lg'
                             : 'bg-white text-gray-600 border border-gray-200 hover:border-pindoor-accent'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>🍽️</span> Ver carta
+                        <span>🍽️</span> {{ __('ui.lugar.tab_carta') }}
                     </button>
                     @endif
 
@@ -335,7 +335,7 @@
                             ? 'bg-gray-700 text-white shadow-lg'
                             : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-500'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>📢</span> Avisos
+                        <span>📢</span> {{ __('ui.lugar.tab_avisos') }}
                     </button>
                     @endif
 
@@ -346,7 +346,7 @@
                             ? 'bg-purple-600 text-white shadow-lg'
                             : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-400'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>🎁</span> Promociones
+                        <span>🎁</span> {{ __('ui.lugar.tab_promociones') }}
                     </button>
                     @endif
 
@@ -356,7 +356,7 @@
                     <button @click="vista = 'habitaciones'"
                         :class="vista === 'habitaciones' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-indigo-400'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>🛏️</span> Habitaciones
+                        <span>🛏️</span> {{ __('ui.lugar.tab_habitaciones') }}
                     </button>
                     @endif
 
@@ -364,7 +364,7 @@
                     <button @click="vista = 'servicios'"
                         :class="vista === 'servicios' ? 'bg-teal-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-teal-400'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>✨</span> Servicios
+                        <span>✨</span> {{ __('ui.lugar.tab_servicios') }}
                     </button>
                     @endif
 
@@ -372,7 +372,7 @@
                     <button @click="vista = 'politicas'"
                         :class="vista === 'politicas' ? 'bg-gray-700 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-500'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>📋</span> Políticas
+                        <span>📋</span> {{ __('ui.lugar.tab_politicas') }}
                     </button>
                     @endif
 
@@ -380,7 +380,7 @@
                     <button @click="vista = 'entradas'"
                         :class="vista === 'entradas' ? 'bg-amber-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-amber-400'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>🎟️</span> Entradas
+                        <span>🎟️</span> {{ __('ui.lugar.tab_entradas') }}
                     </button>
                     @endif
 
@@ -388,7 +388,7 @@
                     <button @click="vista = 'exposiciones'"
                         :class="vista === 'exposiciones' ? 'bg-purple-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-400'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>🖼️</span> Exposiciones
+                        <span>🖼️</span> {{ __('ui.lugar.tab_exposiciones') }}
                     </button>
                     @endif
 
@@ -396,7 +396,7 @@
                     <button @click="vista = 'agenda'"
                         :class="vista === 'agenda' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-400'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>📅</span> Agenda
+                        <span>📅</span> {{ __('ui.lugar.tab_agenda') }}
                     </button>
                     @endif
 
@@ -404,7 +404,7 @@
                     <a href="https://www.google.com/maps?q={{ $punto->lat }},{{ $punto->lng }}"
                        target="_blank" rel="noopener"
                        class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-gray-400">
-                        <span>📍</span> Ir al mapa
+                        <span>📍</span> {{ __('ui.lugar.ir_al_mapa') }}
                     </a>
                     @endif
                 </aside>
@@ -548,7 +548,7 @@
                                 </div>
                             @else
                                 <div class="aspect-video bg-gray-100 rounded-3xl flex items-center justify-center text-6xl shadow-inner italic text-gray-300">
-                                    📍 No hay fotos aún
+                                    {{ __('ui.lugar.sin_fotos') }}
                                 </div>
                             @endif
                         </div>
@@ -648,7 +648,7 @@
                             @endif
                             <div>
                                 <p class="text-xs font-black uppercase tracking-widest text-green-600 mb-0.5">Válida hoy</p>
-                                <span class="text-2xl font-extrabold text-gray-900">Oferta del día</span>
+                                <span class="text-2xl font-extrabold text-gray-900">{{ __('ui.lugar.oferta_titulo') }}</span>
                                 @if($punto->oferta_expira_at)
                                     <p class="text-xs text-gray-400 mt-0.5">
                                         Válida hasta {{ $punto->oferta_expira_at->translatedFormat('d \d\e F') }}
@@ -681,7 +681,7 @@
                             @endif
                             <div>
                                 <p class="text-xs font-black uppercase tracking-widest text-orange-500 mb-0.5">Hoy</p>
-                                <span class="text-2xl font-extrabold text-gray-900">Menú del día</span>
+                                <span class="text-2xl font-extrabold text-gray-900">{{ __('ui.lugar.menu_titulo') }}</span>
                                 @if($punto->registroDato('menu_del_dia')?->actualizado_en)
                                     <p class="text-xs text-gray-400 mt-0.5">
                                         Actualizado {{ $punto->registroDato('menu_del_dia')->actualizado_en->diffForHumans() }}
@@ -736,7 +736,7 @@
                                      class="w-12 h-12 rounded-xl object-cover border border-gray-100 shrink-0">
                             @endif
                             <div>
-                                <p class="text-xs font-black uppercase tracking-widest text-purple-600 mb-0.5">Oferta especial</p>
+                                <p class="text-xs font-black uppercase tracking-widest text-purple-600 mb-0.5">{{ __('ui.lugar.oferta_especial') }}</p>
                                 <span class="text-2xl font-extrabold text-gray-900">Promociones</span>
                             </div>
                         </div>
@@ -766,7 +766,7 @@
                                          alt="Logo {{ $punto->title }}"
                                          class="w-12 h-12 rounded-xl object-cover border border-gray-100 inline-block mr-3">
                                 @endif
-                                <span class="text-2xl font-extrabold text-gray-900">Carta</span>
+                                <span class="text-2xl font-extrabold text-gray-900">{{ __('ui.lugar.carta_titulo') }}</span>
                                 @if($registroCarta?->actualizado_en)
                                     <p class="text-xs text-gray-400 mt-0.5">
                                         Actualizada {{ $registroCarta->actualizado_en->diffForHumans() }}
@@ -806,7 +806,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                   d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                         </svg>
-                                        Ver Carta en PDF
+                                        {{ __('ui.lugar.carta_ver_pdf') }}
                                     </a>
                                 </div>
                             @endif
@@ -829,7 +829,7 @@
                                 @endif
                                 <div>
                                     <p class="text-xs font-black uppercase tracking-widest text-indigo-600 mb-0.5">Alojamiento</p>
-                                    <span class="text-2xl font-extrabold text-gray-900">Habitaciones</span>
+                                    <span class="text-2xl font-extrabold text-gray-900">{{ __('ui.lugar.habitaciones_titulo') }}</span>
                                 </div>
                             </div>
                             @if($alojamiento['precio_desde'] ?? null)
@@ -866,7 +866,7 @@
                             @endif
                             <div>
                                 <p class="text-xs font-black uppercase tracking-widest text-teal-600 mb-0.5">Incluido</p>
-                                <span class="text-2xl font-extrabold text-gray-900">Servicios</span>
+                                <span class="text-2xl font-extrabold text-gray-900">{{ __('ui.lugar.servicios_titulo') }}</span>
                             </div>
                         </div>
 
@@ -906,7 +906,7 @@
                                      alt="Logo" class="w-12 h-12 rounded-xl object-cover border border-gray-100 shrink-0">
                             @endif
                             <div>
-                                <p class="text-xs font-black uppercase tracking-widest text-gray-500 mb-0.5">Información</p>
+                                <p class="text-xs font-black uppercase tracking-widest text-gray-500 mb-0.5">{{ __('ui.lugar.informacion') }}</p>
                                 <span class="text-2xl font-extrabold text-gray-900">Políticas</span>
                             </div>
                         </div>
@@ -952,7 +952,7 @@
                             @endif
                             <div>
                                 <p class="text-xs font-black uppercase tracking-widest text-amber-600 mb-0.5">Acceso</p>
-                                <span class="text-2xl font-extrabold text-gray-900">Entradas y tarifas</span>
+                                <span class="text-2xl font-extrabold text-gray-900">{{ __('ui.lugar.entradas_titulo') }}</span>
                             </div>
                         </div>
 
@@ -1012,7 +1012,7 @@
                             @endif
                             <div>
                                 <p class="text-xs font-black uppercase tracking-widest text-purple-600 mb-0.5">Colecciones</p>
-                                <span class="text-2xl font-extrabold text-gray-900">Exposiciones</span>
+                                <span class="text-2xl font-extrabold text-gray-900">{{ __('ui.lugar.exposiciones_titulo') }}</span>
                             </div>
                         </div>
 
@@ -1177,7 +1177,7 @@
                                         inline-flex  --}}
                                         <a href="{{ $evento->datos['url_entradas'] }}" target="_blank" rel="noopener"
                                            class="hidden mt-2 items-center gap-1 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition">
-                                            Comprar entradas →
+                                            {{ __('ui.lugar.comprar_entradas') }}
                                         </a>
                                         @endif
                                     </div>
@@ -1252,13 +1252,13 @@
                                         <template x-if="evento.url_entradas" class="hidden">
                                             {{-- <a :href="evento.url_entradas" target="_blank" rel="noopener"
                                                class="flex-1 text-center text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-xl transition">
-                                                Comprar entradas →
+                                                {{ __('ui.lugar.comprar_entradas') }}
                                             </a> --}}
                                         </template>
                                         <button type="button"
                                                 @click="modalOpen = false"
                                                 class="flex-1 text-sm font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 px-4 py-2.5 rounded-xl transition">
-                                            Cerrar
+                                            {{ __('ui.lugar.cerrar') }}
                                         </button>
                                     </div>
                                 </div>
@@ -1320,7 +1320,7 @@
                         {{-- Horario --}}
                         @if($punto->horario)
                             <div class="mt-6 pt-6 border-t border-gray-100">
-                                <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Horario</h3>
+                                <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">{{ __('ui.lugar.horario') }}</h3>
                                 <p class="text-gray-700 text-sm font-medium">{{ $punto->horario }}</p>
                             </div>
                         @endif
@@ -1444,7 +1444,7 @@
             <button @click="abierto = false; $dispatch('set-vista', 'oferta')"
                     class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-green-50 transition border-b border-gray-100">
                 <span class="w-2 h-2 rounded-full bg-green-500 shrink-0"></span>
-                🏷️ Oferta del día
+                🏷️ {{ __('ui.lugar.tab_oferta') }}
             </button>
             @endif
 
@@ -1452,7 +1452,7 @@
             <button @click="abierto = false; $dispatch('set-vista', 'menu')"
                     class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-orange-50 transition border-b border-gray-100">
                 <span class="w-2 h-2 rounded-full bg-orange-500 shrink-0"></span>
-                🥘 Menú del día
+                🥘 {{ __('ui.lugar.tab_menu') }}
             </button>
             @endif
 
@@ -1460,7 +1460,7 @@
             <button @click="abierto = false; $dispatch('set-vista', 'carta')"
                     class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-red-50 transition border-b border-gray-100">
                 <span class="w-2 h-2 rounded-full bg-[#fc5648] shrink-0"></span>
-                🍽️ Ver carta
+                🍽️ {{ __('ui.lugar.tab_carta') }}
             </button>
             @endif
 
@@ -1468,7 +1468,7 @@
             <button @click="abierto = false; $dispatch('set-vista', 'avisos')"
                     class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-gray-50 transition border-b border-gray-100">
                 <span class="w-2 h-2 rounded-full bg-gray-700 shrink-0"></span>
-                📢 Avisos
+                {{ __('ui.lugar.tab_avisos') }}
             </button>
             @endif
 
@@ -1476,7 +1476,7 @@
             <button @click="abierto = false; $dispatch('set-vista', 'promociones')"
                     class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-purple-50 transition border-b border-gray-100">
                 <span class="w-2 h-2 rounded-full bg-purple-600 shrink-0"></span>
-                🎁 Promociones
+                {{ __('ui.lugar.tab_promociones') }}
             </button>
             @endif
 
@@ -1484,7 +1484,7 @@
             <button @click="abierto = false; $dispatch('set-vista', 'agenda')"
                     class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-blue-50 transition border-b border-gray-100">
                 <span class="w-2 h-2 rounded-full bg-blue-600 shrink-0"></span>
-                📅 Agenda
+                {{ __('ui.lugar.tab_agenda') }}
             </button>
             @endif
 
@@ -1493,7 +1493,7 @@
             <button @click="abierto = false; $dispatch('set-vista', 'exposiciones')"
                     class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left hover:bg-blue-50 transition border-b border-gray-100">
                 <span class="w-2 h-2 rounded-full bg-blue-600 shrink-0"></span>
-                Exposiciones
+                {{ __('ui.lugar.tab_exposiciones') }}
             </button>
             @endif
 
