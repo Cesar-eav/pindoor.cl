@@ -168,7 +168,7 @@ class PuntoInteresController extends Controller
     {
         $query = PuntoInteres::query()
             ->where('activo', 1)
-            ->whereNotIn('id', [81,80,64,87,115])
+            ->whereNotIn('id', [81,80,64,87,115,128])
             ->where('eliminado', false);
 
         if ($request->filled('category')) {
@@ -444,7 +444,7 @@ class PuntoInteresController extends Controller
         if ($punto->lat && $punto->lng) {
             $cercanos = PuntoInteres::where('activo', true)
                 ->where('eliminado', false)
-                ->whereNotIn('id', [81,80,64,87])
+                ->whereNotIn('id', [81,80,64,87,115,128])
                 ->where('id', '!=', $punto->id)
                 ->whereNotNull('lat')
                 ->whereNotNull('lng')
