@@ -4,7 +4,7 @@ return [
     // Navegación
     'nav' => [
         'inicio'       => 'Inicio',
-        'explorar'     => 'Explorar',
+        'explorar'     => 'Atractivos',
         'panoramas'    => 'Panoramas',
         'experiencias' => 'Experiencias',
         'blog'         => 'Blog',
@@ -39,6 +39,14 @@ return [
         'cerca_label'          => 'Cerca de mí',
         'listado_label'        => 'Listado',
         'todos_label'          => 'Todos',
+        'todas_label'          => 'Todas',
+        'categoria_label'      => 'Categoría',
+        'todas_categorias'     => 'Todas las categorías',
+        'buscar_placeholder'   => 'Ascensor, café, mirador…',
+        'cerca_activo'         => '✅ Cerca de mí',
+        'borrar_filtros'       => '✕ Borrar filtros',
+        'sin_resultados_sub'   => 'No encontramos lugares que coincidan.',
+        'panoramas_con'        => '🗓 Panoramas con',
     ],
 
     // Explorar
@@ -110,6 +118,7 @@ return [
     // Panoramas
     'panoramas' => [
         'titulo'          => 'Panoramas',
+        'evento'          => 'evento',
         'eventos'         => 'eventos',
         'en_cartelera'    => 'en cartelera',
         'exposicion'      => 'exposición',
@@ -122,6 +131,46 @@ return [
         'ver_mas'         => 'Ver más ›',
         'vacio'           => 'No hay panoramas publicados aún',
         'vacio_sub'       => 'Vuelve pronto para ver las novedades.',
+        'cat' => [
+            'arte'        => 'Arte',
+            'musica'      => 'Música',
+            'cine'        => 'Cine',
+            'conferencia' => 'Conferencia',
+            'danza'       => 'Danza',
+            'exposicion'  => 'Exposición',
+            'feria'       => 'Feria',
+            'gastronomia' => 'Gastronomía',
+            'infantil'    => 'Infantil',
+            'literatura'  => 'Literatura',
+            'standup'     => 'Stand Up',
+            'teatro'      => 'Teatro',
+            'tour'        => 'Tour',
+            'taller'      => 'Taller',
+            'otros'       => 'Otros',
+        ],
+    ],
+
+    // Experiencias
+    'experiencias' => [
+        'titulo'           => 'Experiencias',
+        'subtitulo'        => 'Actividades donde <strong class="text-gray-800">participas activamente</strong>: clases de cueca, talleres de cerámica, tours guiados, culinaria y más. Se repiten en el tiempo, para que puedas unirte cuando quieras.',
+        'proponer'         => '¿Ofreces una experiencia? Compártela',
+        'meta_description' => 'Descubre experiencias únicas en Valparaíso: clases de cueca, talleres de arte, tours culturales, gastronomía y más. Para turistas y locales.',
+        'vacio'            => 'No hay experiencias publicadas aún',
+        'vacio_sub'        => 'Vuelve pronto para descubrir lo que hay en Valparaíso.',
+        'cat' => [
+            'danza'       => 'Danza',
+            'musica'      => 'Música',
+            'gastronomia' => 'Gastronomía',
+            'arte'        => 'Arte',
+            'aventura'    => 'Aventura',
+            'cultural'    => 'Cultural',
+            'deportes'    => 'Deportes',
+            'bienestar'   => 'Bienestar',
+            'idiomas'     => 'Idiomas',
+            'taller'      => 'Taller',
+            'otros'       => 'Otros',
+        ],
     ],
 
     // General

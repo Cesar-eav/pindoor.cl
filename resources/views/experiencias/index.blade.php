@@ -1,8 +1,8 @@
 @extends('layouts.pindoor')
 
-@section('title', 'Experiencias — Pindoor.cl')
+@section('title', __('ui.experiencias.titulo') . ' — Pindoor.cl')
 @section('canonical', route('experiencias.index'))
-@section('description', 'Descubre experiencias únicas en Valparaíso: clases de cueca, talleres de arte, tours culturales, gastronomía y más. Para turistas y locales.')
+@section('description', __('ui.experiencias.meta_description'))
 @section('bodyClass', 'bg-gray-100 text-gray-900')
 
 @section('content')
@@ -24,19 +24,17 @@
     {{-- Header --}}
     <section class="mb-8 text-center max-w-2xl mx-auto px-4">
         <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-950 mb-3">
-            Expe<span class="text-[#fc5648]">rien</span>cias
+            {{ __('ui.experiencias.titulo') }}
         </h1>
         <p class="text-gray-500 text-sm md:text-base leading-relaxed mb-5">
-            Actividades donde <strong class="text-gray-800">participas activamente</strong>:
-            clases de cueca, talleres de cerámica, tours guiados, culinaria y más.
-            Se repiten en el tiempo, para que puedas unirte cuando quieras.
+            {!! __('ui.experiencias.subtitulo') !!}
         </p>
         <a href="{{ route('experiencias.proponer') }}"
            class="inline-flex items-center gap-2 bg-[#fc5648] hover:bg-[#d94439] text-white font-bold text-sm px-5 py-2.5 rounded-full transition shadow-sm">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
-            ¿Ofreces una experiencia? Compártela
+            {{ __('ui.experiencias.proponer') }}
         </a>
     </section>
 
@@ -46,14 +44,14 @@
         <a href="{{ route('experiencias.index') }}"
            class="px-4 py-1.5 rounded-full text-xs font-bold border transition-colors
                   {{ !$catActiva ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-500' }}">
-            Todas
+            {{ __('ui.home.todas_label') }}
         </a>
         @foreach($categorias as $slug => $cat)
             @if($experiencias->where('categoria', $slug)->isNotEmpty())
             <a href="{{ route('experiencias.index', ['categoria' => $slug]) }}"
                class="px-4 py-1.5 rounded-full text-xs font-bold border transition-colors
                       {{ $catActiva === $slug ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-500' }}">
-                {{ $cat['emoji'] }} {{ $cat['label'] }}
+                {{ $cat['emoji'] }} {{ __('ui.experiencias.cat.' . $slug) }}
             </a>
             @endif
         @endforeach
@@ -61,7 +59,7 @@
         <a href="{{ route('experiencias.index', ['categoria' => 'gratuito']) }}"
            class="px-4 py-1.5 rounded-full text-xs font-bold border transition-colors
                   {{ $catActiva === 'gratuito' ? 'bg-green-700 text-white border-green-700' : 'bg-green-50 text-green-700 border-green-200 hover:border-green-500' }}">
-            🎟️ Gratis
+            🎟️ {{ __('ui.panoramas.gratis') }}
         </a>
         @endif
     </div>
@@ -70,8 +68,8 @@
     @if($coleccion->isEmpty())
         <div class="text-center py-20">
             <div class="text-5xl mb-3">🎭</div>
-            <p class="font-bold text-gray-700 mb-1">No hay experiencias publicadas aún</p>
-            <p class="text-sm text-gray-400">Vuelve pronto para descubrir lo que hay en Valparaíso.</p>
+            <p class="font-bold text-gray-700 mb-1">{{ __('ui.experiencias.vacio') }}</p>
+            <p class="text-sm text-gray-400">{{ __('ui.experiencias.vacio_sub') }}</p>
         </div>
     @else
 
@@ -108,7 +106,7 @@
                 {{-- Badge precio/gratis --}}
                 @if($exp->es_gratuito)
                 <div class="absolute top-2 right-2 z-20 bg-green-500 text-white text-[12px] font-bold px-2 py-0.5 rounded-lg">
-                    🎟️ Gratis
+                    🎟️ {{ __('ui.panoramas.gratis') }}
                 </div>
                 @elseif($exp->precio)
                 <div class="absolute top-2 right-2 z-20 bg-black/60 backdrop-blur-sm text-white text-[12px] font-bold px-2 py-0.5 rounded-lg">

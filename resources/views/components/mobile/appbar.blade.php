@@ -7,13 +7,20 @@
         <a href="{{ route('puntos.explorar') }}"
            class="px-3 py-1.5 text-xs font-bold transition-colors
                   {{ request()->routeIs('puntos.explorar') || request()->routeIs('puntos.buscar') ? 'bg-[#fc5648] text-white' : 'text-gray-500 hover:text-gray-800' }}">
-            Atractivos
+            {{ __('ui.nav.explorar') }}
         </a>
         <a href="{{ route('atractivos.panoramas') }}"
-           class="px-3 py-1.5  text-xs font-bold transition-colors
+           class="px-3 py-1.5 text-xs font-bold transition-colors
                   {{ request()->routeIs('atractivos.panoramas') ? 'bg-[#fc5648] text-white' : 'text-gray-500 hover:text-gray-800' }}">
-            Panoramas
+            {{ __('ui.nav.panoramas') }}
         </a>
+        <div class="flex items-center gap-0.5 ml-1 bg-gray-100 rounded-full px-2 py-1">
+            <a href="{{ route('lang.switch', 'es') }}"
+               class="text-[10px] font-black transition {{ app()->getLocale() === 'es' ? 'text-[#fc5648]' : 'text-gray-400' }}">ES</a>
+            <span class="text-gray-300 text-[10px]">|</span>
+            <a href="{{ route('lang.switch', 'en') }}"
+               class="text-[10px] font-black transition {{ app()->getLocale() === 'en' ? 'text-[#fc5648]' : 'text-gray-400' }}">EN</a>
+        </div>
     </nav>
 </header>
 
@@ -28,12 +35,12 @@
                           d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
                 <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="Café, mirador, ascensor…"
+                       placeholder="{{ __('ui.home.buscar_placeholder') }}"
                        autofocus
                        class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-[#fc5648] outline-none bg-gray-50">
             </div>
             <button type="submit" class="bg-[#fc5648] text-white px-4 py-2.5 rounded-xl text-sm font-bold">
-                Buscar
+                {{ __('ui.nav.buscar') }}
             </button>
         </div>
     </form>
