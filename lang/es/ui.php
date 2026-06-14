@@ -24,14 +24,21 @@ return [
 
     // Home
     'home' => [
-        'titulo'          => '¿Qué quieres hacer en Valparaíso?',
-        'ver_todos'       => 'Ver todos →',
-        'ver_todas'       => 'Ver todas →',
-        'blog_titulo'     => 'Blog',
-        'panoramas_titulo'=> 'Panoramas',
-        'exp_titulo'      => 'Experiencias',
-        'filtro_activo'   => 'Cerca de ti',
-        'borrar_filtro'   => '✕ Borrar',
+        'titulo'               => '¿Qué quieres hacer en Valparaíso?',
+        'ver_todos'            => 'Ver todos →',
+        'ver_todas'            => 'Ver todas →',
+        'blog_titulo'          => 'Blog',
+        'panoramas_titulo'     => 'Panoramas',
+        'exp_titulo'           => 'Experiencias',
+        'atractivos_titulo'    => 'Atractivos',
+        'ver_todos_atractivos' => 'Ver todos los atractivos',
+        'panoramas_relacionados' => '🗓 Panoramas relacionados',
+        'filtro_activo'        => 'Cerca de ti',
+        'borrar_filtro'        => '✕ Borrar',
+        'buscar_cerca'         => '📍 Buscar cerca de mí',
+        'cerca_label'          => 'Cerca de mí',
+        'listado_label'        => 'Listado',
+        'todos_label'          => 'Todos',
     ],
 
     // Explorar

@@ -5,10 +5,10 @@
     <span class="text-xs text-[#fc5648] font-semibold">
         @if(request('search')) "{{ request('search') }}"
         @elseif(request('category')) {{ $categorias->firstWhere('slug', request('category'))?->nombre }}
-        @elseif(request('lat')) Cerca de ti
+        @elseif(request('lat')) {{ __('ui.home.filtro_activo') }}
         @endif
     </span>
-    <a href="{{ route('puntos.index') }}" class="text-xs text-gray-400 font-bold">✕ Borrar</a>
+    <a href="{{ route('puntos.index') }}" class="text-xs text-gray-400 font-bold">{{ __('ui.home.borrar_filtro') }}</a>
 </div>
 @endif
 </div>
@@ -18,9 +18,9 @@
 <div id="panoramas-mobile-section" class="px-3 pt-3">
     <div class="flex items-center gap-2 mb-2">
         <span class="w-1 h-4 rounded-full bg-[#fc5648] shrink-0"></span>
-        <span class="text-md font-bold text-gray-900 tracking-tight">Panoramas</span>
+        <span class="text-md font-bold text-gray-900 tracking-tight">{{ __('ui.home.panoramas_titulo') }}</span>
         <span class="flex-1 h-px bg-gray-200"></span>
-        <a href="{{ route('atractivos.panoramas') }}" class="text-[11px] text-[#fc5648] font-semibold shrink-0">Ver todos →</a>
+        <a href="{{ route('atractivos.panoramas') }}" class="text-[11px] text-[#fc5648] font-semibold shrink-0">{{ __('ui.home.ver_todos') }}</a>
     </div>
     <div class="overflow-x-auto pb-1 scrollbar-hide"
          style="scrollbar-width:none"
@@ -72,9 +72,9 @@
     <div id="blog-mobile-section" class="mt-5">
         <div class="flex items-center gap-2 mb-3 px-3">
             <span class="w-1 h-4 rounded-full bg-[#fc5648] shrink-0"></span>
-            <h2 class="text-sm font-bold text-gray-900 tracking-tight">Blog</h2>
+            <h2 class="text-sm font-bold text-gray-900 tracking-tight">{{ __('ui.home.blog_titulo') }}</h2>
             <span class="flex-1 h-px bg-gray-200"></span>
-            <a href="{{ route('blog.index') }}" class="text-[11px] font-semibold text-[#fc5648] shrink-0">Ver todos →</a>
+            <a href="{{ route('blog.index') }}" class="text-[11px] font-semibold text-[#fc5648] shrink-0">{{ __('ui.home.ver_todos') }}</a>
         </div>
 
         <div class="flex gap-3 overflow-x-auto pb-2 px-3" style="-ms-overflow-style:none;scrollbar-width:none;">
@@ -107,9 +107,9 @@
     <div id="experiencias-mobile-section" class="mt-5">
         <div class="flex items-center gap-2 mb-3 px-3">
             <span class="w-1 h-4 rounded-full bg-[#fc5648] shrink-0"></span>
-            <h2 class="text-sm font-bold text-gray-900 tracking-tight">Experiencias</h2>
+            <h2 class="text-sm font-bold text-gray-900 tracking-tight">{{ __('ui.home.exp_titulo') }}</h2>
             <span class="flex-1 h-px bg-gray-200"></span>
-            <a href="{{ route('experiencias.index') }}" class="text-[11px] font-semibold text-[#fc5648] shrink-0">Ver todas →</a>
+            <a href="{{ route('experiencias.index') }}" class="text-[11px] font-semibold text-[#fc5648] shrink-0">{{ __('ui.home.ver_todas') }}</a>
         </div>
         <div class="flex gap-3 px-3" >
             @foreach($ultimasExperiencias as $exp)
@@ -140,10 +140,10 @@
     {{-- Cabecera sección atractivos --}}
     <div class="flex items-center gap-2 mb-3">
         <span class="w-1 h-4 rounded-full bg-gray-800 shrink-0"></span>
-        <h2 class="text-md font-bold text-gray-900 tracking-tight">Atractivos</h2>
+        <h2 class="text-md font-bold text-gray-900 tracking-tight">{{ __('ui.home.atractivos_titulo') }}</h2>
         <span class="flex-1 h-px bg-gray-200"></span>
         <a href="{{ route('puntos.explorar', request()->only(['search','category'])) }}"
-           class="text-[11px] font-semibold text-[#fc5648] shrink-0">Ver todos →</a>
+           class="text-[11px] font-semibold text-[#fc5648] shrink-0">{{ __('ui.home.ver_todos') }}</a>
     </div>
 
     <div class="grid grid-cols-2 gap-3">
@@ -156,7 +156,7 @@
     <div class="mt-3 text-center">
         <a href="{{ route('puntos.explorar', request()->only(['search','category'])) }}"
            class="inline-block text-xs font-bold text-white bg-[#fc5648] px-5 py-2 rounded-full shadow">
-            Ver todos los atractivos
+            {{ __('ui.home.ver_todos_atractivos') }}
         </a>
     </div>
     @endif
@@ -175,10 +175,10 @@
     @elseif(empty($panoramas) || $panoramas->isEmpty())
         <div class="text-center py-16">
             <div class="text-5xl mb-3">🕵️‍♂️</div>
-            <p class="font-bold text-gray-700 mb-1">Sin resultados</p>
-            <p class="text-sm text-gray-400 mb-4">Prueba con otra búsqueda</p>
+            <p class="font-bold text-gray-700 mb-1">{{ __('ui.explorar.sin_resultados') }}</p>
+            <p class="text-sm text-gray-400 mb-4">{{ __('ui.explorar.sin_resultados_sub') }}</p>
             <a href="{{ route('puntos.index') }}"
-               class="text-sm font-bold text-[#fc5648] underline">Ver todos</a>
+               class="text-sm font-bold text-[#fc5648] underline">{{ __('ui.explorar.ver_todos') }}</a>
         </div>
     @endif
 
@@ -186,8 +186,8 @@
     @if(isset($panoramas) && $panoramas->isNotEmpty())
     <div class="mt-8">
         <div class="flex items-center justify-between mb-3">
-            <h2 class="text-sm font-bold text-gray-700">🗓 Panoramas relacionados</h2>
-            <a href="{{ route('atractivos.panoramas') }}" class="text-xs text-[#fc5648] font-semibold">Ver todos →</a>
+            <h2 class="text-sm font-bold text-gray-700">{{ __('ui.home.panoramas_relacionados') }}</h2>
+            <a href="{{ route('atractivos.panoramas') }}" class="text-xs text-[#fc5648] font-semibold">{{ __('ui.home.ver_todos') }}</a>
         </div>
         <div class="flex flex-col gap-3">
             @foreach($panoramas as $panorama)
