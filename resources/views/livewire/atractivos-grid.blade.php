@@ -3,17 +3,17 @@
     <div class="bg-white rounded-2xl shadow-sm p-5 mb-8 border border-gray-100">
         <div class="grid grid-cols-3 gap-4 items-end">
             <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Categoría</label>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">{{ __('ui.home.categoria_label') }}</label>
                 <select wire:model.live="category"
                         class="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#fc5648] outline-none bg-gray-50 text-sm">
-                    <option value="">Todas las categorías</option>
+                    <option value="">{{ __('ui.home.todas_categorias') }}</option>
                     @foreach($categorias as $cat)
                         <option value="{{ $cat->slug }}">{{ $cat->nombre }}</option>
                     @endforeach
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Buscar</label>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">{{ __('ui.nav.buscar') }}</label>
                 <div class="relative">
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300"
                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -22,20 +22,20 @@
                     </svg>
                     <input wire:model.live.debounce.350ms="search"
                            type="text"
-                           placeholder="Ascensor, café, mirador…"
+                           placeholder="{{ __('ui.home.buscar_placeholder') }}"
                            class="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#fc5648] outline-none text-sm">
                 </div>
             </div>
             <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Cerca de mí</label>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">{{ __('ui.home.cerca_label') }}</label>
                 <button type="button" id="btn-gps-lw"
                         wire:loading.attr="disabled"
                         class="w-full py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm font-bold transition
                                {{ $lat ? 'bg-[#fc5648] text-white hover:bg-[#d94439]' : 'bg-gray-900 text-white hover:bg-black' }}">
                     @if($lat)
-                        ✅ Cerca de mí
+                        {{ __('ui.home.cerca_activo') }}
                     @else
-                        📍 Buscar cerca de mí
+                        {{ __('ui.home.buscar_cerca') }}
                     @endif
                 </button>
             </div>
@@ -45,7 +45,7 @@
         <div class="flex justify-end mt-3 pt-3 border-t border-gray-50">
             <button wire:click="$set('search', ''); $set('category', ''); clearGps()"
                     class="text-sm font-semibold text-gray-400 hover:text-[#fc5648] transition flex items-center gap-1">
-                ✕ Borrar filtros
+                {{ __('ui.home.borrar_filtros') }}
             </button>
         </div>
         @endif
@@ -58,9 +58,9 @@
         <div class="mb-8">
             <div class="flex items-center gap-3 mb-4">
                 <span class="w-1 h-5 rounded-full bg-[#fc5648] shrink-0"></span>
-                <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">Panoramas</h2>
+                <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">{{ __('ui.home.panoramas_titulo') }}</h2>
                 <span class="flex-1 h-px bg-gray-200"></span>
-                <a href="{{ route('atractivos.panoramas') }}" class="text-sm font-semibold text-[#fc5648] hover:underline shrink-0">Ver todos →</a>
+                <a href="{{ route('atractivos.panoramas') }}" class="text-sm font-semibold text-[#fc5648] hover:underline shrink-0">{{ __('ui.home.ver_todos') }}</a>
             </div>
             <div class="overflow-x-auto border border-gray-100 shadow-sm"
                  style="scrollbar-width:none;cursor:grab"
@@ -113,9 +113,9 @@
         <div class="mb-8">
             <div class="flex items-center gap-3 mb-4">
                 <span class="w-1 h-5 rounded-full bg-[#fc5648] shrink-0"></span>
-                <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">Blog</h2>
+                <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">{{ __('ui.home.blog_titulo') }}</h2>
                 <span class="flex-1 h-px bg-gray-200"></span>
-                <a href="{{ route('blog.index') }}" class="text-sm font-semibold text-[#fc5648] hover:underline shrink-0">Ver todos →</a>
+                <a href="{{ route('blog.index') }}" class="text-sm font-semibold text-[#fc5648] hover:underline shrink-0">{{ __('ui.home.ver_todos') }}</a>
             </div>
             <div class="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2" style="scrollbar-width:none">
                 @foreach($ultimosPosts as $post)
@@ -142,7 +142,7 @@
 
         <div class="flex items-center gap-3 mb-4">
             <span class="w-1 h-5 rounded-full bg-gray-800 shrink-0"></span>
-            <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">Atractivos</h2>
+            <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">{{ __('ui.home.atractivos_titulo') }}</h2>
             <span class="flex-1 h-px bg-gray-200"></span>
         </div>
 
@@ -170,11 +170,11 @@
         @elseif($panoramas->isEmpty())
             <div class="bg-white rounded-2xl shadow-sm p-16 text-center border-2 border-dashed border-gray-200">
                 <div class="text-5xl mb-4">🕵️‍♂️</div>
-                <h3 class="text-xl font-bold text-gray-800 mb-2">Sin resultados</h3>
-                <p class="text-gray-400 mb-5 text-sm">No encontramos lugares que coincidan.</p>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ __('ui.explorar.sin_resultados') }}</h3>
+                <p class="text-gray-400 mb-5 text-sm">{{ __('ui.home.sin_resultados_sub') }}</p>
                 <button wire:click="$set('search', ''); $set('category', ''); clearGps()"
                         class="bg-[#fc5648] text-white px-5 py-2.5 rounded-xl font-bold hover:bg-gray-900 transition text-sm">
-                    Ver todos
+                    {{ __('ui.explorar.ver_todos') }}
                 </button>
             </div>
         @endif
@@ -183,10 +183,10 @@
         <div class="mt-10">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-base font-bold text-gray-700">
-                    🗓 Panoramas con "{{ $search }}"
+                    {{ __('ui.home.panoramas_con') }} "{{ $search }}"
                 </h2>
                 <a href="{{ route('atractivos.panoramas') }}" class="text-xs text-[#fc5648] font-semibold hover:underline">
-                    Ver todos →
+                    {{ __('ui.home.ver_todos') }}
                 </a>
             </div>
             <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">

@@ -356,7 +356,7 @@ class PuntoInteresController extends Controller
         // Datos de display por día (etiquetas, títulos)
         $diasMeta = [];
         foreach ($porDia as $fechaStr => $_) {
-            $f      = Carbon::parse($fechaStr);
+            $f      = Carbon::parse($fechaStr)->locale('es');
             $esHoy  = $f->isSameDay($hoy);
             $esMana = $f->isSameDay($manana);
             $diasMeta[$fechaStr] = [
@@ -376,11 +376,11 @@ class PuntoInteresController extends Controller
         $startIndexMap = [];
         foreach ($coleccion->values() as $p) {
             $startIndexMap[$p->id] = $allImages->count();
-            $fechaLabel = $p->fecha?->translatedFormat('l j \d\e F \d\e Y');
+            $fechaLabel = $p->fecha?->locale('es')->translatedFormat('l j \d\e F \d\e Y');
             if ($p->fecha_fin && $p->fecha_fin->gt($p->fecha)) {
-                $fechaLabel = $p->fecha->translatedFormat('j \d\e F')
+                $fechaLabel = $p->fecha->locale('es')->translatedFormat('j \d\e F')
                             . ' al '
-                            . $p->fecha_fin->translatedFormat('j \d\e F \d\e Y');
+                            . $p->fecha_fin->locale('es')->translatedFormat('j \d\e F \d\e Y');
             }
             $info = [
                 'titulo'    => $p->titulo,
@@ -409,7 +409,7 @@ class PuntoInteresController extends Controller
         $mesesMeta  = [];
         $mesPorDia  = [];
         foreach ($porDia as $fechaStr => $_) {
-            $f      = Carbon::parse($fechaStr);
+            $f      = Carbon::parse($fechaStr)->locale('es');
             $mesKey = $f->format('Y-m');
             $mesPorDia[$fechaStr] = $mesKey;
             if (!isset($mesesMeta[$mesKey])) {

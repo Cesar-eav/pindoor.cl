@@ -1,6 +1,6 @@
 @extends('layouts.pindoor')
 
-@section('title', 'Panoramas — Pindoor.cl')
+@section('title', __('ui.panoramas.titulo') . ' — Pindoor.cl')
 @section('canonical', route('atractivos.panoramas'))
 @if(request()->anyFilled(['categoria']))
 @section('robots', 'noindex, follow')
@@ -30,13 +30,13 @@
     {{-- Header compacto --}}
 <div class="flex items-center justify-between mb-3">
     <h1 class="text-2xl font-extrabold tracking-tight text-slate-950">
-        Pa<span class="text-[#fc5648]">no</span>ra<span class="text-[#fc5648]">ma</span>s
+        {{ __('ui.panoramas.titulo') }}
     </h1>
     <div class="flex items-center gap-2 text-xs text-slate-500 font-medium">
-        <span><strong class="text-slate-900 font-extrabold text-sm">{{ $panoramas->where('categoria','!=','exposicion')->count() }}</strong> eventos</span>
+        <span><strong class="text-slate-900 font-extrabold text-sm">{{ $panoramas->where('categoria','!=','exposicion')->count() }}</strong> {{ __('ui.panoramas.eventos') }}</span>
         @if($exposiciones->isNotEmpty())
         <span class="text-slate-300">·</span>
-        <span><strong class="text-slate-900 font-extrabold text-sm">{{ $exposiciones->count() }}</strong> en cartelera</span>
+        <span><strong class="text-slate-900 font-extrabold text-sm">{{ $exposiciones->count() }}</strong> {{ __('ui.panoramas.en_cartelera') }}</span>
         @endif
     </div>
 </div>
@@ -57,14 +57,14 @@
         <a href="{{ route('atractivos.panoramas') }}"
            class="shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-colors
                   {{ !$catActiva ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-500' }}">
-            Todos
+            {{ __('ui.home.todos_label') }}
         </a>
         @foreach($categorias as $slug => $cat)
             @if($panoramas->where('categoria', $slug)->isNotEmpty())
             <a href="{{ route('atractivos.panoramas', ['categoria' => $slug]) }}"
                class="shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-colors
                       {{ $catActiva === $slug ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-500' }}">
-                {{ $cat['emoji'] }} {{ $cat['label'] }}
+                {{ $cat['emoji'] }} {{ __('ui.panoramas.cat.' . $slug) }}
             </a>
             @endif
         @endforeach
@@ -72,7 +72,7 @@
         <a href="{{ route('atractivos.panoramas', ['categoria' => 'gratuito']) }}"
            class="shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-colors
                   {{ $catActiva === 'gratuito' ? 'bg-green-700 text-white border-green-700' : 'bg-green-50 text-green-700 border-green-200 hover:border-green-500' }}">
-            🎟️ Gratis
+            🎟️ {{ __('ui.panoramas.gratis') }}
         </a>
         @endif
     </div>
@@ -82,8 +82,8 @@
     @if($panoramas->isEmpty())
         <div class="text-center py-20">
             <div class="text-5xl mb-3">📭</div>
-            <p class="font-bold text-gray-700 mb-1">No hay panoramas publicados aún</p>
-            <p class="text-sm text-gray-400">Vuelve pronto para ver las novedades.</p>
+            <p class="font-bold text-gray-700 mb-1">{{ __('ui.panoramas.vacio') }}</p>
+            <p class="text-sm text-gray-400">{{ __('ui.panoramas.vacio_sub') }}</p>
         </div>
     @else
 
@@ -92,9 +92,9 @@
     <section class="mb-10">
         <div class="flex items-center gap-3 mb-4">
             <span class="text-lg">🎭</span>
-            <h2 class="text-base font-extrabold text-gray-900 tracking-tight">En cartelera</h2>
+            <h2 class="text-base font-extrabold text-gray-900 tracking-tight">{{ ucfirst(__('ui.panoramas.en_cartelera')) }}</h2>
             <div class="flex-1 h-px bg-gray-200"></div>
-            <span class="text-xs text-gray-400 font-semibold">{{ $exposiciones->count() }} {{ $exposiciones->count() === 1 ? 'exposición' : 'exposiciones' }}</span>
+            <span class="text-xs text-gray-400 font-semibold">{{ $exposiciones->count() }} {{ $exposiciones->count() === 1 ? __('ui.panoramas.exposicion') : __('ui.panoramas.exposiciones') }}</span>
         </div>
         <div class="flex gap-4 overflow-x-auto pb-2" style="scrollbar-width:none">
             @foreach($exposiciones as $exp)
@@ -119,28 +119,28 @@
                 <div class="absolute top-3 left-3 z-10">
                     @if($diasRest <= 7 && $diasRest >= 0)
                         <span class="bg-[#fc5648] text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
-                            Últimos {{ $diasRest === 0 ? 'hoy' : ($diasRest === 1 ? '1 día' : $diasRest.' días') }}
+                            {{ $diasRest === 0 ? __('ui.panoramas.ultimos_dias') . ' ' . __('ui.panoramas.hoy') : __('ui.panoramas.ultimos_dias') . ' ' . $diasRest }}
                         </span>
                     @elseif(!$iniciada)
                         <span class="bg-gray-800/80 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
-                            Próximamente
+                            {{ __('ui.panoramas.proximamente') }}
                         </span>
                     @else
                         <span class="bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
-                            En curso
+                            {{ __('ui.panoramas.en_curso') }}
                         </span>
                     @endif
                     @if($exp->es_gratuito)
-                        <span class="ml-1 bg-green-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full">Gratis</span>
+                        <span class="ml-1 bg-green-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full">{{ __('ui.panoramas.gratis') }}</span>
                     @endif
                 </div>
 
                 <div class="absolute bottom-0 left-0 right-0 p-4">
                     <p class="text-[11px] font-bold text-white/60 uppercase tracking-widest mb-1">
                         @if($iniciada)
-                            Hasta el {{ $hasta->translatedFormat('j \d\e F') }}
+                            Hasta el {{ $hasta->locale('es')->translatedFormat('j \d\e F') }}
                         @else
-                            Del {{ $exp->fecha->translatedFormat('j \d\e F') }} al {{ $hasta->translatedFormat('j \d\e F') }}
+                            Del {{ $exp->fecha->locale('es')->translatedFormat('j \d\e F') }} al {{ $hasta->locale('es')->translatedFormat('j \d\e F') }}
                         @endif
                     </p>
                     <h3 class="font-extrabold text-white leading-snug line-clamp-2">{{ $exp->titulo }}</h3>
@@ -213,7 +213,7 @@
             @endif
             <h2 class="text-lg font-bold text-gray-800 capitalize">{{ $meta['titulo'] }}</h2>
             <div class="flex-1 h-px bg-gray-200"></div>
-            <span class="text-xs text-gray-400 font-semibold">{{ $grupo->count() }} {{ $grupo->count() === 1 ? 'evento' : 'eventos' }}</span>
+            <span class="text-xs text-gray-400 font-semibold">{{ $grupo->count() }} {{ $grupo->count() === 1 ? __('ui.panoramas.evento') : __('ui.panoramas.eventos') }}</span>
         </div>
 
         {{-- Cards del día --}}
@@ -250,7 +250,7 @@
                     {{-- Badge gratuito (arriba derecha) --}}
                     @if($panorama->es_gratuito)
                     <div class="absolute top-2 right-2 z-10 bg-green-500 text-white md:text-[12px] text-[15px] font-bold px-2 py-0.5 rounded-lg">
-                        🎟️ Gratis
+                        🎟️ {{ __('ui.panoramas.gratis') }}
                     </div>
                     @endif
 
@@ -286,8 +286,8 @@
                         $mismoMes = $panorama->fecha->month === $panorama->fecha_fin->month;
                     @endphp
                     <p class="text-xs text-[#fc5648] font-semibold mb-1">
-                        📅 {{ $panorama->fecha->translatedFormat($mismoMes ? 'j' : 'j \d\e F') }}
-                           al {{ $panorama->fecha_fin->translatedFormat('j \d\e F') }}
+                        📅 {{ $panorama->fecha->locale('es')->translatedFormat($mismoMes ? 'j' : 'j \d\e F') }}
+                           al {{ $panorama->fecha_fin->locale('es')->translatedFormat('j \d\e F') }}
                     </p>
                     @endif
 
@@ -319,7 +319,7 @@
                         <a href="{{ $panorama->slug ? '/panoramas/' . $panorama->slug : '/lugar/' . $panorama->punto_slug . '#agenda' }}"
                            @click.stop
                            class="inline-flex items-center gap-1 text-xs font-bold text-[#fc5648] hover:text-[#d94439] transition">
-                            Ver más &rsaquo;
+                            {{ __('ui.panoramas.ver_mas') }}
                         </a>
                         <a href="{{ $gcUrl }}" target="_blank" rel="noopener noreferrer"
                            @click.stop

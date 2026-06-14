@@ -39,6 +39,14 @@ return [
         'cerca_label'          => 'Near me',
         'listado_label'        => 'List',
         'todos_label'          => 'All',
+        'todas_label'          => 'All',
+        'categoria_label'      => 'Category',
+        'todas_categorias'     => 'All categories',
+        'buscar_placeholder'   => 'Funicular, café, viewpoint…',
+        'cerca_activo'         => '✅ Near me',
+        'borrar_filtros'       => '✕ Clear filters',
+        'sin_resultados_sub'   => 'No places matched your search.',
+        'panoramas_con'        => '🗓 Events matching',
     ],
 
     // Explore
@@ -110,6 +118,7 @@ return [
     // Events (Panoramas)
     'panoramas' => [
         'titulo'          => 'Events',
+        'evento'          => 'event',
         'eventos'         => 'events',
         'en_cartelera'    => 'on stage',
         'exposicion'      => 'exhibition',
@@ -122,6 +131,46 @@ return [
         'ver_mas'         => 'See more ›',
         'vacio'           => 'No events published yet',
         'vacio_sub'       => 'Check back soon for updates.',
+        'cat' => [
+            'arte'        => 'Art',
+            'musica'      => 'Music',
+            'cine'        => 'Film',
+            'conferencia' => 'Conference',
+            'danza'       => 'Dance',
+            'exposicion'  => 'Exhibition',
+            'feria'       => 'Fair',
+            'gastronomia' => 'Food',
+            'infantil'    => 'Kids',
+            'literatura'  => 'Literature',
+            'standup'     => 'Stand Up',
+            'teatro'      => 'Theater',
+            'tour'        => 'Tour',
+            'taller'      => 'Workshop',
+            'otros'       => 'Other',
+        ],
+    ],
+
+    // Experiences
+    'experiencias' => [
+        'titulo'           => 'Experiences',
+        'subtitulo'        => 'Activities where you <strong class="text-gray-800">actively participate</strong>: cueca dance classes, ceramics workshops, guided tours, culinary experiences and more. They recur over time, so you can join whenever you want.',
+        'proponer'         => 'Do you offer an experience? Share it',
+        'meta_description' => 'Discover unique experiences in Valparaíso: cueca dance classes, art workshops, cultural tours, gastronomy and more. For tourists and locals alike.',
+        'vacio'            => 'No experiences published yet',
+        'vacio_sub'        => 'Check back soon to discover what\'s happening in Valparaíso.',
+        'cat' => [
+            'danza'       => 'Dance',
+            'musica'      => 'Music',
+            'gastronomia' => 'Food',
+            'arte'        => 'Art',
+            'aventura'    => 'Adventure',
+            'cultural'    => 'Cultural',
+            'deportes'    => 'Sports',
+            'bienestar'   => 'Wellness',
+            'idiomas'     => 'Languages',
+            'taller'      => 'Workshop',
+            'otros'       => 'Other',
+        ],
     ],
 
     // General
