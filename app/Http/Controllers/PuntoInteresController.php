@@ -101,6 +101,8 @@ class PuntoInteresController extends Controller
         $hoy = Carbon::today();
 
         $proximosPanoramas = Panorama::where('activo', true)
+                    ->whereNull('dias_semana')
+
             ->where(function ($q) use ($hoy) {
                 $q->whereNull('fecha_fin')->where('fecha', '>=', $hoy)
                   ->orWhere('fecha_fin', '>=', $hoy);
