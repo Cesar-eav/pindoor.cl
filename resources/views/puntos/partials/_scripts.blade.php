@@ -193,13 +193,13 @@ function iniciarMapa(containerId) {
 
 // ── GPS ──────────────────────────────────────────────────────────────────
 function geolocate(latInput, lngInput, form, btn) {
-    if (!navigator.geolocation) { alert('Tu navegador no soporta geolocalización.'); return; }
+    if (!navigator.geolocation) { alert('{{ __("ui.general.sin_geolocalizacion") }}'); return; }
     btn.disabled = true;
     const orig = btn.innerHTML;
-    btn.innerHTML = '⌛ Localizando…';
+    btn.innerHTML = '{{ __("ui.general.localizando") }}';
     navigator.geolocation.getCurrentPosition(
         pos => { latInput.value = pos.coords.latitude; lngInput.value = pos.coords.longitude; form.submit(); },
-        ()  => { alert('No pudimos obtener tu ubicación.'); btn.disabled = false; btn.innerHTML = orig; },
+        ()  => { alert('{{ __("ui.general.error_ubicacion") }}'); btn.disabled = false; btn.innerHTML = orig; },
         { enableHighAccuracy: true, timeout: 8000 }
     );
 }

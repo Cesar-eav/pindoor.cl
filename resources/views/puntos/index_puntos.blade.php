@@ -100,7 +100,7 @@
 
         <div class="flex items-center justify-between my-6">
             <h1 class="text-3xl font-bold text-gray-900">
-                ¿Qué quieres <span class="text-red-400">hacer</span> en <span class="text-red-400">Valparaíso</span>?
+                {{ __('ui.home.titulo') }}
             </h1>
             <div class="inline-flex bg-gray-200 p-1 rounded-xl gap-1">
                 <button id="btn-listado" onclick="setView('listado')"
@@ -108,7 +108,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
                     </svg>
-                    Listado
+                    {{ __('ui.nav.listado') }}
                 </button>
                 <button id="btn-mapa" onclick="setView('mapa')"
                         class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all text-gray-500 hover:text-gray-700">
@@ -116,7 +116,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                     </svg>
-                    Mapa
+                    {{ __('ui.nav.mapa') }}
                 </button>
             </div>
         </div>
@@ -128,7 +128,7 @@
                 <button data-slug=""
                         class="pill-mapa px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors
                                {{ !request('category') ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-500' }}">
-                    Todos
+                    {{ __('ui.home.todos_label') }}
                 </button>
                 @foreach($categorias as $cat)
                 <button data-slug="{{ $cat->slug }}"
@@ -142,7 +142,7 @@
             <div id="mapa-principal"></div>
             
             <p class="text-xs text-gray-400 text-center mt-2">
-                <span id="mapa-contador">{{ count($puntosMapData) }}</span> puntos · Clic en un marcador para ver el detalle
+                <span id="mapa-contador">{{ count($puntosMapData) }}</span> {{ __('ui.mapa.puntos') }} · {{ __('ui.mapa.clic_marcador') }}
             </p>
         </div>
 

@@ -16,7 +16,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
             </svg>
         </a>
-        <h1 class="text-lg font-bold text-gray-900">Explorar atractivos</h1>
+        <h1 class="text-lg font-bold text-gray-900">{{ __('ui.explorar.titulo') }}</h1>
     </div>
 
     {{-- Buscador --}}
@@ -26,7 +26,7 @@
         @endif
         <div class="relative">
             <input type="text" name="search" value="{{ request('search') }}"
-                   placeholder="Buscar lugar, categoría…"
+                   placeholder="{{ __('ui.explorar.placeholder') }}"
                    class="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-gray-200 bg-white shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-[#fc5648]/30">
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -40,7 +40,7 @@
             <a href="{{ route('puntos.explorar', array_filter(['search' => request('search')])) }}"
                class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap
                       {{ !request('category') ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-300' }}">
-                Todos
+                {{ __('ui.home.todos_label') }}
             </a>
             @foreach($categorias as $cat)
             <a href="{{ route('puntos.explorar', array_filter(['category' => $cat->slug, 'search' => request('search')])) }}"
@@ -60,13 +60,13 @@
             @elseif(request('category')) {{ $categorias->firstWhere('slug', request('category'))?->nombre }}
             @endif
         </span>
-        <a href="{{ route('puntos.explorar') }}" class="text-xs text-gray-400 font-bold">✕ Borrar</a>
+        <a href="{{ route('puntos.explorar') }}" class="text-xs text-gray-400 font-bold">{{ __('ui.home.borrar_filtro') }}</a>
     </div>
     @endif
 
     {{-- Resultados --}}
     @if($atractivos->count())
-        <p class="text-xs text-gray-400 mb-3">{{ $atractivos->total() }} atractivos</p>
+        <p class="text-xs text-gray-400 mb-3">{{ $atractivos->total() }} {{ __('ui.explorar.atractivos') }}</p>
         <div class="grid grid-cols-2 gap-3">
             @foreach($atractivos as $atractivo)
                 @include('puntos.partials._card_mobile')
@@ -78,9 +78,9 @@
     @else
         <div class="text-center py-16">
             <div class="text-5xl mb-3">🕵️‍♂️</div>
-            <p class="font-bold text-gray-700 mb-1">Sin resultados</p>
-            <p class="text-sm text-gray-400 mb-4">Prueba con otra búsqueda</p>
-            <a href="{{ route('puntos.explorar') }}" class="text-sm font-bold text-[#fc5648] underline">Ver todos</a>
+            <p class="font-bold text-gray-700 mb-1">{{ __('ui.explorar.sin_resultados') }}</p>
+            <p class="text-sm text-gray-400 mb-4">{{ __('ui.explorar.sin_resultados_sub') }}</p>
+            <a href="{{ route('puntos.explorar') }}" class="text-sm font-bold text-[#fc5648] underline">{{ __('ui.explorar.ver_todos') }}</a>
         </div>
     @endif
 

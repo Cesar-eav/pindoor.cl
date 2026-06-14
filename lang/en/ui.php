@@ -24,14 +24,21 @@ return [
 
     // Home
     'home' => [
-        'titulo'          => 'What do you want to do in Valparaíso?',
-        'ver_todos'       => 'See all →',
-        'ver_todas'       => 'See all →',
-        'blog_titulo'     => 'Blog',
-        'panoramas_titulo'=> 'Events',
-        'exp_titulo'      => 'Experiences',
-        'filtro_activo'   => 'Near you',
-        'borrar_filtro'   => '✕ Clear',
+        'titulo'               => 'What do you want to do in Valparaíso?',
+        'ver_todos'            => 'See all →',
+        'ver_todas'            => 'See all →',
+        'blog_titulo'          => 'Blog',
+        'panoramas_titulo'     => 'Events',
+        'exp_titulo'           => 'Experiences',
+        'atractivos_titulo'    => 'Attractions',
+        'ver_todos_atractivos' => 'See all attractions',
+        'panoramas_relacionados' => '🗓 Related events',
+        'filtro_activo'        => 'Near you',
+        'borrar_filtro'        => '✕ Clear',
+        'buscar_cerca'         => '📍 Search near me',
+        'cerca_label'          => 'Near me',
+        'listado_label'        => 'List',
+        'todos_label'          => 'All',
     ],
 
     // Explore
