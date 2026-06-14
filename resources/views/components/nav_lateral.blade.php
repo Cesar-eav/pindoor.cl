@@ -21,20 +21,20 @@
             $navItems = [
                 [
                     'href'   => route('puntos.index'),
-                    'label'  => 'Inicio',
+                    'label'  => __('ui.nav.inicio'),
                     'icon'   => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M5 10v10a2 2 0 002 2h10a2 2 0 002-2V10"/></svg>',
                     'active' => request()->routeIs('puntos.index') && !$enMapa,
                 ],
                 [
                     'href'    => route('puntos.index', ['vista' => 'mapa']),
-                    'label'   => 'Explorar mapa',
+                    'label'   => __('ui.nav.explorar') . ' ' . __('ui.nav.mapa'),
                     'icon'    => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>',
                     'active'  => $enMapa,
                     'onclick' => "if(typeof setView!=='undefined'){event.preventDefault();setView('mapa');}",
                 ],
                 [
                     'href'   => route('atractivos.panoramas'),
-                    'label'  => 'Panoramas',
+                    'label'  => __('ui.nav.panoramas'),
                     'icon'   => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>',
                     'active' => request()->routeIs('atractivos.panoramas'),
                 ],
@@ -46,19 +46,19 @@
                 // ],
                 [
                     'href'   => route('experiencias.index'),
-                    'label'  => 'Experiencias',
+                    'label'  => __('ui.nav.experiencias'),
                     'icon'   => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
                     'active' => request()->routeIs('experiencias.*'),
                 ],
                 [
                     'href'   => route('blog.index'),
-                    'label'  => 'Blog',
+                    'label'  => __('ui.nav.blog'),
                     'icon'   => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>',
                     'active' => request()->routeIs('blog.*'),
                 ],
                 [
                     'href'   => route('contacto.index'),
-                    'label'  => 'Contáctanos',
+                    'label'  => __('ui.nav.contacto'),
                     'icon'   => '<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>',
                     'active' => request()->routeIs('contacto.index'),
                 ],
