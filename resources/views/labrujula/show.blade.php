@@ -37,6 +37,13 @@
     })(window, document, "clarity", "script", "vul5oo31fn");
 </script>
     @endif
+
+    <script>
+  // Si la URL contiene ?exclude=true, se crea la cookie
+  if (window.location.search.includes("exclude=true")) {
+    document.cookie = "clarity_ignore=true; path=/; SameSite=Lax";
+  }
+</script>
 </head>
 
 <body class="bg-gray-100 text-gray-900 font-serif text-base">
@@ -50,7 +57,7 @@
             <!-- Card Principal -->
             <article class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
                 <!-- Imagen Principal -->
-                @if ($atractivo->image)
+                @if ($atractivoss->image)
                     <div class="w-full">
                         <img src="{{ asset('storage/' . $atractivo->image) }}"
                              alt="{{ $atractivo->title }}"

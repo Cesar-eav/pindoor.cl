@@ -29,6 +29,14 @@
     @if(app()->environment('production'))
     <script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","wajfuymjy1");</script>
     @endif
+
+    <script>
+  // Si la URL contiene ?exclude=true, se crea la cookie
+  if (window.location.search.includes("exclude=true")) {
+    document.cookie = "clarity_ignore=true; path=/; SameSite=Lax";
+  }
+</script>
+
 </head>
 <body class="font-sans @yield('bodyClass', 'bg-gray-100 text-gray-900')" style="padding-bottom: var(--inset-bottom, 0px);">
 
