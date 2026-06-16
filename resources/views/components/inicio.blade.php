@@ -51,6 +51,12 @@
             })(window, document, "clarity", "script", "rsqwi6wyvd");
         </script>
     @endif
+    <script>
+  // Si la URL contiene ?exclude=true, se crea la cookie
+  if (window.location.search.includes("exclude=true")) {
+    document.cookie = "clarity_ignore=true; path=/; SameSite=Lax";
+  }
+</script>
 </head>
 
 <body class="bg-gray-100 text-gray-900 font-serif text-base">
