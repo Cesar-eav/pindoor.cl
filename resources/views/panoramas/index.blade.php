@@ -369,6 +369,7 @@
             </template>
             <div class="text-center text-white space-y-1">
                 <p class="font-bold text-lg" x-text="img.titulo"></p>
+                <p class="text-sm text-white/80 leading-snug max-w-md mx-auto" x-show="img.descripcion" x-text="img.descripcion"></p>
                 <p class="text-sm text-white/70" x-show="img.ubicacion"
                    x-text="'📍 ' + img.ubicacion"></p>
                 <div class="flex items-center justify-center gap-3 text-sm text-white/70">
