@@ -144,7 +144,12 @@
             </div>
 
             {{-- Título --}}
-            <h1 class="text-2xl font-bold text-gray-900 leading-tight mb-4">{{ $panorama->titulo }}</h1>
+            <h1 class="text-2xl font-bold text-gray-900 leading-tight mb-3">{{ $panorama->titulo }}</h1>
+
+            {{-- Descripción --}}
+            @if($panorama->getTranslation('descripcion', app()->getLocale(), false))
+            <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-line mb-4">{{ $panorama->descripcion }}</p>
+            @endif
 
             {{-- Fecha y hora --}}
             <div class="flex items-start gap-3 mb-3">
