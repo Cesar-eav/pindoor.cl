@@ -16,9 +16,9 @@
     <label class="block text-sm font-semibold text-gray-700 mb-1">
         Descripción <span class="text-gray-400 font-normal">(opcional)</span>
     </label>
-    <textarea name="descripcion" rows="3"
+    <textarea name="descripcion" rows="8"
               placeholder="Breve descripción del evento…"
-              class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none resize-none">{{ old('descripcion', $panorama->getTranslation('descripcion', 'es', false) ?? '') }}</textarea>
+              class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none resize-none">{{ old('descripcion', isset($panorama) ? ($panorama->getTranslation('descripcion', 'es', false) ?? '') : '') }}</textarea>
     @error('descripcion') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
 </div>
 
