@@ -11,6 +11,17 @@
     @error('titulo') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
 </div>
 
+{{-- Descripción --}}
+<div>
+    <label class="block text-sm font-semibold text-gray-700 mb-1">
+        Descripción <span class="text-gray-400 font-normal">(opcional)</span>
+    </label>
+    <textarea name="descripcion" rows="3"
+              placeholder="Breve descripción del evento…"
+              class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none resize-none">{{ old('descripcion', $panorama->getTranslation('descripcion', 'es', false) ?? '') }}</textarea>
+    @error('descripcion') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+</div>
+
 {{-- Ubicación con autocompletado --}}
 <div x-data="ubicacionAC('{{ old('ubicacion', $panorama->ubicacion ?? '') }}')" class="relative">
     <label class="block text-sm font-semibold text-gray-700 mb-1">Ubicación</label>

@@ -275,10 +275,13 @@
 
                 {{-- Info --}}
                 <div class="p-4">
-                    <p class="font-bold text-gray-900 leading-snug mb-2">
+                    <p class="font-bold text-gray-900 leading-snug mb-1">
                         <span class="md:hidden">{{ mb_strlen($panorama->titulo) > 35 ? mb_substr($panorama->titulo, 0, 35) . '…' : $panorama->titulo }}</span>
                         <span class="hidden md:inline">{{ mb_strlen($panorama->titulo) > 30 ? mb_substr($panorama->titulo, 0, 30) . '…' : $panorama->titulo }}</span>
                     </p>
+                    @if($panorama->getTranslation('descripcion', app()->getLocale(), false))
+                    <p class="text-xs text-gray-500 leading-snug line-clamp-2 mb-1">{{ $panorama->descripcion }}</p>
+                    @endif
 
                     {{-- Rango de fechas --}}
                     @if($panorama->fecha_fin && !$panorama->fecha->isSameDay($panorama->fecha_fin))

@@ -11,7 +11,7 @@ class Panorama extends Model
 {
     use HasTranslations;
 
-    public array $translatable = ['titulo', 'ubicacion'];
+    public array $translatable = ['titulo', 'ubicacion', 'descripcion'];
 
     const CATEGORIAS = [
     'arte'        => ['label' => 'Arte',        'emoji' => '🎨'],    
@@ -40,6 +40,7 @@ class Panorama extends Model
         'titulo',
         'slug',
         'ubicacion',
+        'descripcion',
         'fecha',
         'fecha_fin',
         'dias_semana',
