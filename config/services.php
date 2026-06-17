@@ -37,4 +37,8 @@ return [
         'redirect'      => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'deepl' => [
+        'key' => env('DEEPL_API_KEY'),
+    ],
+
 ];

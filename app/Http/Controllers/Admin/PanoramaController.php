@@ -134,6 +134,9 @@ class PanoramaController extends Controller
             }
         }
 
+        $data['titulo']    = ['es' => $data['titulo']];
+        $data['ubicacion'] = ['es' => $data['ubicacion'] ?? ''];
+
         $panorama = Panorama::create($data);
 
         if ($request->hasFile('imagenes')) {
@@ -209,7 +212,18 @@ class PanoramaController extends Controller
             }
         }
 
-        $panorama->update($data);
+        $titulo    = $data['titulo'];
+        $ubicacion = $data['ubicacion'] ?? null;
+        unset($data['titulo'], $data['ubicacion']);
+
+        $panorama->fill($data);
+        $panorama->setTranslation('titulo', 'es', $titulo);
+        $panorama->setTranslation('titulo', 'en', '');
+        if ($ubicacion !== null) {
+            $panorama->setTranslation('ubicacion', 'es', $ubicacion);
+            $panorama->setTranslation('ubicacion', 'en', '');
+        }
+        $panorama->save();
 
         if ($request->hasFile('imagenes')) {
             $offset = $panorama->imagenes()->max('orden') + 1;
