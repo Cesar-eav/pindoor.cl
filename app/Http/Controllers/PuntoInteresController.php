@@ -385,11 +385,12 @@ class PuntoInteresController extends Controller
                             . $p->fecha_fin->locale('es')->translatedFormat('j \d\e F \d\e Y');
             }
             $info = [
-                'titulo'    => $p->titulo,
-                'ubicacion' => $p->ubicacion,
-                'fecha'     => $fechaLabel,
-                'hora'      => $p->hora,
-                'enlace'    => $p->enlace,
+                'titulo'      => $p->titulo,
+                'ubicacion'   => $p->ubicacion,
+                'descripcion' => $p->getTranslation('descripcion', app()->getLocale(), false),
+                'fecha'       => $fechaLabel,
+                'hora'        => $p->hora,
+                'enlace'      => $p->enlace,
             ];
             if ($p->imagen) {
                 $allImages->push(array_merge($info, ['src' => asset('storage/' . $p->imagen)]));
