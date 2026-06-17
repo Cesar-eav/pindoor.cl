@@ -5,6 +5,11 @@ ROUTES="/var/www/html/pindoor/routes/web.php"
 ISSUES=0
 
 echo ""
+echo "━━━ Pindoor — Info de entorno ━━━━━━━━━━━━━━━━━━━━"
+echo "  PHP local : $(php -r 'echo PHP_VERSION;') (producción: 8.2.x — usar --ignore-platform-reqs)"
+echo "  composer.phar en servidor: ~/pindoor/composer.phar"
+echo "  Comando:  php composer.phar install --no-dev --optimize-autoloader --ignore-platform-reqs"
+echo ""
 echo "━━━ SEO Check — Pindoor ━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # 1. Vistas públicas sin canónico
