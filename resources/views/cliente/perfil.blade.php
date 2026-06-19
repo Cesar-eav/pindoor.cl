@@ -31,8 +31,9 @@
 
             {{-- Cabecera compacta --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex gap-4 items-center mb-3">
-                @if($punto->imagen_perfil)
-                    <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
+                @php $logoUrl = $punto->imagen_perfil ? asset('storage/'.$punto->imagen_perfil) : (auth()->user()->imagen_logo ? asset('storage/'.auth()->user()->imagen_logo) : null); @endphp
+                @if($logoUrl)
+                    <img src="{{ $logoUrl }}"
                          alt="Logo {{ $punto->title }}"
                          class="w-14 h-14 rounded-2xl object-cover border border-gray-100 shrink-0">
                 @else
@@ -64,7 +65,7 @@
 
                 $checks = [
                     'imagen_perfil' => [
-                        'ok'    => (bool) $punto->imagen_perfil,
+                        'ok'    => (bool) ($punto->imagen_perfil ?? auth()->user()->imagen_logo),
                         'label' => 'Logo / foto de perfil',
                         'href'  => route('cliente.perfil.editar', $punto),
                         'tab'   => null,

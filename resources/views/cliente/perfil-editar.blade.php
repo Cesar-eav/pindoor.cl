@@ -82,23 +82,24 @@
                             </div>
 
                             {{-- Imagen de perfil --}}
-                            <div class="bg-white rounded-2xl shadow-sm border border-violet-100 p-5">
+                            <div class="bg-white rounded-2xl shadow-sm border border-violet-100 p-5"
+                                 x-data="{ preview: '{{ $punto->imagen_perfil ? asset('storage/' . $punto->imagen_perfil) : (auth()->user()->imagen_logo ? asset('storage/' . auth()->user()->imagen_logo) : '') }}' }">
                                 <div class="flex items-center gap-2 mb-3">
                                     <span class="w-1 h-5 rounded-full bg-violet-400 shrink-0"></span>
                                     <p class="text-xs text-violet-600 uppercase font-bold tracking-wider">Logo / Imagen de perfil</p>
                                 </div>
                                 <div class="flex items-center gap-4 mb-3">
-                                    @if($punto->imagen_perfil)
-                                        <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
-                                             alt="Logo actual"
-                                             class="w-16 h-16 rounded-2xl object-cover border border-gray-100 shrink-0">
-                                    @else
+                                    <template x-if="preview">
+                                        <img :src="preview" alt="Logo" class="w-16 h-16 rounded-2xl object-cover border border-gray-100 shrink-0">
+                                    </template>
+                                    <template x-if="!preview">
                                         <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center shrink-0 text-2xl">🏪</div>
-                                    @endif
+                                    </template>
                                     <p class="text-xs text-gray-400 leading-relaxed">JPG, PNG o WEBP<br>Máx. 2 MB</p>
                                 </div>
                                 <input type="file" name="imagen_perfil" id="imagen_perfil"
                                        accept="image/jpeg,image/png,image/jpg,image/webp"
+                                       @change="preview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : preview"
                                        class="block w-full text-sm text-gray-500
                                               file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0
                                               file:text-xs file:font-bold file:bg-gray-100 file:text-gray-700
