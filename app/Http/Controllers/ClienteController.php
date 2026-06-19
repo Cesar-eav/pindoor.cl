@@ -23,7 +23,7 @@ class ClienteController extends Controller
 
     public function onboarding()
     {
-        $categorias = Categoria::whereIn('slug', ['cafeterias', 'cultura', 'museos', 'picadas', 'comer', 'alojar', 'tiendas', 'artesania'])
+        $categorias = Categoria::whereIn('slug', ['cafeterias', 'cultura', 'museos', 'picadas', 'comer', 'alojar', 'tiendas', 'artesania','centro-deportivo'])
             ->orderBy('nombre')
             ->get();
         return view('cliente.onboarding', compact('categorias'));
@@ -162,6 +162,8 @@ class ClienteController extends Controller
                 Storage::disk('public')->delete($punto->imagen_perfil);
             }
             $datosPunto['imagen_perfil'] = $this->guardarImagenComprimida($request->file('imagen_perfil'), 'perfiles');
+        } elseif (!$punto->imagen_perfil && auth()->user()->imagen_logo) {
+            $datosPunto['imagen_perfil'] = auth()->user()->imagen_logo;
         }
 
         $punto->update($datosPunto);
