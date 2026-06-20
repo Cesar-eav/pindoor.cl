@@ -129,12 +129,13 @@
     <div class="flex items-end justify-around px-2 pt-2" style="padding-bottom: calc(12px + var(--inset-bottom, 0px))">
 
         {{-- Información --}}
-        <a href="#" class="flex flex-col items-center gap-1 px-2 opacity-40 pointer-events-none" title="Próximamente">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <a href="{{ route('puntos.info') }}"
+           class="flex flex-col items-center gap-1 px-2 text-white {{ request()->routeIs('puntos.info') ? 'opacity-100' : 'opacity-70' }}">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                       d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <span class="text-[10px] font-semibold text-white">Info</span>
+            <span class="text-[10px] font-semibold">Info</span>
         </a>
 
         {{-- Lupa / Buscar --}}
