@@ -264,7 +264,7 @@ if (location.hash === '#mapa') {
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    if (location.hash === '#mapa') {
+    if (location.hash === '#mapa' || new URLSearchParams(location.search).get('vista') === 'mapa') {
         activarVistaMapa();
     }
 
