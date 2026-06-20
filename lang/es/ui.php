@@ -105,6 +105,9 @@ return [
         'ascensor_aviso_horario_semana' => 'Lunes a viernes: 07:00 – 21:30 hrs',
         'ascensor_aviso_horario_finde'  => 'Sábado, domingo y festivos: 08:00 – 21:30 hrs',
         'ascensor_fuera_titulo'    => 'Ascensor fuera de servicio',
+        'ascensor_operativo_aviso'     => 'Aunque este ascensor figura como operativo, <strong>no hay un 100% de garantía de que esté funcionando el día que vayas</strong>. Lamentablemente, no ha habido una política pública a la altura para garantizar su funcionamiento continuo.',
+        'ascensor_operativo_mantenc'   => '🔧 Las mantenciones se realizan <strong>una vez al mes en día de semana</strong>, lo que puede dejarlo fuera de servicio por horas. Ojalá no te toque ese día.',
+        'ascensor_fuera_descripcion'   => 'Este ascensor se encuentra actualmente <strong>fuera de servicio</strong>. Lamentablemente, muchos ascensores de Valparaíso llevan años sin funcionar y no ha habido una política pública a la altura para recuperarlos.',
     ],
 
     // Mapa

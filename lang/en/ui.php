@@ -105,6 +105,9 @@ return [
         'ascensor_aviso_horario_semana' => 'Monday to Friday: 07:00 – 21:30',
         'ascensor_aviso_horario_finde'  => 'Saturday, Sunday & holidays: 08:00 – 21:30',
         'ascensor_fuera_titulo'    => 'Elevator out of service',
+        'ascensor_operativo_aviso'     => 'Although this elevator is listed as operational, <strong>there is no 100% guarantee it will be running on the day you visit</strong>. Unfortunately, there has been no adequate public policy to ensure its continuous operation.',
+        'ascensor_operativo_mantenc'   => '🔧 Maintenance is carried out <strong>once a month on a weekday</strong>, which may take it out of service for a few hours. Hopefully it won\'t be that day when you visit.',
+        'ascensor_fuera_descripcion'   => 'This elevator is currently <strong>out of service</strong>. Unfortunately, many of Valparaíso\'s elevators have been non-functional for years and no adequate public policy has been put in place to restore them.',
     ],
 
     // Map

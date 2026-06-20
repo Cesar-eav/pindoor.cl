@@ -110,27 +110,20 @@
 
             {{-- Aviso especial para ascensores --}}
             @if($punto->categoria?->slug === 'ascensores')
-            @php $esOperativo = str_contains($punto->description ?? '', '*OPERATIVO*'); @endphp
+            @php $esOperativo = str_contains($punto->getTranslation('description', 'es') ?? '', '*OPERATIVO*'); @endphp
             @if($esOperativo)
             <div class="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-5 space-y-3">
                 <div class="flex items-start gap-3">
                     <span class="text-2xl leading-none mt-0.5">⚠️</span>
                     <div class="space-y-2 text-sm text-amber-900">
                         <p class="font-bold text-base">{{ __('ui.lugar.ascensor_aviso_titulo') }}</p>
-                        <p>
-                            Aunque este ascensor figura como operativo, <strong>no hay un 100% de garantía
-                            de que esté funcionando el día que vayas</strong>. Lamentablemente, no ha habido
-                            una política pública a la altura para garantizar su funcionamiento continuo.
-                        </p>
+                        <p>{!! __('ui.lugar.ascensor_operativo_aviso') !!}</p>
                         <div class="bg-amber-100 rounded-xl px-4 py-3 space-y-1">
                             <p class="font-bold text-amber-800">{{ __('ui.lugar.ascensor_aviso_horario') }}</p>
                             <p>{{ __('ui.lugar.ascensor_aviso_horario_semana') }}</p>
                             <p>{{ __('ui.lugar.ascensor_aviso_horario_finde') }}</p>
                         </div>
-                        <p class="text-amber-700 text-xs">
-                            🔧 Las mantenciones se realizan <strong>una vez al mes en día de semana</strong>,
-                            lo que puede dejarlo fuera de servicio por horas. Ojalá no te toque ese día.
-                        </p>
+                        <p class="text-amber-700 text-xs">{!! __('ui.lugar.ascensor_operativo_mantenc') !!}</p>
                     </div>
                 </div>
             </div>
@@ -140,11 +133,7 @@
                     <span class="text-2xl leading-none mt-0.5">🚫</span>
                     <div class="space-y-1 text-sm text-red-900">
                         <p class="font-bold text-base">{{ __('ui.lugar.ascensor_fuera_titulo') }}</p>
-                        <p>
-                            Este ascensor se encuentra actualmente <strong>fuera de servicio</strong>.
-                            Lamentablemente, muchos ascensores de Valparaíso llevan años sin funcionar
-                            y no ha habido una política pública a la altura para recuperarlos.
-                        </p>
+                        <p>{!! __('ui.lugar.ascensor_fuera_descripcion') !!}</p>
                     </div>
                 </div>
             </div>
