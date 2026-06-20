@@ -26,7 +26,7 @@ class PuntoInteresController extends Controller
     try {
         $query = PuntoInteres::query()
             ->where('activo', 1)
-            ->whereNotIn('id', [81,80,64,87, 115,128])
+            ->sinExcluidos()
             ->where('eliminado', false);
 
         if ($request->filled('category')) {
@@ -144,7 +144,7 @@ class PuntoInteresController extends Controller
 
     public function buscar(Request $request)
     {
-        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->where('activo', 1)->where('eliminado', false)->whereNotIn('id', [81,80,64,87,115])])
+        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->where('activo', 1)->where('eliminado', false)->sinExcluidos()])
             ->having('puntos_interes_count', '>', 0)
             ->orderByDesc('puntos_interes_count')
             ->get();
@@ -179,7 +179,7 @@ class PuntoInteresController extends Controller
     {
         $query = PuntoInteres::query()
             ->where('activo', 1)
-            ->whereNotIn('id', [81,80,64,87,115,128])
+            ->sinExcluidos()
             ->where('eliminado', false);
 
         if ($request->filled('category')) {
@@ -205,8 +205,8 @@ class PuntoInteresController extends Controller
 
         $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q
         ->where('activo', 1)
-        ->where('eliminado', false)              
-        ->whereNotIn('id', [81,80,64,87,115,128])
+        ->where('eliminado', false)
+        ->sinExcluidos()
         ])
             ->orderByDesc('puntos_interes_count')
             ->get();
@@ -471,7 +471,7 @@ class PuntoInteresController extends Controller
         if ($punto->lat && $punto->lng) {
             $cercanos = PuntoInteres::where('activo', true)
                 ->where('eliminado', false)
-                ->whereNotIn('id', [81,80,64,87,115,128])
+                ->sinExcluidos()
                 ->where('id', '!=', $punto->id)
                 ->whereNotNull('lat')
                 ->whereNotNull('lng')

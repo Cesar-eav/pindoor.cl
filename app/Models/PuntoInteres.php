@@ -47,6 +47,13 @@ class PuntoInteres extends Model
         'imagen_perfil',
     ];
 
+    const IDS_EXCLUIDOS = [81, 80, 64, 87, 115, 128];
+
+    public function scopeSinExcluidos($query)
+    {
+        return $query->whereNotIn('id', self::IDS_EXCLUIDOS);
+    }
+
     // ═══════════════════════════════════════════════════════════════════════════
     // CATÁLOGOS DE MÓDULOS
     // ═══════════════════════════════════════════════════════════════════════════
