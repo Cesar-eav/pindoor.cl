@@ -28,11 +28,11 @@
 >
 
     {{-- Header compacto --}}
-<div class="flex items-center justify-between mb-3">
+<div class="flex items-center justify-left mb-3">
     <h1 class="text-2xl font-extrabold tracking-tight text-slate-950">
         {{ __('ui.panoramas.titulo') }}
     </h1>
-    <div class="flex items-center gap-2 text-xs text-slate-500 font-medium">
+    <div class="flex items-center ml-5 gap-2 text-xs text-slate-500 font-medium">
         <span><strong class="text-slate-900 font-extrabold text-sm">{{ $panoramas->where('categoria','!=','exposicion')->count() }}</strong> {{ __('ui.panoramas.eventos') }}</span>
         @if($exposiciones->isNotEmpty())
         <span class="text-slate-300">·</span>
@@ -96,7 +96,7 @@
             <div class="flex-1 h-px bg-gray-200"></div>
             <span class="text-xs text-gray-400 font-semibold">{{ $exposiciones->count() }} {{ $exposiciones->count() === 1 ? __('ui.panoramas.exposicion') : __('ui.panoramas.exposiciones') }}</span>
         </div>
-        <div class="flex gap-4 overflow-x-auto pb-2" style="scrollbar-width:none">
+        <div class="flex gap-2 overflow-x-auto pb-2" style="scrollbar-width:none">
             @foreach($exposiciones as $exp)
             @php
                 $hoyExp   = \Carbon\Carbon::today();
@@ -104,49 +104,48 @@
                 $hasta    = $exp->fecha_fin ?? $exp->fecha;
                 $diasRest = $hoyExp->diffInDays($hasta, false);
             @endphp
-            <a href="{{ $exp->enlace ?: route('atractivos.panoramas') }}"
-               @if($exp->enlace) target="_blank" rel="noopener noreferrer" @endif
-               class="group relative block shrink-0 rounded-2xl overflow-hidden shadow-sm bg-gray-900" style="width:12rem;height:18rem;">
+            <a href="{{ route('panoramas.show', $exp) }}"
+               class="group relative block shrink-0" style="width:12rem;">
 
-                @if($exp->imagen)
-                    <img src="{{ asset('storage/' . $exp->imagen) }}"
-                         alt="{{ $exp->titulo }}"
-                         class="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:opacity-90 group-hover:scale-105 transition duration-500">
-                @endif
-                <div class="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent"></div>
+                {{-- Imagen --}}
+                <div class="relative overflow-hidden shadow-sm bg-gray-900" style="height:14rem;">
+                    @if($exp->imagen)
+                        <img src="{{ asset('storage/' . $exp->imagen) }}"
+                             alt="{{ $exp->titulo }}"
+                             class="absolute inset-0 w-full h-full object-cover opacity-100 group-hover:opacity-90 group-hover:scale-105 transition duration-500">
+                    @endif
 
-                {{-- Badge vigencia --}}
-                <div class="absolute top-3 left-3 z-10">
-                    @if($diasRest <= 7 && $diasRest >= 0)
-                        <span class="bg-[#fc5648] text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
-                            {{ $diasRest === 0 ? __('ui.panoramas.ultimos_dias') . ' ' . __('ui.panoramas.hoy') : __('ui.panoramas.ultimos_dias') . ' ' . $diasRest }}
-                        </span>
-                    @elseif(!$iniciada)
-                        <span class="bg-gray-800/80 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
-                            {{ __('ui.panoramas.proximamente') }}
-                        </span>
-                    @else
-                        <span class="bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
-                            {{ __('ui.panoramas.en_curso') }}
-                        </span>
-                    @endif
-                    @if($exp->es_gratuito)
-                        <span class="ml-1 bg-green-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full">{{ __('ui.panoramas.gratis') }}</span>
-                    @endif
+                    {{-- Badge vigencia --}}
+                    <div class="absolute top-3 left-32 z-10">
+                        @if($diasRest <= 7 && $diasRest >= 0)
+                            <span class="bg-[#fc5648] text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
+                                {{ $diasRest === 0 ? __('ui.panoramas.ultimos_dias') . ' ' . __('ui.panoramas.hoy') : __('ui.panoramas.ultimos_dias') . ' ' . $diasRest }}
+                            </span>
+                        @elseif(!$iniciada)
+                            <span class="bg-gray-800/80 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
+                                {{ __('ui.panoramas.proximamente') }}
+                            </span>
+                        @else
+                            <span class="bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
+                                {{ __('ui.panoramas.en_curso') }}
+                            </span>
+                        @endif
+                        @if($exp->es_gratuito)
+                            <span class="ml-1 bg-green-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full">{{ __('ui.panoramas.gratis') }}</span>
+                        @endif
+                    </div>
                 </div>
 
-                <div class="absolute bottom-0 left-0 right-0 p-4">
-                    <p class="text-[11px] font-bold text-white/60 uppercase tracking-widest mb-1">
+                {{-- Info debajo de la imagen --}}
+                <div class="pt-2 px-0.5">
+                    <p class="text-[10px] font-bold text-gray-400  tracking-widest mb-1">
                         @if($iniciada)
                             Hasta el {{ $hasta->locale('es')->translatedFormat('j \d\e F') }}
                         @else
                             Del {{ $exp->fecha->locale('es')->translatedFormat('j \d\e F') }} al {{ $hasta->locale('es')->translatedFormat('j \d\e F') }}
                         @endif
                     </p>
-                    <h3 class="font-extrabold text-white leading-snug line-clamp-2">{{ $exp->titulo }}</h3>
-                    @if($exp->ubicacion)
-  
-                    @endif
+                    <h3 class="text-gray-500 leading-snug text-xs">{{ $exp->titulo }}</h3>
                 </div>
             </a>
             @endforeach
