@@ -16,10 +16,10 @@
 
             <div class="relative z-10">
                 <h1 class="text-white text-4xl font-bold leading-tight mb-4">
-                    Tu arte,<br>visible en Valparaíso
+                    Tu arte,<br>visible en La Escena
                 </h1>
                 <p class="text-white/80 text-base leading-relaxed mb-8">
-                    Crea tu ficha de artista y permite<br>que te encuentren para contratarte o colaborar.
+                    Únete al directorio de artistas y agrupaciones<br>culturales de Valparaíso en Pindoor.
                 </p>
                 <ul class="space-y-3">
                     <li class="flex items-center gap-3 text-white/80 text-sm">
@@ -48,8 +48,8 @@
             <a href="/" class="inline-flex items-center mb-4">
                 <span class="text-white font-bold text-2xl tracking-tight">Pin</span><span class="text-white/65 font-bold text-2xl tracking-tight">door</span>
             </a>
-            <h2 class="text-white text-xl font-bold leading-snug mb-2">Tu arte, visible en Valparaíso</h2>
-            <p class="text-white/80 text-sm leading-relaxed mb-4">Crea tu ficha y permite que te contraten o colaboren contigo.</p>
+            <h2 class="text-white text-xl font-bold leading-snug mb-2">Tu arte, visible en La Escena</h2>
+            <p class="text-white/80 text-sm leading-relaxed mb-4">Únete al directorio de artistas y agrupaciones culturales de Valparaíso.</p>
             <ul class="space-y-2">
                 <li class="flex items-center gap-2 text-white/80 text-sm">
                     <span class="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-white text-[10px] shrink-0">✓</span>
@@ -68,8 +68,8 @@
     </div>
 
     <div class="mb-6">
-        <h2 class="text-xl font-bold text-gray-900">Crea tu perfil de artista</h2>
-        <p class="text-sm text-gray-500 mt-1">Perfil gratuito en Pindoor</p>
+        <h2 class="text-xl font-bold text-gray-900">Únete a La Escena</h2>
+        <p class="text-sm text-gray-500 mt-1">Artistas y agrupaciones culturales · Pindoor</p>
     </div>
 
     <form method="POST" action="{{ route('artista.register.store') }}">
@@ -79,7 +79,7 @@
         </div>
 
         <div>
-            <x-input-label for="name" value="Tu nombre artístico o real" />
+            <x-input-label for="name" value="Tu nombre artístico, real o de la agrupación" />
             <x-text-input id="name" class="block mt-1 w-full" type="text" name="name"
                           :value="old('name')" required autofocus autocomplete="name" />
             <x-input-error :messages="$errors->get('name')" class="mt-2" />

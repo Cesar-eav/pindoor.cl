@@ -19,7 +19,7 @@
                     Casi listo,<br>solo falta un paso
                 </h1>
                 <p class="text-white/80 text-base leading-relaxed">
-                    Confirma tu email para activar<br>tu perfil de artista en Pindoor.
+                    Confirma tu email para activar<br>tu perfil de artista o agrupación en Pindoor.
                 </p>
             </div>
 

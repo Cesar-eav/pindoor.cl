@@ -1,7 +1,7 @@
 @extends('layouts.pindoor')
 
 @section('title', 'Contacto — Pindoor.cl')
-@section('description', 'Contáctanos para registrar tu local en Valparaíso o para unirte como artista a la red Pindoor.')
+@section('description', 'Contáctanos para registrar tu local en Valparaíso o para unirte como artista o agrupación cultural a la red Pindoor.')
 @section('canonical', route('contacto.index'))
 @section('bodyClass', 'bg-gray-50 text-gray-900 font-sans antialiased')
 
@@ -20,7 +20,7 @@
                 Conecta con Pindoor
             </div>
             <h1 class="text-4xl md:text-5xl font-black leading-tight mb-4">
-                ¿Tienes un <span class="text-[#fc5648]">local</span><br>o eres <span class="text-[#fc5648]">artista</span>?
+                ¿Tienes un <span class="text-[#fc5648]">local</span>, eres <span class="text-[#fc5648]">artista</span><br>o formas parte de una <span class="text-[#fc5648]">agrupación cultural</span>?
             </h1>
             <p class="text-white/60 text-base md:text-lg mb-8">
                 Cuéntanos quién eres y te contactamos para mostrarte cómo crecer en la red Pindoor.
@@ -41,7 +41,7 @@
                 </a>
                 <a href="{{ route('artista.register') }}"
                    class="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-6 py-3.5 rounded-2xl shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 text-sm border border-white/20">
-                    Registro artista →
+                    Registro artista / agrupación →
                 </a>
             </div>
             <p class="text-white text-md mt-4">O completa el formulario y te contactamos nosotros.</p>
@@ -139,7 +139,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                 </svg>
-                Soy artista
+                Soy artista / agrupación
             </button>
         </div>
 
@@ -269,8 +269,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-white font-bold text-sm">Únete como artista</h2>
-                        <p class="text-white/70 text-xs">Músico · Pintor · Actor · Fotógrafo · Bailarín</p>
+                        <h2 class="text-white font-bold text-sm">Únete como artista o agrupación cultural</h2>
+                        <p class="text-white/70 text-xs">Músico · Pintor · Actor · Fotógrafo · Compañía · Colectivo</p>
                     </div>
                 </div>
 
