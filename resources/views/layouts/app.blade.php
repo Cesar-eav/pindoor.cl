@@ -20,7 +20,10 @@
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+            <div class="fixed top-0 inset-x-0 z-50">
+                @include('layouts.navigation')
+            </div>
+            <div class="h-16"></div>
 
             <!-- Page Heading -->
             @isset($header)

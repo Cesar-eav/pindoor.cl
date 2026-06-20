@@ -100,22 +100,16 @@ class ClienteController extends Controller
     {
         $this->autorizarPunto($punto);
         $punto->load('moduloDatos', 'moduloItems', 'categoria', 'imagenes');
-        $modulos = $punto->modulos_habilitados ?? [];
-        return view('cliente.perfil', compact('punto', 'modulos'));
+        $modulos         = $punto->modulos_habilitados ?? [];
+        $datoCarta       = $punto->dato('carta');
+        $datoAlojamiento = $punto->dato('alojamiento');
+        return view('cliente.perfil', compact('punto', 'modulos', 'datoCarta', 'datoAlojamiento'));
     }
-
-    // ─── Edición del perfil ────────────────────────────────────────────────────
 
     public function editarPerfil(PuntoInteres $punto)
     {
         $this->autorizarPunto($punto);
-
-        $punto->load('moduloDatos', 'categoria');
-        $modulos          = $punto->modulos_habilitados ?? [];
-        $datoCarta        = $punto->dato('carta');
-        $datoAlojamiento  = $punto->dato('alojamiento');
-
-        return view('cliente.perfil-editar', compact('punto', 'modulos', 'datoCarta', 'datoAlojamiento'));
+        return redirect()->route('cliente.perfil.ver', $punto);
     }
 
     public function actualizarPerfil(Request $request, PuntoInteres $punto)
@@ -124,7 +118,7 @@ class ClienteController extends Controller
         $modulos = $punto->modulos_habilitados ?? [];
 
         $request->validate([
-            'description'         => 'required|string',
+            'description'         => 'sometimes|nullable|string',
             'horario'             => 'nullable|string|max:255',
             'enlace'              => 'nullable|url|max:255',
             'video_url'           => 'nullable|url|max:255',
@@ -144,18 +138,18 @@ class ClienteController extends Controller
         ]);
 
         // ── Campos universales en puntosinteres ──────────────────────────────
-        $datosPunto = [
-            'description'          => $request->description,
-            'horario'              => $request->horario,
-            'sector'               => $request->sector,
-            'direccion'            => $request->direccion,
-            'enlace'               => $request->enlace,
-            'video_url'            => $request->video_url,
-            'tags'                 => $request->tags
-                                        ? array_map('trim', explode(',', $request->tags))
-                                        : [],
-            'descripcion_busqueda' => $request->descripcion_busqueda,
-        ];
+        $datosPunto = array_filter([
+            'description'          => $request->has('description') ? $request->description : null,
+            'horario'              => $request->has('horario') ? $request->horario : null,
+            'sector'               => $request->has('sector') ? $request->sector : null,
+            'direccion'            => $request->has('direccion') ? $request->direccion : null,
+            'enlace'               => $request->has('enlace') ? $request->enlace : null,
+            'video_url'            => $request->has('video_url') ? $request->video_url : null,
+            'tags'                 => $request->has('tags')
+                                        ? ($request->tags ? array_map('trim', explode(',', $request->tags)) : [])
+                                        : null,
+            'descripcion_busqueda' => $request->has('descripcion_busqueda') ? $request->descripcion_busqueda : null,
+        ], fn($v) => $v !== null);
 
         if ($request->hasFile('imagen_perfil')) {
             if ($punto->imagen_perfil) {

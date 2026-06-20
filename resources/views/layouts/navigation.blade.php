@@ -4,9 +4,9 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
-                    </a>
+                    <span class="text-xl font-black tracking-tight leading-none">
+                        <span style="color:#fc5648">Pin</span><span class="text-gray-900">door</span>
+                    </span>
                 </div>
 
                 <!-- Navigation Links -->
@@ -44,15 +44,8 @@
                             Blog
                         </x-nav-link>
 
-                    @elseif(auth()->user()->type === 'cliente')
-                        <x-nav-link :href="route('cliente.perfil')" :active="request()->routeIs('cliente.*')">
-                            Mi Negocio
-                        </x-nav-link>
 
-                    @else
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                            {{ __('Dashboard') }}
-                        </x-nav-link>
+
                     @endif
 
                 </div>
@@ -92,7 +85,7 @@
             <div class="-me-2 flex items-center sm:hidden">
                 <button onclick="toggleMobileMenu()" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path id="hamburger-open" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path id="hamburger-open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         <path id="hamburger-close" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
@@ -137,14 +130,75 @@
                 </x-responsive-nav-link>
 
             @elseif(auth()->user()->type === 'cliente')
-                <x-responsive-nav-link :href="route('cliente.perfil')" :active="request()->routeIs('cliente.*')">
-                    Mi Negocio
-                </x-responsive-nav-link>
+                @if(isset($punto, $modulos))
+                    {{-- Menú contextual de la página de perfil --}}
+                    @php
+                        $_tieneActividadMob = count(array_intersect(['oferta_del_dia','menu_del_dia','avisos','promociones'], $modulos)) > 0;
+                        $_tieneContenidoMob = in_array('carta', $modulos) || in_array('entradas', $modulos) || in_array('exposiciones', $modulos) || in_array('agenda', $modulos) || in_array($punto->categoria_id, [13,14]);
+                        $_tieneAlojMob      = count(array_intersect(['habitaciones','servicios','politicas'], $modulos)) > 0;
+                    @endphp
 
-            @else
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                    {{ __('Dashboard') }}
-                </x-responsive-nav-link>
+                    <div class="px-4 pt-3 pb-1 flex items-center justify-between">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $punto->title }}</p>
+                        <a href="{{ route('puntos.show', $punto->slug) }}" target="_blank"
+                           class="text-[10px] text-[#fc5648] font-bold">Ver ficha ↗</a>
+                    </div>
+
+                    @if($_tieneActividadMob)
+                    <div class="px-4 pt-2 pb-0.5">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Actividad de hoy</p>
+                    </div>
+                    @if(in_array('oferta_del_dia', $modulos))
+                    <x-responsive-nav-link href="#oferta" onclick="toggleMobileMenu()">🏷️ Oferta del día</x-responsive-nav-link>
+                    @endif
+                    @if(in_array('menu_del_dia', $modulos))
+                    <x-responsive-nav-link href="#menu" onclick="toggleMobileMenu()">🥘 Menú del día</x-responsive-nav-link>
+                    @endif
+                    @if(in_array('avisos', $modulos))
+                    <x-responsive-nav-link href="#avisos" onclick="toggleMobileMenu()">📢 Avisos</x-responsive-nav-link>
+                    @endif
+                    @if(in_array('promociones', $modulos))
+                    <x-responsive-nav-link href="#promociones" onclick="toggleMobileMenu()">🎁 Promociones</x-responsive-nav-link>
+                    @endif
+                    @endif
+
+                    <div class="px-4 pt-3 pb-0.5">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Tu perfil</p>
+                    </div>
+                    <x-responsive-nav-link href="#galeria"       onclick="toggleMobileMenu()">🖼️ Galería</x-responsive-nav-link>
+                    <x-responsive-nav-link href="#imagen-perfil" onclick="toggleMobileMenu()">🏷️ Logo / imagen</x-responsive-nav-link>
+                    <x-responsive-nav-link href="#descripcion"   onclick="toggleMobileMenu()">📝 Descripción</x-responsive-nav-link>
+                    <x-responsive-nav-link href="#ubicacion"     onclick="toggleMobileMenu()">📍 Ubicación</x-responsive-nav-link>
+                    <x-responsive-nav-link href="#contacto"      onclick="toggleMobileMenu()">🔗 Contacto</x-responsive-nav-link>
+                    <x-responsive-nav-link href="#busqueda"      onclick="toggleMobileMenu()">🔍 Búsqueda SEO</x-responsive-nav-link>
+
+                    @if($_tieneContenidoMob || $_tieneAlojMob)
+                    <div class="px-4 pt-3 pb-0.5">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Contenido</p>
+                    </div>
+                    @if(in_array('carta', $modulos))
+                    <x-responsive-nav-link href="#carta" onclick="toggleMobileMenu()">🍽️ Carta / Menú</x-responsive-nav-link>
+                    @endif
+                    @if($_tieneAlojMob)
+                    <x-responsive-nav-link href="#alojamiento" onclick="toggleMobileMenu()">🛏️ Alojamiento</x-responsive-nav-link>
+                    @endif
+                    @if(in_array('entradas', $modulos) || in_array('exposiciones', $modulos))
+                    <x-responsive-nav-link :href="route('cliente.museo', $punto)">🎟️ Museo ↗</x-responsive-nav-link>
+                    @endif
+                    @if(in_array('agenda', $modulos))
+                    <x-responsive-nav-link :href="route('cliente.eventos', $punto)">📅 Eventos ↗</x-responsive-nav-link>
+                    @endif
+                    @if(in_array($punto->categoria_id, [13,14]))
+                    <x-responsive-nav-link :href="route('cliente.productos.index')">🛍️ Catálogo ↗</x-responsive-nav-link>
+                    @endif
+                    @endif
+
+                @else
+                    <x-responsive-nav-link :href="route('cliente.perfil')" :active="request()->routeIs('cliente.*')">
+                        Mi Negocio
+                    </x-responsive-nav-link>
+                @endif
+
             @endif
 
         </div>
