@@ -1,8 +1,8 @@
 @extends('layouts.pindoor')
 
-@section('title', 'Artistas en Valparaíso — Pindoor')
-@section('description', 'Descubre artistas de Valparaíso: músicos, artistas visuales, fotógrafos, bailarines y más.')
-@section('canonical', route('artistas.index'))
+@section('title', 'La Escena — Artistas y agrupaciones en Valparaíso · Pindoor')
+@section('description', 'Descubre artistas y agrupaciones culturales de Valparaíso: músicos, visuales, compañías de teatro, colectivos y más.')
+@section('canonical', route('artista.index'))
 @section('bodyClass', 'bg-gray-100 text-gray-900')
 
 @section('content')
@@ -10,19 +10,19 @@
 
     {{-- Cabecera --}}
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Artistas en Valparaíso</h1>
-        <p class="text-sm text-gray-500 mt-1">Músicos, visuales, fotógrafos, bailarines y más</p>
+        <h1 class="text-2xl font-bold text-gray-900">La Escena</h1>
+        <p class="text-sm text-gray-500 mt-1">Artistas y agrupaciones culturales de Valparaíso</p>
     </div>
 
     {{-- Filtro por disciplina --}}
     <div class="flex flex-wrap gap-2 mb-6">
-        <a href="{{ route('artistas.index') }}"
+        <a href="{{ route('artista.index') }}"
            class="px-3 py-1.5 rounded-full text-xs font-bold border transition
                   {{ !$disciplina ? 'bg-violet-600 text-white border-violet-600' : 'bg-white text-gray-600 border-gray-200 hover:border-violet-400 hover:text-violet-600' }}">
             Todos
         </a>
         @foreach($disciplinas as $slug => $d)
-            <a href="{{ route('artistas.index', ['disciplina' => $slug]) }}"
+            <a href="{{ route('artista.index', ['disciplina' => $slug]) }}"
                class="px-3 py-1.5 rounded-full text-xs font-bold border transition
                       {{ $disciplina === $slug ? 'bg-violet-600 text-white border-violet-600' : 'bg-white text-gray-600 border-gray-200 hover:border-violet-400 hover:text-violet-600' }}">
                 {{ $d['emoji'] }} {{ $d['label'] }}
@@ -37,7 +37,7 @@
             <p class="text-gray-500 font-semibold">No hay artistas en esta categoría aún.</p>
             <a href="{{ route('artista.register') }}"
                class="inline-block mt-4 text-sm font-bold text-violet-600 hover:underline">
-                ¿Eres artista? Crea tu perfil →
+                ¿Eres artista o agrupación? Únete a La Escena →
             </a>
         </div>
     @else
@@ -90,11 +90,11 @@
 
     {{-- CTA para artistas --}}
     <div class="mt-8 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl p-6 text-white text-center">
-        <p class="font-bold text-lg mb-1">¿Eres artista en Valparaíso?</p>
-        <p class="text-sm text-white/80 mb-4">Crea tu perfil gratuito y que te encuentren para contratarte o colaborar.</p>
+        <p class="font-bold text-lg mb-1">¿Eres artista o agrupación cultural en Valparaíso?</p>
+        <p class="text-sm text-white/80 mb-4">Únete a La Escena: crea tu perfil gratuito y que te encuentren para contratarte o colaborar.</p>
         <a href="{{ route('artista.register') }}"
            class="inline-block bg-white text-violet-700 font-bold text-sm px-5 py-2 rounded-xl hover:bg-violet-50 transition">
-            Crear mi perfil →
+            Unirme a La Escena →
         </a>
     </div>
 

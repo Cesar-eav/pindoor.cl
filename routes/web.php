@@ -78,7 +78,7 @@ Route::get('/registro-artista',  [ArtistaController::class, 'showRegister'])->na
 Route::post('/registro-artista', [ArtistaController::class, 'register'])->name('artista.register.store');
 
 // Directorio público de artistas
-Route::get('/artistas', [ArtistaController::class, 'directorio'])->name('artistas.index');
+Route::get('/la-escena', [ArtistaController::class, 'directorio'])->name('artista.index');
 
 
 
