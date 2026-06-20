@@ -122,7 +122,7 @@
         </div>
 
         {{-- Vista Mapa --}}
-        <div id="vista-mapa" class="hidden mb-8">
+        <div id="vista-mapa" class="{{ request('vista') === 'mapa' ? '' : 'hidden' }} mb-8">
             {{-- Pills de categoría --}}
             <div id="pills-mapa-desktop" class="flex flex-wrap gap-2 mb-4">
                 <button data-slug=""
@@ -147,7 +147,7 @@
         </div>
 
         {{-- Vista Listado — Livewire --}}
-        <div id="vista-listado">
+        <div id="vista-listado" class="{{ request('vista') === 'mapa' ? 'hidden' : '' }}">
             @livewire('atractivos-grid')
         </div>{{-- /vista-listado --}}
 
