@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Artista;
 use App\Models\Categoria;
 use App\Models\Panorama;
 use App\Models\Post;
@@ -76,14 +77,25 @@ class AtractivosGrid extends Component
         $hayFiltros = (bool) ($this->search || $this->category || $this->lat);
 
         $panoramas = collect();
+        $artistas  = collect();
         if ($this->search) {
+            $s = $this->search;
             $panoramas = Panorama::where('activo', true)
                 ->where('fecha', '>=', now()->toDateString())
                 ->where(fn($q) => $q
-                    ->where('titulo', 'like', "%{$this->search}%")
-                    ->orWhere('ubicacion', 'like', "%{$this->search}%")
+                    ->where('titulo', 'like', "%{$s}%")
+                    ->orWhere('ubicacion', 'like', "%{$s}%")
                 )
                 ->orderBy('fecha')
+                ->limit(6)
+                ->get();
+
+            $artistas = Artista::where('activo', true)
+                ->where(fn($q) => $q
+                    ->where('nombre', 'like', "%{$s}%")
+                    ->orWhere('descripcion', 'like', "%{$s}%")
+                    ->orWhere('disciplina', 'like', "%{$s}%")
+                )
                 ->limit(6)
                 ->get();
         }
@@ -104,7 +116,7 @@ class AtractivosGrid extends Component
 
         return view('livewire.atractivos-grid', compact(
             'atractivos', 'categorias', 'hayFiltros', 'panoramas',
-            'proximosPanoramas', 'ultimosPosts'
+            'proximosPanoramas', 'ultimosPosts', 'artistas'
         ));
     }
 }
