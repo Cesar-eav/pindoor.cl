@@ -10,6 +10,7 @@ use App\Models\Post;
 use App\Models\Experiencia;
 use App\Models\Categoria;
 use App\Models\PuntoProducto;
+use App\Models\Artista;
 use App\Mail\NuevaExperienciaPropuesta;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -86,6 +87,7 @@ class PuntoInteresController extends Controller
             ]);
 
         $panoramas = collect();
+        $artistas  = collect();
         if ($request->filled('search')) {
             $s = $request->search;
             $panoramas = Panorama::where('activo', true)
@@ -94,6 +96,13 @@ class PuntoInteresController extends Controller
                 ->where(fn($q) => $q->where('titulo', 'like', "%{$s}%")
                                     ->orWhere('ubicacion', 'like', "%{$s}%"))
                 ->orderBy('fecha')
+                ->limit(6)
+                ->get();
+
+            $artistas = Artista::where('activo', true)
+                ->where(fn($q) => $q->where('nombre', 'like', "%{$s}%")
+                                    ->orWhere('descripcion', 'like', "%{$s}%")
+                                    ->orWhere('disciplina', 'like', "%{$s}%"))
                 ->limit(6)
                 ->get();
         }
@@ -122,7 +131,7 @@ class PuntoInteresController extends Controller
 
         $ultimasExperiencias = Experiencia::activas()->latest()->take(2)->get();
 
-        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts', 'ultimasExperiencias'));
+        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts', 'ultimasExperiencias', 'artistas'));
 
     } catch (\Exception $e) {
         \Log::error('Error en index: ' . $e->getMessage());
@@ -198,7 +207,18 @@ class PuntoInteresController extends Controller
             ->orderByDesc('puntos_interes_count')
             ->get();
 
-        return view('puntos.explorar', compact('atractivos', 'categorias'));
+        $artistas = collect();
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $artistas = Artista::where('activo', true)
+                ->where(fn($q) => $q->where('nombre', 'like', "%{$s}%")
+                                    ->orWhere('descripcion', 'like', "%{$s}%")
+                                    ->orWhere('disciplina', 'like', "%{$s}%"))
+                ->limit(6)
+                ->get();
+        }
+
+        return view('puntos.explorar', compact('atractivos', 'categorias', 'artistas'));
     }
 
     /**

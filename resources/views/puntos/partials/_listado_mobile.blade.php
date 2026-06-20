@@ -172,7 +172,7 @@
         </p>
     </div>
 
-    @elseif(empty($panoramas) || $panoramas->isEmpty())
+    @elseif((empty($panoramas) || $panoramas->isEmpty()) && (empty($artistas) || $artistas->isEmpty()))
         <div class="text-center py-16">
             <div class="text-5xl mb-3">🕵️‍♂️</div>
             <p class="font-bold text-gray-700 mb-1">{{ __('ui.explorar.sin_resultados') }}</p>
@@ -210,6 +210,39 @@
                     </p>
                     @if($panorama->ubicacion)
                         <p class="text-xs text-gray-400 truncate">📍 {{ $panorama->ubicacion }}</p>
+                    @endif
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Artistas en búsqueda --}}
+    @if(isset($artistas) && $artistas->isNotEmpty())
+    <div class="mt-8">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-sm font-bold text-gray-700">Artistas y agrupaciones</h2>
+            <a href="{{ route('artista.index') }}" class="text-xs text-violet-600 font-semibold">Ver La Escena</a>
+        </div>
+        <div class="flex flex-col gap-3">
+            @foreach($artistas as $artista)
+            <a href="{{ route('artista.show', $artista->slug) }}"
+               class="flex gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm p-3 items-center">
+                @if($artista->imagen_perfil)
+                    <img src="{{ asset('storage/' . $artista->imagen_perfil) }}"
+                         alt="{{ $artista->nombre }}"
+                         class="w-16 h-16 rounded-full object-cover border-2 border-violet-100 shrink-0">
+                @else
+                    <div class="w-16 h-16 rounded-full bg-violet-100 flex items-center justify-center text-2xl shrink-0">
+                        {{ \App\Models\Artista::DISCIPLINAS[$artista->disciplina]['emoji'] ?? '🎨' }}
+                    </div>
+                @endif
+                <div class="min-w-0">
+                    <p class="font-bold text-gray-900 text-sm leading-snug">{{ $artista->nombre }}</p>
+                    <p class="text-xs text-violet-600 font-semibold mt-0.5">{{ $artista->disciplinaLabel() }}</p>
+                    @if($artista->ciudad)
+                        <p class="text-xs text-gray-400 truncate">📍 {{ $artista->ciudad }}</p>
                     @endif
                 </div>
             </a>
