@@ -13,6 +13,7 @@ return [
         'mapa'         => 'Mapa',
         'listado'      => 'Listado',
         'instagram'    => 'Instagram',
+        'info'         => 'Info práctica',
     ],
 
     // FAB / Bottom nav
