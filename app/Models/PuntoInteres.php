@@ -81,7 +81,7 @@ class PuntoInteres extends Model
             $categoriaId === 11                 => ['oferta_del_dia', 'habitaciones', 'servicios', 'politicas'],
             $categoriaId === 7                  => ['oferta_del_dia', 'entradas', 'exposiciones'],
             $categoriaId === 5                  => ['oferta_del_dia', 'agenda'],
-            default                             => ['oferta_del_dia'],
+            default                             => ['oferta_del_dia','agenda'],
         };
     }
 
