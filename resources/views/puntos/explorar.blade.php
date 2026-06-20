@@ -43,11 +43,13 @@
                 {{ __('ui.home.todos_label') }}
             </a>
             @foreach($categorias as $cat)
+            @if($cat->puntos_interes_count > 0)
             <a href="{{ route('puntos.explorar', array_filter(['category' => $cat->slug, 'search' => request('search')])) }}"
                class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap
                       {{ request('category') == $cat->slug ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-300' }}">
                 {{ $cat->nombre }}
             </a>
+            @endif
             @endforeach
         </div>
     </div>

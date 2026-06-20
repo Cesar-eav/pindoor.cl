@@ -203,7 +203,11 @@ class PuntoInteresController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->where('activo', 1)->where('eliminado', false)])
+        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q
+        ->where('activo', 1)
+        ->where('eliminado', false)              
+        ->whereNotIn('id', [81,80,64,87,115,128])
+        ])
             ->orderByDesc('puntos_interes_count')
             ->get();
 
