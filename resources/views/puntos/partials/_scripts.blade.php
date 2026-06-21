@@ -7,6 +7,8 @@ const GPS_LNG     = {{ request('lng') ? (float) request('lng') : 'null' }};
 let mapaIniciado  = false;
 let mapaLeaflet   = null;
 let markerGroup   = null;
+let marcadorUbicacion = null;
+let watchIdMapa   = null;
 
 function setView(vista) {
     const mobile = window.innerWidth < 768;
@@ -186,6 +188,20 @@ function iniciarMapa(containerId) {
 
     markerGroup = L.layerGroup().addTo(mapaLeaflet);
 
+    // ── Control "Mi ubicación" ────────────────────────────────────────────
+    const GpsControl = L.Control.extend({
+        options: { position: 'bottomright' },
+        onAdd() {
+            const btn = L.DomUtil.create('button', 'leaflet-gps-btn');
+            btn.title = '{{ __("ui.mapa.estas_aqui") }}';
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
+            L.DomEvent.on(btn, 'click', L.DomEvent.stopPropagation);
+            L.DomEvent.on(btn, 'click', () => toggleUbicacion(btn));
+            return btn;
+        },
+    });
+    new GpsControl().addTo(mapaLeaflet);
+
     // Aplicar filtro activo al iniciar el mapa si hay categoría seleccionada
     const activePill = document.querySelector('.overflow-x-auto.no-scrollbar a.bg-gray-900[data-slug]');
     filtrarMapa(activePill?.dataset.slug ?? null);
@@ -338,4 +354,41 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+function toggleUbicacion(btn) {
+    if (watchIdMapa !== null) {
+        // Apagar tracking
+        navigator.geolocation.clearWatch(watchIdMapa);
+        watchIdMapa = null;
+        if (marcadorUbicacion) { mapaLeaflet.removeLayer(marcadorUbicacion); marcadorUbicacion = null; }
+        btn.classList.remove('activo');
+        return;
+    }
+
+    if (!navigator.geolocation) { alert('{{ __("ui.general.sin_geolocalizacion") }}'); return; }
+
+    btn.classList.add('activo');
+
+    const icono = L.divIcon({
+        className: '',
+        html: `<div class="user-location-dot"><div class="pulse"></div><div class="core"></div></div>`,
+        iconSize: [18, 18], iconAnchor: [9, 9],
+    });
+
+    watchIdMapa = navigator.geolocation.watchPosition(pos => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+
+        if (marcadorUbicacion) {
+            marcadorUbicacion.setLatLng([lat, lng]);
+        } else {
+            marcadorUbicacion = L.marker([lat, lng], { icon: icono, zIndexOffset: 1000 })
+                .addTo(mapaLeaflet)
+                .bindPopup('<strong style="font-family:Plus Jakarta Sans,sans-serif">{{ __("ui.mapa.estas_aqui") }}</strong>');
+            mapaLeaflet.flyTo([lat, lng], Math.max(mapaLeaflet.getZoom(), 16), { duration: 1 });
+        }
+    }, () => {
+        btn.classList.remove('activo');
+        watchIdMapa = null;
+    }, { enableHighAccuracy: true, maximumAge: 0 });
+}
 </script>
