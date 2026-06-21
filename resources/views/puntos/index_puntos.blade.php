@@ -55,6 +55,15 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         #drawer { transition: transform .28s cubic-bezier(.4,0,.2,1); }
+        /* Punto de usuario pulsante */
+        .user-location-dot { position: relative; width: 18px; height: 18px; }
+        .user-location-dot .core { width: 14px; height: 14px; background: #3b82f6; border: 3px solid white; border-radius: 50%; box-shadow: 0 2px 8px rgba(59,130,246,.5); position: absolute; top: 2px; left: 2px; }
+        .user-location-dot .pulse { width: 18px; height: 18px; background: rgba(59,130,246,.3); border-radius: 50%; position: absolute; top: 0; left: 0; animation: gps-pulse 2s ease-out infinite; }
+        @keyframes gps-pulse { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(2.8); opacity: 0; } }
+        /* Botón GPS control */
+        .leaflet-gps-btn { background: white; border: 2px solid rgba(0,0,0,.08); border-radius: 10px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 3px 12px rgba(0,0,0,.2); transition: all .2s; color: #6b7280; }
+        .leaflet-gps-btn:hover { background: #f0f9ff; color: #3b82f6; border-color: #93c5fd; }
+        .leaflet-gps-btn.activo { background: #eff6ff; color: #3b82f6; border-color: #3b82f6; }
     </style>
 @endsection
 
@@ -64,10 +73,12 @@
 {{-- ══ MOBILE (< md) ══════════════════════════════════════════════════════ --}}
 <div class="md:hidden flex flex-col min-h-screen">
 
-    @include('puntos.partials._listado_mobile')
+    <div id="vista-listado-mobile" class="{{ request('vista') === 'mapa' ? 'hidden' : '' }}">
+        @include('puntos.partials._listado_mobile')
+    </div>
 
     {{-- Mapa mobile --}}
-    <div id="vista-mapa-mobile" class="hidden flex-1 flex-col">
+    <div id="vista-mapa-mobile" class="{{ request('vista') === 'mapa' ? 'flex' : 'hidden' }} flex-1 flex-col">
 
         {{-- Pills de categoría sobre el mapa --}}
         <div class="overflow-x-auto no-scrollbar bg-white border-b border-gray-100 px-3 py-2 shrink-0"
@@ -88,7 +99,23 @@
             </div>
         </div>
 
-        <div id="mapa-mobile" class="flex-1" style="min-height:0;"></div>
+        <div class="relative flex-1" style="min-height:0;">
+            <div id="mapa-mobile" class="absolute inset-0"></div>
+            <button id="gps-btn-mobile" onclick="toggleUbicacion(this)"
+                    class="leaflet-gps-btn absolute z-999"
+                    style="top:12px;right:12px;"
+                    title="{{ __('ui.mapa.estas_aqui') }}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#3b82f6" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="9"/>
+                    <circle cx="12" cy="12" r="5"/>
+                    <circle cx="12" cy="12" r="1.5" fill="#3b82f6"/>
+                    <line x1="12" y1="2" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="22"/>
+                    <line x1="2" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="22" y2="12"/>
+                </svg>
+            </button>
+        </div>
     </div>
 
 </div>{{-- /mobile --}}
