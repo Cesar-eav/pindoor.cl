@@ -160,7 +160,7 @@
         </button>
 
         {{-- Mapa --}}
-        <button onclick="if(typeof setView==='function'){setView('mapa')}else if(typeof Livewire!=='undefined'){Livewire.navigate('{{ route('puntos.index') }}#mapa')}else{window.location='{{ route('puntos.index') }}#mapa'}"
+        <button onclick="if(typeof setView==='function'){setView('mapa')}else{window.location='{{ route('puntos.index') }}?vista=mapa'}"
                 class="flex flex-col items-center gap-1 px-2 text-white">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"

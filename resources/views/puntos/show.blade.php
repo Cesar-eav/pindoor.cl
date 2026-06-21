@@ -390,11 +390,10 @@
                     @endif
 
                     @if($punto->lat && $punto->lng)
-                    <a href="https://www.google.com/maps?q={{ $punto->lat }},{{ $punto->lng }}"
-                       target="_blank" rel="noopener"
+                    <button @click="$dispatch('geo-modal')"
                        class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2 bg-white text-gray-600 border border-gray-200 hover:border-gray-400">
-                        <span>📍</span> {{ __('ui.lugar.ir_al_mapa') }}
-                    </a>
+                        <span>📍</span> {{ __('ui.lugar.como_llegar') }}
+                    </button>
                     @endif
                 </aside>
 
@@ -1260,8 +1259,8 @@
                 </div>
 
                 {{-- COLUMNA DERECHA: sidebar --}}
-                <aside class="lg:col-span-4 hidden md:block">
-                    <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/50 border border-white sticky top-8">
+                <aside class="lg:col-span-4">
+                    <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/50 border border-white lg:sticky lg:top-8">
       
                         {{-- Logo del negocio (solo si es cliente) --}}
                         @if($punto->es_cliente && $punto->imagen_perfil)
@@ -1298,12 +1297,12 @@
 
                         {{-- Mapa --}}
                         @if($punto->lat && $punto->lng)
-                            <div id="mini-mapa" class="h-48 rounded-3xl overflow-hidden border border-gray-100 shadow-inner"></div>
-                            <a href="https://www.google.com/maps?q={{ $punto->lat }},{{ $punto->lng }}"
-                               target="_blank" rel="noopener"
-                               class="mt-2 flex items-center justify-center gap-2 w-full py-2 rounded-xl text-xs font-bold text-gray-600 border border-gray-200 hover:bg-pindoor-accent hover:text-white hover:border-pindoor-accent transition-all duration-300">
-                                Abrir en Google Maps
-                            </a>
+                            <div id="mini-mapa" class="h-64 rounded-3xl overflow-hidden border border-gray-100 shadow-inner"></div>
+                            <button onclick="window.dispatchEvent(new CustomEvent('geo-modal'))"
+                               class="mt-3 flex items-center justify-center gap-2 w-full py-2.5 rounded-2xl text-sm font-bold text-[#fc5648] border border-[#fc5648]/30 hover:bg-[#fff0ef] transition-colors">
+                                <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+                                {{ __('ui.lugar.como_llegar') }}
+                            </button>
                         @endif
 
                         {{-- Horario --}}
@@ -1392,6 +1391,198 @@
         </main>
     </div>
 
+    {{-- Modal: Cómo llegar con geolocalización --}}
+    @if($punto->lat && $punto->lng)
+    <div x-data="geoModal()" @geo-modal.window="abrir()">
+
+        {{-- Backdrop --}}
+        <div x-show="abierto"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="cerrar()"
+             class="fixed inset-0 bg-black/50 z-[200]">
+        </div>
+
+        {{-- Bottom sheet --}}
+        <div x-show="abierto"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="translate-y-full"
+             x-transition:enter-end="translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="translate-y-0"
+             x-transition:leave-end="translate-y-full"
+             class="fixed bottom-0 left-0 right-0 z-[201] bg-white rounded-t-3xl overflow-hidden flex flex-col"
+             style="height:85dvh;max-height:700px">
+
+            {{-- Handle --}}
+            <div class="flex justify-center pt-3 pb-1 shrink-0">
+                <div class="w-10 h-1 bg-gray-200 rounded-full"></div>
+            </div>
+
+            {{-- Header --}}
+            <div class="flex items-start justify-between px-5 py-3 border-b border-gray-100 shrink-0">
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">{{ __('ui.lugar.como_llegar') }}</p>
+                    <p class="font-extrabold text-gray-900 leading-tight">{{ $punto->title }}</p>
+                </div>
+                <button @click="cerrar()"
+                    class="shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-sm font-bold hover:bg-gray-200 transition ml-4">
+                    ✕
+                </button>
+            </div>
+
+            {{-- Status bar --}}
+            <div x-show="estado !== 'idle'" class="px-5 py-2 text-xs font-semibold flex items-center gap-2 min-h-8 shrink-0">
+                <template x-if="estado === 'cargando'">
+                    <span class="text-gray-500 flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        {{ __('ui.general.localizando') }}
+                    </span>
+                </template>
+                <template x-if="estado === 'ok'">
+                    <span class="text-gray-700" x-text="info"></span>
+                </template>
+                <template x-if="estado === 'sin-gps'">
+                    <span class="text-amber-600">⚠️ {{ __('ui.general.error_ubicacion') }}</span>
+                </template>
+            </div>
+
+            {{-- Mapa Leaflet --}}
+            <div id="mapa-geo" class="w-full flex-1 min-h-0"></div>
+
+            {{-- Footer: info ruta --}}
+            <div x-show="info" class="px-5 py-3 border-t border-gray-100 shrink-0 text-sm font-semibold text-gray-700 text-center" x-text="info"></div>
+        </div>
+    </div>
+
+    <script>
+    function geoModal() {
+        return {
+            abierto: false,
+            estado: 'idle',
+            info: '',
+            mapa: null,
+            watchId: null,
+            marcadorUsuario: null,
+            rutaLinea: null,
+
+            abrir() {
+                this.abierto = true;
+                document.body.style.overflow = 'hidden';
+                this.$nextTick(() => this.iniciar());
+            },
+
+            cerrar() {
+                this.abierto = false;
+                document.body.style.overflow = '';
+                if (this.watchId !== null) {
+                    navigator.geolocation.clearWatch(this.watchId);
+                    this.watchId = null;
+                }
+            },
+
+            iniciar() {
+                if (this.mapa) { this.mapa.invalidateSize(); return; }
+
+                const lat = {{ $punto->lat }};
+                const lng = {{ $punto->lng }};
+                const titulo = '{{ addslashes($punto->title) }}';
+
+                this.mapa = L.map('mapa-geo', {
+                    rotate: true,
+                    bearing: 0,
+                    zoomControl: true, scrollWheelZoom: false, attributionControl: false,
+                }).setView([lat, lng], 14);
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(this.mapa);
+
+                const destIcon = L.divIcon({
+                    className: '',
+                    html: "<div style='background:#fc5648;width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 2px 12px rgba(252,86,72,.5)'></div>",
+                    iconSize: [18, 18], iconAnchor: [9, 9],
+                });
+                L.marker([lat, lng], { icon: destIcon }).addTo(this.mapa)
+                    .bindPopup(`<strong style="font-family:Plus Jakarta Sans,sans-serif;font-size:13px">${titulo}</strong>`);
+
+                if (!navigator.geolocation) { this.estado = 'sin-gps'; return; }
+
+                this.estado = 'cargando';
+                const self = this;
+                let primeraVez = true;
+
+                const userIcon = L.divIcon({
+                    className: '',
+                    html: "<div style='background:#3b82f6;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(59,130,246,.5)'></div>",
+                    iconSize: [16, 16], iconAnchor: [8, 8],
+                });
+
+                this.watchId = navigator.geolocation.watchPosition(pos => {
+                    const uLat = pos.coords.latitude;
+                    const uLng = pos.coords.longitude;
+                    const heading = pos.coords.heading; // grados desde el norte, null si estático
+                    self.estado = 'ok';
+
+                    // Mover o crear marcador de usuario
+                    if (self.marcadorUsuario) {
+                        self.marcadorUsuario.setLatLng([uLat, uLng]);
+                    } else {
+                        self.marcadorUsuario = L.marker([uLat, uLng], { icon: userIcon })
+                            .addTo(self.mapa)
+                            .bindPopup('<strong style="font-family:Plus Jakarta Sans,sans-serif">Tú estás aquí</strong>');
+                    }
+
+                    // Rotar el mapa según dirección de marcha
+                    if (heading !== null && !isNaN(heading)) {
+                        self.mapa.setBearing(heading);
+                    }
+
+                    // Centrar el mapa en el usuario (follow mode)
+                    self.mapa.panTo([uLat, uLng], { animate: true, duration: 0.8, easeLinearity: 0.5 });
+
+                    // Primera vez: ajustar zoom para ver ambos puntos y pedir ruta
+                    if (primeraVez) {
+                        primeraVez = false;
+                        self.mapa.fitBounds([[uLat, uLng], [lat, lng]], { padding: [50, 50] });
+
+                        fetch(`https://router.project-osrm.org/route/v1/driving/${uLng},${uLat};${lng},${lat}?overview=full&geometries=geojson`)
+                            .then(r => r.json())
+                            .then(data => {
+                                if (!data.routes?.[0]) return;
+                                const route = data.routes[0];
+                                if (self.rutaLinea) self.mapa.removeLayer(self.rutaLinea);
+                                self.rutaLinea = L.polyline(
+                                    route.geometry.coordinates.map(c => [c[1], c[0]]),
+                                    { color: '#fc5648', weight: 5, opacity: 0.75 }
+                                ).addTo(self.mapa);
+                                const dist = route.distance >= 1000
+                                    ? (route.distance / 1000).toFixed(1) + ' km'
+                                    : Math.round(route.distance) + ' m';
+                                self.info = `📍 ${dist} · ~${Math.round(route.duration / 60)} min`;
+                            })
+                            .catch(() => {
+                                self.rutaLinea = L.polyline([[uLat, uLng], [lat, lng]], {
+                                    color: '#fc5648', weight: 3, dashArray: '8 8', opacity: 0.5,
+                                }).addTo(self.mapa);
+                                self.info = '📍 Ruta aproximada';
+                            });
+                    }
+
+                }, () => {
+                    self.estado = 'sin-gps';
+                }, { enableHighAccuracy: true, maximumAge: 0 });
+            },
+        };
+    }
+    </script>
+    @endif
+
     {{-- FAB colapsable móvil --}}
     @php
         $hayAcciones = $punto->tieneOfertaActiva() || $punto->tieneMenu()
@@ -1402,14 +1593,14 @@
                     || ($punto->moduloActivo('agenda') && $punto->eventosProximos()->count());
     @endphp
     @if($punto->lat && $punto->lng)
-    <a href="https://www.google.com/maps?q={{ $punto->lat }},{{ $punto->lng }}"
+    <button onclick="window.dispatchEvent(new CustomEvent('geo-modal'))"
        class="lg:hidden fixed left-4 z-50 flex items-center gap-2 bg-white text-gray-800 text-sm font-bold px-4 py-3 rounded-full shadow-xl border border-gray-200 hover:bg-gray-50 transition"
        style="bottom: calc(80px + var(--inset-bottom, 0px))">
         <svg class="w-4 h-4 text-[#fc5648] shrink-0" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
         </svg>
-        Mapa
-    </a>
+        {{ __('ui.lugar.como_llegar') }}
+    </button>
     @endif
 
     @if($hayAcciones)
@@ -1515,18 +1706,21 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const map = L.map('mini-mapa', {
-                zoomControl: false, dragging: true,
+                zoomControl: true, dragging: true,
                 scrollWheelZoom: false, attributionControl: false
-            }).setView([{{ $punto->lat }}, {{ $punto->lng }}], 15);
+            }).setView([{{ $punto->lat }}, {{ $punto->lng }}], 16);
 
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
 
             const customIcon = L.divIcon({
                 className: 'custom-div-icon',
-                html: "<div style='background-color:#fc5648;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 0 10px rgba(0,0,0,0.2);'></div>",
-                iconSize: [12, 12], iconAnchor: [6, 6]
+                html: "<div style='background-color:#fc5648;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 12px rgba(252,86,72,0.5);'></div>",
+                iconSize: [16, 16], iconAnchor: [8, 8]
             });
-            L.marker([{{ $punto->lat }}, {{ $punto->lng }}], { icon: customIcon }).addTo(map);
+
+            L.marker([{{ $punto->lat }}, {{ $punto->lng }}], { icon: customIcon })
+                .addTo(map)
+                .bindPopup('<strong style="font-size:13px;font-family:Plus Jakarta Sans,sans-serif">{{ addslashes($punto->title) }}</strong>@if($punto->direccion)<br><span style="font-size:11px;color:#6b7280">{{ addslashes($punto->direccion) }}</span>@endif');
         });
     </script>
     @endif
