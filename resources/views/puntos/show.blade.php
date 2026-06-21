@@ -1469,6 +1469,9 @@
             estado: 'idle',
             info: '',
             mapa: null,
+            watchId: null,
+            marcadorUsuario: null,
+            rutaLinea: null,
 
             abrir() {
                 this.abierto = true;
@@ -1479,6 +1482,10 @@
             cerrar() {
                 this.abierto = false;
                 document.body.style.overflow = '';
+                if (this.watchId !== null) {
+                    navigator.geolocation.clearWatch(this.watchId);
+                    this.watchId = null;
+                }
             },
 
             iniciar() {
@@ -1489,6 +1496,8 @@
                 const titulo = '{{ addslashes($punto->title) }}';
 
                 this.mapa = L.map('mapa-geo', {
+                    rotate: true,
+                    bearing: 0,
                     zoomControl: true, scrollWheelZoom: false, attributionControl: false,
                 }).setView([lat, lng], 14);
 
@@ -1506,46 +1515,68 @@
 
                 this.estado = 'cargando';
                 const self = this;
+                let primeraVez = true;
 
-                navigator.geolocation.getCurrentPosition(pos => {
+                const userIcon = L.divIcon({
+                    className: '',
+                    html: "<div style='background:#3b82f6;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(59,130,246,.5)'></div>",
+                    iconSize: [16, 16], iconAnchor: [8, 8],
+                });
+
+                this.watchId = navigator.geolocation.watchPosition(pos => {
                     const uLat = pos.coords.latitude;
                     const uLng = pos.coords.longitude;
+                    const heading = pos.coords.heading; // grados desde el norte, null si estático
                     self.estado = 'ok';
 
-                    const userIcon = L.divIcon({
-                        className: '',
-                        html: "<div style='background:#3b82f6;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(59,130,246,.5)'></div>",
-                        iconSize: [16, 16], iconAnchor: [8, 8],
-                    });
-                    L.marker([uLat, uLng], { icon: userIcon }).addTo(self.mapa)
-                        .bindPopup('<strong style="font-family:Plus Jakarta Sans,sans-serif">Tú estás aquí</strong>');
+                    // Mover o crear marcador de usuario
+                    if (self.marcadorUsuario) {
+                        self.marcadorUsuario.setLatLng([uLat, uLng]);
+                    } else {
+                        self.marcadorUsuario = L.marker([uLat, uLng], { icon: userIcon })
+                            .addTo(self.mapa)
+                            .bindPopup('<strong style="font-family:Plus Jakarta Sans,sans-serif">Tú estás aquí</strong>');
+                    }
 
-                    self.mapa.fitBounds([[uLat, uLng], [lat, lng]], { padding: [50, 50] });
+                    // Rotar el mapa según dirección de marcha
+                    if (heading !== null && !isNaN(heading)) {
+                        self.mapa.setBearing(heading);
+                    }
 
-                    fetch(`https://router.project-osrm.org/route/v1/driving/${uLng},${uLat};${lng},${lat}?overview=full&geometries=geojson`)
-                        .then(r => r.json())
-                        .then(data => {
-                            if (!data.routes?.[0]) return;
-                            const route = data.routes[0];
-                            L.polyline(
-                                route.geometry.coordinates.map(c => [c[1], c[0]]),
-                                { color: '#fc5648', weight: 5, opacity: 0.75 }
-                            ).addTo(self.mapa);
-                            const dist = route.distance >= 1000
-                                ? (route.distance / 1000).toFixed(1) + ' km'
-                                : Math.round(route.distance) + ' m';
-                            self.info = `📍 ${dist} · ~${Math.round(route.duration / 60)} min en auto`;
-                        })
-                        .catch(() => {
-                            L.polyline([[uLat, uLng], [lat, lng]], {
-                                color: '#fc5648', weight: 3, dashArray: '8 8', opacity: 0.5,
-                            }).addTo(self.mapa);
-                            self.info = '📍 Ruta aproximada';
-                        });
+                    // Centrar el mapa en el usuario (follow mode)
+                    self.mapa.panTo([uLat, uLng], { animate: true, duration: 0.8, easeLinearity: 0.5 });
+
+                    // Primera vez: ajustar zoom para ver ambos puntos y pedir ruta
+                    if (primeraVez) {
+                        primeraVez = false;
+                        self.mapa.fitBounds([[uLat, uLng], [lat, lng]], { padding: [50, 50] });
+
+                        fetch(`https://router.project-osrm.org/route/v1/driving/${uLng},${uLat};${lng},${lat}?overview=full&geometries=geojson`)
+                            .then(r => r.json())
+                            .then(data => {
+                                if (!data.routes?.[0]) return;
+                                const route = data.routes[0];
+                                if (self.rutaLinea) self.mapa.removeLayer(self.rutaLinea);
+                                self.rutaLinea = L.polyline(
+                                    route.geometry.coordinates.map(c => [c[1], c[0]]),
+                                    { color: '#fc5648', weight: 5, opacity: 0.75 }
+                                ).addTo(self.mapa);
+                                const dist = route.distance >= 1000
+                                    ? (route.distance / 1000).toFixed(1) + ' km'
+                                    : Math.round(route.distance) + ' m';
+                                self.info = `📍 ${dist} · ~${Math.round(route.duration / 60)} min`;
+                            })
+                            .catch(() => {
+                                self.rutaLinea = L.polyline([[uLat, uLng], [lat, lng]], {
+                                    color: '#fc5648', weight: 3, dashArray: '8 8', opacity: 0.5,
+                                }).addTo(self.mapa);
+                                self.info = '📍 Ruta aproximada';
+                            });
+                    }
 
                 }, () => {
                     self.estado = 'sin-gps';
-                }, { timeout: 10000, maximumAge: 60000 });
+                }, { enableHighAccuracy: true, maximumAge: 0 });
             },
         };
     }
