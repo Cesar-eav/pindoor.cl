@@ -68,6 +68,7 @@ return [
         'compartir'       => 'Compartir',
         'ver_mapa'        => 'Ver en mapa',
         'ir_al_mapa'      => 'Ir al mapa',
+        'abrir_navegacion'=> 'Abrir navegación →',
         'horario'         => 'Horario',
         'contacto'        => 'Contacto',
         'sitio_web'       => 'Sitio web',
