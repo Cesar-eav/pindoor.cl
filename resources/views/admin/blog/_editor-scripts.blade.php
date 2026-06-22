@@ -101,6 +101,48 @@ document.addEventListener('DOMContentLoaded', function () {
     toggle.addEventListener('change', () => {
         label.textContent = toggle.checked ? 'Publicado' : 'Borrador';
     });
+
+    // ── Contador Resumen ─────────────────────────────────────────────
+    const RESUMEN_MAX = 600;
+    const resumenInput  = document.getElementById('resumen-input');
+    const resumenChars  = document.getElementById('resumen-chars');
+    const resumenPalab  = document.getElementById('resumen-palabras');
+
+    function contarResumen() {
+        const txt    = resumenInput.value;
+        const chars  = txt.length;
+        const words  = txt.trim() === '' ? 0 : txt.trim().split(/\s+/).length;
+        const quedan = RESUMEN_MAX - chars;
+        resumenPalab.textContent = words + (words === 1 ? ' palabra' : ' palabras');
+        resumenChars.textContent = chars + ' / ' + RESUMEN_MAX;
+        resumenChars.classList.toggle('text-red-500', quedan <= 50);
+        resumenChars.classList.toggle('text-gray-400', quedan > 50);
+    }
+    resumenInput.addEventListener('input', contarResumen);
+    contarResumen();
+
+    // ── Contador Contenido (Quill) ───────────────────────────────────
+    const CONTENIDO_MAX  = 10000;
+    const contenidoChars = document.getElementById('contenido-chars');
+    const contenidoPalab = document.getElementById('contenido-palabras');
+    const contenidoAviso = document.getElementById('contenido-limite-aviso');
+
+    function contarContenido() {
+        const txt    = quill.getText().replace(/\n$/, '');
+        const chars  = txt.length;
+        const words  = txt.trim() === '' ? 0 : txt.trim().split(/\s+/).length;
+        const quedan = CONTENIDO_MAX - chars;
+        contenidoPalab.textContent = words + (words === 1 ? ' palabra' : ' palabras');
+        contenidoChars.textContent = chars.toLocaleString('es') + ' / ' + CONTENIDO_MAX.toLocaleString('es');
+        contenidoChars.classList.toggle('text-red-500', quedan <= 200);
+        contenidoChars.classList.toggle('text-gray-400', quedan > 200);
+        contenidoAviso.classList.toggle('hidden', chars < CONTENIDO_MAX);
+        if (chars > CONTENIDO_MAX) {
+            quill.deleteText(CONTENIDO_MAX, chars - CONTENIDO_MAX);
+        }
+    }
+    quill.on('text-change', contarContenido);
+    contarContenido();
 });
 </script>
 

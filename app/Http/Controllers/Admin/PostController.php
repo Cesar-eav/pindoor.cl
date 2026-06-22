@@ -120,12 +120,12 @@ class PostController extends Controller
         return response()->json(['url' => asset('storage/' . $path)]);
     }
 
-    // Recoge slots imagen_nueva_1…5 con sus posiciones
+    // Recoge slots imagen_nueva_1…20 con sus posiciones
     private function recogerImagenesNuevas(Request $request, array $base): ?array
     {
         $result = $base;
-        for ($s = 1; $s <= 5; $s++) {
-            if (count($result) >= 5) break;
+        for ($s = 1; $s <= 20; $s++) {
+            if (count($result) >= 20) break;
             if ($request->hasFile("imagen_nueva_{$s}")) {
                 $ruta = $request->file("imagen_nueva_{$s}")->store('blog/galeria', 'public');
                 $pos  = $request->integer("posicion_nueva_{$s}") ?: null;
