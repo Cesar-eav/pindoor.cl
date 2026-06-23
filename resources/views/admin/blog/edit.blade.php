@@ -6,7 +6,7 @@
         </div>
     </x-slot>
 
-    <div class="py-8 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-8 w-[90vw] mx-auto">
         @include('admin.blog._form', [
             'action' => route('admin.blog.update', $post),
             'method' => 'PUT',
