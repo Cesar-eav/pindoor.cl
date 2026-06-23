@@ -143,6 +143,109 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     quill.on('text-change', contarContenido);
     contarContenido();
+
+    // ── Vista previa de posiciones de imágenes ───────────────────────
+    const TAGS_BLOQUE = ['</p>','</h2>','</h3>','</h4>','</blockquote>','</ul>','</ol>'];
+    const NUMS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩',
+                  '⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
+
+    function parsearBloques(html) {
+        let marcado = html;
+        TAGS_BLOQUE.forEach(t => { marcado = marcado.split(t).join(t + '¶'); });
+        return marcado.split('¶')
+            .map(b => b.replace(/<[^>]*>/g, '').trim())
+            .filter(b => b !== '');
+    }
+
+    function leerImagenesGaleria() {
+        const imgs = [];
+        // Existentes
+        document.querySelectorAll('[id^="existente-"]').forEach(el => {
+            const idx = el.id.replace('existente-', '');
+            const hidden = document.getElementById('hidden-eliminar-' + idx);
+            if (hidden && !hidden.disabled) return; // marcada para borrar
+            const thumb = el.querySelector('img');
+            const posInput = document.getElementById('pos-existente-' + idx)?.querySelector('input[type="number"]');
+            imgs.push({ src: thumb?.src || null, pos: parseInt(posInput?.value) || 0 });
+        });
+        // Slots nuevos
+        for (let s = 1; s <= 20; s++) {
+            const preview = document.getElementById('preview-' + s);
+            if (!preview || preview.classList.contains('hidden')) continue;
+            const posInput = document.getElementById('pos-nueva-' + s)?.querySelector('input[type="number"]');
+            imgs.push({ src: preview.src, pos: parseInt(posInput?.value) || 0 });
+        }
+        return imgs;
+    }
+
+    function actualizarPreview() {
+        const container = document.getElementById('preview-posiciones');
+        const bloqueCount = document.getElementById('preview-bloque-count');
+        if (!container) return;
+
+        const bloques = parsearBloques(quill.root.innerHTML);
+        const imagenes = leerImagenesGaleria();
+
+        if (bloqueCount) bloqueCount.textContent = bloques.length + (bloques.length === 1 ? ' bloque' : ' bloques');
+
+        if (bloques.length === 0) {
+            container.innerHTML = '<p class="text-[11px] text-gray-300 italic">Escribe contenido para ver la vista previa…</p>';
+            return;
+        }
+
+        // Agrupar imágenes posicionadas por bloque
+        const porBloque = {};
+        const automaticas = [];
+        imagenes.forEach(img => {
+            if (img.pos > 0) {
+                if (!porBloque[img.pos]) porBloque[img.pos] = [];
+                porBloque[img.pos].push(img);
+            } else {
+                automaticas.push(img);
+            }
+        });
+
+        function thumbHtml(img) {
+            return img.src
+                ? `<img src="${img.src}" class="w-full h-14 object-cover rounded-lg border border-gray-200">`
+                : `<div class="w-full h-10 bg-gray-200 rounded-lg"></div>`;
+        }
+
+        let out = '';
+        bloques.forEach((texto, i) => {
+            const n = i + 1;
+            const tag = quill.root.innerHTML.match(/<(h[2-4])/)?.[1];
+            const isHead = quill.root.querySelectorAll('h2,h3,h4')[0] && texto.length < 80;
+            out += `<div class="flex items-start gap-2 py-1.5 border-b border-gray-100 last:border-0">
+                <span class="shrink-0 text-[10px] font-black text-[#fc5648] mt-0.5 w-5 text-center">${NUMS[i] || n}</span>
+                <span class="text-[11px] text-gray-600 leading-tight">${texto.slice(0, 80)}${texto.length > 80 ? '…' : ''}</span>
+            </div>`;
+            if (porBloque[n]) {
+                porBloque[n].forEach(img => {
+                    out += `<div class="pl-7 py-1">${thumbHtml(img)}</div>`;
+                });
+            }
+        });
+
+        if (automaticas.length > 0) {
+            out += `<div class="pt-2 pb-1 text-[9px] font-black uppercase tracking-widest text-gray-400">Auto-distribuidas</div>`;
+            automaticas.forEach(img => {
+                out += `<div class="py-1 opacity-60">${thumbHtml(img)}</div>`;
+            });
+        }
+
+        container.innerHTML = out;
+    }
+
+    quill.on('text-change', actualizarPreview);
+    document.getElementById('galeria-grid')?.addEventListener('input', e => {
+        if (e.target.type === 'number') actualizarPreview();
+    });
+    // Actualizar preview cuando se selecciona una imagen nueva en la galería
+    document.getElementById('galeria-grid')?.addEventListener('change', e => {
+        if (e.target.type === 'file') setTimeout(actualizarPreview, 200);
+    });
+    actualizarPreview();
 });
 </script>
 
