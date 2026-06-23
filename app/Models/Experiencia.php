@@ -77,7 +77,7 @@ class Experiencia extends Model
 
     public function scopeActivas($query)
     {
-        return $query->where('activo', true)->where('estado', 'aprobada')->orderBy('orden')->orderBy('titulo');
+        return $query->where('activo', true)->where('estado', 'aprobada');
     }
 
     public function scopePendientes($query)

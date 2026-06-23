@@ -111,10 +111,10 @@
             <span class="flex-1 h-px bg-gray-200"></span>
             <a href="{{ route('experiencias.index') }}" class="text-[11px] font-semibold text-[#fc5648] shrink-0">{{ __('ui.home.ver_todas') }}</a>
         </div>
-        <div class="flex gap-3 px-3" >
+        <div class="flex gap-3 px-3 overflow-x-auto pb-1" style="-ms-overflow-style:none;scrollbar-width:none;">
             @foreach($ultimasExperiencias as $exp)
             <a href="{{ route('experiencias.show', $exp) }}"
-               class="relative flex-1 rounded-2xl overflow-hidden shadow-sm" style="height:10rem;">
+               class="relative shrink-0 rounded-2xl overflow-hidden shadow-sm" style="width:72vw;height:10rem;">
                 @if($exp->imagen)
                     <img src="{{ asset('storage/' . $exp->imagen) }}"
                          alt="{{ $exp->titulo }}"

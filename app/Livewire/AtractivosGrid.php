@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Artista;
 use App\Models\Categoria;
+use App\Models\Experiencia;
 use App\Models\Panorama;
 use App\Models\Post;
 use App\Models\PuntoInteres;
@@ -114,9 +115,11 @@ class AtractivosGrid extends Component
 
         $ultimosPosts = $hayFiltros ? collect() : Post::publicados()->take(10)->get();
 
+        $ultimasExperiencias = $hayFiltros ? collect() : Experiencia::activas()->take(10)->get();
+
         return view('livewire.atractivos-grid', compact(
             'atractivos', 'categorias', 'hayFiltros', 'panoramas',
-            'proximosPanoramas', 'ultimosPosts', 'artistas'
+            'proximosPanoramas', 'ultimosPosts', 'ultimasExperiencias', 'artistas'
         ));
     }
 }
