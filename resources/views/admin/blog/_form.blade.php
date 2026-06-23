@@ -138,8 +138,8 @@
                             <div id="overlay-eliminar-{{ $idx }}"
                                  class="absolute inset-0 bg-red-500/75 hidden flex-col items-center justify-center gap-0.5 cursor-pointer"
                                  onclick="toggleEliminar({{ $idx }})">
-                                <span class="text-white font-black text-[10px]">BORRAR</span>
-                                <span class="text-white/80 text-[9px]">clic p/deshacer</span>
+                                <span class="text-white font-black text-[10px]">Se borrará</span>
+                                <span class="text-white/80 text-[9px]">al guardar · clic p/deshacer</span>
                             </div>
                             <input type="hidden" id="hidden-eliminar-{{ $idx }}" name="eliminar_imagen[]" value="{{ $idx }}" disabled>
                         </div>
@@ -227,13 +227,20 @@
         var hidden   = document.getElementById('hidden-eliminar-' + idx);
         var posDiv   = document.getElementById('pos-existente-' + idx);
         var labelDiv = document.getElementById('label-eliminar-' + idx);
-        var marcado  = overlay.classList.contains('hidden');
-        overlay.classList.toggle('hidden', !marcado);
-        overlay.classList.toggle('flex', marcado);
-        btn.classList.toggle('hidden', marcado);
-        hidden.disabled = !marcado;
-        posDiv.classList.toggle('hidden', marcado);
-        labelDiv.classList.toggle('hidden', !marcado);
+        var marcado  = hidden && !hidden.disabled;
+        if (marcado) {
+            overlay.style.display = 'none';
+            btn.style.display = '';
+            hidden.disabled = true;
+            posDiv.style.display = '';
+            labelDiv.style.display = 'none';
+        } else {
+            overlay.style.display = 'flex';
+            btn.style.display = 'none';
+            hidden.disabled = false;
+            posDiv.style.display = 'none';
+            labelDiv.style.display = 'block';
+        }
     }
 
     function previewSlot(slot, input) {

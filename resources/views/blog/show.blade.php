@@ -150,7 +150,10 @@
                 foreach (['</p>','</h2>','</h3>','</h4>','</blockquote>','</ul>','</ol>'] as $tag) {
                     $marcado = str_replace($tag, $tag . '¶', $marcado);
                 }
-                $bloques    = array_values(array_filter(array_map('trim', explode('¶', $marcado))));
+                $bloques    = array_values(array_filter(
+                    array_map('trim', explode('¶', $marcado)),
+                    fn($b) => trim(strip_tags($b)) !== ''
+                ));
                 $numBloques = count($bloques);
 
                 // Separar imágenes posicionadas de automáticas
