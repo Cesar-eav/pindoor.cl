@@ -193,29 +193,47 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // Agrupar imágenes posicionadas por bloque
+        // Agrupar posicionadas manualmente
         const porBloque = {};
         const automaticas = [];
         imagenes.forEach(img => {
             if (img.pos > 0) {
                 if (!porBloque[img.pos]) porBloque[img.pos] = [];
-                porBloque[img.pos].push(img);
+                porBloque[img.pos].push({ ...img, _isAuto: false });
             } else {
                 automaticas.push(img);
             }
         });
 
+        // Calcular posiciones de auto-distribuidas (mismo algoritmo que PHP)
+        if (automaticas.length > 0) {
+            const n = automaticas.length;
+            const numBloques = bloques.length;
+            const interval = Math.max(1, Math.floor(numBloques / (n + 1)));
+            let autoIdx = 0;
+            for (let p = interval; p <= numBloques + 1 && autoIdx < n; p++) {
+                if (!porBloque[p]) {
+                    porBloque[p] = [{ ...automaticas[autoIdx++], _isAuto: true }];
+                }
+            }
+            while (autoIdx < n) {
+                const last = numBloques + 1;
+                if (!porBloque[last]) porBloque[last] = [];
+                porBloque[last].push({ ...automaticas[autoIdx++], _isAuto: true });
+            }
+        }
+
         function thumbHtml(img) {
+            const cls = 'w-full h-14 object-cover rounded-lg border border-gray-200' + (img._isAuto ? ' opacity-70' : '');
+            const label = img._isAuto ? '<p class="text-[9px] text-gray-400 text-right mt-0.5">auto</p>' : '';
             return img.src
-                ? `<img src="${img.src}" class="w-full h-14 object-cover rounded-lg border border-gray-200">`
-                : `<div class="w-full h-10 bg-gray-200 rounded-lg"></div>`;
+                ? `<div><img src="${img.src}" class="${cls}">${label}</div>`
+                : `<div><div class="w-full h-10 bg-gray-200 rounded-lg"></div>${label}</div>`;
         }
 
         let out = '';
         bloques.forEach((texto, i) => {
             const n = i + 1;
-            const tag = quill.root.innerHTML.match(/<(h[2-4])/)?.[1];
-            const isHead = quill.root.querySelectorAll('h2,h3,h4')[0] && texto.length < 80;
             out += `<div class="flex items-start gap-2 py-1.5 border-b border-gray-100 last:border-0">
                 <span class="shrink-0 text-[10px] font-black text-[#fc5648] mt-0.5 w-5 text-center">${NUMS[i] || n}</span>
                 <span class="text-[11px] text-gray-600 leading-tight">${texto.slice(0, 80)}${texto.length > 80 ? '…' : ''}</span>
@@ -227,10 +245,18 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        if (automaticas.length > 0) {
-            out += `<div class="pt-2 pb-1 text-[9px] font-black uppercase tracking-widest text-gray-400">Auto-distribuidas</div>`;
-            automaticas.forEach(img => {
-                out += `<div class="py-1 opacity-60">${thumbHtml(img)}</div>`;
+        // Imágenes con posición más allá del último bloque → van al final
+        const alFinal = [];
+        Object.entries(porBloque).forEach(([p, imgs]) => {
+            if (parseInt(p) > bloques.length) alFinal.push(...imgs);
+        });
+        if (alFinal.length > 0) {
+            out += `<div class="flex items-center gap-2 py-1.5 border-t border-gray-100 mt-1">
+                <span class="shrink-0 text-[10px] font-black text-gray-300 w-5 text-center">↓</span>
+                <span class="text-[11px] text-gray-400 italic">Al final del artículo</span>
+            </div>`;
+            alFinal.forEach(img => {
+                out += `<div class="pl-7 py-1">${thumbHtml(img)}</div>`;
             });
         }
 
