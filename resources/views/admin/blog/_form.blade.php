@@ -20,10 +20,19 @@
                 {{ old('publicado', $post?->publicado) ? 'Publicado' : 'Borrador' }}
             </span>
         </label>
-        <button type="submit"
-                class="bg-gray-900 text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-black transition">
-            {{ $esEdicion ? 'Guardar cambios' : 'Crear post' }}
-        </button>
+        <div class="flex items-center gap-3">
+            <span id="guardar-spinner" class="hidden items-center gap-2 text-sm text-gray-400">
+                <svg class="animate-spin w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                </svg>
+                Guardando…
+            </span>
+            <button type="submit" id="guardar-btn"
+                    class="bg-gray-900 text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-black transition">
+                {{ $esEdicion ? 'Guardar cambios' : 'Crear post' }}
+            </button>
+        </div>
     </div>
 
     @if($errors->any())

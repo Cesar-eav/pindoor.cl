@@ -31,9 +31,14 @@ document.addEventListener('DOMContentLoaded', function () {
         quill.clipboard.dangerouslyPasteHTML(hidden.value);
     }
 
-    // Sincronizar al enviar
+    // Sincronizar al enviar + spinner
     document.getElementById('blog-form').addEventListener('submit', function () {
         hidden.value = quill.root.innerHTML;
+        const btn     = document.getElementById('guardar-btn');
+        const spinner = document.getElementById('guardar-spinner');
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        spinner.style.display = 'flex';
     });
 
     // ── Subida de imagen al servidor ────────────────────────────────
