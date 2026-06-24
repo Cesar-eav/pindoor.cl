@@ -114,6 +114,89 @@ document.addEventListener('DOMContentLoaded', function () {
         contarResumen();
     };
 
+    // ── Auto-traducir ES → EN ───────────────────────────────────────
+    window.autoTraducir = async function() {
+        const btn    = document.getElementById('btn-autotraducir');
+        const estado = document.getElementById('traducir-estado');
+
+        // Guardar contenido ES actual
+        document.getElementById('contenido_es').value = quill.root.innerHTML;
+
+        const tituloEs  = document.getElementById('titulo-es').value.trim();
+        const resumenEs = document.getElementById('resumen-es').value.trim();
+        const textoEs   = quill.getText().trim();
+
+        if (!tituloEs && !textoEs) {
+            alert('Escribe primero el contenido en Español.');
+            return;
+        }
+
+        btn.disabled  = true;
+        btn.className = btn.className.replace('text-gray-500', 'text-blue-400');
+        estado.classList.remove('hidden');
+
+        async function traducirTexto(txt) {
+            if (!txt) return '';
+            // Dividir en oraciones de ~450 chars
+            const oraciones = txt.match(/[^.!?]+[.!?]+/g) || [txt];
+            const chunks = [];
+            let cur = '';
+            for (const o of oraciones) {
+                if ((cur + o).length > 450) { if (cur) chunks.push(cur); cur = o; }
+                else cur += (cur ? ' ' : '') + o;
+            }
+            if (cur) chunks.push(cur);
+
+            let resultado = '';
+            for (let i = 0; i < chunks.length; i++) {
+                estado.textContent = `Traduciendo… ${i + 1}/${chunks.length}`;
+                const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunks[i])}&langpair=es|en&de=cesar.eav@gmail.com`);
+                const d = await r.json();
+                resultado += (d.responseData?.translatedText || chunks[i]) + ' ';
+                await new Promise(r => setTimeout(r, 600));
+            }
+            return resultado.trim();
+        }
+
+        try {
+            // Traducir título
+            if (tituloEs) {
+                estado.textContent = 'Traduciendo título…';
+                document.getElementById('titulo-en').value = await traducirTexto(tituloEs);
+            }
+            // Traducir resumen
+            if (resumenEs) {
+                estado.textContent = 'Traduciendo resumen…';
+                document.getElementById('resumen-en').value = await traducirTexto(resumenEs);
+            }
+            // Traducir contenido → reconstruir como párrafos HTML
+            if (textoEs) {
+                const traducido = await traducirTexto(textoEs);
+                const oraciones = traducido.match(/[^.!?]+[.!?]+/g) || [traducido];
+                let htmlEn = '';
+                let buf = '';
+                oraciones.forEach((o, i) => {
+                    buf += o + ' ';
+                    if (buf.length > 350 || i === oraciones.length - 1) {
+                        htmlEn += '<p>' + buf.trim() + '</p>';
+                        buf = '';
+                    }
+                });
+                document.getElementById('contenido_en').value = htmlEn;
+            }
+
+            // Cambiar a tab EN para mostrar resultado
+            setLang('en');
+            estado.textContent = '✓ Traducción completada';
+            setTimeout(() => { estado.classList.add('hidden'); estado.textContent = ''; }, 3000);
+        } catch(e) {
+            estado.textContent = 'Error al traducir. Inténtalo de nuevo.';
+        } finally {
+            btn.disabled  = false;
+            btn.className = btn.className.replace('text-blue-400', 'text-gray-500');
+        }
+    };
+
     // ── Slug automático desde título ────────────────────────────────
     const tituloInput = document.getElementById('titulo-es');
     const slugInput   = document.getElementById('slug');
