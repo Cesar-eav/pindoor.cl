@@ -66,6 +66,8 @@
                                     <li class="px-5 py-3 flex items-center justify-between gap-4">
                                         <span class="text-sm text-gray-800 font-medium flex-1" x-text="ev.nombre"></span>
                                         <span class="text-xs text-gray-400 whitespace-nowrap" x-text="ev.fecha + (ev.hora ? ' ' + ev.hora : '')"></span>
+                                        <span x-show="guardado === ev.slug" x-cloak
+                                              class="text-xs text-green-600 font-medium whitespace-nowrap">Guardado</span>
                                         <select x-model="ev.categoria"
                                                 @change="actualizarCategoria(ev)"
                                                 class="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-600 focus:ring-1 focus:ring-[#fc5648] outline-none">
@@ -90,6 +92,8 @@
                                     <li class="px-5 py-3 flex items-center justify-between gap-4">
                                         <span class="text-sm text-gray-800 font-medium flex-1" x-text="ev.nombre"></span>
                                         <span class="text-xs text-gray-400 whitespace-nowrap" x-text="ev.fecha + (ev.hora ? ' ' + ev.hora : '')"></span>
+                                        <span x-show="guardado === ev.slug" x-cloak
+                                              class="text-xs text-green-600 font-medium whitespace-nowrap">Guardado</span>
                                         <select x-model="ev.categoria"
                                                 @change="actualizarCategoria(ev)"
                                                 class="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-600 focus:ring-1 focus:ring-[#fc5648] outline-none">
@@ -136,6 +140,7 @@
             mensaje:  '',
             progreso: '',
             resumen:  null,
+            guardado: null,
 
             async importar() {
                 this.estado   = 'consultando';
@@ -186,7 +191,7 @@
 
             async actualizarCategoria(ev) {
                 try {
-                    await fetch(`/admin/panoramas/${ev.id}/categoria`, {
+                    const res = await fetch(`/admin/panoramas/${ev.slug}/categoria`, {
                         method: 'PATCH',
                         headers: {
                             'Content-Type': 'application/json',
@@ -194,6 +199,10 @@
                         },
                         body: JSON.stringify({ categoria: ev.categoria }),
                     });
+                    if (res.ok) {
+                        this.guardado = ev.slug;
+                        setTimeout(() => { this.guardado = null; }, 2000);
+                    }
                 } catch (e) {
                     console.error('Error al actualizar categoría:', e);
                 }
