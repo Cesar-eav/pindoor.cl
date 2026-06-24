@@ -172,7 +172,7 @@
     </div>
 
     {{-- ── Secciones por día (agrupadas por mes) ─────────────────────────── --}}
-    @php $mesPrevio = null; @endphp
+    @php $mesPrevio = null; $bannerMostrado = false; @endphp
     @foreach($porDia as $fechaStr => $grupo)
     @php $meta = $diasMeta[$fechaStr]; $mesActual = $mesPorDia[$fechaStr]; @endphp
 
@@ -202,6 +202,21 @@
         {{-- Cards del día --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             @foreach($grupo as $panorama)
+            @if(!$bannerMostrado && $loop->iteration === 3) @php $bannerMostrado = true; @endphp
+            <a href="{{ route('contacto.index') }}"
+               class="group relative flex flex-col justify-between overflow-hidden rounded-2xl shadow-sm
+                      bg-[#fc5648] text-white min-h-48 p-5 hover:shadow-lg transition-all duration-300">
+                <div>
+                    <span class="text-[10px] font-black uppercase tracking-widest opacity-60">Espacio publicitario</span>
+                    <p class="text-xl font-extrabold leading-tight mt-1">¿Tienes un evento en Valparaíso?</p>
+                    <p class="text-sm opacity-80 mt-2 leading-snug">Destaca tu panorama y llega a miles de personas que buscan qué hacer en la ciudad.</p>
+                </div>
+                <span class="mt-4 self-start bg-white text-[#fc5648] text-xs font-black px-4 py-2 rounded-full
+                             group-hover:bg-gray-100 transition">
+                    Contáctanos →
+                </span>
+            </a>
+            @endif
 
             @php $cardHref = $panorama->slug ? route('panoramas.show', $panorama) : url('/lugar/' . $panorama->punto_slug . '#agenda'); @endphp
             <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer
