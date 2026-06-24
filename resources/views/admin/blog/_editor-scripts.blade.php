@@ -25,15 +25,17 @@ document.addEventListener('DOMContentLoaded', function () {
         },
     });
 
-    // Cargar contenido existente (edición)
-    const hidden = document.getElementById('contenido-hidden');
-    if (hidden.value.trim()) {
-        quill.clipboard.dangerouslyPasteHTML(hidden.value);
+    // Cargar contenido ES por defecto
+    const hiddenEs = document.getElementById('contenido_es');
+    const hiddenEn = document.getElementById('contenido_en');
+    if (hiddenEs.value.trim()) {
+        quill.clipboard.dangerouslyPasteHTML(hiddenEs.value);
     }
 
     // Sincronizar al enviar + spinner
     document.getElementById('blog-form').addEventListener('submit', function () {
-        hidden.value = quill.root.innerHTML;
+        const activoId = 'contenido_' + currentLang;
+        document.getElementById(activoId).value = quill.root.innerHTML;
         const btn     = document.getElementById('guardar-btn');
         const spinner = document.getElementById('guardar-spinner');
         btn.disabled = true;
@@ -71,8 +73,49 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
+    // ── Cambio de idioma ────────────────────────────────────────────
+    let currentLang = 'es';
+
+    window.setLang = function(lang) {
+        // Guardar contenido del editor en el textarea del idioma actual
+        document.getElementById('contenido_' + currentLang).value = quill.root.innerHTML;
+
+        // Mostrar/ocultar campos
+        document.querySelectorAll('[data-lang-field]').forEach(el => {
+            el.style.display = el.dataset.langField === lang ? '' : 'none';
+        });
+
+        // Cargar contenido del nuevo idioma en el editor
+        const nuevoContenido = document.getElementById('contenido_' + lang).value;
+        quill.setContents([]);
+        if (nuevoContenido.trim()) {
+            quill.clipboard.dangerouslyPasteHTML(nuevoContenido);
+        }
+
+        // Actualizar label del editor
+        const label = document.getElementById('editor-lang-label');
+        if (label) {
+            label.textContent = lang.toUpperCase();
+            label.style.color = lang === 'es' ? '#fc5648' : '#3b82f6';
+        }
+
+        // Estilos de los tabs
+        const tabEs = document.getElementById('tab-es');
+        const tabEn = document.getElementById('tab-en');
+        if (lang === 'es') {
+            tabEs.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-[#fc5648] bg-[#fc5648] text-white transition';
+            tabEn.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition';
+        } else {
+            tabEn.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-blue-500 bg-blue-500 text-white transition';
+            tabEs.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition';
+        }
+
+        currentLang = lang;
+        contarResumen();
+    };
+
     // ── Slug automático desde título ────────────────────────────────
-    const tituloInput = document.getElementById('titulo');
+    const tituloInput = document.getElementById('titulo-es');
     const slugInput   = document.getElementById('slug');
     let slugEditado   = slugInput.value.trim() !== '';
 
@@ -108,13 +151,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ── Contador Resumen ─────────────────────────────────────────────
-    const RESUMEN_MAX = 600;
-    const resumenInput  = document.getElementById('resumen-input');
-    const resumenChars  = document.getElementById('resumen-chars');
-    const resumenPalab  = document.getElementById('resumen-palabras');
+    const RESUMEN_MAX  = 600;
+    const resumenChars = document.getElementById('resumen-chars');
+    const resumenPalab = document.getElementById('resumen-palabras');
 
     function contarResumen() {
-        const txt    = resumenInput.value;
+        const el  = document.getElementById('resumen-' + currentLang);
+        if (!el) return;
+        const txt    = el.value;
         const chars  = txt.length;
         const words  = txt.trim() === '' ? 0 : txt.trim().split(/\s+/).length;
         const quedan = RESUMEN_MAX - chars;
@@ -123,7 +167,8 @@ document.addEventListener('DOMContentLoaded', function () {
         resumenChars.classList.toggle('text-red-500', quedan <= 50);
         resumenChars.classList.toggle('text-gray-400', quedan > 50);
     }
-    resumenInput.addEventListener('input', contarResumen);
+    document.getElementById('resumen-es').addEventListener('input', contarResumen);
+    document.getElementById('resumen-en').addEventListener('input', contarResumen);
     contarResumen();
 
     // ── Contador Contenido (Quill) ───────────────────────────────────

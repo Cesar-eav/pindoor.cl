@@ -45,23 +45,43 @@
     </div>
     @endif
 
+    {{-- ── Tabs idioma ─────────────────────────────────────────────────── --}}
+    <div class="w-[90vw] mx-auto flex items-center gap-2">
+        <button type="button" id="tab-es" onclick="setLang('es')"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-[#fc5648] bg-[#fc5648] text-white transition">
+            🇪🇸 Español
+        </button>
+        <button type="button" id="tab-en" onclick="setLang('en')"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition">
+            🇬🇧 English
+        </button>
+        <span class="text-xs text-gray-400 ml-2">Slug e imágenes son compartidos</span>
+    </div>
+
     {{-- ── Fila superior: Título+Slug · Resumen · Portada ─────────────── --}}
     <div class="w-[90vw] mx-auto bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
             {{-- Título + Slug --}}
             <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Título *</label>
-                    <input id="titulo" type="text" name="titulo" required
-                           value="{{ old('titulo', $post?->titulo) }}"
+                <div data-lang-field="es">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Título * <span class="text-[#fc5648]">ES</span></label>
+                    <input id="titulo-es" type="text" name="titulo_es" required
+                           value="{{ old('titulo_es', $post?->getTranslation('titulo','es',false)) }}"
                            placeholder="Ej: Los mejores rincones del cerro Alegre"
                            class="w-full px-4 py-3 border border-gray-200 rounded-xl text-base font-semibold focus:ring-2 focus:ring-[#fc5648] outline-none">
+                </div>
+                <div data-lang-field="en" style="display:none">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Title <span class="text-blue-500">EN</span></label>
+                    <input id="titulo-en" type="text" name="titulo_en"
+                           value="{{ old('titulo_en', $post?->getTranslation('titulo','en',false)) }}"
+                           placeholder="Eg: The best corners of Cerro Alegre"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl text-base font-semibold focus:ring-2 focus:ring-blue-400 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">
                         Slug (URL)
-                        <span class="normal-case font-normal text-gray-400 ml-1">— automático desde el título</span>
+                        <span class="normal-case font-normal text-gray-400 ml-1">— automático desde el título ES</span>
                     </label>
                     <div class="flex items-center gap-2">
                         <span class="text-sm text-gray-400 shrink-0">/blog/</span>
@@ -75,13 +95,24 @@
 
             {{-- Resumen --}}
             <div>
-                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">
-                    Resumen
-                    <span class="normal-case font-normal text-gray-400 ml-1">— aparece en las tarjetas</span>
-                </label>
-                <textarea id="resumen-input" name="resumen" rows="12" maxlength="600"
-                          placeholder="Una breve introducción que invite a leer el post completo..."
-                          class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none resize-none">{{ old('resumen', $post?->resumen) }}</textarea>
+                <div data-lang-field="es">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">
+                        Resumen <span class="text-[#fc5648]">ES</span>
+                        <span class="normal-case font-normal text-gray-400 ml-1">— aparece en las tarjetas</span>
+                    </label>
+                    <textarea id="resumen-es" name="resumen_es" rows="12" maxlength="600"
+                              placeholder="Una breve introducción que invite a leer el post completo..."
+                              class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none resize-none">{{ old('resumen_es', $post?->getTranslation('resumen','es',false)) }}</textarea>
+                </div>
+                <div data-lang-field="en" style="display:none">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">
+                        Summary <span class="text-blue-500">EN</span>
+                        <span class="normal-case font-normal text-gray-400 ml-1">— shown on cards</span>
+                    </label>
+                    <textarea id="resumen-en" name="resumen_en" rows="12" maxlength="600"
+                              placeholder="A brief intro that invites readers..."
+                              class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none resize-none">{{ old('resumen_en', $post?->getTranslation('resumen','en',false)) }}</textarea>
+                </div>
                 <div class="flex justify-between mt-1.5 text-[11px] text-gray-400">
                     <span id="resumen-palabras">0 palabras</span>
                     <span id="resumen-chars" class="font-semibold">0 / 600</span>
@@ -198,7 +229,9 @@
             {{-- ── Columna central: Editor ────────────────────────────────── --}}
             <div>
                 <div class="flex items-center justify-between mb-3">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Contenido</label>
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                        Contenido — <span id="editor-lang-label" class="text-[#fc5648]">ES</span>
+                    </label>
                     <div class="flex items-center gap-3 text-[11px] text-gray-400">
                         <span id="contenido-palabras">0 palabras</span>
                         <span id="contenido-chars" class="font-semibold">0 / 10 000</span>
@@ -208,7 +241,8 @@
                 <div id="contenido-limite-aviso" class="hidden mt-2 text-xs text-red-500 font-semibold">
                     Límite de 10 000 caracteres alcanzado.
                 </div>
-                <textarea id="contenido-hidden" name="contenido" class="hidden">{{ old('contenido', $post?->contenido) }}</textarea>
+                <textarea id="contenido_es" name="contenido_es" class="hidden">{{ old('contenido_es', $post?->getTranslation('contenido','es',false)) }}</textarea>
+                <textarea id="contenido_en" name="contenido_en" class="hidden">{{ old('contenido_en', $post?->getTranslation('contenido','en',false)) }}</textarea>
             </div>
 
             {{-- ── Columna derecha: Preview posiciones ────────────────────── --}}
