@@ -439,7 +439,7 @@ class AdminController extends Controller
                 $datos
             );
 
-            $item['id']        = $panorama->id;
+            $item['slug']      = $panorama->slug;
             $item['categoria'] = $panorama->categoria;
 
             $panorama->wasRecentlyCreated ? ($creados[] = $item) : ($actualizados[] = $item);
