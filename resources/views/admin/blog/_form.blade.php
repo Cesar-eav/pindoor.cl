@@ -46,7 +46,7 @@
     @endif
 
     {{-- ── Tabs idioma ─────────────────────────────────────────────────── --}}
-    <div class="w-[90vw] mx-auto flex items-center gap-2">
+    <div class="w-[90vw] mx-auto flex items-center gap-2 flex-wrap">
         <button type="button" id="tab-es" onclick="setLang('es')"
                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-[#fc5648] bg-[#fc5648] text-white transition">
             🇪🇸 Español
@@ -55,7 +55,12 @@
                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition">
             🇬🇧 English
         </button>
-        <span class="text-xs text-gray-400 ml-2">Slug e imágenes son compartidos</span>
+        <button type="button" id="btn-autotraducir" onclick="autoTraducir()"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-blue-400 hover:text-blue-500 transition ml-2">
+            ✨ Auto-traducir ES→EN
+        </button>
+        <span id="traducir-estado" class="text-xs text-gray-400 hidden"></span>
+        <span class="text-xs text-gray-400 ml-auto">Slug e imágenes son compartidos</span>
     </div>
 
     {{-- ── Fila superior: Título+Slug · Resumen · Portada ─────────────── --}}
