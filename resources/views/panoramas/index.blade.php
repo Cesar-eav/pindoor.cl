@@ -171,8 +171,56 @@
         </div>
     </div>
 
+    {{-- ── Banner publicitario ────────────────────────────────────────────── --}}
+    <div x-data="{
+            slide: 0,
+            slides: [
+                { titulo: '¿Tienes un evento en Valparaíso?', sub: 'Llega a miles de personas que buscan qué hacer en la ciudad.' },
+                { titulo: 'Destaca tu panorama aquí', sub: 'Tu evento, concierto o actividad en el lugar donde todos miran.' },
+                { titulo: 'Más visibilidad, más público', sub: 'Promociona tu espacio cultural entre turistas y locales.' },
+                { titulo: '¿Organizas shows, ferias o talleres?', sub: 'Pindoor te conecta con la audiencia correcta en Valparaíso.' },
+            ],
+            init() { setInterval(() => this.slide = (this.slide + 1) % this.slides.length, 3500); }
+         }"
+         class="mb-8 -mx-4 px-4">
+        <a href="{{ route('contacto.index') }}"
+           class="group relative flex items-center justify-between overflow-hidden rounded-2xl bg-[#fc5648] px-6 py-5 shadow-sm hover:shadow-lg transition-all duration-300">
+
+            {{-- Textos rotantes --}}
+            <div class="min-w-0 flex-1">
+                <span class="text-[10px] font-black uppercase tracking-widest text-white/60">Espacio publicitario</span>
+                <template x-for="(s, i) in slides" :key="i">
+                    <div x-show="slide === i"
+                         x-transition:enter="transition duration-500"
+                         x-transition:enter-start="opacity-0 translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition duration-300"
+                         x-transition:leave-start="opacity-100"
+                         x-transition:leave-end="opacity-0">
+                        <p class="text-lg font-extrabold text-white leading-tight mt-0.5" x-text="s.titulo"></p>
+                        <p class="text-sm text-white/75 mt-0.5 leading-snug" x-text="s.sub"></p>
+                    </div>
+                </template>
+            </div>
+
+            {{-- CTA --}}
+            <span class="ml-4 shrink-0 bg-white text-[#fc5648] text-xs font-black px-4 py-2 rounded-full
+                         group-hover:bg-gray-100 transition whitespace-nowrap">
+                Contáctanos →
+            </span>
+
+            {{-- Dots --}}
+            <div class="absolute bottom-2 left-6 flex gap-1">
+                <template x-for="(s, i) in slides" :key="i">
+                    <span class="block w-1 h-1 rounded-full transition-all duration-300"
+                          :class="slide === i ? 'bg-white w-3' : 'bg-white/40'"></span>
+                </template>
+            </div>
+        </a>
+    </div>
+
     {{-- ── Secciones por día (agrupadas por mes) ─────────────────────────── --}}
-    @php $mesPrevio = null; $bannerMostrado = false; @endphp
+    @php $mesPrevio = null; @endphp
     @foreach($porDia as $fechaStr => $grupo)
     @php $meta = $diasMeta[$fechaStr]; $mesActual = $mesPorDia[$fechaStr]; @endphp
 
@@ -202,21 +250,6 @@
         {{-- Cards del día --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             @foreach($grupo as $panorama)
-            @if(!$bannerMostrado && $loop->iteration === 3) @php $bannerMostrado = true; @endphp
-            <a href="{{ route('contacto.index') }}"
-               class="group relative flex flex-col justify-between overflow-hidden rounded-2xl shadow-sm
-                      bg-[#fc5648] text-white min-h-48 p-5 hover:shadow-lg transition-all duration-300">
-                <div>
-                    <span class="text-[10px] font-black uppercase tracking-widest opacity-60">Espacio publicitario</span>
-                    <p class="text-xl font-extrabold leading-tight mt-1">¿Tienes un evento en Valparaíso?</p>
-                    <p class="text-sm opacity-80 mt-2 leading-snug">Destaca tu panorama y llega a miles de personas que buscan qué hacer en la ciudad.</p>
-                </div>
-                <span class="mt-4 self-start bg-white text-[#fc5648] text-xs font-black px-4 py-2 rounded-full
-                             group-hover:bg-gray-100 transition">
-                    Contáctanos →
-                </span>
-            </a>
-            @endif
 
             @php $cardHref = $panorama->slug ? route('panoramas.show', $panorama) : url('/lugar/' . $panorama->punto_slug . '#agenda'); @endphp
             <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer
