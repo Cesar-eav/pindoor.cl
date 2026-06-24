@@ -23,28 +23,38 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'titulo'         => 'required|string|max:255',
+            'titulo_es'      => 'required|string|max:255',
+            'titulo_en'      => 'nullable|string|max:255',
             'slug'           => 'nullable|string|max:255',
-            'resumen'        => 'nullable|string|max:600',
-            'contenido'      => 'nullable|string',
+            'resumen_es'     => 'nullable|string|max:600',
+            'resumen_en'     => 'nullable|string|max:600',
+            'contenido_es'   => 'nullable|string',
+            'contenido_en'   => 'nullable|string',
             'imagen_portada' => 'nullable|image|max:6144',
             'publicado'      => 'nullable|boolean',
         ]);
 
-        $data['slug'] = Post::generarSlug($data['slug'] ?: $data['titulo']);
+        $slug = Post::generarSlug($data['slug'] ?: $data['titulo_es']);
 
         if ($request->hasFile('imagen_portada')) {
-            $data['imagen_portada'] = $request->file('imagen_portada')
-                ->store('blog/portadas', 'public');
+            $portada = $request->file('imagen_portada')->store('blog/portadas', 'public');
         }
 
-        $data['imagenes'] = $this->recogerImagenesNuevas($request, []);
-
         $publicado = (bool) ($data['publicado'] ?? false);
-        $data['publicado']    = $publicado;
-        $data['publicado_en'] = $publicado ? now() : null;
 
-        Post::create($data);
+        $post = new Post();
+        $post->slug           = $slug;
+        $post->imagen_portada = $portada ?? null;
+        $post->imagenes       = $this->recogerImagenesNuevas($request, []);
+        $post->publicado      = $publicado;
+        $post->publicado_en   = $publicado ? now() : null;
+        $post->setTranslation('titulo',    'es', $data['titulo_es'])
+             ->setTranslation('titulo',    'en', $data['titulo_en'] ?? '')
+             ->setTranslation('resumen',   'es', $data['resumen_es'] ?? '')
+             ->setTranslation('resumen',   'en', $data['resumen_en'] ?? '')
+             ->setTranslation('contenido', 'es', $data['contenido_es'] ?? '')
+             ->setTranslation('contenido', 'en', $data['contenido_en'] ?? '');
+        $post->save();
 
         return redirect()->route('admin.blog.index')
             ->with('success', 'Post creado correctamente.');
@@ -58,27 +68,27 @@ class PostController extends Controller
     public function update(Request $request, Post $blog)
     {
         $data = $request->validate([
-            'titulo'         => 'required|string|max:255',
+            'titulo_es'      => 'required|string|max:255',
+            'titulo_en'      => 'nullable|string|max:255',
             'slug'           => 'nullable|string|max:255',
-            'resumen'        => 'nullable|string|max:600',
-            'contenido'      => 'nullable|string',
+            'resumen_es'     => 'nullable|string|max:600',
+            'resumen_en'     => 'nullable|string|max:600',
+            'contenido_es'   => 'nullable|string',
+            'contenido_en'   => 'nullable|string',
             'imagen_portada' => 'nullable|image|max:6144',
             'publicado'      => 'nullable|boolean',
         ]);
 
-        $data['slug'] = Post::generarSlug($data['slug'] ?: $data['titulo'], $blog->id);
+        $blog->slug = Post::generarSlug($data['slug'] ?: $data['titulo_es'], $blog->id);
 
         if ($request->hasFile('imagen_portada')) {
             if ($blog->imagen_portada) Storage::disk('public')->delete($blog->imagen_portada);
-            $data['imagen_portada'] = $request->file('imagen_portada')
-                ->store('blog/portadas', 'public');
-        } else {
-            unset($data['imagen_portada']);
+            $blog->imagen_portada = $request->file('imagen_portada')->store('blog/portadas', 'public');
         }
 
-        // Procesar imágenes existentes: borrar las marcadas, actualizar posiciones
-        $existentes  = $blog->imagenes ?? [];
-        $eliminar    = $request->input('eliminar_imagen', []);
+        // Procesar imágenes existentes
+        $existentes   = $blog->imagenes ?? [];
+        $eliminar     = $request->input('eliminar_imagen', []);
         $existentesOk = [];
 
         foreach ($existentes as $idx => $img) {
@@ -91,17 +101,23 @@ class PostController extends Controller
             $existentesOk[] = ['ruta' => $ruta, 'posicion' => $pos];
         }
 
-        $data['imagenes'] = $this->recogerImagenesNuevas($request, $existentesOk);
+        $blog->imagenes = $this->recogerImagenesNuevas($request, $existentesOk);
 
         $publicado = (bool) ($data['publicado'] ?? false);
-        $data['publicado'] = $publicado;
+        $blog->publicado = $publicado;
         if ($publicado && ! $blog->publicado_en) {
-            $data['publicado_en'] = now();
+            $blog->publicado_en = now();
         } elseif (! $publicado) {
-            $data['publicado_en'] = null;
+            $blog->publicado_en = null;
         }
 
-        $blog->update($data);
+        $blog->setTranslation('titulo',    'es', $data['titulo_es'])
+             ->setTranslation('titulo',    'en', $data['titulo_en'] ?? '')
+             ->setTranslation('resumen',   'es', $data['resumen_es'] ?? '')
+             ->setTranslation('resumen',   'en', $data['resumen_en'] ?? '')
+             ->setTranslation('contenido', 'es', $data['contenido_es'] ?? '')
+             ->setTranslation('contenido', 'en', $data['contenido_en'] ?? '');
+        $blog->save();
 
         return redirect()->route('admin.blog.index')
             ->with('success', 'Post actualizado.');
