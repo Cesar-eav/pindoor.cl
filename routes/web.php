@@ -124,8 +124,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/panoramas/ubicaciones', [PanoramaController::class, 'ubicaciones'])->name('panoramas.ubicaciones');
     Route::resource('panoramas', PanoramaController::class)->except(['show']);
     Route::patch('/panoramas/{panorama}/toggle', [PanoramaController::class, 'toggle'])->name('panoramas.toggle');
+    Route::patch('/panoramas/{panorama}/categoria', [PanoramaController::class, 'actualizarCategoria'])->name('panoramas.categoria');
     Route::delete('/panoramas/imagenes/{imagen}', [PanoramaController::class, 'destroyImagen'])->name('panoramas.imagenes.destroy');
     Route::post('/panoramas/configuracion', [PanoramaController::class, 'configuracion'])->name('panoramas.configuracion');
+    Route::get('/passline', [AdminController::class, 'passline'])->name('passline');
+    Route::post('/passline', [AdminController::class, 'passlineImportar'])->name('passline.importar');
 
     // Experiencias
     Route::resource('experiencias', ExperienciaController::class)->except(['show']);
