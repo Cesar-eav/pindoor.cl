@@ -267,6 +267,10 @@ class PanoramaController extends Controller
 
         $panorama->delete();
 
+        if (request()->expectsJson()) {
+            return response()->json(['ok' => true]);
+        }
+
         return redirect()->route('admin.panoramas.index')->with('success', 'Panorama eliminado.');
     }
 
