@@ -6,9 +6,12 @@ use App\Models\PuntoInteres;
 use App\Models\Artista;
 use App\Models\Categoria;
 use App\Models\LeadPublicita;
+use App\Models\Panorama;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class AdminController extends Controller
@@ -370,5 +373,129 @@ class AdminController extends Controller
             'success' => true,
             'url'     => route('admin.puntos.create'),
         ]);
+    }
+
+    public function passline()
+    {
+        return view('admin.passline');
+    }
+
+    public function passlineImportar(Request $request)
+    {
+        $eventos = $request->input('eventos', []);
+
+        $categoriaMap = [
+            'Música'      => 'musica',
+            'Music'       => 'musica',
+            'Teatro'      => 'teatro',
+            'Theatre'     => 'teatro',
+            'Arte'        => 'arte',
+            'Cine'        => 'cine',
+            'Danza'       => 'danza',
+            'Dance'       => 'danza',
+            'Comedia'     => 'standup',
+            'Comedy'      => 'standup',
+            'Literatura'  => 'literatura',
+            'Feria'       => 'feria',
+            'Infantil'    => 'infantil',
+            'Gastronomía' => 'gastronomia',
+            'Conferencia' => 'conferencia',
+        ];
+
+        $creados = $actualizados = $omitidos = [];
+
+        foreach ($eventos as $ev) {
+            $fecha = Carbon::parse($ev['fecha_inicio']);
+            $item = [
+                'nombre' => $ev['nombre'],
+                'fecha'  => $fecha->locale('es')->isoFormat('D MMM YYYY'),
+                'hora'   => substr($ev['hora_inicio'] ?? '', 0, 5),
+                'lugar'  => $ev['lugar'],
+            ];
+
+            if ($fecha->isPast()) { $omitidos[] = $item; continue; }
+
+            $hora      = $item['hora'] ?: null;
+            $fechaFin  = !empty($ev['fecha_termino']) ? $ev['fecha_termino'] : null;
+            $categoria = $categoriaMap[$ev['upper_category_name'] ?? ''] ?? 'otros';
+            $imagen    = $this->descargarImagenPassline($ev['recorte'] ?? null, $ev['id']);
+
+            $datos = [
+                'titulo'      => $ev['nombre'],
+                'fecha'       => $fecha->toDateString(),
+                'fecha_fin'   => $fechaFin,
+                'hora'        => $hora,
+                'ubicacion'   => $ev['lugar'],
+                'descripcion' => $this->construirDescripcion($ev),
+                'imagen'      => $imagen,
+                'enlace'      => $ev['url'],
+                'es_gratuito' => (float)($ev['precio_min'] ?? 1) === 0.0,
+                'categoria'   => $categoria,
+                'activo'      => true,
+            ];
+
+            $panorama = Panorama::updateOrCreate(
+                ['fuente' => 'passline', 'fuente_id' => $ev['id']],
+                $datos
+            );
+
+            $item['id']        = $panorama->id;
+            $item['categoria'] = $panorama->categoria;
+
+            $panorama->wasRecentlyCreated ? ($creados[] = $item) : ($actualizados[] = $item);
+        }
+
+        return response()->json([
+            'creados'      => $creados,
+            'actualizados' => $actualizados,
+            'omitidos'     => $omitidos,
+        ]);
+    }
+
+    private function construirDescripcion(array $ev): array
+    {
+        $carbon = Carbon::parse($ev['fecha_inicio']);
+        $hora   = substr($ev['hora_inicio'] ?? '', 0, 5);
+        $precio = (float)($ev['precio_min'] ?? 0);
+
+        $fechaEs = $carbon->locale('es')->isoFormat('dddd D [de] MMMM [de] YYYY');
+        $fechaEn = $carbon->locale('en')->isoFormat('dddd, MMMM D, YYYY');
+
+        $es = "{$ev['nombre']} en {$ev['lugar']}.\n{$fechaEs}";
+        if ($hora) $es .= " a las {$hora} hrs.";
+        if (!empty($ev['artistas'])) $es .= "\n{$ev['artistas']}";
+        $es .= $precio > 0
+            ? "\nEntrada desde $" . number_format($precio, 0, ',', '.') . " CLP."
+            : "\nEntrada liberada.";
+
+        $en = "{$ev['nombre']} at {$ev['lugar']}.\n{$fechaEn}";
+        if ($hora) $en .= " at {$hora} hrs.";
+        if (!empty($ev['artistas'])) $en .= "\n{$ev['artistas']}";
+        $en .= $precio > 0
+            ? "\nTickets from $" . number_format($precio, 0, ',', '.') . " CLP."
+            : "\nFree entry.";
+
+        return ['es' => $es, 'en' => $en];
+    }
+
+    private function descargarImagenPassline(?string $url, string $id): ?string
+    {
+        if (!$url) return null;
+
+        $ruta    = "panoramas/passline/{$id}.jpg";
+        $destino = storage_path("app/public/{$ruta}");
+
+        if (file_exists($destino)) return $ruta;
+
+        try {
+            @mkdir(dirname($destino), 0755, true);
+            $response = Http::timeout(10)->get($url);
+            if ($response->successful()) {
+                file_put_contents($destino, $response->body());
+                return $ruta;
+            }
+        } catch (\Exception $e) {}
+
+        return null;
     }
 }

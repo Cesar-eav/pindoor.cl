@@ -287,4 +287,11 @@ class PanoramaController extends Controller
         $panorama->update(['activo' => ! $panorama->activo]);
         return back()->with('success', 'Visibilidad actualizada.');
     }
+
+    public function actualizarCategoria(Request $request, Panorama $panorama)
+    {
+        $request->validate(['categoria' => 'required|in:' . implode(',', array_keys(Panorama::CATEGORIAS))]);
+        $panorama->update(['categoria' => $request->categoria]);
+        return response()->json(['ok' => true]);
+    }
 }

@@ -48,6 +48,8 @@ class Panorama extends Model
         'categoria',
         'es_gratuito',
         'enlace',
+        'fuente',
+        'fuente_id',
         'imagen',
         'activo',
         'orden',

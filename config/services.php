@@ -41,4 +41,8 @@ return [
         'key' => env('DEEPL_API_KEY'),
     ],
 
+    'passline' => [
+        'cf_clearance' => env('PASSLINE_CF_CLEARANCE'),
+    ],
+
 ];

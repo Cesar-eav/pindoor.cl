@@ -2,10 +2,16 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Panoramas</h2>
-            <a href="{{ route('admin.panoramas.create') }}"
-               class="bg-[#fc5648] text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#d94439] transition">
-                + Nuevo panorama
-            </a>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('admin.passline') }}"
+                   class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-50 transition">
+                    Importar Passline
+                </a>
+                <a href="{{ route('admin.panoramas.create') }}"
+                   class="bg-[#fc5648] text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#d94439] transition">
+                    + Nuevo panorama
+                </a>
+            </div>
         </div>
     </x-slot>
 
