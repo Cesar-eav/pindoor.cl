@@ -133,7 +133,9 @@
                         $vencido = $key === 'pasados';
                     @endphp
 
-                    <div class="bg-white rounded-xl border border-gray-100 shadow-sm flex items-stretch overflow-hidden
+                    <div x-data="{ eliminando: false }"
+                         x-show="!eliminando"
+                         class="bg-white rounded-xl border border-gray-100 shadow-sm flex items-stretch overflow-hidden
                                 {{ $vencido ? 'opacity-60' : '' }}">
 
                         {{-- Fecha badge --}}
@@ -213,11 +215,14 @@
                             <div class="flex items-center gap-3">
                                 <a href="{{ route('admin.panoramas.edit', $panorama) }}"
                                    class="text-xs font-bold text-blue-600 hover:underline">Editar</a>
-                                <form action="{{ route('admin.panoramas.destroy', $panorama) }}" method="POST"
-                                      onsubmit="return confirm('¿Eliminar «{{ addslashes($panorama->titulo) }}»?')">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="text-xs font-bold text-red-400 hover:underline">Eliminar</button>
-                                </form>
+                                <button type="button"
+                                        class="text-xs font-bold text-red-400 hover:underline"
+                                        @click="if(confirm('¿Eliminar «{{ addslashes($panorama->titulo) }}»?')) {
+                                            fetch('{{ route('admin.panoramas.destroy', $panorama) }}', {
+                                                method: 'DELETE',
+                                                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+                                            }).then(r => { if(r.ok || r.status === 302) eliminando = true });
+                                        }">Eliminar</button>
                             </div>
                         </div>
 
