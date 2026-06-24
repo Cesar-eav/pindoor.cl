@@ -50,6 +50,7 @@ class Panorama extends Model
         'enlace',
         'fuente',
         'fuente_id',
+        'created_by',
         'imagen',
         'activo',
         'orden',
@@ -64,6 +65,9 @@ class Panorama extends Model
     {
         static::creating(function (self $p) {
             $p->slug = Str::slug($p->titulo) . '-' . uniqid();
+            if (auth()->check() && !$p->created_by) {
+                $p->created_by = auth()->user()->name;
+            }
         });
 
         static::created(function (self $p) {
