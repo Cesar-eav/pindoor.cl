@@ -16,7 +16,13 @@
                 <button @click="importar()"
                         :disabled="estado !== 'idle' && estado !== 'listo'"
                         class="w-full bg-[#fc5648] text-white font-bold py-3 px-6 rounded-xl
-                               hover:bg-[#d94439] transition disabled:opacity-50 disabled:cursor-not-allowed">
+                               hover:bg-[#d94439] transition disabled:opacity-50 disabled:cursor-not-allowed
+                               flex items-center justify-center gap-2">
+                    <svg x-show="estado === 'consultando' || estado === 'guardando'"
+                         class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
                     <span x-show="estado === 'idle' || estado === 'listo'">Importar eventos</span>
                     <span x-show="estado === 'consultando'">Consultando Passline…</span>
                     <span x-show="estado === 'guardando'" x-text="progreso"></span>
