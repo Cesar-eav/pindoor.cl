@@ -9,6 +9,73 @@
 
 @section('content')
 
+{{-- ── Hero banner publicitario ──────────────────────────────────────────── --}}
+@php $bannerFotos = $panoramas->filter(fn($p) => $p->imagen)->take(6)->values(); @endphp
+<div x-data="{
+        slide: 0,
+        slides: [
+            { titulo: '¿Tienes un evento en Valparaíso?',       sub: 'Llega a miles de personas que buscan qué hacer en la ciudad.' },
+            { titulo: 'Destaca tu panorama aquí',               sub: 'Tu show, feria o actividad frente a la audiencia correcta.' },
+            { titulo: '¿Organizas conciertos o talleres?',      sub: 'Promociona tu espacio cultural entre turistas y locales.' },
+            { titulo: 'Más visibilidad, más público',           sub: 'Pindoor es la guía de eventos de Valparaíso. Úsala a tu favor.' },
+        ],
+        init() { setInterval(() => this.slide = (this.slide + 1) % this.slides.length, 3800); }
+     }"
+     class="w-full bg-gray-950 overflow-hidden mb-0">
+
+    <div class="max-w-5xl mx-auto px-4 py-6 flex items-center gap-4">
+
+        {{-- Texto izquierda --}}
+        <div class="flex-1 min-w-0">
+            <span class="text-[10px] font-black uppercase tracking-widest text-[#fc5648]">Espacio publicitario · Pindoor</span>
+            <div class="relative mt-1" style="min-height:3.6rem">
+                <template x-for="(s, i) in slides" :key="i">
+                    <div x-show="slide === i"
+                         x-transition:enter="transition duration-500"
+                         x-transition:enter-start="opacity-0 translate-y-3"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition duration-300 absolute"
+                         x-transition:leave-start="opacity-100"
+                         x-transition:leave-end="opacity-0"
+                         class="w-full">
+                        <p class="text-xl sm:text-2xl font-extrabold text-white leading-tight" x-text="s.titulo"></p>
+                        <p class="text-xs sm:text-sm text-gray-400 mt-0.5 leading-snug line-clamp-2" x-text="s.sub"></p>
+                    </div>
+                </template>
+            </div>
+            <div class="flex items-center gap-3 mt-3">
+                <a href="{{ route('contacto.index') }}"
+                   class="inline-block bg-[#fc5648] hover:bg-[#d94439] text-white text-xs font-black px-5 py-2 rounded-full transition whitespace-nowrap">
+                    Contáctanos →
+                </a>
+                {{-- Dots --}}
+                <div class="flex gap-1.5">
+                    <template x-for="(s, i) in slides" :key="i">
+                        <span class="block h-1.5 rounded-full transition-all duration-300 cursor-pointer"
+                              :class="slide === i ? 'bg-[#fc5648] w-4' : 'bg-gray-600 w-1.5'"
+                              @click="slide = i"></span>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        {{-- Imágenes derecha --}}
+        @if($bannerFotos->isNotEmpty())
+        <div class="hidden sm:flex gap-2 shrink-0">
+            @foreach($bannerFotos->take(4) as $foto)
+            <a href="{{ route('panoramas.show', $foto) }}"
+               class="relative block shrink-0 w-20 h-24 rounded-xl overflow-hidden ring-1 ring-white/10 hover:ring-[#fc5648]/60 transition">
+                <img src="{{ asset('storage/' . $foto->imagen) }}"
+                     alt="{{ $foto->titulo }}"
+                     class="w-full h-full object-cover brightness-75 hover:brightness-100 transition duration-300">
+            </a>
+            @endforeach
+        </div>
+        @endif
+
+    </div>
+</div>
+
 <div class="max-w-5xl mx-auto px-4 pt-3 pb-8">
 
     {{-- Header compacto --}}
@@ -169,54 +236,6 @@
             </a>
             @endforeach
         </div>
-    </div>
-
-    {{-- ── Banner publicitario ────────────────────────────────────────────── --}}
-    <div x-data="{
-            slide: 0,
-            slides: [
-                { titulo: '¿Tienes un evento en Valparaíso?', sub: 'Llega a miles de personas que buscan qué hacer en la ciudad.' },
-                { titulo: 'Destaca tu panorama aquí', sub: 'Tu evento, concierto o actividad en el lugar donde todos miran.' },
-                { titulo: 'Más visibilidad, más público', sub: 'Promociona tu espacio cultural entre turistas y locales.' },
-                { titulo: '¿Organizas shows, ferias o talleres?', sub: 'Pindoor te conecta con la audiencia correcta en Valparaíso.' },
-            ],
-            init() { setInterval(() => this.slide = (this.slide + 1) % this.slides.length, 3500); }
-         }"
-         class="mb-8 -mx-4 px-4">
-        <a href="{{ route('contacto.index') }}"
-           class="group relative flex items-center justify-between overflow-hidden rounded-2xl bg-[#fc5648] px-6 py-5 shadow-sm hover:shadow-lg transition-all duration-300">
-
-            {{-- Textos rotantes --}}
-            <div class="min-w-0 flex-1">
-                <span class="text-[10px] font-black uppercase tracking-widest text-white/60">Espacio publicitario</span>
-                <template x-for="(s, i) in slides" :key="i">
-                    <div x-show="slide === i"
-                         x-transition:enter="transition duration-500"
-                         x-transition:enter-start="opacity-0 translate-y-2"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         x-transition:leave="transition duration-300"
-                         x-transition:leave-start="opacity-100"
-                         x-transition:leave-end="opacity-0">
-                        <p class="text-lg font-extrabold text-white leading-tight mt-0.5" x-text="s.titulo"></p>
-                        <p class="text-sm text-white/75 mt-0.5 leading-snug" x-text="s.sub"></p>
-                    </div>
-                </template>
-            </div>
-
-            {{-- CTA --}}
-            <span class="ml-4 shrink-0 bg-white text-[#fc5648] text-xs font-black px-4 py-2 rounded-full
-                         group-hover:bg-gray-100 transition whitespace-nowrap">
-                Contáctanos →
-            </span>
-
-            {{-- Dots --}}
-            <div class="absolute bottom-2 left-6 flex gap-1">
-                <template x-for="(s, i) in slides" :key="i">
-                    <span class="block w-1 h-1 rounded-full transition-all duration-300"
-                          :class="slide === i ? 'bg-white w-3' : 'bg-white/40'"></span>
-                </template>
-            </div>
-        </a>
     </div>
 
     {{-- ── Secciones por día (agrupadas por mes) ─────────────────────────── --}}
