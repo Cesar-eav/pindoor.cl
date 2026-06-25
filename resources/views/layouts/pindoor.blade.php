@@ -51,10 +51,10 @@
     {{-- Selector de idioma (desktop, esquina superior derecha) --}}
     <div class="fixed top-3 right-3 z-50 hidden md:flex items-center gap-1 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full px-2 py-1 shadow-sm text-xs font-bold">
         <a href="{{ route('lang.switch', 'es') }}"
-           class="{{ app()->getLocale() === 'es' ? 'text-[#fc5648]' : 'text-gray-400 hover:text-gray-700' }} px-1 transition">ES</a>
+           class="{{ app()->getLocale() === 'es' ? 'text-[#fc5648]' : 'text-gray-400 hover:text-gray-700' }} px-1 transition">🇪🇸</a>
         <span class="text-gray-300">|</span>
         <a href="{{ route('lang.switch', 'en') }}"
-           class="{{ app()->getLocale() === 'en' ? 'text-[#fc5648]' : 'text-gray-400 hover:text-gray-700' }} px-1 transition">EN</a>
+           class="{{ app()->getLocale() === 'en' ? 'text-[#fc5648]' : 'text-gray-400 hover:text-gray-700' }} px-1 transition">🇬🇧</a>
     </div>
 
     {{-- Contenido principal --}}
