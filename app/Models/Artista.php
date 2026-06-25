@@ -26,7 +26,7 @@ class Artista extends Model
         'imagen_perfil', 'ciudad',
         'email_contacto', 'telefono',
         'enlace_web', 'enlace_instagram', 'enlace_facebook',
-        'enlace_spotify', 'enlace_youtube',
+        'enlace_spotify', 'enlace_youtube', 'enlace_youtube_video',
         'activo',
     ];
 
