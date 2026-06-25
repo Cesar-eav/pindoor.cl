@@ -123,7 +123,8 @@ class ArtistaController extends Controller
             'enlace_instagram'  => 'nullable|url|max:500',
             'enlace_facebook'   => 'nullable|url|max:500',
             'enlace_spotify'    => 'nullable|url|max:500',
-            'enlace_youtube'    => 'nullable|url|max:500',
+            'enlace_youtube'       => 'nullable|url|max:500',
+            'enlace_youtube_video' => 'nullable|url|max:500',
             'imagen'            => 'nullable|image|max:4096',
         ]);
 

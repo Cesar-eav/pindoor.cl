@@ -12,8 +12,8 @@
         </div>
     </x-slot>
 
-    <div class="py-8">
-        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-8" x-data="{ tab: '{{ $errors->any() ? 'perfil' : 'perfil' }}' }">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
             @if(session('success'))
                 <div class="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
@@ -29,122 +29,221 @@
                 </div>
             @endif
 
-            {{-- Grid principal: form ocupa 2 cols, portafolio 1 col --}}
-            <div class="grid lg:grid-cols-3 gap-6 items-start">
+            {{-- Pestañas --}}
+            <div class="flex gap-1 mb-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-1.5 w-fit">
+                <button type="button" @click="tab = 'perfil'"
+                        :class="tab === 'perfil'
+                            ? 'bg-violet-600 text-white shadow-sm'
+                            : 'text-gray-500 hover:text-gray-800'"
+                        class="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    Perfil
+                </button>
+                <button type="button" @click="tab = 'galeria'"
+                        :class="tab === 'galeria'
+                            ? 'bg-violet-600 text-white shadow-sm'
+                            : 'text-gray-500 hover:text-gray-800'"
+                        class="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    Galería
+                    @if($artista->imagenes->isNotEmpty())
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                              :class="tab === 'galeria' ? 'bg-white/20 text-white' : 'bg-violet-100 text-violet-600'">
+                            {{ $artista->imagenes->count() }}
+                        </span>
+                    @endif
+                </button>
+            </div>
 
-                {{-- Columnas 1 y 2: un solo form --}}
+            {{-- Pestaña: Perfil --}}
+            <div x-show="tab === 'perfil'" x-transition:enter="transition ease-out duration-150"
+                 x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
+
                 <form action="{{ route('artista.perfil.actualizar') }}" method="POST"
                       enctype="multipart/form-data"
-                      class="lg:col-span-2 grid lg:grid-cols-2 gap-6 items-start">
+                      x-data="{ guardando: false }"
+                      @submit="guardando = true">
                     @csrf @method('PUT')
 
-                    {{-- Col 1 — Información del perfil --}}
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
-                        <h3 class="font-bold text-gray-800">Información del perfil</h3>
+                    <div class="grid lg:grid-cols-3 gap-6 items-stretch">
 
-                        {{-- Foto --}}
-                        <div class="flex items-center gap-4">
-                            @if($artista->imagen_perfil)
-                                <img src="{{ asset('storage/' . $artista->imagen_perfil) }}"
-                                     alt="{{ $artista->nombre }}"
-                                     class="w-16 h-16 rounded-full object-cover border-2 border-violet-200 shrink-0">
-                            @else
-                                <div class="w-16 h-16 rounded-full bg-violet-100 flex items-center justify-center text-2xl shrink-0">🎨</div>
-                            @endif
-                            <div class="flex-1 min-w-0">
-                                <input type="file" name="imagen" accept="image/*"
-                                       class="block w-full text-sm text-gray-500
-                                              file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0
-                                              file:text-xs file:font-bold file:bg-violet-50 file:text-violet-700
-                                              hover:file:bg-violet-100 cursor-pointer">
-                                <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP — máx. 4 MB</p>
+                        {{-- Identidad: 2 cols --}}
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:col-span-2 h-full">
+                            <div class="flex flex-col lg:flex-row gap-6">
+
+                                {{-- Avatar --}}
+                                <div class="flex lg:flex-col items-center gap-4 lg:gap-3 lg:w-40 shrink-0">
+                                    @if($artista->imagen_perfil)
+                                        <img src="{{ asset('storage/' . $artista->imagen_perfil) }}"
+                                             alt="{{ $artista->nombre }}"
+                                             class="w-20 h-20 lg:w-36 lg:h-36 rounded-full object-cover border-4 border-violet-100 shadow-sm shrink-0">
+                                    @else
+                                        <div class="w-20 h-20 lg:w-36 lg:h-36 rounded-full bg-violet-100 flex items-center justify-center text-4xl lg:text-5xl border-4 border-violet-50 shrink-0">🎨</div>
+                                    @endif
+                                    <div class="flex-1 lg:w-full">
+                                        <label class="block text-xs font-semibold text-gray-500 mb-1">Foto de perfil</label>
+                                        <input type="file" name="imagen" accept="image/*"
+                                               class="block w-full text-xs text-gray-500
+                                                      file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0
+                                                      file:text-xs file:font-bold file:bg-violet-50 file:text-violet-700
+                                                      hover:file:bg-violet-100 cursor-pointer">
+                                        <p class="text-[10px] text-gray-400 mt-1">JPG, PNG — máx. 4 MB</p>
+                                    </div>
+                                </div>
+
+                                {{-- Campos en grid 2 cols --}}
+                                <div class="flex-1 grid sm:grid-cols-2 gap-4">
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre artístico o de la agrupación *</label>
+                                        <input type="text" name="nombre" value="{{ old('nombre', $artista->nombre) }}" required
+                                               class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Disciplina *</label>
+                                        <select name="disciplina" required
+                                                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none bg-white">
+                                            @foreach(\App\Models\Artista::DISCIPLINAS as $slug => $d)
+                                                <option value="{{ $slug }}" {{ old('disciplina', $artista->disciplina) === $slug ? 'selected' : '' }}>
+                                                    {{ $d['emoji'] }} {{ $d['label'] }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Ciudad</label>
+                                        <input type="text" name="ciudad" value="{{ old('ciudad', $artista->ciudad) }}"
+                                               placeholder="Valparaíso…"
+                                               class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none">
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Descripción / Biografía</label>
+                                        <textarea name="descripcion" rows="7"
+                                                  placeholder="Cuéntanos sobre tu trabajo, trayectoria y propuesta artística…"
+                                                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none resize-none">{{ old('descripcion', $artista->descripcion) }}</textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono</label>
+                                        <input type="text" name="telefono" value="{{ old('telefono', $artista->telefono) }}"
+                                               placeholder="+56 9 1234 5678"
+                                               class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Email de contacto público</label>
+                                        <input type="email" name="email_contacto" value="{{ old('email_contacto', $artista->email_contacto) }}"
+                                               placeholder="contacto@tumisma.cl"
+                                               class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none">
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre artístico o de la agrupación *</label>
-                            <input type="text" name="nombre" value="{{ old('nombre', $artista->nombre) }}" required
-                                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none">
-                        </div>
+                        {{-- Redes: col derecha con guardar al pie --}}
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col gap-3 h-full">
+                            <h3 class="font-bold text-gray-800">Redes y enlaces</h3>
 
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Disciplina *</label>
-                            <select name="disciplina" required
-                                    class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none bg-white">
-                                @foreach(\App\Models\Artista::DISCIPLINAS as $slug => $d)
-                                    <option value="{{ $slug }}" {{ old('disciplina', $artista->disciplina) === $slug ? 'selected' : '' }}>
-                                        {{ $d['emoji'] }} {{ $d['label'] }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Descripción / Biografía</label>
-                            <textarea name="descripcion" rows="4"
-                                      placeholder="Cuéntanos sobre tu trabajo, trayectoria y propuesta artística…"
-                                      class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none resize-none">{{ old('descripcion', $artista->descripcion) }}</textarea>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Ciudad</label>
-                            <input type="text" name="ciudad" value="{{ old('ciudad', $artista->ciudad) }}"
-                                   placeholder="Valparaíso…"
-                                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono de contacto</label>
-                            <input type="text" name="telefono" value="{{ old('telefono', $artista->telefono) }}"
-                                   placeholder="+56 9 1234 5678"
-                                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Email de contacto público</label>
-                            <input type="email" name="email_contacto" value="{{ old('email_contacto', $artista->email_contacto) }}"
-                                   placeholder="contacto@tumisma.cl"
-                                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none">
-                            <p class="text-xs text-gray-400 mt-1">Se mostrará en tu perfil público</p>
-                        </div>
-                    </div>
-
-                    {{-- Col 2 — Redes y enlaces --}}
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
-                        <h3 class="font-bold text-gray-800">Redes y enlaces</h3>
-
-                        <div class="space-y-3">
-                            @foreach([
-                                ['enlace_web',       '🌐', 'Sitio web',  'https://tu-sitio.cl'],
-                                ['enlace_instagram',  '📸', 'Instagram',  'https://instagram.com/tu_usuario'],
-                                ['enlace_facebook',   '👤', 'Facebook',   'https://facebook.com/tu_pagina'],
-                                ['enlace_spotify',    '🎧', 'Spotify',    'https://open.spotify.com/artist/...'],
-                                ['enlace_youtube',    '▶️',  'YouTube',    'https://youtube.com/@tu_canal'],
-                            ] as [$campo, $icon, $label, $placeholder])
                             <div>
-                                <label class="block text-xs font-semibold text-gray-500 mb-1">{{ $icon }} {{ $label }}</label>
-                                <input type="url" name="{{ $campo }}"
-                                       value="{{ old($campo, $artista->$campo) }}"
-                                       placeholder="{{ $placeholder }}"
-                                       class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none">
+                                <label class="flex items-center gap-2 text-xs font-semibold text-gray-500 mb-1">
+                                    <span class="w-5 h-5 rounded flex items-center justify-center shrink-0" style="background:linear-gradient(135deg,#f9a825,#e91e63,#9c27b0)">
+                                        <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                                    </span>
+                                    Instagram
+                                </label>
+                                <input type="url" name="enlace_instagram" value="{{ old('enlace_instagram', $artista->enlace_instagram) }}"
+                                       placeholder="https://instagram.com/tu_usuario"
+                                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none">
                             </div>
-                            @endforeach
+
+                            <div>
+                                <label class="flex items-center gap-2 text-xs font-semibold text-gray-500 mb-1">
+                                    <span class="w-5 h-5 rounded flex items-center justify-center shrink-0" style="background:#1877F2">
+                                        <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                                    </span>
+                                    Facebook
+                                </label>
+                                <input type="url" name="enlace_facebook" value="{{ old('enlace_facebook', $artista->enlace_facebook) }}"
+                                       placeholder="https://facebook.com/tu_pagina"
+                                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="flex items-center gap-2 text-xs font-semibold text-gray-500 mb-1">
+                                    <span class="w-5 h-5 rounded flex items-center justify-center shrink-0" style="background:#1DB954">
+                                        <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+                                    </span>
+                                    Spotify
+                                </label>
+                                <input type="url" name="enlace_spotify" value="{{ old('enlace_spotify', $artista->enlace_spotify) }}"
+                                       placeholder="https://open.spotify.com/artist/..."
+                                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="flex items-center gap-2 text-xs font-semibold text-gray-500 mb-1">
+                                    <span class="w-5 h-5 rounded flex items-center justify-center shrink-0" style="background:#FF0000">
+                                        <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                                    </span>
+                                    YouTube — Canal
+                                </label>
+                                <input type="url" name="enlace_youtube" value="{{ old('enlace_youtube', $artista->enlace_youtube) }}"
+                                       placeholder="https://youtube.com/@tu_canal"
+                                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="flex items-center gap-2 text-xs font-semibold text-gray-500 mb-1">
+                                    <span class="w-5 h-5 rounded flex items-center justify-center shrink-0" style="background:#FF0000">
+                                        <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                                    </span>
+                                    YouTube — Video de presentación
+                                </label>
+                                <input type="url" name="enlace_youtube_video" value="{{ old('enlace_youtube_video', $artista->enlace_youtube_video) }}"
+                                       placeholder="https://youtube.com/watch?v=..."
+                                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="flex items-center gap-2 text-xs font-semibold text-gray-500 mb-1">
+                                    <span class="w-5 h-5 rounded bg-gray-700 flex items-center justify-center shrink-0">
+                                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                                    </span>
+                                    Sitio web
+                                </label>
+                                <input type="url" name="enlace_web" value="{{ old('enlace_web', $artista->enlace_web) }}"
+                                       placeholder="https://tu-sitio.cl"
+                                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none">
+                            </div>
+
+                            <div class="pt-2 border-t border-gray-100 mt-auto">
+                                <button type="submit"
+                                        :disabled="guardando"
+                                        class="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-70 text-white px-6 py-3 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2">
+                                    <svg x-show="guardando" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" style="display:none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                    </svg>
+                                    <span x-text="guardando ? 'Guardando…' : 'Guardar cambios'">Guardar cambios</span>
+                                </button>
+                            </div>
                         </div>
 
-                        <button type="submit"
-                                class="w-full bg-violet-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-violet-700 transition">
-                            Guardar cambios
-                        </button>
                     </div>
-
                 </form>
+            </div>
 
-                {{-- Col 3 — Portafolio --}}
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
-                    <h3 class="font-bold text-gray-800">Portafolio</h3>
+            {{-- Pestaña: Galería --}}
+            <div x-show="tab === 'galeria'" x-transition:enter="transition ease-out duration-150"
+                 x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+                 style="display:none">
 
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+
+                    {{-- Imágenes existentes --}}
                     @if($artista->imagenes->isNotEmpty())
-                        <div class="grid grid-cols-3 gap-2">
+                        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
                             @foreach($artista->imagenes as $img)
                                 <div class="relative group" id="img-wrap-{{ $img->id }}">
                                     <img src="{{ asset('storage/' . $img->ruta) }}"
@@ -158,26 +257,43 @@
                                 </div>
                             @endforeach
                         </div>
+                    @else
+                        <div class="text-center py-12 text-gray-400">
+                            <svg class="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 3h18M3 21h18"/>
+                            </svg>
+                            <p class="text-sm font-medium">Aún no tienes imágenes en tu portafolio</p>
+                            <p class="text-xs mt-1">Sube tus trabajos para mostrarlos en tu perfil público</p>
+                        </div>
                     @endif
 
+                    {{-- Upload --}}
                     <form action="{{ route('artista.imagen.subir') }}" method="POST"
-                          enctype="multipart/form-data" class="space-y-3"
+                          enctype="multipart/form-data"
+                          class="border-t border-gray-100 pt-6"
                           onsubmit="if(!this.querySelector('input[type=file]').files.length){ alert('Selecciona al menos una imagen antes de subir.'); return false; }">
                         @csrf
-                        <input type="file" name="imagenes[]" accept="image/*" multiple
-                               class="block w-full text-sm text-gray-500
-                                      file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0
-                                      file:text-xs file:font-bold file:bg-violet-50 file:text-violet-700
-                                      hover:file:bg-violet-100 cursor-pointer">
-                        <p class="text-xs text-gray-400">JPG, PNG, WEBP — máx. 4 MB c/u</p>
-                        <button type="submit"
-                                class="w-full bg-gray-800 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-gray-700 transition">
-                            Subir imágenes
-                        </button>
+                        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+                            <div class="flex-1">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Agregar imágenes al portafolio</label>
+                                <div class="border-2 border-dashed border-gray-200 hover:border-violet-300 rounded-xl p-4 transition">
+                                    <input type="file" name="imagenes[]" accept="image/*" multiple
+                                           class="block w-full text-sm text-gray-500
+                                                  file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0
+                                                  file:text-xs file:font-bold file:bg-violet-50 file:text-violet-700
+                                                  hover:file:bg-violet-100 cursor-pointer">
+                                    <p class="text-xs text-gray-400 mt-2">JPG, PNG, WEBP — máx. 4 MB por imagen. Podés seleccionar varias a la vez.</p>
+                                </div>
+                            </div>
+                            <button type="submit"
+                                    class="shrink-0 bg-gray-800 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-700 transition">
+                                Subir imágenes
+                            </button>
+                        </div>
                     </form>
                 </div>
-
             </div>
+
         </div>
     </div>
 
