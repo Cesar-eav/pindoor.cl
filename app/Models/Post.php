@@ -13,6 +13,11 @@ class Post extends Model
 
     public array $translatable = ['titulo', 'resumen', 'contenido'];
 
+    public function getFallbackLocale(string $locale): ?string
+    {
+        return $locale !== 'es' ? 'es' : null;
+    }
+
     protected $fillable = [
         'titulo',
         'slug',
