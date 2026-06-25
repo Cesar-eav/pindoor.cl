@@ -133,7 +133,7 @@
                         $vencido = $key === 'pasados';
                     @endphp
 
-                    <div x-data="{ eliminando: false }"
+                    <div x-data="{ eliminando: false, confirmando: false }"
                          x-show="!eliminando"
                          class="bg-white rounded-xl border border-gray-100 shadow-sm flex items-stretch overflow-hidden
                                 {{ $vencido ? 'opacity-60' : '' }}">
@@ -219,13 +219,20 @@
                                 <a href="{{ route('admin.panoramas.edit', $panorama) }}"
                                    class="text-xs font-bold text-blue-600 hover:underline">Editar</a>
                                 <button type="button"
+                                        x-show="!confirmando"
                                         class="text-xs font-bold text-red-400 hover:underline"
-                                        @click="if(confirm('¿Eliminar «{{ addslashes($panorama->titulo) }}»?')) {
-                                            fetch('{{ route('admin.panoramas.destroy', $panorama) }}', {
+                                        @click="confirmando = true">Eliminar</button>
+                                <div x-show="confirmando" class="flex items-center gap-2">
+                                    <button type="button"
+                                            class="text-xs font-bold text-red-500 hover:underline"
+                                            @click="fetch('{{ route('admin.panoramas.destroy', $panorama) }}', {
                                                 method: 'DELETE',
                                                 headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
-                                            }).then(r => { if(r.ok || r.status === 302) eliminando = true });
-                                        }">Eliminar</button>
+                                            }).then(r => { eliminando = true }).catch(() => { confirmando = false })">Sí</button>
+                                    <button type="button"
+                                            class="text-xs text-gray-400 hover:underline"
+                                            @click="confirmando = false">No</button>
+                                </div>
                             </div>
                         </div>
 
