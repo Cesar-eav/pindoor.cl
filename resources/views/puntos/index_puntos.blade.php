@@ -55,15 +55,19 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         #drawer { transition: transform .28s cubic-bezier(.4,0,.2,1); }
-        /* Punto de usuario pulsante */
-        .user-location-dot { position: relative; width: 18px; height: 18px; }
-        .user-location-dot .core { width: 14px; height: 14px; background: #3b82f6; border: 3px solid white; border-radius: 50%; box-shadow: 0 2px 8px rgba(59,130,246,.5); position: absolute; top: 2px; left: 2px; }
-        .user-location-dot .pulse { width: 18px; height: 18px; background: rgba(59,130,246,.3); border-radius: 50%; position: absolute; top: 0; left: 0; animation: gps-pulse 2s ease-out infinite; }
+        /* GPS marker compuesto */
+        .gps-marker { position: relative; width: 40px; height: 40px; }
+        .gps-pulse-ring { position: absolute; inset: 0; border-radius: 50%; background: rgba(252,86,72,.2); animation: gps-pulse 2s ease-out infinite; }
+        .gps-core { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 14px; height: 14px; background: #fc5648; border: 3px solid white; border-radius: 50%; box-shadow: 0 2px 8px rgba(252,86,72,.6); z-index: 2; }
+        .gps-cone-wrap { position: absolute; inset: 0; display: flex; align-items: flex-start; justify-content: center; padding-top: 2px; opacity: 0; transform-origin: center; transition: transform 0.4s ease-out, opacity 0.3s; z-index: 1; }
         @keyframes gps-pulse { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(2.8); opacity: 0; } }
         /* Botón GPS control */
         .leaflet-gps-btn { background: white; border: 2px solid rgba(0,0,0,.08); border-radius: 10px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 3px 12px rgba(0,0,0,.2); transition: all .2s; color: #6b7280; }
-        .leaflet-gps-btn:hover { background: #f0f9ff; color: #3b82f6; border-color: #93c5fd; }
-        .leaflet-gps-btn.activo { background: #eff6ff; color: #3b82f6; border-color: #3b82f6; }
+        .leaflet-gps-btn:hover { background: #fff0ef; color: #fc5648; border-color: #fca49f; }
+        .leaflet-gps-btn.activo { background: #fff0ef; color: #fc5648; border-color: #fc5648; }
+        /* Botón recentrar (aparece cuando usuario arrastra) */
+        .leaflet-recenter-btn { background: white; border-radius: 50%; width: 42px; height: 42px; box-shadow: 0 3px 12px rgba(0,0,0,.25); display: flex; align-items: center; justify-content: center; color: #fc5648; cursor: pointer; border: 2px solid rgba(0,0,0,.08); margin-bottom: 6px; transition: background .2s; }
+        .leaflet-recenter-btn:hover { background: #fff0ef; }
     </style>
 @endsection
 
@@ -105,10 +109,10 @@
                     class="leaflet-gps-btn absolute z-999"
                     style="top:12px;right:12px;"
                     title="{{ __('ui.mapa.estas_aqui') }}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#3b82f6" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="9"/>
                     <circle cx="12" cy="12" r="5"/>
-                    <circle cx="12" cy="12" r="1.5" fill="#3b82f6"/>
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
                     <line x1="12" y1="2" x2="12" y2="3"/>
                     <line x1="12" y1="21" x2="12" y2="22"/>
                     <line x1="2" y1="12" x2="3" y2="12"/>

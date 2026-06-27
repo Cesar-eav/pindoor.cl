@@ -187,7 +187,14 @@ return [
         'storage/framework/sessions',
         'storage/framework/cache',
         'storage/framework/testing',
-        'storage/logs/laravel.log',
+        'storage/logs',
+        'storage/app',       // imágenes subidas — vienen de pindoor.cl, no del bundle
+        'node_modules',
+        'public/*.apk',
+        'public/*.aab',
+        '.git',
+        'tests',
+        'nativephp/ios',
     ],
 
     /*
@@ -278,13 +285,13 @@ return [
         |
         */
         'build' => [
-            // R8/ProGuard Configuration - currently disabled
-            'minify_enabled' => env('NATIVEPHP_ANDROID_MINIFY_ENABLED', false),
-            'shrink_resources' => env('NATIVEPHP_ANDROID_SHRINK_RESOURCES', false),
+            // R8/ProGuard Configuration
+            'minify_enabled' => env('NATIVEPHP_ANDROID_MINIFY_ENABLED', true),
+            'shrink_resources' => env('NATIVEPHP_ANDROID_SHRINK_RESOURCES', true),
             'obfuscate' => env('NATIVEPHP_ANDROID_OBFUSCATE', false),
 
-            // Debug Symbol Configuration - currently enabled
-            'debug_symbols' => env('NATIVEPHP_ANDROID_DEBUG_SYMBOLS', 'FULL'),
+            // Debug Symbol Configuration
+            'debug_symbols' => env('NATIVEPHP_ANDROID_DEBUG_SYMBOLS', 'NONE'),
             'generate_mapping_files' => env('NATIVEPHP_ANDROID_MAPPING_FILES', false),
             'mapping_file_path' => env('NATIVEPHP_ANDROID_MAPPING_PATH', 'build/outputs/mapping/release/'),
 
