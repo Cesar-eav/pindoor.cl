@@ -7,8 +7,15 @@ const GPS_LNG     = {{ request('lng') ? (float) request('lng') : 'null' }};
 let mapaIniciado  = false;
 let mapaLeaflet   = null;
 let markerGroup   = null;
-let marcadorUbicacion = null;
-let watchIdMapa   = null;
+let marcadorUbicacion      = null;
+let watchIdMapa            = null;
+let lastBearing            = null;
+let siguiendo              = false;
+let btnRecenterRef         = null;
+let orientationListener    = null;
+let lastOrientationTs      = 0;
+let _smoothSin             = null;  // componente sin del heading filtrado
+let _smoothCos             = null;  // componente cos del heading filtrado
 
 function setView(vista) {
     const mobile = window.innerWidth < 768;
@@ -68,6 +75,12 @@ function setView(vista) {
             mapaLeaflet?.invalidateSize();
             if (GPS_LAT && GPS_LNG) {
                 mapaLeaflet.flyTo([GPS_LAT, GPS_LNG], 18, { duration: 1 });
+            }
+            if (watchIdMapa === null) {
+                const gpsBtn = mobile
+                    ? document.getElementById('gps-btn-mobile')
+                    : document.querySelector('#mapa-principal .leaflet-gps-btn');
+                if (gpsBtn) toggleUbicacion(gpsBtn);
             }
         }, 150);
     } else {
@@ -169,14 +182,14 @@ function iniciarMapa(containerId) {
         maxZoom: 19,
         zoomControl: false,
         attributionControl: false,
+        rotate: true,
+        touchRotate: true,
+        bearing: 0,
     });
     mapaLeaflet.invalidateSize();
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         maxZoom: 19, subdomains: 'abcd',
-    }).addTo(mapaLeaflet);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19, subdomains: 'abcd', pane: 'shadowPane',
     }).addTo(mapaLeaflet);
 
     if (GPS_LAT && GPS_LNG) {
@@ -202,6 +215,38 @@ function iniciarMapa(containerId) {
     });
     new GpsControl().addTo(mapaLeaflet);
 
+    // Control "Recentrar" — aparece cuando el usuario arrastra el mapa durante tracking
+    const RecenterControl = L.Control.extend({
+        options: { position: 'bottomleft' },
+        onAdd() {
+            const btn = L.DomUtil.create('button', 'leaflet-recenter-btn hidden');
+            btnRecenterRef = btn;
+            btn.title = 'Volver a mi posición';
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>`;
+            L.DomEvent.on(btn, 'click', L.DomEvent.stopPropagation);
+            L.DomEvent.on(btn, 'click', () => {
+                siguiendo = true;
+                btn.classList.add('hidden');
+                if (marcadorUbicacion) {
+                    mapaLeaflet.panTo(marcadorUbicacion.getLatLng(), { animate: true, duration: 0.5 });
+                }
+            });
+            return btn;
+        },
+    });
+    new RecenterControl().addTo(mapaLeaflet);
+
+    // Detectar drag del usuario → salir de follow mode
+    mapaLeaflet.on('dragstart', () => {
+        if (watchIdMapa !== null && siguiendo) {
+            siguiendo = false;
+            btnRecenterRef?.classList.remove('hidden');
+        }
+    });
+
+    // Sin transición CSS en el marcador: cualquier cambio de transform del mapa
+    // (pan, zoom, rotación) la activaría y desencajaría visualmente el punto.
+
     // Aplicar filtro activo al iniciar el mapa si hay categoría seleccionada
     const activePill = document.querySelector('.overflow-x-auto.no-scrollbar a.bg-gray-900[data-slug]');
     filtrarMapa(activePill?.dataset.slug ?? null);
@@ -224,34 +269,26 @@ function geolocateMobile(btn) {
     const mapaVisible = !document.getElementById('vista-mapa-mobile')?.classList.contains('hidden');
 
     if (mapaVisible && mapaLeaflet) {
-        // Estamos en el mapa: solo centrar, sin recargar página
-        if (!navigator.geolocation) { alert('Tu navegador no soporta geolocalización.'); return; }
-        btn.disabled = true;
-        const orig = btn.innerHTML;
-        btn.innerHTML = '⌛ Localizando…';
-        navigator.geolocation.getCurrentPosition(
-            pos => {
-                const lat = pos.coords.latitude;
-                const lng = pos.coords.longitude;
-                btn.disabled = false;
-                btn.innerHTML = orig;
-                mapaLeaflet.flyTo([lat, lng], 18, { duration: 1 });
-                L.circleMarker([lat, lng], {
-                    radius: 8, color: '#fc5648', fillColor: '#fc5648', fillOpacity: 1, weight: 3,
-                }).addTo(mapaLeaflet).bindPopup('Estás aquí').openPopup();
-            },
-            () => { alert('No pudimos obtener tu ubicación.'); btn.disabled = false; btn.innerHTML = orig; },
-            { enableHighAccuracy: true, timeout: 8000 }
-        );
-    } else {
-        // Estamos en el listado: submit normal para filtrar por cercanía
-        geolocate(
-            document.getElementById('lat-m'),
-            document.getElementById('lng-m'),
-            document.getElementById('filterForm-mobile'),
-            btn
-        );
+        // Si el tracking ya está activo: recentrar y retomar seguimiento
+        if (marcadorUbicacion) {
+            siguiendo = true;
+            btnRecenterRef?.classList.add('hidden');
+            mapaLeaflet.panTo(marcadorUbicacion.getLatLng(), { animate: true, duration: 0.5 });
+            return;
+        }
+        // Si no hay tracking activo: activarlo via el botón GPS del mapa
+        const gpsBtn = document.getElementById('gps-btn-mobile');
+        if (gpsBtn && watchIdMapa === null) toggleUbicacion(gpsBtn);
+        return;
     }
+
+    // Estamos en el listado: submit normal para filtrar por cercanía
+    geolocate(
+        document.getElementById('lat-m'),
+        document.getElementById('lng-m'),
+        document.getElementById('filterForm-mobile'),
+        btn
+    );
 }
 
 function activarVistaMapa() {
@@ -355,40 +392,149 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+
+function actualizarCono(heading) {
+    const cone = marcadorUbicacion?._icon?.querySelector('.gps-cone-wrap');
+    if (!cone) return;
+    if (heading === null || isNaN(heading)) {
+        cone.style.opacity = '0';
+        lastBearing = null;
+        return;
+    }
+    if (lastBearing !== null) {
+        const rawDelta = Math.abs(heading - lastBearing);
+        const delta = Math.min(rawDelta, 360 - rawDelta);
+        if (delta < 5) return;
+    }
+    cone.style.opacity = '1';
+    cone.style.transform = `rotate(${heading}deg)`;
+    lastBearing = heading;
+}
+
+function iniciarBrujula() {
+    const handler = (e) => {
+        const now = performance.now();
+        if (now - lastOrientationTs < 50) return; // 20 fps max
+        lastOrientationTs = now;
+        let h = null;
+        if (e.webkitCompassHeading != null) {
+            h = e.webkitCompassHeading; // iOS — clockwise desde norte, ya correcto
+        } else if (e.alpha != null) {
+            h = (360 - e.alpha - 30 + 720) % 360; // Android: negar alpha corrige espejo E-W; offset calibra N
+        }
+        if (h === null) return;
+        // Suavizar sin/cos por separado: evita el giro brusco cerca de 0°/360°
+        const rad = h * Math.PI / 180;
+        if (_smoothSin === null) {
+            _smoothSin = Math.sin(rad);
+            _smoothCos = Math.cos(rad);
+        } else {
+            _smoothSin = 0.15 * Math.sin(rad) + 0.85 * _smoothSin;
+            _smoothCos = 0.15 * Math.cos(rad) + 0.85 * _smoothCos;
+        }
+        const suavizado = (Math.atan2(_smoothSin, _smoothCos) * 180 / Math.PI + 360) % 360;
+        actualizarCono(suavizado);
+    };
+    // deviceorientationabsolute = norte geográfico real (Android Chrome 7+)
+    const tipo = ('ondeviceorientationabsolute' in window)
+        ? 'deviceorientationabsolute'
+        : 'deviceorientation';
+    window.addEventListener(tipo, handler);
+    orientationListener = { tipo, handler };
+}
+
+function detenerBrujula() {
+    if (orientationListener) {
+        window.removeEventListener(orientationListener.tipo, orientationListener.handler);
+        orientationListener = null;
+    }
+    _smoothSin = null;
+    _smoothCos = null;
+}
+
+function animarBearing(targetBearing, duracion = 400) {
+    if (!mapaLeaflet?.getBearing) return;
+    const startBearing = mapaLeaflet.getBearing() ?? 0;
+    let delta = targetBearing - startBearing;
+    if (delta > 180) delta -= 360;   // ruta más corta en círculo
+    if (delta < -180) delta += 360;
+    if (Math.abs(delta) < 0.5) return;
+    const t0 = performance.now();
+    function step(now) {
+        const t = Math.min((now - t0) / duracion, 1);
+        const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // ease-in-out
+        mapaLeaflet.setBearing(startBearing + delta * ease);
+        if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+}
+
 function toggleUbicacion(btn) {
-    if (watchIdMapa !== null) {
-        // Apagar tracking
-        navigator.geolocation.clearWatch(watchIdMapa);
-        watchIdMapa = null;
-        if (marcadorUbicacion) { mapaLeaflet.removeLayer(marcadorUbicacion); marcadorUbicacion = null; }
-        btn.classList.remove('activo');
+    // GPS activo pero usuario arrastró → recentrar y retomar seguimiento
+    if (watchIdMapa !== null && !siguiendo) {
+        siguiendo = true;
+        btnRecenterRef?.classList.add('hidden');
+        if (marcadorUbicacion) {
+            mapaLeaflet.panTo(marcadorUbicacion.getLatLng(), { animate: true, duration: 0.5 });
+        }
         return;
     }
 
+    // GPS activo y siguiendo → apagar
+    if (watchIdMapa !== null) {
+        navigator.geolocation.clearWatch(watchIdMapa);
+        watchIdMapa = null; lastBearing = null; siguiendo = false;
+        if (marcadorUbicacion) { mapaLeaflet.removeLayer(marcadorUbicacion); marcadorUbicacion = null; }
+        btn.classList.remove('activo');
+        btnRecenterRef?.classList.add('hidden');
+        detenerBrujula();
+        return;
+    }
+
+    // GPS apagado → encender
     if (!navigator.geolocation) { alert('{{ __("ui.general.sin_geolocalizacion") }}'); return; }
 
+    // Feedback visual mientras adquiere señal
+    const iconoOriginal = btn.innerHTML;
     btn.classList.add('activo');
+    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>`;
+    siguiendo = true;
+    iniciarBrujula();
 
-    const icono = L.divIcon({
-        className: '',
-        html: `<div class="user-location-dot"><div class="pulse"></div><div class="core"></div></div>`,
-        iconSize: [18, 18], iconAnchor: [9, 9],
-    });
+    const iconoHtml = `<div class="gps-marker">
+        <div class="gps-pulse-ring"></div>
+        <div class="gps-cone-wrap"><svg viewBox="0 0 24 24" width="16" height="16" fill="rgba(252,86,72,0.9)"><polygon points="12,1 17,13 12,10 7,13"/></svg></div>
+        <div class="gps-core"></div>
+    </div>`;
 
     watchIdMapa = navigator.geolocation.watchPosition(pos => {
-        const { latitude: lat, longitude: lng } = pos.coords;
+        const { latitude: lat, longitude: lng, heading } = pos.coords;
 
-        if (marcadorUbicacion) {
-            marcadorUbicacion.setLatLng([lat, lng]);
-        } else {
-            marcadorUbicacion = L.marker([lat, lng], { icon: icono, zIndexOffset: 1000 })
-                .addTo(mapaLeaflet)
-                .bindPopup('<strong style="font-family:Plus Jakarta Sans,sans-serif">{{ __("ui.mapa.estas_aqui") }}</strong>');
+        if (!marcadorUbicacion) {
+            // Primera posición: restaurar icono y crear marcador
+            btn.innerHTML = iconoOriginal;
+            marcadorUbicacion = L.marker([lat, lng], {
+                icon: L.divIcon({ className: 'gps-marker-icon', html: iconoHtml, iconSize: [40, 40], iconAnchor: [20, 20] }),
+                zIndexOffset: 1000,
+            }).addTo(mapaLeaflet);
             mapaLeaflet.flyTo([lat, lng], Math.max(mapaLeaflet.getZoom(), 16), { duration: 1 });
+        } else {
+            marcadorUbicacion.setLatLng([lat, lng]);
+            if (siguiendo && !mapaLeaflet._animatingZoom) {
+                mapaLeaflet.panTo([lat, lng], { animate: true, duration: 0.8 });
+            }
         }
+
+        // El cono y la rotación del mapa los maneja iniciarBrujula() via DeviceOrientationEvent.
+        // Si el GPS provee heading (raro, solo al moverse rápido), lo usamos como refuerzo.
+        const tieneHeading = heading !== null && !isNaN(heading);
+        if (tieneHeading) actualizarCono(heading);
+
     }, () => {
+        btn.innerHTML = iconoOriginal;
         btn.classList.remove('activo');
-        watchIdMapa = null;
-    }, { enableHighAccuracy: true, maximumAge: 0 });
+        watchIdMapa = null; siguiendo = false;
+        detenerBrujula();
+    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 });
 }
 </script>
