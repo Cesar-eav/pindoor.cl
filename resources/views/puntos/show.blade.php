@@ -1391,9 +1391,13 @@
         </main>
     </div>
 
-    {{-- Modal: Cómo llegar con geolocalización --}}
+    {{-- Modal: Cómo llegar con Google Maps --}}
     @if($punto->lat && $punto->lng)
-    <div x-data="geoModal()" @geo-modal.window="abrir()">
+    @php
+        $gmapEmbed = "https://maps.google.com/maps?q={$punto->lat},{$punto->lng}&output=embed&z=16";
+        $gmapNav   = "https://www.google.com/maps/dir/?api=1&destination={$punto->lat},{$punto->lng}&travelmode=walking";
+    @endphp
+    <div x-data="{ abierto: false }" @geo-modal.window="abierto = true; document.body.style.overflow='hidden'">
 
         {{-- Backdrop --}}
         <div x-show="abierto"
@@ -1403,7 +1407,7 @@
              x-transition:leave="transition ease-in duration-150"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             @click="cerrar()"
+             @click="abierto = false; document.body.style.overflow=''"
              class="fixed inset-0 bg-black/50 z-[200]">
         </div>
 
@@ -1429,158 +1433,36 @@
                     <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">{{ __('ui.lugar.como_llegar') }}</p>
                     <p class="font-extrabold text-gray-900 leading-tight">{{ $punto->title }}</p>
                 </div>
-                <button @click="cerrar()"
+                <button @click="abierto = false; document.body.style.overflow=''"
                     class="shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-sm font-bold hover:bg-gray-200 transition ml-4">
                     ✕
                 </button>
             </div>
 
-            {{-- Status bar --}}
-            <div x-show="estado !== 'idle'" class="px-5 py-2 text-xs font-semibold flex items-center gap-2 min-h-8 shrink-0">
-                <template x-if="estado === 'cargando'">
-                    <span class="text-gray-500 flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                        </svg>
-                        {{ __('ui.general.localizando') }}
-                    </span>
-                </template>
-                <template x-if="estado === 'ok'">
-                    <span class="text-gray-700" x-text="info"></span>
-                </template>
-                <template x-if="estado === 'sin-gps'">
-                    <span class="text-amber-600">⚠️ {{ __('ui.general.error_ubicacion') }}</span>
-                </template>
+            {{-- Google Maps embed --}}
+            <div class="flex-1 min-h-0">
+                <iframe
+                    x-bind:src="abierto ? '{{ $gmapEmbed }}' : ''"
+                    class="w-full h-full border-0"
+                    allowfullscreen
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
             </div>
 
-            {{-- Mapa Leaflet --}}
-            <div id="mapa-geo" class="w-full flex-1 min-h-0"></div>
-
-            {{-- Footer: info ruta --}}
-            <div x-show="info" class="px-5 py-3 border-t border-gray-100 shrink-0 text-sm font-semibold text-gray-700 text-center" x-text="info"></div>
+            {{-- Footer: botón abrir Google Maps --}}
+            <div class="px-5 py-4 border-t border-gray-100 shrink-0">
+                <a href="{{ $gmapNav }}"
+                   target="_blank" rel="noopener"
+                   class="flex items-center justify-center gap-2 w-full py-3 bg-[#fc5648] text-white text-sm font-bold rounded-2xl shadow hover:bg-[#e04437] transition-colors">
+                    <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                    </svg>
+                    {{ __('ui.lugar.como_llegar') }} con Google Maps
+                </a>
+            </div>
         </div>
     </div>
-
-    <script>
-    function geoModal() {
-        return {
-            abierto: false,
-            estado: 'idle',
-            info: '',
-            mapa: null,
-            watchId: null,
-            marcadorUsuario: null,
-            rutaLinea: null,
-
-            abrir() {
-                this.abierto = true;
-                document.body.style.overflow = 'hidden';
-                this.$nextTick(() => this.iniciar());
-            },
-
-            cerrar() {
-                this.abierto = false;
-                document.body.style.overflow = '';
-                if (this.watchId !== null) {
-                    navigator.geolocation.clearWatch(this.watchId);
-                    this.watchId = null;
-                }
-            },
-
-            iniciar() {
-                if (this.mapa) { this.mapa.invalidateSize(); return; }
-
-                const lat = {{ $punto->lat }};
-                const lng = {{ $punto->lng }};
-                const titulo = '{{ addslashes($punto->title) }}';
-
-                this.mapa = L.map('mapa-geo', {
-                    rotate: true,
-                    bearing: 0,
-                    zoomControl: true, scrollWheelZoom: false, attributionControl: false,
-                }).setView([lat, lng], 14);
-
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(this.mapa);
-
-                const destIcon = L.divIcon({
-                    className: '',
-                    html: "<div style='background:#fc5648;width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 2px 12px rgba(252,86,72,.5)'></div>",
-                    iconSize: [18, 18], iconAnchor: [9, 9],
-                });
-                L.marker([lat, lng], { icon: destIcon }).addTo(this.mapa)
-                    .bindPopup(`<strong style="font-family:Plus Jakarta Sans,sans-serif;font-size:13px">${titulo}</strong>`);
-
-                if (!navigator.geolocation) { this.estado = 'sin-gps'; return; }
-
-                this.estado = 'cargando';
-                const self = this;
-                let primeraVez = true;
-
-                const userIcon = L.divIcon({
-                    className: '',
-                    html: "<div style='background:#3b82f6;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(59,130,246,.5)'></div>",
-                    iconSize: [16, 16], iconAnchor: [8, 8],
-                });
-
-                this.watchId = navigator.geolocation.watchPosition(pos => {
-                    const uLat = pos.coords.latitude;
-                    const uLng = pos.coords.longitude;
-                    const heading = pos.coords.heading; // grados desde el norte, null si estático
-                    self.estado = 'ok';
-
-                    // Mover o crear marcador de usuario
-                    if (self.marcadorUsuario) {
-                        self.marcadorUsuario.setLatLng([uLat, uLng]);
-                    } else {
-                        self.marcadorUsuario = L.marker([uLat, uLng], { icon: userIcon })
-                            .addTo(self.mapa)
-                            .bindPopup('<strong style="font-family:Plus Jakarta Sans,sans-serif">Tú estás aquí</strong>');
-                    }
-
-                    // Rotar el mapa según dirección de marcha
-                    if (heading !== null && !isNaN(heading)) {
-                        self.mapa.setBearing(heading);
-                    }
-
-                    // Centrar el mapa en el usuario (follow mode)
-                    self.mapa.panTo([uLat, uLng], { animate: true, duration: 0.8, easeLinearity: 0.5 });
-
-                    // Primera vez: ajustar zoom para ver ambos puntos y pedir ruta
-                    if (primeraVez) {
-                        primeraVez = false;
-                        self.mapa.fitBounds([[uLat, uLng], [lat, lng]], { padding: [50, 50] });
-
-                        fetch(`https://router.project-osrm.org/route/v1/driving/${uLng},${uLat};${lng},${lat}?overview=full&geometries=geojson`)
-                            .then(r => r.json())
-                            .then(data => {
-                                if (!data.routes?.[0]) return;
-                                const route = data.routes[0];
-                                if (self.rutaLinea) self.mapa.removeLayer(self.rutaLinea);
-                                self.rutaLinea = L.polyline(
-                                    route.geometry.coordinates.map(c => [c[1], c[0]]),
-                                    { color: '#fc5648', weight: 5, opacity: 0.75 }
-                                ).addTo(self.mapa);
-                                const dist = route.distance >= 1000
-                                    ? (route.distance / 1000).toFixed(1) + ' km'
-                                    : Math.round(route.distance) + ' m';
-                                self.info = `📍 ${dist} · ~${Math.round(route.duration / 60)} min`;
-                            })
-                            .catch(() => {
-                                self.rutaLinea = L.polyline([[uLat, uLng], [lat, lng]], {
-                                    color: '#fc5648', weight: 3, dashArray: '8 8', opacity: 0.5,
-                                }).addTo(self.mapa);
-                                self.info = '📍 Ruta aproximada';
-                            });
-                    }
-
-                }, () => {
-                    self.estado = 'sin-gps';
-                }, { enableHighAccuracy: true, maximumAge: 0 });
-            },
-        };
-    }
-    </script>
     @endif
 
     {{-- FAB colapsable móvil --}}
