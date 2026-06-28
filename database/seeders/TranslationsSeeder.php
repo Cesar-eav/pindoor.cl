@@ -9,25 +9,47 @@ class TranslationsSeeder extends Seeder
 {
     public function run(): void
     {
-        // ─── categorias ──────────────────────────────────────────────
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Viewpoints", 1]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Cafés", 2]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Street Art", 3]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Monuments", 4]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Culture", 5]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Nature", 6]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Museums", 7]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Local Food", 8]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Architecture", 9]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Restaurants", 10]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Stay", 11]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Statues", 12]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Shops", 13]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Crafts", 14]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Funiculars", 15]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Funiculars", 16]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Shops", 17]);
-        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Crafts", 18]);
+        // ─── categorias: nombre EN ────────────────────────────────────
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Viewpoints",          1]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Cafés",               2]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Street Art",          3]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Monuments",           4]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Cultural Centers",    5]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Nature",              6]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Museums",             7]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Local Food",          8]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Architecture",        9]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Restaurants",         10]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Stay",                11]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Statues",             12]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Intangible Heritage", 13]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Squares",             14]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Churches",            15]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Funiculars",          16]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Shops",               17]);
+        DB::update("UPDATE categorias SET nombre = JSON_SET(nombre, '$.en', ?) WHERE id = ?", ["Crafts",              18]);
+
+        // ─── categorias: iconos ───────────────────────────────────────
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["camera",          1]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["mug-hot",         2]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["palette",         3]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["monument",        4]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["book-open",       5]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["tree",            6]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["building-columns",7]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["hotdog",          8]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["archway",         9]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["utensils",        10]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["bed",             11]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["person",          12]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["scroll",          13]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["sun",             14]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["church",          15]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["mountain-sun",    16]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["shopping-bag",    17]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["gift",            18]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["dumbbell",        19]);
+        DB::update("UPDATE categorias SET icono = ? WHERE id = ?", ["masks-theater",   20]);
 
         // ─── puntosinteres: title (proper nouns, same in both languages) ──
         DB::statement("UPDATE puntosinteres SET title = JSON_SET(title, '$.en', JSON_UNQUOTE(JSON_EXTRACT(title, '$.es')))");
