@@ -1394,10 +1394,45 @@
     {{-- Modal: Cómo llegar con Google Maps --}}
     @if($punto->lat && $punto->lng)
     @php
-        $gmapEmbed = "https://maps.google.com/maps?q={$punto->lat},{$punto->lng}&output=embed&z=16";
-        $gmapNav   = "https://www.google.com/maps/dir/?api=1&destination={$punto->lat},{$punto->lng}&travelmode=walking";
+        $destLat   = $punto->lat;
+        $destLng   = $punto->lng;
+        $gmapBase  = "https://maps.google.com/maps?output=embed&z=15";
+        $gmapDest  = "https://maps.google.com/maps?q={$destLat},{$destLng}&output=embed&z=16";
+        $gmapNav   = "https://www.google.com/maps/dir/?api=1&destination={$destLat},{$destLng}&travelmode=walking";
     @endphp
-    <div x-data="{ abierto: false }" @geo-modal.window="abierto = true; document.body.style.overflow='hidden'">
+    <div x-data="{
+            abierto: false,
+            iframeSrc: '',
+            estado: 'idle',
+            destLat: {{ $destLat }},
+            destLng: {{ $destLng }},
+            abrir() {
+                this.abierto = true;
+                document.body.style.overflow = 'hidden';
+                this.iframeSrc = '{{ $gmapDest }}';
+                this.pedirUbicacion();
+            },
+            cerrar() {
+                this.abierto = false;
+                document.body.style.overflow = '';
+                this.iframeSrc = '';
+                this.estado = 'idle';
+            },
+            pedirUbicacion() {
+                if (!navigator.geolocation) return;
+                this.estado = 'cargando';
+                const self = this;
+                navigator.geolocation.getCurrentPosition(pos => {
+                    const uLat = pos.coords.latitude;
+                    const uLng = pos.coords.longitude;
+                    self.iframeSrc = `https://maps.google.com/maps?saddr=${uLat},${uLng}&daddr=${self.destLat},${self.destLng}&output=embed`;
+                    self.estado = 'ok';
+                }, () => {
+                    self.estado = 'idle';
+                }, { enableHighAccuracy: true, timeout: 8000 });
+            },
+        }"
+        @geo-modal.window="abrir()">
 
         {{-- Backdrop --}}
         <div x-show="abierto"
@@ -1407,7 +1442,7 @@
              x-transition:leave="transition ease-in duration-150"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             @click="abierto = false; document.body.style.overflow=''"
+             @click="cerrar()"
              class="fixed inset-0 bg-black/50 z-[200]">
         </div>
 
@@ -1433,24 +1468,32 @@
                     <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">{{ __('ui.lugar.como_llegar') }}</p>
                     <p class="font-extrabold text-gray-900 leading-tight">{{ $punto->title }}</p>
                 </div>
-                <button @click="abierto = false; document.body.style.overflow=''"
+                <button @click="cerrar()"
                     class="shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-sm font-bold hover:bg-gray-200 transition ml-4">
                     ✕
                 </button>
             </div>
 
-            {{-- Google Maps embed --}}
+            {{-- Status geolocalización --}}
+            <div x-show="estado === 'cargando'" class="px-5 py-2 shrink-0 flex items-center gap-2 text-xs font-semibold text-gray-500">
+                <svg class="w-3.5 h-3.5 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+                {{ __('ui.general.localizando') }}
+            </div>
+
+            {{-- Google Maps iframe: primero destino, luego ruta origen→destino --}}
             <div class="flex-1 min-h-0">
                 <iframe
-                    x-bind:src="abierto ? '{{ $gmapEmbed }}' : ''"
+                    x-bind:src="iframeSrc"
                     class="w-full h-full border-0"
                     allowfullscreen
-                    loading="lazy"
                     referrerpolicy="no-referrer-when-downgrade">
                 </iframe>
             </div>
 
-            {{-- Footer: botón abrir Google Maps --}}
+            {{-- Footer: botón navegación nativa --}}
             <div class="px-5 py-4 border-t border-gray-100 shrink-0">
                 <a href="{{ $gmapNav }}"
                    target="_blank" rel="noopener"
@@ -1458,7 +1501,7 @@
                     <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
                     </svg>
-                    {{ __('ui.lugar.como_llegar') }} con Google Maps
+                    Navegar con Google Maps
                 </a>
             </div>
         </div>
