@@ -9,31 +9,29 @@
 @section('bodyClass', 'bg-gray-100 text-gray-900')
 
 @php
-$jsonLdEventos = $panoramas->where('categoria', '!=', 'exposicion')
-    ->take(20)
-    ->map(fn($p) => [
-        '@type'     => 'Event',
-        'name'      => is_array($p->title) ? ($p->title['es'] ?? $p->title) : $p->title,
-        'startDate' => $p->fecha instanceof \Carbon\Carbon ? $p->fecha->toDateString() : (string)$p->fecha,
-        'location'  => ['@type' => 'Place', 'name' => $p->lugar ?: 'Valparaíso', 'address' => ['@type' => 'PostalAddress', 'addressLocality' => 'Valparaíso', 'addressCountry' => 'CL']],
-        'url'       => route('panoramas.show', $p->slug ?? $p->id),
-        'organizer' => ['@type' => 'Organization', 'name' => 'Pindoor'],
-        'eventStatus' => 'https://schema.org/EventScheduled',
-        'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
-    ])->values()->all();
+$jsonLdEventos = $panoramas->where('categoria', '!=', 'exposicion')->take(20)->values();
+$jsonLdList = [];
+foreach ($jsonLdEventos as $i => $p) {
+    $jsonLdList[] = [
+        '@type'    => 'ListItem',
+        'position' => $i + 1,
+        'item'     => [
+            '@type'               => 'Event',
+            'name'                => (string) $p->titulo,
+            'startDate'           => $p->fecha instanceof \Carbon\Carbon ? $p->fecha->toDateString() : (string)$p->fecha,
+            'location'            => ['@type' => 'Place', 'name' => $p->lugar ?: 'Valparaíso', 'address' => ['@type' => 'PostalAddress', 'addressLocality' => 'Valparaíso', 'addressCountry' => 'CL']],
+            'url'                 => route('panoramas.show', $p->slug ?? $p->id),
+            'organizer'           => ['@type' => 'Organization', 'name' => 'Pindoor'],
+            'eventStatus'         => 'https://schema.org/EventScheduled',
+            'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
+        ],
+    ];
+}
+$jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemList', 'name' => 'Panoramas en Valparaíso', 'url' => route('atractivos.panoramas'), 'itemListElement' => $jsonLdList], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 @endphp
 
 @section('head')
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": "Panoramas en Valparaíso",
-    "description": "Eventos, conciertos, exposiciones y actividades culturales en Valparaíso",
-    "url": "{{ route('atractivos.panoramas') }}",
-    "itemListElement": @json(collect($jsonLdEventos)->map(fn($e, $i) => ['@type' => 'ListItem', 'position' => $i + 1, 'item' => $e]))
-}
-</script>
+<script type="application/ld+json">{!! $jsonLdJson !!}</script>
 @endsection
 
 @section('content')
