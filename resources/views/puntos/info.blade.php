@@ -6,6 +6,15 @@
 @section('bodyClass', 'bg-gray-50 text-gray-900')
 @section('robots', 'index, follow')
 
+@section('head')
+    @vite('resources/js/leaflet.js')
+    <style>
+        .bano-marker-pago   { background:#8b5cf6; }
+        .bano-marker-gratis { background:#10b981; }
+        .bano-dot { width:14px;height:14px;border-radius:50%;border:2.5px solid white;box-shadow:0 2px 6px rgba(0,0,0,.25); }
+    </style>
+@endsection
+
 @section('content')
 <div class="max-w-xl mx-auto px-3 py-5 pb-28">
 
@@ -37,8 +46,176 @@
 
     <div class="space-y-3">
 
+    @php
+    $nl = "\n";
+    $base = url('/info');
+
+    $banosPago   = collect(__('ui.info.banos.pago_list'))
+        ->map(fn($r) => "• {$r[0]}" . ($r[1] ? " · {$r[1]}" : '') . " — {$r[2]}")
+        ->implode($nl);
+    $banosGratis = collect(__('ui.info.banos.gratis_list'))
+        ->map(fn($r) => "• {$r[0]}" . ($r[1] ? " · {$r[1]}" : ''))
+        ->implode($nl);
+
+    $ascList  = collect(__('ui.info.ascensores.list'))
+        ->map(fn($r) => "• {$r[0]} ({$r[1]}) — {$r[2]}")
+        ->implode($nl);
+    $ascFuera = collect(__('ui.info.ascensores.fuera_list'))
+        ->map(fn($r) => "• {$r[0]}: {$r[1]}")
+        ->implode($nl);
+
+    $termDests = collect(__('ui.info.terminal.dests'))
+        ->map(fn($r) => "• {$r[0]}: {$r[1]}")
+        ->implode($nl);
+
+    $parkins = collect(__('ui.info.estacionamiento.parkins'))
+        ->map(fn($r) => "• {$r[1]} — {$r[3]}")
+        ->implode($nl);
+
+    $waTexts = [
+
+        'trolebus' => implode($nl, [
+            "🚎 *Trolebús Valparaíso*",
+            "Línea 802 · Av. Argentina ↔ Aduana",
+            "🏆 Sistema de trolebuses más antiguo de América Latina (desde 1952)",
+            "",
+            "⏰ *Horario:*",
+            "• Lunes a Sábado: 07:00 – 22:00",
+            "• Domingo y festivos: No opera",
+            "",
+            "📍 *Recorrido ida → Aduana:*",
+            "Av. Argentina › Colón › Edwards › Brasil › Pedro Montt › Blanco Sur › Blanco › Aduana",
+            "",
+            "📍 *Recorrido vuelta → Av. Argentina:*",
+            "Aduana › Bustamante › Serrano/Prat › Esmeralda › Condell › Buenos Aires › Colón › Av. Argentina",
+            "",
+            "⏱ Frecuencia cada 10–15 min · Se paga con tarjeta Bip!",
+            "",
+            __('ui.info.wa_intro') . " {$base}#trolebus",
+        ]),
+
+        'metro' => implode($nl, [
+            "🚆 *Metro / Merval Valparaíso*",
+            "Tren Limache – Puerto · 21 estaciones",
+            "",
+            "⏰ *Horario:*",
+            "• Lunes a Viernes: 06:00 – 23:30",
+            "• Sábado: 07:30 – 23:30",
+            "• Domingo y festivos: 07:30 – 23:30",
+            "",
+            "⏱ *Frecuencias:*",
+            "• L–V punta (Puerto–Sarg. Aldea): c/ 6 min",
+            "• L–V punta (Puerto–Limache): c/ 12 min",
+            "• L–V fuera punta · Sáb · Dom: c/ 12 min",
+            "• Recorrido completo Puerto ↔ Limache: ~50 min",
+            "",
+            "🚉 *Estaciones:*",
+            "Puerto · Bellavista · Francia · Barón · Portales (Valparaíso)",
+            "Recreo · Miramar · Viña del Mar · Hospital · Chorrillos · El Salto (Viña)",
+            "Quilpué · El Sol · Valencia ✨ · Belloto (Quilpué)",
+            "Las Américas · La Concepción · Villa Alemana · Sargento Aldea (Villa Alemana)",
+            "Peñablanca · Limache",
+            "",
+            __('ui.info.wa_intro') . " {$base}#metro",
+        ]),
+
+        'terminal' => implode($nl, [
+            "🚌 *Terminal de Buses Valparaíso*",
+            "📍 Av. Pedro Montt 2860 · Frente al Congreso Nacional",
+            "",
+            "🗺 *Destinos frecuentes:*",
+            $termDests,
+            "",
+            "🏢 *Empresas:* Turbus · Pullman Bus · Cóndor Bus · Eme Bus · Ciktur · ETM · Sol del Pacífico",
+            "",
+            "🛎 *Servicios:*",
+            "• Duchas: \$1.300",
+            "• Custodia bolso pequeño: \$500",
+            "• Custodia bolso grande: \$1.000",
+            "",
+            __('ui.info.wa_intro') . " {$base}#terminal",
+        ]),
+
+        'banos' => implode($nl, [
+            "🚻 *Baños Públicos en Valparaíso*",
+            "",
+            "💰 *Con tarifa:*",
+            $banosPago,
+            "",
+            "🆓 *Gratuitos:*",
+            $banosGratis,
+            "",
+            __('ui.info.wa_intro') . " {$base}#banos",
+        ]),
+
+        'ascensores' => implode($nl, [
+            "🚡 *Ascensores de Valparaíso · 2026*",
+            "Patrimonio UNESCO · 7 operativos",
+            "",
+            "⚠️ No hay garantía al 100% de que funcionen el día de tu visita.",
+            "",
+            "⏰ *Horario:*",
+            "• Lunes a Viernes: 07:00 – 21:30",
+            "• Sáb · Dom · Festivos: 08:00 – 21:30",
+            "",
+            "💰 *Tarifas 2026:*",
+            "• Tarifa general: \$200",
+            "• Turista extranjero: \$1.000",
+            "• Bicicleta (Barón y Cordillera): \$600",
+            "• Exentos: menores de 14 · estudiantes · mayores de 60",
+            "",
+            "✅ *Operativos:*",
+            $ascList,
+            "",
+            "❌ *Fuera de servicio:*",
+            $ascFuera,
+            "",
+            __('ui.info.wa_intro') . " {$base}#ascensores",
+        ]),
+
+        'cambio' => implode($nl, [
+            "💱 *Cambio de Moneda en Valparaíso*",
+            "",
+            "📍 *Dónde:*",
+            "• Cambios FC — Zona calle Prat / Barrio Financiero · Tel. +56 9 6207 4957 · USD · EUR · ARS · BRL",
+            "• Calle Prat y alrededores — Varias opciones en la zona financiera",
+            "",
+            "⏰ *Horario general:*",
+            "• Lunes a Viernes: 09:00 – 18:00",
+            "• Sábado: 10:00 – 13:00",
+            "• Domingo: Cerrado",
+            "",
+            "💡 *Consejos:*",
+            "· Lleva siempre tu cédula o pasaporte — es obligatorio para montos grandes.",
+            "· Evita a los captadores en la calle que ofrecen mejor cambio.",
+            "· Los cajeros automáticos aceptan Visa/Mastercard internacionales.",
+            "",
+            __('ui.info.wa_intro') . " {$base}#cambio",
+        ]),
+
+        'estacionamiento' => implode($nl, [
+            "🅿️ *Estacionamientos en Valparaíso*",
+            "",
+            "⚠️ Los cerros (Alegre, Concepción, Artillería) tienen calles angostas y estacionamiento muy limitado.",
+            "Se recomienda dejar el auto en el Plan y subir a pie, en ascensor o funicular.",
+            "",
+            "📋 *Opciones:*",
+            $parkins,
+            "",
+            "🚡 *Alternativa recomendada:* Estaciona en el Plan (Av. Argentina) y usa los ascensores o escaleras para subir a los cerros.",
+            "",
+            __('ui.info.wa_intro') . " {$base}#estacionamiento",
+        ]),
+    ];
+    @endphp
+
     @foreach($cards as $card)
-    <div x-data="{ open: false }"
+    @php
+        $waText = rawurlencode($waTexts[$card['id']] ?? $card['emoji'] . ' ' . $card['titulo'] . "\n\n" . __('ui.info.wa_intro') . "\n" . url('/info') . '#' . $card['id']);
+        $waUrl  = "https://wa.me/?text={$waText}";
+    @endphp
+    <div id="{{ $card['id'] }}"
+         x-data="{ open: window.location.hash === '#{{ $card['id'] }}' }"
          class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
         <button @click="open = !open"
@@ -49,6 +226,14 @@
                 <p class="text-sm font-extrabold text-gray-900">{{ $card['titulo'] }}</p>
                 <p class="text-[11px] text-gray-400 truncate mt-0.5">{{ $card['sub'] }}</p>
             </div>
+            <a href="{{ $waUrl }}" target="_blank" rel="noopener"
+               @click.stop
+               class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
+               title="Compartir por WhatsApp">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+            </a>
             <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200"
                  :class="open ? 'rotate-180' : ''"
                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -265,6 +450,14 @@
             @if($card['id'] === 'banos')
             <div class="px-4 pb-5 pt-4 space-y-4">
 
+                <button @click="$dispatch('mapa-banos')"
+                        class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-purple-50 text-purple-700 text-sm font-bold hover:bg-purple-100 transition-colors">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                    </svg>
+                    Ver en mapa
+                </button>
+
                 {{-- Pagados --}}
                 <div>
                     <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">{{ __('ui.info.banos.pago') }}</p>
@@ -294,10 +487,11 @@
                     </div>
                 </div>
 
-                <p class="text-[11px] text-gray-400 text-center leading-snug">
-                    {{ __('ui.info.banos.mapa') }}<br>
-                    <span class="font-semibold">banosvalparaiso-geopucv.hub.arcgis.com</span>
-                </p>
+                <button @click="$dispatch('mapa-banos')"
+                    class="w-full mt-1 flex items-center justify-center gap-2 bg-violet-50 hover:bg-violet-100 text-violet-700 font-semibold text-sm rounded-2xl px-4 py-3 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                    {{ __('ui.info.banos.mapa') }}
+                </button>
 
             </div>
             @endif
@@ -482,4 +676,174 @@
     </p>
 
 </div>
+
+{{-- ══ MODAL: Mapa de Baños ═══════════════════════════════════════════════ --}}
+<div x-data="mapaBanos()" @mapa-banos.window="abrir()">
+
+    {{-- Backdrop --}}
+    <div x-show="abierto"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         @click="cerrar()"
+         class="fixed inset-0 bg-black/50 z-200">
+    </div>
+
+    {{-- Bottom sheet --}}
+    <div x-show="abierto"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="translate-y-full" x-transition:enter-end="translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="translate-y-0" x-transition:leave-end="translate-y-full"
+         class="fixed bottom-0 left-0 right-0 z-201 bg-white rounded-t-3xl overflow-hidden flex flex-col"
+         style="height:88dvh">
+
+        {{-- Handle --}}
+        <div class="flex justify-center pt-3 pb-1 shrink-0">
+            <div class="w-10 h-1 bg-gray-200 rounded-full"></div>
+        </div>
+
+        {{-- Header --}}
+        <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100 shrink-0">
+            <div>
+                <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Info práctica</p>
+                <p class="font-extrabold text-gray-900">🚻 Baños Públicos · Valparaíso</p>
+            </div>
+            <button @click="cerrar()"
+                class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold hover:bg-gray-200 transition">✕</button>
+        </div>
+
+        {{-- Leyenda --}}
+        <div class="flex items-center gap-4 px-5 py-2 shrink-0 text-xs font-semibold">
+            <span class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-violet-500 shrink-0"></span> Con tarifa
+            </span>
+            <span class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-emerald-500 shrink-0"></span> Gratuito
+            </span>
+        </div>
+
+        {{-- Mapa --}}
+        <div class="flex-1 min-h-0 relative">
+            <div id="mapa-banos" class="w-full h-full"></div>
+            <div x-show="gpsLoading"
+                 class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white/70 backdrop-blur-sm z-400 pointer-events-none">
+                <svg class="w-8 h-8 text-violet-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+                </svg>
+                <p class="text-xs font-semibold text-violet-600">{{ __('ui.general.localizando') }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function mapaBanos() {
+    return {
+        abierto: false,
+        mapa: null,
+        gpsLoading: false,
+
+        abrir() {
+            this.abierto = true;
+            document.body.style.overflow = 'hidden';
+            this.$nextTick(() => this.iniciar());
+        },
+
+        cerrar() {
+            this.abierto = false;
+            document.body.style.overflow = '';
+        },
+
+        iniciar() {
+            if (this.mapa) { this.mapa.invalidateSize(); return; }
+
+            this.mapa = L.map('mapa-banos', {
+                center: [-33.0437, -71.6182],
+                zoom: 14,
+                zoomControl: true,
+                attributionControl: false,
+            });
+
+            if (navigator.geolocation) {
+                this.gpsLoading = true;
+                navigator.geolocation.getCurrentPosition(
+                    pos => {
+                        const uLat = pos.coords.latitude, uLng = pos.coords.longitude;
+                        this.mapa.setView([uLat, uLng], 15);
+                        L.marker([uLat, uLng], {
+                            icon: L.divIcon({
+                                className: '',
+                                html: '<div style="width:16px;height:16px;background:#fc5648;border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(252,86,72,.6)"></div>',
+                                iconSize: [16, 16], iconAnchor: [8, 8]
+                            })
+                        }).addTo(this.mapa).bindPopup('📍 Tú estás aquí');
+                        this.gpsLoading = false;
+                    },
+                    () => { this.gpsLoading = false; },
+                    { enableHighAccuracy: true, timeout: 6000 }
+                );
+            }
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                maxZoom: 16, subdomains: 'abcd',
+            }).addTo(this.mapa);
+
+            const iconPago   = L.divIcon({ className: '', html: '<div class="bano-dot bano-marker-pago"></div>',   iconSize:[14,14], iconAnchor:[7,7] });
+            const iconGratis = L.divIcon({ className: '', html: '<div class="bano-dot bano-marker-gratis"></div>', iconSize:[14,14], iconAnchor:[7,7] });
+
+
+            //{ n:'Pérgola de las Flores',          r:'Calle Condell · Plaza Aníbal Pinto',       p:'$350', lat:-33.043326, lng:-71.625280 },
+                //{ n:'Plaza Victoria',                  r:'Bajo la glorieta',                          p:'$300', lat:-33.046211, lng:-71.620087 },
+                //{ n:'Estacionamientos Barrio Puerto', r:'Subterráneos',                       lat:-33.03810, lng:-71.62456 },
+
+            const pagados = [
+                
+                { n:'Plaza Simón Bolivar',             r:'Detras de juegos',                          p:'$300', lat:-33.045271, lng:-71.619634 },
+                { n:'Estación Puerto — 1er piso',      r:'Costado Muelle Prat · buen estado',         p:'$400', lat:-33.038246, lng:-71.627580 },
+                { n:'Muelle Prat',                     r:'En Galeria artesanal',                      p:'$500', lat:-33.037299, lng:-71.627599 },
+
+                { n:'Mercado Puerto',                  r:'1er piso · moderno y limpio',               p:'$350', lat:-33.035751, lng:-71.630092 },
+                { n:'Plaza O\'Higgins',                r:'Frente al Teatro Municipal · el más nuevo', p:'$400', lat:-33.047916, lng:-71.607940 },
+                { n:'Terminal de Buses',               r:'Costado de la losa de llegada',             p:'$400', lat:-33.046862, lng:-71.606610 },
+                { n:'Mercado El Cardonal',             r:'2do piso · amplio y espacioso',             p:'$300', lat:-33.045168, lng:-71.607520 },
+               // { n:'Parque Italia',                   r:'Detrás de Plaza Salvador Allende',          p:'$300', lat:-33.047356, lng:-71.613441 },
+                { n:'Paseo 21 de Mayo',                 r:'Costado del Museo Naval',                   p:'$300', lat:-33.031343, lng:-71.630563 },
+            ];
+
+            const gratuitos = [
+                { n:'Estación Puerto — 2do piso', r:'Patio de comidas · muchos no lo saben', lat:-33.038309, lng:-71.627456 },
+                { n:'Mall Paseo Ross',            r:'Av. Argentina',                          lat:-33.048921, lng:-71.604269 },
+                { n:'Jumbo Portal Valparaíso',    r:'Supermercado',                           lat:-33.044086, lng:-71.604843 },
+                { n:'Museo Historia Natural',     r:'Centro',                                 lat:-33.046498, lng:-71.621173 },
+
+                { n:'Biblioteca Santiago Severín',r:'Centro',                                 lat:-33.045031, lng:-71.619328 },
+            ];
+
+            pagados.forEach(b => {
+                L.marker([b.lat, b.lng], { icon: iconPago })
+                    .addTo(this.mapa)
+                    .bindPopup(`<div style="font-family:'Plus Jakarta Sans',sans-serif;min-width:160px">
+                        <p style="font-weight:800;font-size:13px;margin:0 0 2px">${b.n}</p>
+                        <p style="font-size:11px;color:#6b7280;margin:0 0 4px">${b.r}</p>
+                        <span style="background:#f3e8ff;color:#7c3aed;font-weight:700;font-size:12px;padding:2px 8px;border-radius:99px">${b.p}</span>
+                    </div>`);
+            });
+
+            gratuitos.forEach(b => {
+                L.marker([b.lat, b.lng], { icon: iconGratis })
+                    .addTo(this.mapa)
+                    .bindPopup(`<div style="font-family:'Plus Jakarta Sans',sans-serif;min-width:160px">
+                        <p style="font-weight:800;font-size:13px;margin:0 0 2px">${b.n}</p>
+                        <p style="font-size:11px;color:#6b7280;margin:0 0 4px">${b.r}</p>
+                        <span style="background:#d1fae5;color:#065f46;font-weight:700;font-size:12px;padding:2px 8px;border-radius:99px">Gratis</span>
+                    </div>`);
+            });
+        },
+    };
+}
+</script>
+
 @endsection
