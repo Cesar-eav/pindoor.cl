@@ -253,7 +253,7 @@ return [
                 ['Plaza O\'Higgins',              'Frente al Teatro Municipal · el más nuevo', '$400'],
                 ['Terminal de Buses',             'Costado de la losa de llegada', '$400'],
                 ['Mercado El Cardonal',           '2do piso · amplio y espacioso', '$300'],
-                ['Parque Italia',                 'Detrás de Plaza Salvador Allende', '$300'],
+               // ['Parque Italia',                 'Detrás de Plaza Salvador Allende', '$300'],
                 ['Paseo 21 de Mayo',              'Costado del Museo Naval', '$300'],
             ],
             'gratis_list' => [
