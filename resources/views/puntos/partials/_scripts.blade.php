@@ -192,6 +192,20 @@ function iniciarMapa(containerId) {
         maxZoom: 19, subdomains: 'abcd',
     }).addTo(mapaLeaflet);
 
+    // ── Distritos de Valparaíso (desde DB) ───────────────────────────────
+    fetch('/api/distritos')
+        .then(r => r.json())
+        .then(lista => lista.forEach(d => {
+            if (!d.coordenadas || d.coordenadas.length < 3) return;
+            L.polygon(d.coordenadas, {
+                color: d.color, weight: 2, opacity: 0.7,
+                fillColor: d.color, fillOpacity: 0.12, dashArray: '5,4',
+            }).addTo(mapaLeaflet).bindPopup(
+                `<span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13px;color:${d.color}">${d.nombre}</span>`
+            );
+        }))
+        .catch(() => {});
+
     if (GPS_LAT && GPS_LNG) {
         mapaLeaflet.setView([GPS_LAT, GPS_LNG], 15);
         L.circleMarker([GPS_LAT, GPS_LNG], {
