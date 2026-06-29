@@ -20,6 +20,7 @@
         "vue": "^3.5.30"
     },
     "dependencies": {
+        "@geoman-io/leaflet-geoman-free": "^2.20.0",
         "alpine": "^0.2.1",
         "leaflet": "^1.9.4",
         "leaflet-rotate": "^0.2.8",

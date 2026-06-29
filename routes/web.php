@@ -16,6 +16,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ExperienciaController;
+use App\Http\Controllers\Admin\DistritoController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -58,6 +59,7 @@ Route::get('/atractivos/ciudad/{ciudad}', [PuntoInteresController::class, 'filtr
 Route::get('/explorar', [PuntoInteresController::class, 'explorar'])->name('puntos.explorar');
 Route::get('/categorias', [PuntoInteresController::class, 'buscar'])->name('puntos.buscar.vista');
 Route::get('/info', fn() => view('puntos.info'))->name('puntos.info');
+Route::get('/api/distritos', [DistritoController::class, 'json'])->name('api.distritos');
 Route::get('/panoramas', [PuntoInteresController::class, 'panoramas'])->name('atractivos.panoramas');
 Route::get('/panoramas/{panorama}', [PuntoInteresController::class, 'showPanorama'])->name('panoramas.show');
 Route::get('/experiencias', [PuntoInteresController::class, 'experiencias'])->name('experiencias.index');
@@ -129,6 +131,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('/panoramas/configuracion', [PanoramaController::class, 'configuracion'])->name('panoramas.configuracion');
     Route::get('/passline', [AdminController::class, 'passline'])->name('passline');
     Route::post('/passline', [AdminController::class, 'passlineImportar'])->name('passline.importar');
+
+    // Distritos
+    Route::resource('distritos', DistritoController::class)->except(['show','create','edit']);
+    Route::get('distritos/editor', [DistritoController::class, 'index'])->name('distritos.editor');
 
     // Experiencias
     Route::resource('experiencias', ExperienciaController::class)->except(['show']);
