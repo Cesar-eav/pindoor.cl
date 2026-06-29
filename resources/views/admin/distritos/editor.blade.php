@@ -42,15 +42,25 @@
 
         {{-- Instrucciones --}}
         <div class="px-5 py-4 border-t border-gray-100 text-[11px] text-gray-400 leading-snug space-y-1">
-            <p><strong class="text-gray-600">Dibujar:</strong> Crea un distrito → haz clic en el mapa para añadir vértices → doble clic para cerrar</p>
-            <p><strong class="text-gray-600">Editar:</strong> Selecciona un distrito en la lista → arrastra los vértices</p>
-            <p><strong class="text-gray-600">Guardar:</strong> El botón "Guardar" en cada tarjeta guarda los vértices actuales</p>
+            <p><strong class="text-gray-600">Dibujar:</strong> Clic para añadir vértice · Doble clic para cerrar · Botón ← para borrar el último</p>
+            <p><strong class="text-gray-600">Editar:</strong> Arrastra vértices · <strong class="text-red-400">Clic derecho</strong> sobre un vértice para eliminarlo</p>
+            <p><strong class="text-gray-600">Guardar:</strong> Pulsa 💾 cuando termines</p>
         </div>
     </div>
 
     {{-- ── Mapa ────────────────────────────────────────────────────────────── --}}
     <div class="flex-1 relative">
         <div id="mapa-editor" class="w-full h-full"></div>
+
+        {{-- Botón flotante deshacer vértice (solo visible al dibujar) --}}
+        <button id="btn-deshacer" onclick="deshacerVertice()"
+            style="display:none"
+            class="absolute bottom-20 left-1/2 -translate-x-1/2 z-500
+                   bg-white border border-gray-200 shadow-lg rounded-2xl
+                   px-5 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50
+                   items-center gap-2 transition">
+            ← Borrar último vértice
+        </button>
 
         {{-- Toast feedback --}}
         <div id="toast" class="hidden absolute bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm font-semibold px-5 py-2.5 rounded-2xl shadow-lg z-500 transition-opacity"></div>
@@ -82,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Al terminar de dibujar un polígono nuevo
     mapa.on('pm:create', e => {
+        document.getElementById('btn-deshacer').style.display = 'none';
         if (!activoId) { e.layer.remove(); return; }
         const d = distritos[activoId];
         if (d.layer) d.layer.remove();
@@ -163,21 +174,25 @@ function renderTarjeta(d) {
                 class="w-7 h-7 rounded-lg border border-gray-200 cursor-pointer p-0.5 shrink-0">
         </div>
         <div class="flex gap-1.5">
-            <button onclick="activarDibujo(${d.id})"
-                class="flex-1 text-[11px] font-bold py-1.5 rounded-xl border border-gray-200 text-gray-600 hover:border-[#fc5648] hover:text-[#fc5648] transition" id="btn-dibujar-${d.id}">
-                ✏️ Dibujar
+            <button onclick="activarDibujo(${d.id})" title="Dibujar polígono"
+                class="flex-1 py-1.5 rounded-xl border border-gray-200 text-gray-600 hover:border-[#fc5648] hover:text-[#fc5648] transition flex items-center justify-center" id="btn-dibujar-${d.id}">
+                <i class="fa fa-pen text-xs"></i>
             </button>
-            <button onclick="activarEdicion(${d.id})"
-                class="flex-1 text-[11px] font-bold py-1.5 rounded-xl border border-gray-200 text-gray-600 hover:border-blue-400 hover:text-blue-500 transition">
-                ↔ Mover
+            <button onclick="activarEdicion(${d.id})" title="Mover vértices"
+                class="flex-1 py-1.5 rounded-xl border border-gray-200 text-gray-600 hover:border-blue-400 hover:text-blue-500 transition flex items-center justify-center">
+                <i class="fa fa-arrows-up-down-left-right text-xs"></i>
             </button>
-            <button onclick="guardarDistrito(${d.id})"
-                class="flex-1 text-[11px] font-bold py-1.5 rounded-xl bg-gray-900 text-white hover:bg-black transition">
-                💾 Guardar
+            <button onclick="guardarDistrito(${d.id})" title="Guardar" id="btn-guardar-${d.id}"
+                class="flex-1 py-1.5 rounded-xl bg-gray-900 text-white hover:bg-black transition flex items-center justify-center">
+                <i class="fa fa-floppy-disk text-xs" id="ico-guardar-${d.id}"></i>
+                <svg id="spin-guardar-${d.id}" class="hidden animate-spin h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                </svg>
             </button>
-            <button onclick="eliminarDistrito(${d.id})"
-                class="text-[11px] font-bold py-1.5 px-2 rounded-xl border border-red-100 text-red-400 hover:bg-red-50 transition">
-                ✕
+            <button onclick="eliminarDistrito(${d.id})" title="Eliminar"
+                class="py-1.5 px-2.5 rounded-xl border border-red-100 text-red-400 hover:bg-red-50 transition flex items-center justify-center">
+                <i class="fa fa-trash text-xs"></i>
             </button>
         </div>
         <p class="text-[10px] text-gray-400 mt-1.5" id="vertices-${d.id}">${d.coordenadas ? d.coordenadas.length + ' vértices' : 'Sin polígono'}</p>
@@ -225,6 +240,7 @@ function activarDibujo(id) {
         pathOptions: estiloDistrito(distritos[id]?.color || '#fc5648'),
     });
 
+    document.getElementById('btn-deshacer').style.display = 'flex';
     toast('Haz clic para añadir vértices · Doble clic para cerrar');
 }
 
@@ -263,6 +279,11 @@ function guardarDistrito(id) {
     if (d.layer) d.layer.pm.disable();
     mapa.pm.disableDraw();
 
+    const ico  = document.getElementById(`ico-guardar-${id}`);
+    const spin = document.getElementById(`spin-guardar-${id}`);
+    if (ico)  ico.classList.add('hidden');
+    if (spin) spin.classList.remove('hidden');
+
     fetch(`${BASE}/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF },
@@ -275,6 +296,10 @@ function guardarDistrito(id) {
         if (el) el.textContent = coords ? coords.length + ' vértices guardados ✓' : 'Sin polígono';
         document.querySelectorAll('[id^="tarjeta-"]').forEach(el => el.classList.remove('ring-2','ring-[#fc5648]','ring-blue-400'));
         toast('Guardado ✓');
+    })
+    .finally(() => {
+        if (ico)  ico.classList.remove('hidden');
+        if (spin) spin.classList.add('hidden');
     });
 }
 
@@ -284,6 +309,14 @@ function cambiarColor(id, color) {
     const dot = document.querySelector(`#tarjeta-${id} span.rounded-full`);
     if (dot) dot.style.background = color;
     if (distritos[id].layer) distritos[id].layer.setStyle(estiloDistrito(color));
+}
+
+// ── Deshacer último vértice al dibujar ────────────────────────────────────
+function deshacerVertice() {
+    const draw = mapa.pm.Draw.Polygon;
+    if (draw && draw._enabled) {
+        draw._removeLastVertex();
+    }
 }
 
 // ── Eliminar ──────────────────────────────────────────────────────────────
