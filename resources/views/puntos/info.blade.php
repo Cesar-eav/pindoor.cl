@@ -213,12 +213,12 @@
 
     @foreach($cards as $card)
     @php
-        $waText = rawurlencode($waTexts[$card['id']] ?? $card['emoji'] . ' ' . $card['titulo'] . "\n\n" . __('ui.info.wa_intro') . "\n" . $base . '#' . $card['id']);
-        $waUrl  = "https://wa.me/?text={$waText}";
+        $waRaw  = $waTexts[$card['id']] ?? $card['emoji'] . ' ' . $card['titulo'] . "\n\n" . __('ui.info.wa_intro') . "\n" . $base . '#' . $card['id'];
+        $waUrl  = "https://wa.me/?text=" . rawurlencode($waRaw);
     @endphp
     <div id="{{ $card['id'] }}"
          x-data="{ open: window.location.hash === '#{{ $card['id'] }}' }"
-         class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+         class="relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
         <button @click="open = !open"
                 class="w-full flex items-center gap-3 px-4 py-4 text-left transition-colors"
@@ -228,20 +228,23 @@
                 <p class="text-sm font-extrabold text-gray-900">{{ $card['titulo'] }}</p>
                 <p class="text-[11px] text-gray-400 truncate mt-0.5">{{ $card['sub'] }}</p>
             </div>
-            <a href="{{ $waUrl }}" target="_blank" rel="noopener"
-               @click.stop
-               class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
-               title="Compartir por WhatsApp">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                </svg>
-            </a>
+            <span class="shrink-0 w-8 h-8"></span>
             <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200"
                  :class="open ? 'rotate-180' : ''"
                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
             </svg>
         </button>
+
+        <a href="{{ $waUrl }}" target="_blank" rel="noopener"
+           data-text="{{ e($waRaw) }}"
+           onclick="return compartirInfo(event, this)"
+           class="absolute right-10 top-4 w-8 h-8 flex items-center justify-center rounded-full text-[#25D366] hover:bg-[#25D366]/10 transition-colors z-10"
+           title="Compartir">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+        </a>
 
         <div x-show="open" style="height:3px; background:{{ $card['color'] }}; margin-top:-1px"></div>
 
@@ -846,6 +849,27 @@ function mapaBanos() {
             });
         },
     };
+}
+
+function compartirInfo(e, el) {
+    e.preventDefault();
+    const text = el.dataset.text;
+    const href = el.href;
+
+    const tieneShare = !!navigator.share;
+    const host = location.hostname + ':' + location.port;
+    alert('DEBUG\nnavigator.share: ' + tieneShare + '\nhost: ' + host + '\nhref: ' + href.substring(0, 40));
+
+    if (navigator.share) {
+        navigator.share({ text }).catch(err => {
+            alert('share error: ' + err.name + ' — ' + err.message);
+            window.location.href = href;
+        });
+    } else {
+        alert('Sin share API — navegando a wa.me');
+        window.location.href = href;
+    }
+    return false;
 }
 </script>
 
