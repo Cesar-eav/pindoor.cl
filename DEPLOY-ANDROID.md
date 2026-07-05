@@ -7,27 +7,33 @@ Las credenciales del keystore están en `.env` (`ANDROID_KEYSTORE_FILE`, `ANDROI
 
 ---
 
-## 1. Compilar el APK (distribución directa)
+## 1. Compilar
+
+> **Google Play exige AAB** desde agosto 2021 — no acepta APK para nuevas versiones.
+
+### AAB (Google Play)
 
 ```bash
 cd /var/www/html/pindoor
-
-php artisan native:package android
-```
-
-El APK firmado queda en:
-```
-nativephp/android/app/build/outputs/apk/release/app-release.apk
-```
-
-Para generar **AAB** (requerido por Google Play):
-```bash
+npm run build
 php artisan native:package android --build-type=bundle
 ```
 
 Salida:
 ```
 nativephp/android/app/build/outputs/bundle/release/app-release.aab
+```
+
+### APK (instalación directa / sideload)
+
+```bash
+cd /var/www/html/pindoor
+php artisan native:package android
+```
+
+Salida:
+```
+nativephp/android/app/build/outputs/apk/release/app-release.apk
 ```
 
 ---
@@ -104,6 +110,6 @@ JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ./gradlew clean assembleRelease
 
 - [ ] `native:release patch/minor/major` ejecutado (actualiza `.env`)
 - [ ] Assets compilados: `npm run build`
-- [ ] APK/AAB generado con `native:package android`
-- [ ] APK probado en dispositivo físico antes de subir
+- [ ] AAB generado con `native:package android --build-type=bundle`
+- [ ] AAB probado en dispositivo físico antes de subir (o APK con `native:package android`)
 - [ ] Novedades de versión preparadas para Play Store
