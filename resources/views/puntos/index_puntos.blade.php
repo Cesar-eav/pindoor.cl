@@ -61,6 +61,8 @@
         .gps-core { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 14px; height: 14px; background: #fc5648; border: 3px solid white; border-radius: 50%; box-shadow: 0 2px 8px rgba(252,86,72,.6); z-index: 2; }
         .gps-cone-wrap { position: absolute; inset: 0; display: flex; align-items: flex-start; justify-content: center; padding-top: 2px; opacity: 0; transform-origin: center; transition: transform 0.4s ease-out, opacity 0.3s; z-index: 1; }
         @keyframes gps-pulse { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(2.8); opacity: 0; } }
+        @keyframes gps-spin { to { transform: rotate(360deg); } }
+        .gps-buscando { animation: gps-spin 1s linear infinite; transform-origin: center; }
         /* Botón GPS control */
         .leaflet-gps-btn { background: white; border: 2px solid rgba(0,0,0,.08); border-radius: 10px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 3px 12px rgba(0,0,0,.2); transition: all .2s; color: #6b7280; }
         .leaflet-gps-btn:hover { background: #fff0ef; color: #fc5648; border-color: #fca49f; }
@@ -188,5 +190,5 @@
 @endsection
 
 @section('scripts')
-    @include('puntos.partials._scripts')
+    @include('puntos.partials._mapa')
 @endsection
