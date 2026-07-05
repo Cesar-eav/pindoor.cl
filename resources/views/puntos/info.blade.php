@@ -48,7 +48,8 @@
 
     @php
     $nl = "\n";
-    $base = url('/info');
+    // En la app nativa el host es 127.x.x.x — forzar URL pública para compartir
+    $base = str_starts_with(request()->getHost(), '127.') ? 'https://pindoor.cl/info' : url('/info');
 
     $banosPago   = collect(__('ui.info.banos.pago_list'))
         ->map(fn($r) => "• {$r[0]}" . ($r[1] ? " · {$r[1]}" : '') . " — {$r[2]}")
@@ -138,6 +139,7 @@
 
         'banos' => implode($nl, [
             "🚻 *Baños Públicos en Valparaíso*",
+            __('ui.info.wa_intro') . " {$base}#banos",
             "",
             "💰 *Con tarifa:*",
             $banosPago,
@@ -145,7 +147,7 @@
             "🆓 *Gratuitos:*",
             $banosGratis,
             "",
-            __('ui.info.wa_intro') . " {$base}#banos",
+
         ]),
 
         'ascensores' => implode($nl, [
@@ -211,8 +213,8 @@
 
     @foreach($cards as $card)
     @php
-        $waText = rawurlencode($waTexts[$card['id']] ?? $card['emoji'] . ' ' . $card['titulo'] . "\n\n" . __('ui.info.wa_intro') . "\n" . url('/info') . '#' . $card['id']);
-        $waUrl  = "https://wa.me/?text={$waText}";
+        $waText = rawurlencode($waTexts[$card['id']] ?? $card['emoji'] . ' ' . $card['titulo'] . "\n\n" . __('ui.info.wa_intro') . "\n" . $base . '#' . $card['id']);
+        $waUrl  = "whatsapp://send?text={$waText}";
     @endphp
     <div id="{{ $card['id'] }}"
          x-data="{ open: window.location.hash === '#{{ $card['id'] }}' }"
@@ -226,7 +228,7 @@
                 <p class="text-sm font-extrabold text-gray-900">{{ $card['titulo'] }}</p>
                 <p class="text-[11px] text-gray-400 truncate mt-0.5">{{ $card['sub'] }}</p>
             </div>
-            <a href="{{ $waUrl }}" target="_blank" rel="noopener"
+            <a href="{{ $waUrl }}"
                @click.stop
                class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
                title="Compartir por WhatsApp">
@@ -805,7 +807,6 @@ function mapaBanos() {
                 { n:'Estación Puerto — 1er piso',      r:'Costado Muelle Prat · buen estado',         p:'$400', lat:-33.038246, lng:-71.627580 },
                 { n:'Muelle Prat',                     r:'En Galeria artesanal',                      p:'$500', lat:-33.037299, lng:-71.627599 },
 
-                { n:'Mercado Puerto',                  r:'1er piso · moderno y limpio',               p:'$350', lat:-33.035751, lng:-71.630092 },
                 { n:'Plaza O\'Higgins',                r:'Frente al Teatro Municipal · el más nuevo', p:'$400', lat:-33.047916, lng:-71.607940 },
                 { n:'Terminal de Buses',               r:'Costado de la losa de llegada',             p:'$400', lat:-33.046862, lng:-71.606610 },
                 { n:'Mercado El Cardonal',             r:'2do piso · amplio y espacioso',             p:'$300', lat:-33.045168, lng:-71.607520 },
@@ -814,7 +815,9 @@ function mapaBanos() {
             ];
 
             const gratuitos = [
-                { n:'Estación Puerto — 2do piso', r:'Patio de comidas · muchos no lo saben', lat:-33.038309, lng:-71.627456 },
+                { n:'Mercado Puerto',                  r:'1er piso · moderno y limpio',         lat:-33.035751, lng:-71.630092 },
+
+                { n:'Estación Puerto — 2do piso', r:'Patio de comidas · muchos no lo saben',    lat:-33.038309, lng:-71.627456 },
                 { n:'Mall Paseo Ross',            r:'Av. Argentina',                          lat:-33.048921, lng:-71.604269 },
                 { n:'Jumbo Portal Valparaíso',    r:'Supermercado',                           lat:-33.044086, lng:-71.604843 },
                 { n:'Museo Historia Natural',     r:'Centro',                                 lat:-33.046498, lng:-71.621173 },

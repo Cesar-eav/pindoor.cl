@@ -249,7 +249,6 @@ return [
                 ['Plaza Simón Bolívar',           'Detrás de los juegos', '$300'],
                 ['Estación Puerto — 1er piso',    'Costado Muelle Prat · buen estado', '$400'],
                 ['Muelle Prat',                   'En galería artesanal', '$500'],
-                ['Mercado Puerto',                '1er piso · moderno y limpio', '$350'],
                 ['Plaza O\'Higgins',              'Frente al Teatro Municipal · el más nuevo', '$400'],
                 ['Terminal de Buses',             'Costado de la losa de llegada', '$400'],
                 ['Mercado El Cardonal',           '2do piso · amplio y espacioso', '$300'],
@@ -257,6 +256,8 @@ return [
                 ['Paseo 21 de Mayo',              'Costado del Museo Naval', '$300'],
             ],
             'gratis_list' => [
+                ['Mercado Puerto',                '1er piso · moderno y limpio'],
+
                 ['Estación Puerto — 2do piso',   'Patio de comidas · muchos no lo saben'],
                 ['Mall Paseo Ross',              'Av. Argentina'],
                 ['Jumbo Portal Valparaíso',      'Supermercado'],

@@ -249,7 +249,6 @@ return [
                 ['Plaza Simón Bolívar',           'Behind the playground', '$300'],
                 ['Estación Puerto — ground floor','Beside Muelle Prat · good condition', '$400'],
                 ['Muelle Prat',                   'In craft gallery', '$500'],
-                ['Mercado Puerto',                'Ground floor · modern and clean', '$350'],
                 ['Plaza O\'Higgins',              'Across from Teatro Municipal · newest', '$400'],
                 ['Bus Terminal',                  'Beside the arrivals area', '$400'],
                 ['Mercado El Cardonal',           '2nd floor · spacious', '$300'],
@@ -257,6 +256,7 @@ return [
                 ['Paseo 21 de Mayo',              'Beside Museo Naval', '$300'],
             ],
             'gratis_list' => [
+                ['Mercado Puerto',                'Ground floor · modern and clean'],
                 ['Estación Puerto — upper floor', 'Food court level · little known'],
                 ['Mall Paseo Ross',               'Av. Argentina'],
                 ['Jumbo Portal Valparaíso',       'Supermarket'],
