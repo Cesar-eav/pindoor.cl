@@ -854,20 +854,12 @@ function mapaBanos() {
 function compartirInfo(e, el) {
     e.preventDefault();
     const text = el.dataset.text;
-    const href = el.href;
-
-    const tieneShare = !!navigator.share;
-    const host = location.hostname + ':' + location.port;
-    alert('DEBUG\nnavigator.share: ' + tieneShare + '\nhost: ' + host + '\nhref: ' + href.substring(0, 40));
-
     if (navigator.share) {
-        navigator.share({ text }).catch(err => {
-            alert('share error: ' + err.name + ' — ' + err.message);
-            window.location.href = href;
+        navigator.share({ text }).catch(() => {
+            window.location.href = 'whatsapp://send?text=' + encodeURIComponent(text);
         });
     } else {
-        alert('Sin share API — navegando a wa.me');
-        window.location.href = href;
+        window.location.href = 'whatsapp://send?text=' + encodeURIComponent(text);
     }
     return false;
 }
