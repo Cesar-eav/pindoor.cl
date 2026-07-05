@@ -214,7 +214,7 @@
     @foreach($cards as $card)
     @php
         $waText = rawurlencode($waTexts[$card['id']] ?? $card['emoji'] . ' ' . $card['titulo'] . "\n\n" . __('ui.info.wa_intro') . "\n" . $base . '#' . $card['id']);
-        $waUrl  = "whatsapp://send?text={$waText}";
+        $waUrl  = "https://wa.me/?text={$waText}";
     @endphp
     <div id="{{ $card['id'] }}"
          x-data="{ open: window.location.hash === '#{{ $card['id'] }}' }"
@@ -228,7 +228,7 @@
                 <p class="text-sm font-extrabold text-gray-900">{{ $card['titulo'] }}</p>
                 <p class="text-[11px] text-gray-400 truncate mt-0.5">{{ $card['sub'] }}</p>
             </div>
-            <a href="{{ $waUrl }}"
+            <a href="{{ $waUrl }}" target="_blank" rel="noopener"
                @click.stop
                class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
                title="Compartir por WhatsApp">
