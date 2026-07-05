@@ -320,7 +320,16 @@ function activarVistaMapa() {
     }
     history.replaceState(null, '', location.pathname);
     const containerId = mobile ? 'mapa-mobile' : 'mapa-principal';
-    if (!mapaIniciado) { mapaIniciado = true; iniciarMapa(containerId); }
+    if (!mapaIniciado) {
+        mapaIniciado = true;
+        iniciarMapa(containerId);
+        // GPS automático al abrir el mapa por primera vez
+        setTimeout(() => {
+            const btn = document.getElementById('gps-btn-mobile')
+                     ?? document.querySelector('#mapa-principal .leaflet-gps-btn');
+            if (btn && watchIdMapa === null && navigator.geolocation) toggleUbicacion(btn);
+        }, 400);
+    }
 }
 
 if (location.hash === '#mapa') {

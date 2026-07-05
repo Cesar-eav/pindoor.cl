@@ -59,6 +59,12 @@ Route::get('/atractivos/ciudad/{ciudad}', [PuntoInteresController::class, 'filtr
 Route::get('/explorar', [PuntoInteresController::class, 'explorar'])->name('puntos.explorar');
 Route::get('/categorias', [PuntoInteresController::class, 'buscar'])->name('puntos.buscar.vista');
 Route::get('/info', fn() => view('puntos.info'))->name('puntos.info');
+Route::post('/api/share', function () {
+    $text = request('text', '');
+    $url  = request('url', '');
+    \Native\Mobile\Facades\Share::url('Pindoor', $text, $url);
+    return response()->json(['ok' => true]);
+})->name('api.share');
 Route::get('/api/distritos', [DistritoController::class, 'json'])->name('api.distritos');
 Route::get('/panoramas', [PuntoInteresController::class, 'panoramas'])->name('atractivos.panoramas');
 Route::get('/panoramas/{panorama}', [PuntoInteresController::class, 'showPanorama'])->name('panoramas.show');
