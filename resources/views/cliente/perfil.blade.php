@@ -528,6 +528,17 @@
                                 <div class="section-card-body">
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div class="sm:col-span-2">
+                                            <x-input-label for="categoria_id" value="Categoría" />
+                                            <select name="categoria_id" id="categoria_id"
+                                                    class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-blue-400 focus:border-blue-400">
+                                                @foreach($categorias as $cat)
+                                                    <option value="{{ $cat->id }}" {{ old('categoria_id', $punto->categoria_id) == $cat->id ? 'selected' : '' }}>
+                                                        {{ $cat->nombre }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="sm:col-span-2">
                                             <div class="flex items-center gap-2 mb-1">
                                                 <x-input-label for="horario" value="Horario de atención" />
                                                 @if($horarioVacio)<span class="empty-hint">Sin completar</span>@endif
