@@ -23,7 +23,7 @@ class ClienteController extends Controller
 
     public function onboarding()
     {
-        $categorias = Categoria::whereIn('slug', ['cafeterias', 'cultura', 'museos', 'picadas', 'comer', 'alojar', 'tiendas', 'artesania','centro-deportivo'])
+        $categorias = Categoria::whereIn('slug', ['cafeterias', 'cultura', 'museos', 'picadas', 'comer', 'alojar', 'tiendas', 'artesania','centro-deportivo','bar'])
             ->orderBy('nombre')
             ->get();
         return view('cliente.onboarding', compact('categorias'));
@@ -103,7 +103,11 @@ class ClienteController extends Controller
         $modulos         = $punto->modulos_habilitados ?? [];
         $datoCarta       = $punto->dato('carta');
         $datoAlojamiento = $punto->dato('alojamiento');
-        return view('cliente.perfil', compact('punto', 'modulos', 'datoCarta', 'datoAlojamiento'));
+        $categorias      = Categoria::whereIn('slug', [
+            'cafeterias', 'cultura', 'museos', 'picadas', 'comer',
+            'alojar', 'tiendas', 'artesania', 'centro-deportivo','bar'
+        ])->orderBy('nombre')->get();
+        return view('cliente.perfil', compact('punto', 'modulos', 'datoCarta', 'datoAlojamiento', 'categorias'));
     }
 
     public function editarPerfil(PuntoInteres $punto)
@@ -125,6 +129,7 @@ class ClienteController extends Controller
             'tags'                => 'nullable|string',
             'descripcion_busqueda'=> 'nullable|string',
             'imagen_perfil'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'categoria_id'        => 'sometimes|nullable|exists:categorias,id',
             // Alimentación
             'carta'               => 'nullable|string',
             'carta_pdf'           => 'nullable|file|mimes:pdf|max:5120',
@@ -149,6 +154,7 @@ class ClienteController extends Controller
                                         ? ($request->tags ? array_map('trim', explode(',', $request->tags)) : [])
                                         : null,
             'descripcion_busqueda' => $request->has('descripcion_busqueda') ? $request->descripcion_busqueda : null,
+            'categoria_id'         => $request->has('categoria_id') ? $request->categoria_id : null,
         ], fn($v) => $v !== null);
 
         if ($request->hasFile('imagen_perfil')) {
