@@ -31,7 +31,16 @@ class CategoriaController extends Controller
 
         $data['slug'] = Str::slug($data['nombre']);
 
-        Categoria::create($data);
+        if (Categoria::where('slug', $data['slug'])->exists()) {
+            return back()->withInput()->withErrors(['nombre' => 'Ya existe una categoría con un nombre muy similar (slug duplicado).']);
+        }
+
+        try {
+            Categoria::create($data);
+        } catch (\Exception $e) {
+            \Log::error('CategoriaController@store: ' . get_class($e) . ' — ' . $e->getMessage());
+            return back()->withInput()->withErrors(['nombre' => get_class($e) . ': ' . $e->getMessage()]);
+        }
 
         return redirect()->route('admin.categorias.index')->with('success', 'Categoría creada.');
     }
@@ -52,7 +61,16 @@ class CategoriaController extends Controller
 
         $data['slug'] = Str::slug($data['nombre']);
 
-        $categoria->update($data);
+        if (Categoria::where('slug', $data['slug'])->where('id', '!=', $categoria->id)->exists()) {
+            return back()->withInput()->withErrors(['nombre' => 'Ya existe una categoría con un nombre muy similar (slug duplicado).']);
+        }
+
+        try {
+            $categoria->update($data);
+        } catch (\Exception $e) {
+            \Log::error('CategoriaController@update: ' . get_class($e) . ' — ' . $e->getMessage());
+            return back()->withInput()->withErrors(['nombre' => get_class($e) . ': ' . $e->getMessage()]);
+        }
 
         return redirect()->route('admin.categorias.index')->with('success', 'Categoría actualizada.');
     }
