@@ -263,3 +263,52 @@ function filterIcons(query) {
 
 document.addEventListener('DOMContentLoaded', () => buildGrid(allIcons));
 </script>
+
+@php
+    $catalogo = \App\Models\PuntoInteres::catalogoModulos();
+    // groupBy no preserva claves string — se añade '_key' a cada item antes de agrupar
+    $grupos   = collect($catalogo)->map(fn($mod, $key) => array_merge($mod, ['_key' => $key]))->groupBy('grupo');
+    $actuales = old('modulos_defecto', $categoria->modulos_defecto ?? []);
+@endphp
+
+<div>
+    <label class="block text-sm font-semibold text-gray-700 mb-2">Uso de la categoría</label>
+    <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition
+                  {{ old('es_cliente', $categoria->es_cliente ?? false) ? 'border-[#fc5648] bg-[#fff5f4]' : 'border-gray-200 bg-gray-50 hover:border-gray-300' }}">
+        <input type="checkbox" name="es_cliente" value="1"
+               class="shrink-0 accent-[#fc5648]"
+               {{ old('es_cliente', $categoria->es_cliente ?? false) ? 'checked' : '' }}>
+        <div>
+            <span class="text-sm font-semibold text-gray-800">Disponible para negocios (clientes)</span>
+            <p class="text-xs text-gray-400 mt-0.5">Los negocios registrados en Pindoor podrán elegir esta categoría.</p>
+        </div>
+    </label>
+</div>
+
+<div>
+    <label class="block text-sm font-semibold text-gray-700 mb-2">Módulos activos por defecto</label>
+    <p class="text-xs text-gray-400 mb-3">Se asignan automáticamente cuando se activa un negocio en esta categoría.</p>
+
+    <div class="space-y-4">
+        @foreach($grupos as $grupo => $modulos)
+        <div>
+            <p class="text-[11px] font-bold uppercase tracking-wide text-gray-400 mb-1.5">{{ $grupo }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                @foreach($modulos as $mod)
+                @php $modKey = $mod['_key']; @endphp
+                <label class="flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition
+                              {{ in_array($modKey, $actuales) ? 'border-[#fc5648] bg-[#fff5f4]' : 'border-gray-200 bg-gray-50 hover:border-gray-300' }}">
+                    <input type="checkbox" name="modulos_defecto[]" value="{{ $modKey }}"
+                           class="mt-0.5 shrink-0 accent-[#fc5648]"
+                           {{ in_array($modKey, $actuales) ? 'checked' : '' }}>
+                    <div>
+                        <span class="text-sm font-semibold text-gray-800">{{ $mod['emoji'] }} {{ $mod['label'] }}</span>
+                        <p class="text-xs text-gray-400 leading-tight mt-0.5">{{ $mod['desc'] }}</p>
+                    </div>
+                </label>
+                @endforeach
+            </div>
+        </div>
+        @endforeach
+    </div>
+</div>

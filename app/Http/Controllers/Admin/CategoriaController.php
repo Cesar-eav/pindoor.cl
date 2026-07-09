@@ -17,19 +17,25 @@ class CategoriaController extends Controller
 
     public function create()
     {
-        return view('admin.categorias.create');
+        $categoria = null;
+        return view('admin.categorias.create', compact('categoria'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'nombre'      => 'required|string|max:100|unique:categorias,nombre',
-            'tipo'        => 'nullable|string|max:50',
-            'icono'       => 'nullable|string|max:10',
-            'descripcion' => 'nullable|string|max:500',
+            'nombre'          => 'required|string|max:100|unique:categorias,nombre',
+            'tipo'            => 'nullable|string|max:50',
+            'icono'           => 'nullable|string|max:10',
+            'descripcion'     => 'nullable|string|max:500',
+            'modulos_defecto' => 'nullable|array',
+            'modulos_defecto.*'=> 'string',
+            'es_cliente'      => 'nullable|boolean',
         ]);
 
-        $data['slug'] = Str::slug($data['nombre']);
+        $data['slug']            = Str::slug($data['nombre']);
+        $data['modulos_defecto'] = $request->input('modulos_defecto', []);
+        $data['es_cliente']      = $request->boolean('es_cliente');
 
         if (Categoria::where('slug', $data['slug'])->exists()) {
             return back()->withInput()->withErrors(['nombre' => 'Ya existe una categoría con un nombre muy similar (slug duplicado).']);
@@ -47,19 +53,26 @@ class CategoriaController extends Controller
 
     public function edit(Categoria $categoria)
     {
-        return view('admin.categorias.edit', compact('categoria'));
+        $categoria->loadCount('puntosInteres');
+        $catalogo = \App\Models\PuntoInteres::catalogoModulos();
+        return view('admin.categorias.edit', compact('categoria', 'catalogo'));
     }
 
     public function update(Request $request, Categoria $categoria)
     {
         $data = $request->validate([
-            'nombre'      => 'required|string|max:100|unique:categorias,nombre,' . $categoria->id,
-            'tipo'        => 'nullable|string|max:50',
-            'icono'       => 'nullable|string|max:10',
-            'descripcion' => 'nullable|string|max:500',
+            'nombre'           => 'required|string|max:100|unique:categorias,nombre,' . $categoria->id,
+            'tipo'             => 'nullable|string|max:50',
+            'icono'            => 'nullable|string|max:10',
+            'descripcion'      => 'nullable|string|max:500',
+            'modulos_defecto'  => 'nullable|array',
+            'modulos_defecto.*'=> 'string',
+            'es_cliente'       => 'nullable|boolean',
         ]);
 
-        $data['slug'] = Str::slug($data['nombre']);
+        $data['slug']            = Str::slug($data['nombre']);
+        $data['modulos_defecto'] = $request->input('modulos_defecto', []);
+        $data['es_cliente']      = $request->boolean('es_cliente');
 
         if (Categoria::where('slug', $data['slug'])->where('id', '!=', $categoria->id)->exists()) {
             return back()->withInput()->withErrors(['nombre' => 'Ya existe una categoría con un nombre muy similar (slug duplicado).']);

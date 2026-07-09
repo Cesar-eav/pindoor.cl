@@ -17,6 +17,13 @@ class Categoria extends Model
         'tipo',
         'icono',
         'descripcion',
+        'modulos_defecto',
+        'es_cliente',
+    ];
+
+    protected $casts = [
+        'modulos_defecto' => 'array',
+        'es_cliente'      => 'boolean',
     ];
 
     /**
