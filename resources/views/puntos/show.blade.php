@@ -17,24 +17,19 @@
 
 @section('bodyClass', 'bg-[#f9fafb] text-gray-900 leading-relaxed')
 
+@php
+    $imagenPrincipal = $punto->imagenes->firstWhere('es_principal', true) ?? $punto->imagenes->first();
+    $imagenUrl       = $imagenPrincipal ? asset('storage/' . $imagenPrincipal->ruta) : null;
+    $canonicalUrl    = route('puntos.show', $punto->slug ?? $punto->id);
+@endphp
+
+@section('og_type', 'place')
+@section('og_url', $canonicalUrl)
+@section('og_title', $seoTitle)
+@section('og_description', $seoDesc)
+@if($imagenUrl)@section('og_image', $imagenUrl)@endif
+
 @section('head')
-    @php
-        $imagenPrincipal = $punto->imagenes->firstWhere('es_principal', true) ?? $punto->imagenes->first();
-        $imagenUrl = $imagenPrincipal ? asset('storage/' . $imagenPrincipal->ruta) : null;
-        $canonicalUrl = route('puntos.show', $punto->slug ?? $punto->id);
-    @endphp
-    <meta property="og:type" content="place" />
-    <meta property="og:url" content="{{ $canonicalUrl }}" />
-    <meta property="og:title" content="{{ $seoTitle }}" />
-    <meta property="og:description" content="{{ $seoDesc }}" />
-    @if($imagenUrl)
-    <meta property="og:image" content="{{ $imagenUrl }}" />
-    <meta property="og:image:alt" content="{{ $punto->title }}" />
-    @endif
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="{{ $seoTitle }}" />
-    <meta name="twitter:description" content="{{ $seoDesc }}" />
-    @if($imagenUrl)<meta name="twitter:image" content="{{ $imagenUrl }}" />@endif
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",

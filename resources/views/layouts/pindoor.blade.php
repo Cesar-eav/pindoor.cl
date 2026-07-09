@@ -21,8 +21,22 @@
     @hasSection('canonical')
         <link rel="canonical" href="@yield('canonical')" />
     @endif
-    <meta property="og:site_name" content="Pindoor" />
-    <meta property="og:locale" content="es_CL" />
+    {{-- Open Graph / Twitter Card — páginas hijas pueden pisar con @section('og_*') --}}
+    <meta property="og:site_name"        content="Pindoor" />
+    <meta property="og:locale"           content="es_CL" />
+    <meta property="og:type"             content="@yield('og_type', 'website')" />
+    <meta property="og:url"              content="@yield('og_url', url()->current())" />
+    <meta property="og:title"            content="@yield('og_title', 'Pindoor · Guía de lugares en Valparaíso')" />
+    <meta property="og:description"      content="@yield('og_description', 'Descubre restaurantes, cafés, museos, miradores y atracciones turísticas en Valparaíso. La guía local completa.')" />
+    <meta property="og:image"            content="@yield('og_image', 'https://pindoor.cl/og.jpg')" />
+    <meta property="og:image:width"      content="1200" />
+    <meta property="og:image:height"     content="630" />
+    <meta property="og:image:alt"        content="@yield('og_title', 'Pindoor · Valparaíso')" />
+    <meta name="twitter:card"            content="summary_large_image" />
+    <meta name="twitter:site"            content="@pindoor_cl" />
+    <meta name="twitter:title"           content="@yield('og_title', 'Pindoor · Guía de lugares en Valparaíso')" />
+    <meta name="twitter:description"     content="@yield('og_description', 'Descubre restaurantes, cafés, museos, miradores y atracciones turísticas en Valparaíso.')" />
+    <meta name="twitter:image"           content="@yield('og_image', 'https://pindoor.cl/og.jpg')" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     @yield('head')
