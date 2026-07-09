@@ -80,16 +80,11 @@ class PuntoInteres extends Model
         ];
     }
 
-    /** Módulos activos por defecto al activar un cliente, según su categoría. */
+    /** Módulos activos por defecto al activar un cliente, según su categoría (leídos de BD). */
     public static function modulosDefecto(int $categoriaId): array
     {
-        return match (true) {
-            in_array($categoriaId, [2, 8, 10]) => ['oferta_del_dia', 'menu_del_dia', 'carta'],
-            $categoriaId === 11                 => ['oferta_del_dia', 'habitaciones', 'servicios', 'politicas'],
-            $categoriaId === 7                  => ['oferta_del_dia', 'entradas', 'exposiciones'],
-            $categoriaId === 5                  => ['oferta_del_dia', 'agenda'],
-            default                             => ['oferta_del_dia','agenda'],
-        };
+        $cat = \App\Models\Categoria::find($categoriaId);
+        return $cat?->modulos_defecto ?? [];
     }
 
     /**
