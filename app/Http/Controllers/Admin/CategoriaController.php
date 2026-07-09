@@ -26,7 +26,7 @@ class CategoriaController extends Controller
         $data = $request->validate([
             'nombre'          => 'required|string|max:100|unique:categorias,nombre',
             'tipo'            => 'nullable|string|max:50',
-            'icono'           => 'nullable|string|max:10',
+            'icono'           => 'nullable|string|max:50',
             'descripcion'     => 'nullable|string|max:500',
             'modulos_defecto' => 'nullable|array',
             'modulos_defecto.*'=> 'string',
@@ -48,7 +48,7 @@ class CategoriaController extends Controller
             return back()->withInput()->withErrors(['nombre' => get_class($e) . ': ' . $e->getMessage()]);
         }
 
-        return redirect()->route('admin.categorias.index')->with('success', 'Categoría creada.');
+        return redirect()->route('admin.categorias.create')->with('success', '«' . $data['nombre'] . '» fue creada correctamente.');
     }
 
     public function edit(Categoria $categoria)
