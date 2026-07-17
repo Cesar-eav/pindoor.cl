@@ -258,6 +258,30 @@
     }
 </script>
 
+<script>
+function sharePanel() {
+    return {
+        open: false, copiado: false, text: '',
+        toggle() { this.open = !this.open; },
+        nativo() { navigator.share({ text: this.text }).catch(() => {}); this.open = false; },
+        wa() { window.location.href = 'whatsapp://send?text=' + encodeURIComponent(this.text); this.open = false; },
+        telegram() { window.location.href = 'https://t.me/share/url?text=' + encodeURIComponent(this.text); this.open = false; },
+        email() {
+            const lines = this.text.split('\n');
+            const subject = encodeURIComponent(lines[0] || 'Info de Pindoor');
+            window.location.href = 'mailto:?subject=' + subject + '&body=' + encodeURIComponent(this.text);
+            this.open = false;
+        },
+        copiar() {
+            navigator.clipboard?.writeText(this.text).then(() => {
+                this.copiado = true;
+                setTimeout(() => { this.copiado = false; this.open = false; }, 1500);
+            });
+        },
+    };
+}
+</script>
+
 @yield('scripts')
 <script>
 if ('serviceWorker' in navigator) {
