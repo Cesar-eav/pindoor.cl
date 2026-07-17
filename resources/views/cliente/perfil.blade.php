@@ -181,13 +181,6 @@
         <div class="max-w-3xl mx-auto px-4 lg:px-8 py-8 space-y-8">
 
             {{-- Flash messages --}}
-            @if(session('success'))
-            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
-                 class="bg-green-50 border border-green-200 text-green-800 text-sm rounded-xl px-5 py-3 flex items-center gap-2">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                {{ session('success') }}
-            </div>
-            @endif
             @if(session('error'))
             <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-5 py-3">{{ session('error') }}</div>
             @endif
@@ -666,9 +659,9 @@
                             <div class="section-card-body">
                                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
                                     <div>
-                                        <x-input-label for="carta" value="Descripción de la carta" />
+                                        <x-input-label for="carta-texto" value="Descripción de la carta" />
                                         <div id="carta-editor" class="mt-1 bg-white border border-gray-200 rounded-xl text-sm min-h-44"></div>
-                                        <textarea id="carta" name="carta" class="hidden">{!! old('carta', $datoCarta['texto'] ?? '') !!}</textarea>
+                                        <textarea id="carta-texto" name="carta" class="hidden">{!! old('carta', $datoCarta['texto'] ?? '') !!}</textarea>
                                     </div>
                                     <div>
                                         <x-input-label for="carta_pdf" value="Carta en PDF (opcional)" />
@@ -683,7 +676,7 @@
                                         @endif
                                         <input type="file" name="carta_pdf" id="carta_pdf" accept="application/pdf"
                                                class="block w-full mt-1 text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer" />
-                                        <p class="text-xs text-gray-400 mt-1">Solo PDF · Máx. 5 MB</p>
+                                        <p class="text-xs text-gray-400 mt-1">Solo PDF · Máx. 30 MB</p>
                                     </div>
                                 </div>
                                 <div class="flex justify-end mt-5 pt-4 border-t border-gray-100">
@@ -945,6 +938,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (textarea.value.trim()) q.clipboard.dangerouslyPasteHTML(textarea.value);
         q.on('text-change', () => { textarea.value = q.root.innerHTML; });
         if (formEl) formEl.addEventListener('submit', () => { textarea.value = q.root.innerHTML; });
+        editorEl._quill    = q;
+        editorEl._textarea = textarea;
     }
 
     @if(in_array('oferta_del_dia', $modulos))
@@ -967,7 +962,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initEditor('#description-editor', '#description', document.getElementById('form-perfil'), true);
 
     @if(in_array('carta', $modulos))
-    initEditor('#carta-editor', '#carta', null, true);
+    initEditor('#carta-editor', '#carta-texto', null, true);
     @endif
     @if($tieneModuloAlojamiento)
     initEditor('#habitaciones-editor', '#habitaciones', null, true);
@@ -977,12 +972,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // ── Sync Quill textareas on any form submit ──────────────────────
     document.querySelectorAll('form').forEach(form => {
         form.addEventListener('submit', function () {
-            this.querySelectorAll('.ql-editor').forEach(editor => {
-                const container = editor.closest('[id$="-editor"]');
-                if (!container) return;
-                const textareaId = '#' + container.id.replace('-editor', '');
-                const textarea = document.querySelector(textareaId);
-                if (textarea) textarea.value = editor.innerHTML;
+            this.querySelectorAll('[id$="-editor"]').forEach(container => {
+                if (container._quill && container._textarea) {
+                    container._textarea.value = container._quill.root.innerHTML;
+                }
             });
         });
     });
@@ -1153,7 +1146,46 @@ document.addEventListener('DOMContentLoaded', function () {
     }, { rootMargin: '-20% 0px -70% 0px' });
 
     sections.forEach(s => observer.observe(s));
+
+    // ── Guardar: spinner + volver a la sección ──────────────────────
+    document.querySelectorAll('.btn-save').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const section = this.closest('.scroll-mt-20');
+            if (section?.id) sessionStorage.setItem('_pindoor_section', section.id);
+            this.innerHTML = '<svg class="animate-spin inline w-4 h-4 mr-1.5 -mt-0.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Guardando…';
+        });
+    });
+
+    @if(session('success'))
+    const _sec = sessionStorage.getItem('_pindoor_section');
+    if (_sec) {
+        sessionStorage.removeItem('_pindoor_section');
+        requestAnimationFrame(() => {
+            document.getElementById(_sec)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
+    @endif
 });
 </script>
 
+{{-- Toast de éxito fijo --}}
+@if(session('success'))
+<div id="toast-ok" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;display:flex;align-items:flex-start;gap:12px;background:#fff;border:1px solid #bbf7d0;box-shadow:0 20px 60px rgba(0,0,0,.18);border-radius:20px;padding:20px 22px;max-width:360px;width:90%">
+    <div style="width:32px;height:32px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg style="width:16px;height:16px;color:#16a34a" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+        </svg>
+    </div>
+    <div style="flex:1;min-width:0">
+        <p style="margin:0;font-size:14px;font-weight:700;color:#111827">¡Guardado!</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#6b7280;line-height:1.4">{{ session('success') }}</p>
+    </div>
+    <button onclick="document.getElementById('toast-ok').remove()" style="background:none;border:none;cursor:pointer;color:#d1d5db;padding:0;flex-shrink:0">
+        <svg style="width:16px;height:16px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+    </button>
+</div>
+<script>setTimeout(() => document.getElementById('toast-ok')?.remove(), 5000);</script>
+@endif
 </x-app-layout>

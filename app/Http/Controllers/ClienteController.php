@@ -98,6 +98,16 @@ class ClienteController extends Controller
 
     public function verPerfil(PuntoInteres $punto)
     {
+        return $this->mostrarPerfil($punto);
+    }
+
+    public function editarPerfil(PuntoInteres $punto)
+    {
+        return $this->mostrarPerfil($punto);
+    }
+
+    private function mostrarPerfil(PuntoInteres $punto)
+    {
         $this->autorizarPunto($punto);
         $punto->load('moduloDatos', 'moduloItems', 'categoria', 'imagenes');
         $modulos         = $punto->modulos_habilitados ?? [];
@@ -105,15 +115,9 @@ class ClienteController extends Controller
         $datoAlojamiento = $punto->dato('alojamiento');
         $categorias      = Categoria::whereIn('slug', [
             'cafeterias', 'cultura', 'museos', 'picadas', 'comer',
-            'alojar', 'tiendas', 'artesania', 'centro-deportivo','bar'
+            'alojar', 'tiendas', 'artesania', 'centro-deportivo', 'bar'
         ])->orderBy('nombre')->get();
         return view('cliente.perfil', compact('punto', 'modulos', 'datoCarta', 'datoAlojamiento', 'categorias'));
-    }
-
-    public function editarPerfil(PuntoInteres $punto)
-    {
-        $this->autorizarPunto($punto);
-        return redirect()->route('cliente.perfil.ver', $punto);
     }
 
     public function actualizarPerfil(Request $request, PuntoInteres $punto)
@@ -132,7 +136,7 @@ class ClienteController extends Controller
             'categoria_id'        => 'sometimes|nullable|exists:categorias,id',
             // Alimentación
             'carta'               => 'nullable|string',
-            'carta_pdf'           => 'nullable|file|mimes:pdf|max:5120',
+            'carta_pdf'           => 'nullable|file|mimes:pdf|max:30720',
             // Alojamiento
             'precio_desde'        => 'nullable|string|max:100',
             'check_in'            => 'nullable|string|max:20',
@@ -169,11 +173,15 @@ class ClienteController extends Controller
         $punto->update($datosPunto);
 
         // ── Módulo: carta ────────────────────────────────────────────────────
-        if (in_array('carta', $modulos)) {
-            $registro = $punto->moduloDatos()->firstOrNew(['modulo' => 'carta']);
+        if (in_array('carta', $modulos) &&
+            ($request->has('carta') || $request->hasFile('carta_pdf') || $request->boolean('eliminar_carta_pdf'))) {
+
+            $registro   = $punto->moduloDatos()->firstOrNew(['modulo' => 'carta']);
             $datosCarta = $registro->datos ?? [];
 
-            $datosCarta['texto'] = $request->carta;
+            if ($request->has('carta')) {
+                $datosCarta['texto'] = $request->carta;
+            }
 
             if ($request->boolean('eliminar_carta_pdf') && !empty($datosCarta['pdf_ruta'])) {
                 Storage::disk('public')->delete($datosCarta['pdf_ruta']);
@@ -187,15 +195,14 @@ class ClienteController extends Controller
                 $datosCarta['pdf_ruta'] = $request->file('carta_pdf')->store('cartas', 'public');
             }
 
-            $registro->fill([
-                'datos'         => $datosCarta,
-                'actualizado_en'=> now(),
-            ])->save();
+            $registro->fill(['datos' => $datosCarta, 'actualizado_en' => now()])->save();
         }
 
         // ── Módulo: alojamiento (habitaciones, servicios, politicas) ─────────
         $modulosAlojamiento = ['habitaciones', 'servicios', 'politicas'];
-        if (array_intersect($modulosAlojamiento, $modulos)) {
+        if (array_intersect($modulosAlojamiento, $modulos) &&
+            $request->hasAny(['precio_desde', 'check_in', 'check_out', 'habitaciones', 'servicios_incluidos', 'politicas'])) {
+
             $punto->moduloDatos()->updateOrCreate(
                 ['modulo' => 'alojamiento'],
                 [
@@ -211,7 +218,7 @@ class ClienteController extends Controller
             );
         }
 
-        return redirect()->route('cliente.perfil.editar', $punto)
+        return redirect()->route('cliente.perfil.ver', $punto)
             ->with('success', 'Perfil actualizado correctamente.');
     }
 
