@@ -80,7 +80,8 @@ class AdminController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
+                // title es JSON: el LIKE normal castea con collation binaria (case-sensitive)
+                $q->whereRaw('LOWER(title) LIKE ?', ['%' . mb_strtolower($search) . '%'])
                   ->orWhere('sector', 'like', "%{$search}%")
                   ->orWhere('autor', 'like', "%{$search}%");
             });
