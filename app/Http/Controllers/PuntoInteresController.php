@@ -334,7 +334,7 @@ class PuntoInteresController extends Controller
                 $fake = new Panorama();
                 $fake->fill([
                     'titulo'      => $item->campo('titulo', ''),
-                    'ubicacion'   => $item->punto?->nombre,
+                    'ubicacion'   => $item->punto?->title,
                     'fecha'       => $item->fecha->format('Y-m-d'),
                     'fecha_fin'   => null,
                     'dias_semana' => null,
