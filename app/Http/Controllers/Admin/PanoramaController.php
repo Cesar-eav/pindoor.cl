@@ -21,8 +21,10 @@ class PanoramaController extends Controller
         $query = Panorama::orderBy('fecha')->orderBy('hora')->orderBy('id');
 
         if ($search) {
-            $query->where(fn($q) => $q->where('titulo', 'like', "%{$search}%")
-                                      ->orWhere('ubicacion', 'like', "%{$search}%"));
+            $searchLower = mb_strtolower($search);
+            // titulo/ubicacion son JSON: el LIKE normal castea con collation binaria (case-sensitive)
+            $query->where(fn($q) => $q->whereRaw('LOWER(titulo) LIKE ?', ["%{$searchLower}%"])
+                                      ->orWhereRaw('LOWER(ubicacion) LIKE ?', ["%{$searchLower}%"]));
         }
         if ($categoria === 'gratuito') {
             $query->where('es_gratuito', true);
@@ -77,7 +79,7 @@ class PanoramaController extends Controller
 
         $results = Panorama::whereNotNull('ubicacion')
             ->where('ubicacion', '!=', '')
-            ->when($q, fn($query) => $query->where('ubicacion', 'like', "%{$q}%"))
+            ->when($q, fn($query) => $query->whereRaw('LOWER(ubicacion) LIKE ?', ['%' . mb_strtolower($q) . '%']))
             ->distinct()
             ->orderBy('ubicacion')
             ->limit(8)

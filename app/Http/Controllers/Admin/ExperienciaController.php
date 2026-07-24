@@ -18,7 +18,8 @@ class ExperienciaController extends Controller
         $query = Experiencia::orderBy('orden')->orderBy('titulo');
 
         if ($search) {
-            $query->where(fn($q) => $q->where('titulo', 'like', "%{$search}%")
+            // titulo es JSON: el LIKE normal castea con collation binaria (case-sensitive)
+            $query->where(fn($q) => $q->whereRaw('LOWER(titulo) LIKE ?', ['%' . mb_strtolower($search) . '%'])
                                       ->orWhere('proveedor', 'like', "%{$search}%")
                                       ->orWhere('ubicacion', 'like', "%{$search}%"));
         }
