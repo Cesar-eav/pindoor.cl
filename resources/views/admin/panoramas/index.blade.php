@@ -7,6 +7,10 @@
                    class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-50 transition">
                     Importar Passline
                 </a>
+                <a href="{{ route('admin.portaldisc') }}"
+                   class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-50 transition">
+                    Importar Portaldisc
+                </a>
                 <a href="{{ route('admin.panoramas.create') }}"
                    class="bg-[#fc5648] text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#d94439] transition">
                     + Nuevo panorama
@@ -196,6 +200,10 @@
                                 @endif
                                 @if($panorama->enlace)
                                 <span class="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">🔗 Enlace</span>
+                                @endif
+                                @if($panorama->fuente)
+                                @php $fuente = \App\Models\Panorama::FUENTES[$panorama->fuente] ?? ['label' => ucfirst($panorama->fuente), 'emoji' => '📥']; @endphp
+                                <span class="text-[10px] font-bold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">{{ $fuente['emoji'] }} {{ $fuente['label'] }}</span>
                                 @endif
                                 @if($panorama->created_by)
                                 <span class="text-[10px] text-gray-400 px-2 py-0.5">👤 {{ $panorama->created_by }}</span>

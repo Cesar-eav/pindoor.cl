@@ -137,6 +137,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('/panoramas/configuracion', [PanoramaController::class, 'configuracion'])->name('panoramas.configuracion');
     Route::get('/passline', [AdminController::class, 'passline'])->name('passline');
     Route::post('/passline', [AdminController::class, 'passlineImportar'])->name('passline.importar');
+    Route::get('/portaldisc', [AdminController::class, 'portaldisc'])->name('portaldisc');
+    Route::post('/portaldisc', [AdminController::class, 'portaldiscImportar'])->name('portaldisc.importar');
 
     // Distritos
     Route::resource('distritos', DistritoController::class)->except(['show','create','edit']);

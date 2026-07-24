@@ -13,6 +13,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('panoramas:importar-passline')->dailyAt('07:00');
+        $schedule->command('panoramas:importar-portaldisc')->dailyAt('07:15');
     }
 
     /**

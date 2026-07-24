@@ -114,6 +114,7 @@ class PanoramaController extends Controller
         $data['activo']      = $request->boolean('activo', true);
         $data['es_gratuito'] = $request->boolean('es_gratuito', false);
         $data['orden']       = $request->input('orden', 0);
+        $data['fuente']      = 'manual';
         $data['dias_semana'] = $request->has('dias_semana')
             ? array_map('intval', $request->input('dias_semana'))
             : null;
