@@ -31,6 +31,12 @@ class Panorama extends Model
     'otros'       => ['label' => 'Otros',      'emoji' => '🫘'],
     ];
 
+    const FUENTES = [
+        'manual'     => ['label' => 'Manual',     'emoji' => '✍️'],
+        'passline'   => ['label' => 'Passline',   'emoji' => '🎫'],
+        'portaldisc' => ['label' => 'Portaldisc', 'emoji' => '💿'],
+    ];
+
     const DIAS = [
         1 => 'Lun', 2 => 'Mar', 3 => 'Mié',
         4 => 'Jue', 5 => 'Vie', 6 => 'Sáb', 7 => 'Dom',

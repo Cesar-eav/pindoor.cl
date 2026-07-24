@@ -8,6 +8,7 @@ use App\Models\Categoria;
 use App\Models\LeadPublicita;
 use App\Models\Panorama;
 use App\Models\User;
+use App\Services\PortaldiscImporter;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -497,5 +498,15 @@ class AdminController extends Controller
         } catch (\Exception $e) {}
 
         return null;
+    }
+
+    public function portaldisc()
+    {
+        return view('admin.portaldisc');
+    }
+
+    public function portaldiscImportar(PortaldiscImporter $importer)
+    {
+        return response()->json($importer->importar());
     }
 }
