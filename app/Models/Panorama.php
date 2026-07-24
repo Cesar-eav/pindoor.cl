@@ -35,6 +35,7 @@ class Panorama extends Model
         'manual'     => ['label' => 'Manual',     'emoji' => '✍️'],
         'passline'   => ['label' => 'Passline',   'emoji' => '🎫'],
         'portaldisc' => ['label' => 'Portaldisc', 'emoji' => '💿'],
+        'cliente'    => ['label' => 'Cliente',    'emoji' => '🏢'],
     ];
 
     const DIAS = [

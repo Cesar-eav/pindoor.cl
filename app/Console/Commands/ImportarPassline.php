@@ -99,7 +99,6 @@ class ImportarPassline extends Command
             }
 
             $hora     = substr($ev['hora_inicio'] ?? '', 0, 5) ?: null;
-            $fechaFin = !empty($ev['fecha_termino']) ? $ev['fecha_termino'] : null;
             $categoria = self::CATEGORIA_MAP[$ev['upper_category_name'] ?? ''] ?? 'otros';
 
             if ($dryRun) {
@@ -127,7 +126,9 @@ class ImportarPassline extends Command
             $datos = [
                 'titulo'      => $ev['nombre'],
                 'fecha'       => $fecha->toDateString(),
-                'fecha_fin'   => $fechaFin,
+                // fecha_termino de Passline no indica evento multi-día: es solo la hora de
+                // cierre cruzando medianoche, así que no la usamos como fecha_fin.
+                'fecha_fin'   => null,
                 'hora'        => $hora,
                 'ubicacion'   => $ev['lugar'],
                 'descripcion' => ['es' => $es, 'en' => $en],

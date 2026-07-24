@@ -20,7 +20,7 @@
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6" x-data="{ lightbox: null }">
 
             @if(session('success'))
                 <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
@@ -57,7 +57,7 @@
                                placeholder="Buscar por título o ubicación…"
                                class="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
                     </div>
-                    @if($search || $categoria)
+                    @if($search || $categoria || $admin)
                     <a href="{{ route('admin.panoramas.index') }}"
                        class="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 font-semibold px-3 transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,6 +84,16 @@
                             class="px-3 py-1 rounded-full text-xs font-bold border transition
                                    {{ $categoria === 'gratuito' ? 'bg-green-700 text-white border-green-700' : 'bg-green-50 text-green-700 border-green-200 hover:border-green-400' }}">
                         🎟️ Gratis
+                    </button>
+                    <button type="submit" name="admin" value="cesar"
+                            class="px-3 py-1 rounded-full text-xs font-bold border transition
+                                   {{ $admin === 'cesar' ? 'bg-red-700 text-white' : 'bg-green-50 text-green-700 border-green-200 hover:border-green-400' }}">
+                        César
+                    </button>
+                    <button type="submit" name="admin" value="daniela"
+                            class="px-3 py-1 rounded-full text-xs font-bold border transition
+                                   {{ $admin === 'daniela' ? 'bg-red-700 text-white' : 'bg-green-50 text-green-700 border-green-200 hover:border-green-400' }}">
+                        Daniela
                     </button>
                 </div>
             </form>
@@ -132,12 +142,11 @@
                 <div class="space-y-2">
                     @foreach($grupo as $panorama)
                     @php
-                        $cat    = $panorama->categoria ? (\App\Models\Panorama::CATEGORIAS[$panorama->categoria] ?? null) : null;
                         $esHoy  = $panorama->fecha && $panorama->fecha->isSameDay($hoy);
                         $vencido = $key === 'pasados';
                     @endphp
 
-                    <div x-data="{ eliminando: false, confirmando: false }"
+                    <div x-data="{ eliminando: false, confirmando: false, categoria: @js($panorama->categoria), guardado: false }"
                          x-show="!eliminando"
                          class="bg-white rounded-xl border border-gray-100 shadow-sm flex items-stretch overflow-hidden
                                 {{ $vencido ? 'opacity-60' : '' }}">
@@ -165,9 +174,13 @@
                         {{-- Imagen --}}
                         <div class="shrink-0 w-16 self-stretch">
                             @if($panorama->imagen)
-                                <img src="{{ asset('storage/' . $panorama->imagen) }}"
-                                     alt="{{ $panorama->titulo }}"
-                                     class="w-full h-full object-cover">
+                                <button type="button"
+                                        @click="lightbox = '{{ asset('storage/' . $panorama->imagen) }}'"
+                                        class="w-full h-full cursor-zoom-in focus:outline-none">
+                                    <img src="{{ asset('storage/' . $panorama->imagen) }}"
+                                         alt="{{ $panorama->titulo }}"
+                                         class="w-full h-full object-cover">
+                                </button>
                             @else
                                 <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-300 text-xl">📷</div>
                             @endif
@@ -184,11 +197,30 @@
                                 <span class="text-[11px] text-gray-400 truncate max-w-[180px]">📍 {{ $panorama->ubicacion }}</span>
                                 @endif
                             </div>
-                            <div class="flex flex-wrap gap-1.5 mt-1.5">
-                                @if($cat)
-                                <span class="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                                    {{ $cat['emoji'] }} {{ $cat['label'] }}
-                                </span>
+                            <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                @if($panorama->fuente === 'cliente')
+                                    @php $catInfo = \App\Models\Panorama::CATEGORIAS[$panorama->categoria] ?? null; @endphp
+                                    @if($catInfo)
+                                    <span class="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                                        {{ $catInfo['emoji'] }} {{ $catInfo['label'] }}
+                                    </span>
+                                    @endif
+                                @else
+                                <select x-model="categoria"
+                                        @change="fetch(`/admin/panoramas/{{ $panorama->slug }}/categoria`, {
+                                            method: 'PATCH',
+                                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                            body: JSON.stringify({ categoria })
+                                        }).then(r => { if (r.ok) { guardado = true; setTimeout(() => guardado = false, 2000) } })"
+                                        class="text-[10px] font-bold bg-gray-100 text-gray-600 pl-2 pr-1 py-0.5 rounded-full border-0 focus:ring-1 focus:ring-[#fc5648] outline-none">
+                                    @if(!$panorama->categoria)
+                                    <option value="">Sin categoría</option>
+                                    @endif
+                                    @foreach($categorias as $slug => $catOpcion)
+                                    <option value="{{ $slug }}">{{ $catOpcion['emoji'] }} {{ $catOpcion['label'] }}</option>
+                                    @endforeach
+                                </select>
+                                <span x-show="guardado" x-cloak class="text-[10px] text-green-600 font-medium">✓</span>
                                 @endif
                                 @if(!empty($panorama->dias_semana))
                                 <span class="text-[10px] font-bold bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full">
@@ -213,6 +245,13 @@
 
                         {{-- Acciones --}}
                         <div class="flex flex-col items-end justify-between px-4 py-3 shrink-0 gap-2">
+                            @if($panorama->fuente === 'cliente')
+                                <span class="text-[11px] font-bold px-2.5 py-1 rounded-full
+                                             {{ $panorama->activo ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400' }}">
+                                    {{ $panorama->activo ? '● Visible' : '○ Oculto' }}
+                                </span>
+                                <span class="text-[11px] text-gray-400 italic text-right">Se gestiona desde el panel del cliente</span>
+                            @else
                             <form action="{{ route('admin.panoramas.toggle', $panorama) }}" method="POST">
                                 @csrf @method('PATCH')
                                 <button type="submit"
@@ -242,6 +281,7 @@
                                             @click="confirmando = false">No</button>
                                 </div>
                             </div>
+                            @endif
                         </div>
 
                     </div>
@@ -252,6 +292,26 @@
             @endforeach
 
             @endif
+
+            {{-- Lightbox de imagen --}}
+            <div x-show="lightbox" x-cloak
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @click.self="lightbox = null"
+                 @keydown.escape.window="lightbox = null"
+                 class="fixed inset-0 z-999 bg-black/95 flex items-center justify-center p-4">
+                <button @click="lightbox = null"
+                        class="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                <img :src="lightbox" class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl select-none">
+            </div>
 
         </div>
     </div>

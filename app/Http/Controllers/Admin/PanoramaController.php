@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Configuracion;
+use App\Models\ModuloItem;
 use App\Models\Panorama;
 use App\Models\PanoramaImagen;
 use Carbon\Carbon;
@@ -17,6 +18,9 @@ class PanoramaController extends Controller
     {
         $search    = $request->input('search');
         $categoria = $request->input('categoria');
+        $admin = $request->input('admin');
+
+        Log::info($admin);
 
         $query = Panorama::orderBy('fecha')->orderBy('hora')->orderBy('id');
 
@@ -32,7 +36,17 @@ class PanoramaController extends Controller
             $query->where('categoria', $categoria);
         }
 
-        $panoramas  = $query->get();
+        if ($admin === 'cesar') {
+            $query->where('created_by', 'Admin');
+        } elseif ($admin === 'daniela') {
+            $query->where('created_by', 'Daniela Cabrera');
+        }
+
+        $panoramas = $query->get()
+            ->merge($this->eventosDeClientes($search, $categoria))
+            ->sortBy(fn ($p) => ($p->fecha?->format('Y-m-d') ?? '9999-99-99') . ($p->hora ?? '99:99'))
+            ->values();
+
         $limiteDias = (int) Configuracion::get('panoramas_limite_dias', 15);
         $categorias = Panorama::CATEGORIAS;
         $hoy        = Carbon::today();
@@ -62,8 +76,64 @@ class PanoramaController extends Controller
         ];
 
         return view('admin.panoramas.index', compact(
-            'panoramas', 'limiteDias', 'grupos', 'hoy', 'categorias', 'search', 'categoria'
+            'panoramas', 'limiteDias', 'grupos', 'hoy', 'categorias', 'search', 'categoria', 'admin'
         ));
+    }
+
+    /**
+     * Agenda de eventos que cada cliente gestiona desde su propio panel (punto_modulo_items,
+     * modulo 'eventos'). No viven en la tabla panoramas: se arman acá como Panorama de solo
+     * lectura, igual que en PuntoInteresController::panoramas() para la vista pública.
+     */
+    private function eventosDeClientes(?string $search, ?string $categoria)
+    {
+        $tipoACategoria = [
+            'concierto'   => 'musica',   'teatro'      => 'teatro',
+            'cine'        => 'cine',     'exposicion'  => 'exposicion',
+            'taller'      => 'taller',   'danza'       => 'danza',
+            'conferencia' => 'conferencia',
+        ];
+
+        $eventos = ModuloItem::where('modulo', 'eventos')
+            ->whereNotNull('fecha')
+            ->whereHas('punto', fn($q) => $q->where('eliminado', false))
+            ->with('punto')
+            ->get()
+            ->map(function (ModuloItem $item) use ($tipoACategoria) {
+                $fake = new Panorama();
+                $fake->fill([
+                    'titulo'      => $item->campo('titulo', ''),
+                    'ubicacion'   => $item->punto?->title,
+                    'fecha'       => $item->fecha->format('Y-m-d'),
+                    'fecha_fin'   => null,
+                    'dias_semana' => null,
+                    'hora'        => $item->campo('hora'),
+                    'categoria'   => $tipoACategoria[$item->campo('tipo', 'otro')] ?? 'otros',
+                    'es_gratuito' => (float) ($item->campo('precio', 1)) === 0.0,
+                    'enlace'      => $item->campo('url_entradas'),
+                    'imagen'      => $item->imagen,
+                    'activo'      => $item->activo,
+                    'fuente'      => 'cliente',
+                ]);
+                $fake->setAttribute('id', 'mi_' . $item->id);
+                $fake->exists = false;
+
+                return $fake;
+            });
+
+        if ($search) {
+            $searchLower = mb_strtolower($search);
+            $eventos = $eventos->filter(fn ($p) => str_contains(mb_strtolower($p->titulo), $searchLower)
+                || str_contains(mb_strtolower((string) $p->ubicacion), $searchLower));
+        }
+
+        if ($categoria === 'gratuito') {
+            $eventos = $eventos->where('es_gratuito', true);
+        } elseif ($categoria) {
+            $eventos = $eventos->where('categoria', $categoria);
+        }
+
+        return $eventos->values();
     }
 
     public function configuracion(Request $request)
