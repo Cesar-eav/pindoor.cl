@@ -35,11 +35,13 @@ class PuntoInteresController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
+            $searchLower = mb_strtolower($search);
+            $query->where(function($q) use ($search, $searchLower) {
+                // title/tags son JSON: el LIKE normal castea con collation binaria (case-sensitive)
+                $q->whereRaw('LOWER(title) LIKE ?', ["%{$searchLower}%"])
+                  ->orWhereRaw('LOWER(description) LIKE ?', ["%{$searchLower}%"])
                   ->orWhere('descripcion_busqueda', 'like', "%{$search}%")
-                  ->orWhere('tags', 'like', "%{$search}%");
+                  ->orWhereRaw('LOWER(tags) LIKE ?', ["%{$searchLower}%"]);
             });
         }
 
@@ -90,11 +92,13 @@ class PuntoInteresController extends Controller
         $artistas  = collect();
         if ($request->filled('search')) {
             $s = $request->search;
+            $sLower = mb_strtolower($s);
             $panoramas = Panorama::where('activo', true)
                 ->whereNotNull('dias_semana')
                 ->where('fecha', '>=', now()->toDateString())
-                ->where(fn($q) => $q->where('titulo', 'like', "%{$s}%")
-                                    ->orWhere('ubicacion', 'like', "%{$s}%"))
+                // titulo/ubicacion son JSON: el LIKE normal es case-sensitive
+                ->where(fn($q) => $q->whereRaw('LOWER(titulo) LIKE ?', ["%{$sLower}%"])
+                                    ->orWhereRaw('LOWER(ubicacion) LIKE ?', ["%{$sLower}%"]))
                 ->orderBy('fecha')
                 ->limit(6)
                 ->get();
@@ -188,11 +192,13 @@ class PuntoInteresController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
+            $searchLower = mb_strtolower($search);
+            $query->where(function($q) use ($search, $searchLower) {
+                // title/tags son JSON: el LIKE normal castea con collation binaria (case-sensitive)
+                $q->whereRaw('LOWER(title) LIKE ?', ["%{$searchLower}%"])
+                  ->orWhereRaw('LOWER(description) LIKE ?', ["%{$searchLower}%"])
                   ->orWhere('descripcion_busqueda', 'like', "%{$search}%")
-                  ->orWhere('tags', 'like', "%{$search}%");
+                  ->orWhereRaw('LOWER(tags) LIKE ?', ["%{$searchLower}%"]);
             });
         }
 
