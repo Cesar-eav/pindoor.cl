@@ -23,27 +23,61 @@
                 </div>
             @else
 
-            {{-- ===== FORMULARIO NUEVO / EDITAR EVENTO ===== --}}
             <div x-data="{
                 abierto: {{ $errors->any() ? 'true' : 'false' }},
                 editando: null,
-                resetForm() { this.editando = null; }
-            }" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                imagenActual: null,
+                imagenPreview: null,
+                resetForm() {
+                    this.editando = null;
+                    this.imagenActual = null;
+                    if (this.imagenPreview) URL.revokeObjectURL(this.imagenPreview);
+                    this.imagenPreview = null;
+                    this.$refs.form.reset();
+                },
+                previsualizar(input) {
+                    if (this.imagenPreview) URL.revokeObjectURL(this.imagenPreview);
+                    this.imagenPreview = input.files[0] ? URL.createObjectURL(input.files[0]) : null;
+                },
+                editar(evento) {
+                    this.editando = evento;
+                    this.imagenActual = evento.imagen_url;
+                    if (this.imagenPreview) URL.revokeObjectURL(this.imagenPreview);
+                    this.imagenPreview = null;
+                    this.abierto = true;
+                    this.$nextTick(() => {
+                        const f = this.$refs.form;
+                        f.titulo.value = evento.titulo;
+                        f.tipo.value = evento.tipo;
+                        f.fecha.value = evento.fecha;
+                        f.hora.value = evento.hora || '';
+                        f.hora_fin.value = evento.hora_fin || '';
+                        f.precio.value = evento.precio || '';
+                        f.precio_texto.value = evento.precio_texto || '';
+                        f.descripcion.value = evento.descripcion || '';
+                        f.url_entradas.value = evento.url_entradas || '';
+                        f.destacado.checked = evento.destacado;
+                    });
+                }
+            }" class="space-y-6">
+
+            {{-- ===== FORMULARIO NUEVO / EDITAR EVENTO ===== --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
 
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h4 class="font-bold text-gray-700">📅 Programar evento</h4>
+                        <h4 class="font-bold text-gray-700" x-text="editando ? '✏️ Editar evento' : '📅 Programar evento'"></h4>
                         <p class="text-xs text-gray-400 mt-0.5">Agrega obras de teatro, proyecciones, conciertos, talleres y más.</p>
                     </div>
-                    <button @click="abierto = !abierto"
+                    <button @click="abierto = !abierto; if (!abierto) resetForm()"
                             class="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:opacity-90 transition"
                             x-text="abierto ? 'Cerrar' : '+ Nuevo evento'"></button>
                 </div>
 
                 <div x-show="abierto" x-transition class="border-t border-gray-100 pt-5 mt-2">
-                    <form method="POST" action="{{ route('cliente.eventos.guardar', $punto) }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('cliente.eventos.guardar', $punto) }}" enctype="multipart/form-data" x-ref="form">
                         @csrf
-                        <input type="hidden" name="evento_id" :value="editando ? editando.id : ''">
+                        <input type="hidden" name="item_id" :value="editando ? editando.id : ''">
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -121,7 +155,19 @@
                             <div>
                                 <label class="block text-xs font-bold text-gray-600 mb-1">Imagen del evento (opcional)</label>
                                 <input type="file" name="imagen" accept="image/*"
+                                       @change="previsualizar($event.target)"
                                        class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+
+                                <div class="flex items-center gap-4 mt-2" x-show="imagenActual || imagenPreview">
+                                    <div x-show="imagenActual" class="text-center">
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Actual</p>
+                                        <img :src="imagenActual" class="w-16 h-16 rounded-xl object-cover border border-gray-200">
+                                    </div>
+                                    <div x-show="imagenPreview" class="text-center">
+                                        <p class="text-[10px] font-bold text-blue-500 uppercase mb-1">Nueva</p>
+                                        <img :src="imagenPreview" class="w-16 h-16 rounded-xl object-cover border border-blue-200">
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="md:col-span-2 flex items-center gap-3">
@@ -136,11 +182,11 @@
                         </div>
 
                         <div class="flex justify-end mt-5 gap-3">
-                            <button type="button" @click="abierto = false"
+                            <button type="button" @click="abierto = false; resetForm()"
                                     class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">Cancelar</button>
                             <button type="submit"
-                                    class="px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:opacity-90 transition">
-                                Publicar en agenda
+                                    class="px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:opacity-90 transition"
+                                    x-text="editando ? 'Guardar cambios' : 'Publicar en agenda'">
                             </button>
                         </div>
                     </form>
@@ -196,6 +242,22 @@
                                 <p class="text-xs font-bold text-blue-700 mt-0.5">{{ $evento->precioEvento() }}</p>
                             </div>
                             <div class="flex gap-2 shrink-0">
+                                <button type="button"
+                                        @click="editar(@js([
+                                            'id'           => $evento->id,
+                                            'titulo'       => $evento->datos['titulo'] ?? '',
+                                            'tipo'         => $evento->datos['tipo'] ?? '',
+                                            'fecha'        => optional($evento->fecha)->format('Y-m-d'),
+                                            'hora'         => $evento->datos['hora'] ?? '',
+                                            'hora_fin'     => $evento->datos['hora_fin'] ?? '',
+                                            'precio'       => $evento->datos['precio'] ?? '',
+                                            'precio_texto' => $evento->datos['precio_texto'] ?? '',
+                                            'descripcion'  => $evento->datos['descripcion'] ?? '',
+                                            'url_entradas' => $evento->datos['url_entradas'] ?? '',
+                                            'destacado'    => (bool) $evento->destacado,
+                                            'imagen_url'   => $evento->imagen ? asset('storage/' . $evento->imagen) : null,
+                                        ])); window.scrollTo({ top: 0, behavior: 'smooth' })"
+                                        class="text-xs text-blue-600 font-bold hover:underline">Editar</button>
                                 <form method="POST" action="{{ route('cliente.eventos.eliminar', [$punto, $evento]) }}"
                                       onsubmit="return confirm('¿Eliminar este evento?')">
                                     @csrf @method('DELETE')
@@ -233,6 +295,8 @@
                 @else
                     <p class="text-sm text-gray-400 italic text-center py-6">No hay eventos en la agenda. ¡Programa el primero!</p>
                 @endif
+            </div>
+
             </div>
 
             {{-- Oferta del día (si habilitada) --}}

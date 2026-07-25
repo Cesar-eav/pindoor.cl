@@ -319,7 +319,7 @@
                             ? 'bg-gray-700 text-white shadow-lg'
                             : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-500'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>📢</span> {{ __('ui.lugar.tab_avisos') }}
+                        {{ __('ui.lugar.tab_avisos') }}
                     </button>
                     @endif
 
@@ -330,7 +330,7 @@
                             ? 'bg-purple-600 text-white shadow-lg'
                             : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-400'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>🎁</span> {{ __('ui.lugar.tab_promociones') }}
+                        {{ __('ui.lugar.tab_promociones') }}
                     </button>
                     @endif
 
@@ -364,7 +364,7 @@
                     <button @click="vista = 'entradas'"
                         :class="vista === 'entradas' ? 'bg-amber-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-amber-400'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>🎟️</span> {{ __('ui.lugar.tab_entradas') }}
+                        {{ __('ui.lugar.tab_entradas') }}
                     </button>
                     @endif
 
@@ -372,7 +372,7 @@
                     <button @click="vista = 'exposiciones'"
                         :class="vista === 'exposiciones' ? 'bg-purple-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-400'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>🖼️</span> {{ __('ui.lugar.tab_exposiciones') }}
+                        {{ __('ui.lugar.tab_exposiciones') }}
                     </button>
                     @endif
 
@@ -380,7 +380,7 @@
                     <button @click="vista = 'agenda'"
                         :class="vista === 'agenda' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-400'"
                         class="w-full py-3 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-200 flex items-center gap-2">
-                        <span>📅</span> {{ __('ui.lugar.tab_agenda') }}
+                        {{ __('ui.lugar.tab_agenda') }}
                     </button>
                     @endif
 
