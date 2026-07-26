@@ -63,8 +63,8 @@
         {{-- Cabecera: video si está activado puntualmente, si no la imagen de portada --}}
         @if($recomendacion->video_en_cabecera && $recomendacion->video_youtube_id)
         <div class="bg-gray-900 aspect-video">
-            <iframe src="https://www.youtube.com/embed/{{ $recomendacion->video_youtube_id }}"
-                    class="w-full h-full" allowfullscreen loading="lazy"></iframe>
+            <iframe src="https://www.youtube.com/embed/{{ $recomendacion->video_youtube_id }}?rel=0&modestbranding=1&iv_load_policy=3&fs=0"
+                    class="w-full h-full" loading="lazy"></iframe>
         </div>
         @elseif($recomendacion->imagen_portada)
         <div class="bg-gray-900">
@@ -262,8 +262,8 @@
             <div class="pt-2">
                 <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">🎥 Entrevista / reportaje</p>
                 <div class="aspect-video rounded-2xl overflow-hidden shadow-lg">
-                    <iframe src="https://www.youtube.com/embed/{{ $recomendacion->video_youtube_id }}"
-                            class="w-full h-full" allowfullscreen loading="lazy"></iframe>
+                    <iframe src="https://www.youtube.com/embed/{{ $recomendacion->video_youtube_id }}?rel=0&modestbranding=1&iv_load_policy=3&fs=0"
+                            class="w-full h-full" loading="lazy"></iframe>
                 </div>
             </div>
             @endif
