@@ -43,6 +43,9 @@
                         <x-nav-link :href="route('admin.blog.index')" :active="request()->routeIs('admin.blog*')">
                             Blog
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.recomendaciones.index')" :active="request()->routeIs('admin.recomendaciones*')">
+                            Recomienda
+                        </x-nav-link>
 
 
 
@@ -127,6 +130,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.blog.index')" :active="request()->routeIs('admin.blog*')">
                     Blog
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.recomendaciones.index')" :active="request()->routeIs('admin.recomendaciones*')">
+                    Recomienda
                 </x-responsive-nav-link>
 
             @elseif(auth()->user()->type === 'cliente')

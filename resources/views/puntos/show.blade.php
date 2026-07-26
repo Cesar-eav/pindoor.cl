@@ -581,6 +581,22 @@
                                     </div>
                                 @endif
                             @endif
+
+                            {{-- Pindoor Recomienda --}}
+                            @php $recomendacionPindoor = $punto->recomendacionPublicada(); @endphp
+                            @if($recomendacionPindoor)
+                            <a href="{{ route('recomienda.show', $recomendacionPindoor->slug) }}"
+                               class="flex items-center gap-3 bg-[#fff0ef] hover:bg-[#ffe0dd] border border-[#fc5648]/20 rounded-2xl px-5 py-4 transition">
+                                <span class="text-2xl shrink-0">{{ $recomendacionPindoor->plan_info['emoji'] }}</span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-black uppercase tracking-widest text-[#fc5648]">Pindoor Recomienda</p>
+                                    <p class="text-sm font-bold text-gray-800 truncate">{{ $recomendacionPindoor->titulo }}</p>
+                                </div>
+                                <svg class="w-5 h-5 text-[#fc5648] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                            @endif
                         </section>
                     </div>
 
