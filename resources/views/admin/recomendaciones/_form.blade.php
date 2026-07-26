@@ -82,7 +82,6 @@
 {{-- ── Bloque 3 columnas: Galería · Editor · Preview ─────────────── --}}
 @php
     $imagenesExistentes = ($recomendacion ?? null)?->relationLoaded('imagenes') ? $recomendacion->imagenes : collect();
-    $slotsNuevos = max(0, 20 - $imagenesExistentes->count());
 @endphp
 <div class="w-[90vw] mx-auto bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
     <div class="grid grid-cols-1 lg:grid-cols-[210px_1fr_190px] gap-5 items-start">
@@ -128,32 +127,20 @@
                 </div>
                 @endforeach
 
-                {{-- Slots nuevas imágenes --}}
-                @for($s = 1; $s <= $slotsNuevos; $s++)
-                <div id="slot-{{ $s }}">
-                    <label class="relative aspect-square rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 hover:border-[#fc5648] hover:bg-[#fff8f7] transition cursor-pointer overflow-hidden block">
-                        <img id="preview-{{ $s }}" src="" alt="" class="w-full h-full object-cover absolute inset-0 hidden">
-                        <div id="placeholder-{{ $s }}" class="w-full h-full flex flex-col items-center justify-center gap-1">
-                            <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                            </svg>
-                        </div>
-                        <button type="button" id="btn-limpiar-{{ $s }}"
-                                onclick="limpiarSlot(event, {{ $s }})"
-                                class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 items-center justify-center text-[9px] font-bold shadow z-10 hidden">✕</button>
-                        <input type="file" id="slot-input-{{ $s }}" name="imagen_nueva_{{ $s }}"
-                               accept="image/*"
-                               class="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-                               onchange="previewSlot({{ $s }}, this)">
+                {{-- Nuevas imágenes: previews generadas por JS tras seleccionar --}}
+                <div id="nuevas-grid" class="contents"></div>
+
+                {{-- Botón para agregar fotos (varias a la vez) --}}
+                <div>
+                    <label class="relative aspect-square rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 hover:border-[#fc5648] hover:bg-[#fff8f7] transition cursor-pointer overflow-hidden flex flex-col items-center justify-center gap-1">
+                        <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span class="text-[9px] font-bold text-gray-400 text-center px-1">Agregar fotos<br>(varias a la vez)</span>
+                        <input type="file" id="input-nuevas" name="imagenes_nuevas[]" accept="image/*" multiple
+                               class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
                     </label>
-                    <div id="pos-nueva-{{ $s }}" class="mt-1 hidden">
-                        <input type="number" min="1" max="99"
-                               name="posicion_nueva_{{ $s }}"
-                               placeholder="párrafo (auto)"
-                               class="w-full px-1.5 py-1 text-[10px] border border-gray-200 rounded-lg focus:ring-1 focus:ring-[#fc5648] outline-none text-center">
-                    </div>
                 </div>
-                @endfor
 
             </div>
         </div>
