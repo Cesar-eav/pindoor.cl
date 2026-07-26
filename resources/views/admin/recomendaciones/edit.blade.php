@@ -29,8 +29,12 @@
                   enctype="multipart/form-data" class="space-y-6">
                 @csrf @method('PUT')
                 @include('admin.recomendaciones._form')
-                <div class="w-[90vw] mx-auto flex justify-end">
-                    <button type="submit"
+                <div class="w-[90vw] mx-auto flex justify-end gap-3">
+                    <button type="submit" name="accion" value="seguir"
+                            class="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-50 transition">
+                        Guardar y seguir editando
+                    </button>
+                    <button type="submit" name="accion" value="guardar"
                             class="bg-gray-900 text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-black transition">
                         Guardar cambios
                     </button>

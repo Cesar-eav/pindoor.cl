@@ -55,6 +55,9 @@ class RecomendacionController extends Controller
 
         $this->guardarImagenesNuevas($request, $recomendacion, 0);
 
+        if ($request->input('accion') === 'seguir') {
+            return redirect()->route('admin.recomendaciones.edit', $recomendacion)->with('success', 'Recomendación creada correctamente.');
+        }
         return redirect()->route('admin.recomendaciones.index')->with('success', 'Recomendación creada correctamente.');
     }
 
@@ -98,6 +101,9 @@ class RecomendacionController extends Controller
         $offset = (int) $recomendacion->imagenes()->max('orden');
         $this->guardarImagenesNuevas($request, $recomendacion, $offset);
 
+        if ($request->input('accion') === 'seguir') {
+            return redirect()->route('admin.recomendaciones.edit', $recomendacion)->with('success', 'Recomendación actualizada correctamente.');
+        }
         return redirect()->route('admin.recomendaciones.index')->with('success', 'Recomendación actualizada correctamente.');
     }
 

@@ -175,29 +175,71 @@
             <div x-data="{
                     images: {{ $imagenesAlFinal->map(fn($r) => asset('storage/' . $r))->values()->toJson() }},
                     current: 0,
+                    zoom: false,
                     prev() { this.current = (this.current - 1 + this.images.length) % this.images.length; },
                     next() { this.current = (this.current + 1) % this.images.length; },
-                 }"
-                 class="relative bg-gray-900 rounded-2xl overflow-hidden">
-                <template x-for="(src, i) in images" :key="i">
-                    <img :src="src" x-show="current === i" class="w-full max-h-80 object-cover">
-                </template>
-                @if($imagenesAlFinal->count() > 1)
-                <button @click="prev()"
-                        class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                    </svg>
-                </button>
-                <button @click="next()"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </button>
-                <div class="absolute bottom-2 right-3 bg-black/50 text-white text-xs font-semibold px-2 py-0.5 rounded-full"
-                     x-text="(current + 1) + ' / ' + images.length"></div>
-                @endif
+                 }">
+                <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">📷 Galería</p>
+
+                <div class="relative bg-gray-900 rounded-2xl overflow-hidden h-72 sm:h-80">
+                    <template x-for="(src, i) in images" :key="i">
+                        <img :src="src" x-show="current === i" @click="zoom = true"
+                             class="w-full h-full object-cover cursor-zoom-in">
+                    </template>
+                    @if($imagenesAlFinal->count() > 1)
+                    <button @click="prev()"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <button @click="next()"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                    <div class="absolute bottom-2 right-3 bg-black/50 text-white text-xs font-semibold px-2 py-0.5 rounded-full"
+                         x-text="(current + 1) + ' / ' + images.length"></div>
+                    @endif
+                </div>
+
+                {{-- Zoom / lightbox --}}
+                <div x-show="zoom" x-cloak
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100"
+                     x-transition:leave-end="opacity-0"
+                     @click.self="zoom = false"
+                     @keydown.escape.window="zoom = false"
+                     class="fixed inset-0 z-999 bg-black/95 flex items-center justify-center p-4">
+                    <button @click="zoom = false"
+                            class="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                    <template x-for="(src, i) in images" :key="'zoom-' + i">
+                        <img :src="src" x-show="current === i" @click.stop
+                             class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl select-none">
+                    </template>
+                    @if($imagenesAlFinal->count() > 1)
+                    <button @click.stop="prev()"
+                            class="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <button @click.stop="next()"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                    @endif
+                </div>
             </div>
             @endif
 
