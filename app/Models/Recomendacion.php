@@ -27,6 +27,7 @@ class Recomendacion extends Model
         'contenido',
         'video_url',
         'video_youtube',
+        'video_en_cabecera',
         'whatsapp',
         'enlace',
         'autor',
@@ -45,6 +46,7 @@ class Recomendacion extends Model
         'publicado'         => 'boolean',
         'publicado_en'      => 'datetime',
         'activo'            => 'boolean',
+        'video_en_cabecera' => 'boolean',
     ];
 
     public function imagenes()

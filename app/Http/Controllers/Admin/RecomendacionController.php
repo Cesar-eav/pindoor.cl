@@ -167,6 +167,7 @@ class RecomendacionController extends Controller
             'contenido'         => 'nullable|string',
             'video_url'         => 'nullable|url|max:500',
             'video_youtube'     => 'nullable|url|max:500',
+            'video_en_cabecera' => 'nullable|boolean',
             'whatsapp'          => 'nullable|string|max:30',
             'enlace'            => 'nullable|url|max:500',
             'autor'             => 'nullable|string|max:255',
@@ -183,6 +184,7 @@ class RecomendacionController extends Controller
     {
         $data['activo']            = $request->boolean('activo', true);
         $data['destacado_portada'] = $request->boolean('destacado_portada', false);
+        $data['video_en_cabecera'] = $request->boolean('video_en_cabecera', false);
         $data['orden']             = $request->input('orden', 0);
 
         $publicado = $request->boolean('publicado', false);

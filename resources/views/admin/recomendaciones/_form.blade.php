@@ -203,14 +203,23 @@
         <p class="text-xs text-gray-400 mt-1">Solo para Instagram — se muestra como enlace, no se incrusta en la nota.</p>
         @error('video_url') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
     </div>
-    <div id="campo-video-youtube">
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Video de YouTube <span class="font-normal text-gray-400">(solo Cobertura Premium)</span></label>
+    <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Video de YouTube</label>
         <input type="url" name="video_youtube"
                value="{{ old('video_youtube', $recomendacion->video_youtube ?? '') }}"
                placeholder="https://www.youtube.com/watch?v=…"
                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
-        <p class="text-xs text-gray-400 mt-1">Entrevista / reportaje en video. Se incrusta reproducible en la ficha pública.</p>
+        <p class="text-xs text-gray-400 mt-1">Entrevista / reportaje. Normalmente se incrusta en el cuerpo de la nota (Plan Premium).</p>
         @error('video_youtube') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+
+        <label class="flex items-center gap-2 mt-2 cursor-pointer">
+            <input type="hidden" name="video_en_cabecera" value="0">
+            <input type="checkbox" name="video_en_cabecera" value="1" id="video_en_cabecera"
+                   {{ old('video_en_cabecera', $recomendacion->video_en_cabecera ?? false) ? 'checked' : '' }}
+                   class="w-4 h-4 accent-[#fc5648] rounded">
+            <span class="text-xs font-semibold text-gray-600">Mostrar este video en la cabecera (reemplaza la portada)</span>
+        </label>
+        <p class="text-[11px] text-amber-700 mt-0.5">Uso puntual para promociones — no es parte permanente de ningún plan.</p>
     </div>
     <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Autor / Redactor</label>
