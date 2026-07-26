@@ -111,36 +111,57 @@ document.addEventListener('DOMContentLoaded', function () {
         actualizarPreview();
     };
 
-    // ── Galería: preview de slots nuevos ─────────────────────────────
-    window.previewSlot = function(slot, input) {
-        var file = input.files[0];
-        if (!file) return;
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('preview-' + slot).src = e.target.result;
-            document.getElementById('preview-' + slot).classList.remove('hidden');
-            document.getElementById('placeholder-' + slot).classList.add('hidden');
-            document.getElementById('btn-limpiar-' + slot).classList.remove('hidden');
-            document.getElementById('btn-limpiar-' + slot).classList.add('flex');
-            document.getElementById('pos-nueva-' + slot).classList.remove('hidden');
-            actualizarPreview();
-        };
-        reader.readAsDataURL(file);
-    };
+    // ── Galería: agregar varias imágenes nuevas a la vez ─────────────
+    let nuevosArchivos = [];
+    const inputNuevas = document.getElementById('input-nuevas');
 
-    window.limpiarSlot = function(event, slot) {
-        event.preventDefault();
-        var input = document.getElementById('slot-input-' + slot);
-        input.value = '';
-        try { input.files = new DataTransfer().files; } catch(e) {}
-        document.getElementById('preview-' + slot).classList.add('hidden');
-        document.getElementById('placeholder-' + slot).classList.remove('hidden');
-        document.getElementById('btn-limpiar-' + slot).classList.add('hidden');
-        document.getElementById('btn-limpiar-' + slot).classList.remove('flex');
-        document.getElementById('pos-nueva-' + slot).classList.add('hidden');
-        document.getElementById('pos-nueva-' + slot).querySelector('input').value = '';
+    inputNuevas.addEventListener('change', function () {
+        nuevosArchivos = nuevosArchivos.concat(Array.from(this.files));
+        renderNuevasPreviews();
+    });
+
+    function syncInputNuevas() {
+        const dt = new DataTransfer();
+        nuevosArchivos.forEach(f => dt.items.add(f));
+        inputNuevas.files = dt.files;
+    }
+
+    function renderNuevasPreviews() {
+        const grid = document.getElementById('nuevas-grid');
+        grid.innerHTML = '';
+        nuevosArchivos.forEach((file, i) => {
+            const url = URL.createObjectURL(file);
+            const wrap = document.createElement('div');
+            wrap.innerHTML = `
+                <div class="relative aspect-square rounded-xl overflow-hidden border-2 border-gray-100 bg-gray-50">
+                    <img src="${url}" class="w-full h-full object-cover">
+                    <button type="button" data-idx="${i}"
+                            class="btn-quitar-nueva absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-[10px] font-bold shadow transition z-10">✕</button>
+                </div>
+                <div class="mt-1">
+                    <input type="number" min="1" max="99" name="posicion_nueva[]"
+                           placeholder="párrafo (auto)"
+                           class="w-full px-1.5 py-1 text-[10px] border border-gray-200 rounded-lg focus:ring-1 focus:ring-[#fc5648] outline-none text-center">
+                </div>
+            `;
+            grid.appendChild(wrap);
+        });
+        grid.querySelectorAll('.btn-quitar-nueva').forEach(btn => {
+            btn.addEventListener('click', () => {
+                nuevosArchivos.splice(parseInt(btn.dataset.idx), 1);
+                syncInputNuevas();
+                renderNuevasPreviews();
+                actualizarPreview();
+            });
+        });
+        syncInputNuevas();
         actualizarPreview();
-    };
+        const contador = document.getElementById('galeria-contador');
+        if (contador) {
+            const existentes = document.querySelectorAll('[id^="existente-"]').length;
+            contador.textContent = (existentes + nuevosArchivos.length) + '/20';
+        }
+    }
 
     // ── Vista previa de posiciones de imágenes ───────────────────────
     const TAGS_BLOQUE = ['</p>','</h2>','</h3>','</h4>','</blockquote>','</ul>','</ol>'];
@@ -165,12 +186,11 @@ document.addEventListener('DOMContentLoaded', function () {
             const posInput = document.getElementById('pos-existente-' + idx)?.querySelector('input[type="number"]');
             imgs.push({ src: thumb?.src || null, pos: parseInt(posInput?.value) || 0 });
         });
-        for (let s = 1; s <= 20; s++) {
-            const preview = document.getElementById('preview-' + s);
-            if (!preview || preview.classList.contains('hidden')) continue;
-            const posInput = document.getElementById('pos-nueva-' + s)?.querySelector('input[type="number"]');
-            imgs.push({ src: preview.src, pos: parseInt(posInput?.value) || 0 });
-        }
+        document.querySelectorAll('#nuevas-grid > div').forEach(el => {
+            const img = el.querySelector('img');
+            const posInput = el.querySelector('input[type="number"]');
+            imgs.push({ src: img?.src || null, pos: parseInt(posInput?.value) || 0 });
+        });
         return imgs;
     }
 
