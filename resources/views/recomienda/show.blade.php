@@ -60,8 +60,13 @@
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
-        {{-- Portada --}}
-        @if($recomendacion->imagen_portada)
+        {{-- Cabecera: video si está activado puntualmente, si no la imagen de portada --}}
+        @if($recomendacion->video_en_cabecera && $recomendacion->video_youtube_id)
+        <div class="bg-gray-900 aspect-video">
+            <iframe src="https://www.youtube.com/embed/{{ $recomendacion->video_youtube_id }}"
+                    class="w-full h-full" allowfullscreen loading="lazy"></iframe>
+        </div>
+        @elseif($recomendacion->imagen_portada)
         <div class="bg-gray-900">
             <img src="{{ asset('storage/' . $recomendacion->imagen_portada) }}" alt="{{ $recomendacion->titulo }}"
                  class="w-full max-h-80 object-cover">
@@ -210,8 +215,8 @@
             </div>
             @endif
 
-            {{-- Entrevista / reportaje en video (solo Cobertura Premium) --}}
-            @if($recomendacion->plan === 'premium' && $recomendacion->video_youtube_id)
+            {{-- Entrevista / reportaje en video (Plan Premium, salvo que ya se muestre en la cabecera) --}}
+            @if($recomendacion->plan === 'premium' && $recomendacion->video_youtube_id && !$recomendacion->video_en_cabecera)
             <div class="pt-2">
                 <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">🎥 Entrevista / reportaje</p>
                 <div class="aspect-video rounded-2xl overflow-hidden shadow-lg">
