@@ -17,6 +17,8 @@ use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ExperienciaController;
 use App\Http\Controllers\Admin\DistritoController;
+use App\Http\Controllers\Admin\RecomendacionController;
+use App\Http\Controllers\RecomiendaController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -74,6 +76,7 @@ Route::post('/experiencias/proponer', [PuntoInteresController::class, 'proponerS
 Route::get('/experiencias/{experiencia}', [PuntoInteresController::class, 'showExperiencia'])->name('experiencias.show');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+Route::get('/recomienda/{slug}', [RecomiendaController::class, 'show'])->name('recomienda.show');
 
 Route::get('/registro', [PublicitaController::class, 'index'])->name('publicita.index');
 Route::post('/publicita', [PublicitaController::class, 'store'])->name('publicita.store');
@@ -150,6 +153,15 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::patch('/experiencias/{experiencia}/aprobar', [ExperienciaController::class, 'aprobar'])->name('experiencias.aprobar');
     Route::patch('/experiencias/{experiencia}/rechazar', [ExperienciaController::class, 'rechazar'])->name('experiencias.rechazar');
     Route::delete('/experiencias/imagenes/{imagen}', [ExperienciaController::class, 'destroyImagen'])->name('experiencias.imagenes.destroy');
+
+    // Pindoor Recomienda
+    Route::post('/recomendaciones/imagen', [RecomendacionController::class, 'uploadImagen'])->name('recomendaciones.imagen');
+    Route::resource('recomendaciones', RecomendacionController::class)
+        ->except(['show'])
+        ->parameters(['recomendaciones' => 'recomendacion']);
+    Route::patch('/recomendaciones/{recomendacion}/toggle', [RecomendacionController::class, 'toggle'])->name('recomendaciones.toggle');
+    Route::patch('/recomendaciones/{recomendacion}/publicar', [RecomendacionController::class, 'togglePublicado'])->name('recomendaciones.publicar');
+    Route::delete('/recomendaciones/imagenes/{imagen}', [RecomendacionController::class, 'destroyImagen'])->name('recomendaciones.imagenes.destroy');
 
     // Artistas
     Route::get('/artistas', [\App\Http\Controllers\AdminController::class, 'artistas'])->name('artistas');

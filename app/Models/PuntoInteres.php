@@ -161,6 +161,17 @@ class PuntoInteres extends Model
         return $this->hasMany(ModuloItem::class, 'punto_interes_id');
     }
 
+    public function recomendaciones()
+    {
+        return $this->hasMany(Recomendacion::class, 'punto_interes_id');
+    }
+
+    /** Reseña publicada de Pindoor Recomienda asociada a este lugar, si existe. */
+    public function recomendacionPublicada(): ?Recomendacion
+    {
+        return $this->recomendaciones()->publicadas()->orderByDesc('destacado_portada')->first();
+    }
+
     // ═══════════════════════════════════════════════════════════════════════════
     // HELPERS DE MÓDULOS
     // ═══════════════════════════════════════════════════════════════════════════
