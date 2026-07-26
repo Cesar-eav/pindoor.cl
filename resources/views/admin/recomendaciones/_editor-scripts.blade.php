@@ -34,6 +34,17 @@ document.addEventListener('DOMContentLoaded', function () {
         hiddenContenido.value = quill.root.innerHTML;
     });
 
+    // ── Video de YouTube: solo para Plan Cobertura Premium ───────────
+    const campoVideoYoutube = document.getElementById('campo-video-youtube');
+    const radiosPlan = document.querySelectorAll('input[name="plan"]');
+
+    function actualizarCampoYoutube() {
+        const seleccionado = document.querySelector('input[name="plan"]:checked')?.value;
+        campoVideoYoutube.classList.toggle('hidden', seleccionado !== 'premium');
+    }
+    radiosPlan.forEach(r => r.addEventListener('change', actualizarCampoYoutube));
+    actualizarCampoYoutube();
+
     // ── Subida de imagen al servidor (imagen incrustada en el editor) ──
     function imageHandler() {
         const input = document.createElement('input');

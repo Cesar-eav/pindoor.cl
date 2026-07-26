@@ -60,13 +60,8 @@
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
-        {{-- Cabecera: video de YouTube si existe, si no la imagen de portada --}}
-        @if($recomendacion->video_youtube_id)
-        <div class="bg-gray-900 aspect-video">
-            <iframe src="https://www.youtube.com/embed/{{ $recomendacion->video_youtube_id }}"
-                    class="w-full h-full" allowfullscreen loading="lazy"></iframe>
-        </div>
-        @elseif($recomendacion->imagen_portada)
+        {{-- Portada --}}
+        @if($recomendacion->imagen_portada)
         <div class="bg-gray-900">
             <img src="{{ asset('storage/' . $recomendacion->imagen_portada) }}" alt="{{ $recomendacion->titulo }}"
                  class="w-full max-h-80 object-cover">
@@ -98,6 +93,7 @@
             @php
                 $contenidoFinal = $recomendacion->contenido ?? '';
                 $imagenesGaleria = $recomendacion->imagenes;
+                $imagenesAlFinal = collect();
 
                 if ($imagenesGaleria->isNotEmpty() && trim(strip_tags($contenidoFinal)) !== '') {
 
@@ -152,17 +148,51 @@
                     }
                     foreach ($insertarEn as $p => $rutas) {
                         if ($p > $numBloques) {
-                            foreach ($rutas as $ruta) $out .= $figuraHtml($ruta);
+                            foreach ($rutas as $ruta) $imagenesAlFinal->push($ruta);
                         }
                     }
 
                     $contenidoFinal = $out;
+                } elseif ($imagenesGaleria->isNotEmpty()) {
+                    // Sin texto: todas las fotos de galería van al carrusel final
+                    $imagenesAlFinal = $imagenesGaleria->pluck('ruta');
                 }
             @endphp
 
             @if($contenidoFinal)
             <div class="resenatext">
                 {!! $contenidoFinal !!}
+            </div>
+            @endif
+
+            {{-- Carrusel de imágenes restantes --}}
+            @if($imagenesAlFinal->isNotEmpty())
+            <div x-data="{
+                    images: {{ $imagenesAlFinal->map(fn($r) => asset('storage/' . $r))->values()->toJson() }},
+                    current: 0,
+                    prev() { this.current = (this.current - 1 + this.images.length) % this.images.length; },
+                    next() { this.current = (this.current + 1) % this.images.length; },
+                 }"
+                 class="relative bg-gray-900 rounded-2xl overflow-hidden">
+                <template x-for="(src, i) in images" :key="i">
+                    <img :src="src" x-show="current === i" class="w-full max-h-80 object-cover">
+                </template>
+                @if($imagenesAlFinal->count() > 1)
+                <button @click="prev()"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <button @click="next()"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+                <div class="absolute bottom-2 right-3 bg-black/50 text-white text-xs font-semibold px-2 py-0.5 rounded-full"
+                     x-text="(current + 1) + ' / ' + images.length"></div>
+                @endif
             </div>
             @endif
 
@@ -177,6 +207,17 @@
                     </svg>
                 </div>
                 <p class="text-sm font-semibold text-gray-800">{{ $recomendacion->direccion }}</p>
+            </div>
+            @endif
+
+            {{-- Entrevista / reportaje en video (solo Cobertura Premium) --}}
+            @if($recomendacion->plan === 'premium' && $recomendacion->video_youtube_id)
+            <div class="pt-2">
+                <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">🎥 Entrevista / reportaje</p>
+                <div class="aspect-video rounded-2xl overflow-hidden shadow-lg">
+                    <iframe src="https://www.youtube.com/embed/{{ $recomendacion->video_youtube_id }}"
+                            class="w-full h-full" allowfullscreen loading="lazy"></iframe>
+                </div>
             </div>
             @endif
 
