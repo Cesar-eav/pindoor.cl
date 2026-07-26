@@ -141,20 +141,16 @@ class RecomendacionController extends Controller
         return response()->json(['url' => asset('storage/' . $path)]);
     }
 
-    // Recoge las imágenes subidas de una vez (imagenes_nuevas[]) con su posición (párrafo tras el que se inserta)
+    // Recoge slots imagen_nueva_1…20 con su posición (párrafo tras el que se inserta)
     private function guardarImagenesNuevas(Request $request, Recomendacion $recomendacion, int $ordenBase): void
     {
-        if (!$request->hasFile('imagenes_nuevas')) return;
-
-        $posiciones = $request->input('posicion_nueva', []);
-
-        foreach ($request->file('imagenes_nuevas') as $i => $file) {
-            if (!$file) continue;
-            $ruta = $file->store('recomienda', 'public');
+        for ($s = 1; $s <= 20; $s++) {
+            if (!$request->hasFile("imagen_nueva_{$s}")) continue;
+            $ruta = $request->file("imagen_nueva_{$s}")->store('recomienda', 'public');
             $recomendacion->imagenes()->create([
                 'ruta'     => $ruta,
-                'orden'    => $ordenBase + $i + 1,
-                'posicion' => !empty($posiciones[$i]) ? (int) $posiciones[$i] : null,
+                'orden'    => $ordenBase + $s,
+                'posicion' => $request->integer("posicion_nueva_{$s}") ?: null,
             ]);
         }
     }
