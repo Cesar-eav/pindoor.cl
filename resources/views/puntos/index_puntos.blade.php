@@ -1,27 +1,42 @@
 @php
     use Illuminate\Support\Str;
     $hayFiltros = request()->anyFilled(['category', 'search', 'lat']);
+    $categoriaActiva = request()->filled('category')
+        ? $categorias->firstWhere('slug', request('category'))
+        : null;
 @endphp
 
 @extends('layouts.pindoor')
 
+@if($categoriaActiva)
+@section('title', $categoriaActiva->nombre . ' en Valparaíso · Pindoor')
+@section('description', 'Descubre ' . $categoriaActiva->nombre . ' en Valparaíso: dirección, horarios, fotos y ubicación en el mapa. Guía actualizada de Pindoor.')
+@section('canonical', route('puntos.index', ['category' => $categoriaActiva->slug]))
+@else
 @section('title', 'Pindoor · Guía de lugares en Valparaíso')
 @section('description', 'Explora restaurantes, cafeterías, hoteles, museos, bares y atracciones turísticas en Valparaíso. Filtra por categoría, busca por nombre o activa el GPS para ver qué tienes cerca.')
 @section('canonical', route('puntos.index'))
-@if(request()->anyFilled(['category', 'search', 'lat', 'vista', 'page']))
+@endif
+@if(request()->anyFilled(['search', 'lat', 'vista', 'page']))
 @section('robots', 'noindex, follow')
 @endif
 @section('bodyClass', 'bg-gray-100 text-gray-900')
 
 @section('head')
+    @php
+        $ogTitle = $categoriaActiva ? $categoriaActiva->nombre . ' en Valparaíso · Pindoor' : 'Pindoor · Guía de lugares en Valparaíso';
+        $ogDesc  = $categoriaActiva
+            ? 'Descubre ' . $categoriaActiva->nombre . ' en Valparaíso: dirección, horarios, fotos y ubicación en el mapa.'
+            : 'Explora restaurantes, hoteles, museos y atracciones turísticas en Valparaíso. La guía local más completa.';
+    @endphp
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="{{ route('puntos.index') }}" />
-    <meta property="og:title" content="Pindoor · Guía de lugares en Valparaíso" />
-    <meta property="og:description" content="Explora restaurantes, hoteles, museos y atracciones turísticas en Valparaíso. La guía local más completa." />
+    <meta property="og:url" content="{{ $categoriaActiva ? route('puntos.index', ['category' => $categoriaActiva->slug]) : route('puntos.index') }}" />
+    <meta property="og:title" content="{{ $ogTitle }}" />
+    <meta property="og:description" content="{{ $ogDesc }}" />
     <meta property="og:image" content="{{ asset('img/pindoor-og.jpg') }}" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Pindoor · Guía de lugares en Valparaíso" />
-    <meta name="twitter:description" content="Explora restaurantes, hoteles, museos y atracciones turísticas en Valparaíso. La guía local más completa." />
+    <meta name="twitter:title" content="{{ $ogTitle }}" />
+    <meta name="twitter:description" content="{{ $ogDesc }}" />
     <meta name="twitter:image" content="{{ asset('img/pindoor-og.jpg') }}" />
     <script type="application/ld+json">
     [
@@ -133,7 +148,7 @@
 
         <div class="flex items-center justify-between my-6">
             <h1 class="text-3xl font-bold text-gray-900">
-                {{ __('ui.home.titulo') }}
+                {{ $categoriaActiva ? $categoriaActiva->nombre . ' en Valparaíso' : __('ui.home.titulo') }}
             </h1>
             <div class="inline-flex bg-gray-200 p-1 rounded-xl gap-1">
                 <button id="btn-listado" onclick="setView('listado')"
