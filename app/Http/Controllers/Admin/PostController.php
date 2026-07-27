@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use App\Models\PuntoInteres;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -17,7 +18,9 @@ class PostController extends Controller
 
     public function create()
     {
-        return view('admin.blog.create');
+        $puntos = PuntoInteres::where('eliminado', false)->get(['id', 'title', 'sector'])
+            ->sortBy(fn ($p) => $p->title)->values();
+        return view('admin.blog.create', compact('puntos'));
     }
 
     public function store(Request $request)
@@ -56,13 +59,18 @@ class PostController extends Controller
              ->setTranslation('contenido', 'en', $data['contenido_en'] ?? '');
         $post->save();
 
+        $this->sincronizarLugares($request, $post);
+
         return redirect()->route('admin.blog.index')
             ->with('success', 'Post creado correctamente.');
     }
 
     public function edit(Post $blog)
     {
-        return view('admin.blog.edit', ['post' => $blog]);
+        $blog->load('lugares');
+        $puntos = PuntoInteres::where('eliminado', false)->get(['id', 'title', 'sector'])
+            ->sortBy(fn ($p) => $p->title)->values();
+        return view('admin.blog.edit', ['post' => $blog, 'puntos' => $puntos]);
     }
 
     public function update(Request $request, Post $blog)
@@ -119,6 +127,8 @@ class PostController extends Controller
              ->setTranslation('contenido', 'en', $data['contenido_en'] ?? '');
         $blog->save();
 
+        $this->sincronizarLugares($request, $blog);
+
         return redirect()->route('admin.blog.index')
             ->with('success', 'Post actualizado.');
     }
@@ -134,6 +144,17 @@ class PostController extends Controller
         $request->validate(['imagen' => 'required|image|max:6144']);
         $path = $request->file('imagen')->store('blog/contenido', 'public');
         return response()->json(['url' => asset('storage/' . $path)]);
+    }
+
+    // Guarda qué lugares (PuntoInteres) se mencionan en el post, en el orden elegido
+    private function sincronizarLugares(Request $request, Post $post): void
+    {
+        $ids = $request->input('lugares', []);
+        $post->lugares()->sync(
+            collect($ids)->filter()->values()
+                ->mapWithKeys(fn ($id, $i) => [(int) $id => ['orden' => $i]])
+                ->all()
+        );
     }
 
     // Recoge slots imagen_nueva_1…20 con sus posiciones
