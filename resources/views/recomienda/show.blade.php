@@ -4,7 +4,7 @@
 
 @section('title', $recomendacion->titulo . ' — Pindoor Recomienda')
 @section('canonical', route('recomienda.show', $recomendacion->slug))
-@section('description', \Illuminate\Support\Str::limit(strip_tags($recomendacion->contenido ?? ''), 160)
+@section('description', \Illuminate\Support\Str::limit($recomendacion->resumen ?: strip_tags($recomendacion->contenido ?? ''), 160)
     ?: $recomendacion->titulo . ' — ' . $recomendacion->negocio)
 @section('bodyClass', 'bg-gray-100 text-gray-900')
 
@@ -80,19 +80,29 @@
                 <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#fff0ef] text-[#fc5648] text-xs font-bold">
                     {{ $planInfo['emoji'] }} {{ $planInfo['label'] }}
                 </span>
-                @if($recomendacion->destacado_portada && (!$recomendacion->destacado_hasta || $recomendacion->destacado_hasta->isFuture()))
+                {{-- @if($recomendacion->destacado_portada && (!$recomendacion->destacado_hasta || $recomendacion->destacado_hasta->isFuture()))
                 <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">🥇 Recomendado Pindoor</span>
-                @endif
+                @endif --}}
                 @if($recomendacion->rubro)
                 <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-bold">{{ $recomendacion->rubro }}</span>
                 @endif
             </div>
 
             {{-- Título --}}
-            <h1 class="text-2xl font-bold text-gray-900 leading-tight">{{ $recomendacion->titulo }}</h1>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight leading-[1.1]">
+                {{ $recomendacion->titulo }}
+            </h1>
 
             {{-- Negocio --}}
             <p class="text-sm text-gray-600 font-semibold">🏪 {{ $recomendacion->negocio }}</p>
+
+            {{-- Resumen destacado --}}
+            @if($recomendacion->resumen)
+            <p class="text-lg text-gray-500 leading-relaxed border-l-4 border-[#fc5648] pl-5"
+               style="font-family:'Lora',serif; font-style:italic;">
+                {{ $recomendacion->resumen }}
+            </p>
+            @endif
 
             {{-- Contenido con imágenes intercaladas --}}
             @php

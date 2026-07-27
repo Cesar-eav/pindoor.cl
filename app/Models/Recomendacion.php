@@ -18,6 +18,7 @@ class Recomendacion extends Model
 
     protected $fillable = [
         'titulo',
+        'resumen',
         'slug',
         'punto_interes_id',
         'plan',
