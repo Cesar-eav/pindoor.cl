@@ -165,6 +165,7 @@ class RecomendacionController extends Controller
     {
         return $request->validate([
             'titulo'            => 'required|string|max:255',
+            'resumen'           => 'nullable|string|max:600',
             'punto_interes_id'  => 'nullable|exists:puntosinteres,id',
             'plan'              => 'required|string|in:' . implode(',', array_keys(Recomendacion::PLANES)),
             'negocio'           => 'required|string|max:255',

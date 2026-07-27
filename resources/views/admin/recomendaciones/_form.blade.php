@@ -59,6 +59,46 @@
     </div>
 </div>
 
+{{-- Resumen --}}
+<div class="w-[90vw] mx-auto">
+    <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-semibold text-gray-700">
+            Resumen
+            <span class="font-normal text-gray-400">— aparece destacado bajo el título</span>
+        </label>
+        <div class="flex items-center gap-3 text-[11px] text-gray-400">
+            <span id="resumen-palabras">0 palabras</span>
+            <span id="resumen-chars" class="font-semibold">0 / 600</span>
+        </div>
+    </div>
+    <textarea id="resumen" name="resumen" rows="5" maxlength="600"
+              placeholder="Una breve introducción que invite a leer la nota completa..."
+              class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none resize-none">{{ old('resumen', $recomendacion->resumen ?? '') }}</textarea>
+    @error('resumen') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+</div>
+
+<script>
+(function () {
+    const RESUMEN_MAX  = 600;
+    const resumenEl     = document.getElementById('resumen');
+    const resumenChars  = document.getElementById('resumen-chars');
+    const resumenPalab  = document.getElementById('resumen-palabras');
+
+    function contarResumen() {
+        const txt    = resumenEl.value;
+        const chars  = txt.length;
+        const words  = txt.trim() === '' ? 0 : txt.trim().split(/\s+/).length;
+        const quedan = RESUMEN_MAX - chars;
+        resumenPalab.textContent = words + (words === 1 ? ' palabra' : ' palabras');
+        resumenChars.textContent = chars + ' / ' + RESUMEN_MAX;
+        resumenChars.classList.toggle('text-red-500', quedan <= 50);
+        resumenChars.classList.toggle('text-gray-400', quedan > 50);
+    }
+    resumenEl.addEventListener('input', contarResumen);
+    contarResumen();
+})();
+</script>
+
 {{-- Rubro + Dirección --}}
 <div class="w-[90vw] mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div>
