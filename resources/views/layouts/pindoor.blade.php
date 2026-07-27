@@ -92,7 +92,7 @@
 
 {{-- FAB expandido: fila horizontal --}}
 <div id="fab-menu"
-     class="hidden fixed left-0 right-0 z-50 justify-center gap-3 px-4 md:hidden"
+     class="hidden fixed left-0 right-0 z-50 flex-wrap justify-center gap-3 px-4 md:hidden"
      style="bottom: calc(80px + var(--inset-bottom, 0px))">
 
     {{-- GPS --}}
@@ -141,23 +141,33 @@
         <span class="text-[10px] font-bold leading-none">Escena</span>
     </a>
 
+    {{-- Información --}}
+    <a href="{{ route('puntos.info') }}" onclick="closeFab()"
+       class="flex flex-col items-center gap-1.5 bg-white border border-gray-200 text-gray-700 px-5 py-3.5 rounded-2xl shadow-xl min-w-19">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span class="text-[10px] font-bold leading-none">Info</span>
+    </a>
+
 </div>
 
 {{-- Barra inferior --}}
 <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#fc5648] shadow-[0_-2px_16px_rgba(252,86,72,0.35)]">
     <div class="flex items-end justify-around px-2 pt-2" style="padding-bottom: calc(12px + var(--inset-bottom, 0px))">
 
-        {{-- Información --}}
-        <a href="{{ route('puntos.info') }}"
-           class="flex flex-col items-center gap-1 px-2 text-white ">
+        {{-- Inicio --}}
+        <a href="{{ route('puntos.index') }}"
+           class="flex flex-col items-center gap-1 px-2 text-white">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4a1 1 0 001-1v-4h2v4a1 1 0 001 1h4a1 1 0 001-1V10"/>
             </svg>
-            <span class="text-[10px] font-semibold">Info</span>
+            <span class="text-[10px] font-semibold">{{ __('ui.nav.inicio') }}</span>
         </a>
 
-        {{-- Lupa / Buscar --}}
+                {{-- Lupa / Buscar --}}
         <a href="{{ route('puntos.buscar.vista') }}"
            class="flex flex-col items-center gap-1 px-2 text-white">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,7 +176,6 @@
             </svg>
             <span class="text-[10px] font-semibold">{{ __('ui.nav.buscar') }}</span>
         </a>
-
         {{-- Botón (+) central --}}
         <button onclick="toggleFab()" id="fab-btn"
                 class="relative -mt-5 w-14 h-14 rounded-full bg-white text-[#fc5648] shadow-lg flex items-center justify-center transition-transform duration-200">
