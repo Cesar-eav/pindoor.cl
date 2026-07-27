@@ -19,6 +19,14 @@
         <priority>0.5</priority>
     </url>
 
+    @foreach($categorias as $categoria)
+    <url>
+        <loc>{{ route('puntos.index', ['category' => $categoria->slug]) }}</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    @endforeach
+
     @foreach($puntos as $punto)
     <url>
         <loc>{{ route('puntos.show', $punto->slug) }}</loc>
