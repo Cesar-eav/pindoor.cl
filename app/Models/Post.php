@@ -13,7 +13,7 @@ class Post extends Model
 
     public array $translatable = ['titulo', 'resumen', 'contenido'];
 
-    public function getFallbackLocale(string $locale): ?string
+    public function getFallbackLocale(?string $locale = null): ?string
     {
         return $locale !== 'es' ? 'es' : null;
     }
@@ -38,6 +38,13 @@ class Post extends Model
     public function scopePublicados($query)
     {
         return $query->where('publicado', true)->orderByDesc('publicado_en');
+    }
+
+    public function lugares()
+    {
+        return $this->belongsToMany(PuntoInteres::class, 'post_punto_interes')
+            ->withPivot('orden')
+            ->orderBy('post_punto_interes.orden');
     }
 
     public function getImagenPortadaUrlAttribute(): ?string

@@ -39,6 +39,18 @@
         @if($post->imagen_portada_url)"image": "{{ $post->imagen_portada_url }}",@endif
         "publisher": { "@type": "Organization", "name": "Pindoor" },
         "mainEntityOfPage": "{{ $canonicalUrl }}"
+        @if($post->lugares->isNotEmpty())
+        ,"mentions": [
+            @foreach($post->lugares as $lugar)
+            {
+                "@type": "LocalBusiness",
+                "name": "{{ addslashes($lugar->title) }}",
+                "url": "{{ route('puntos.show', $lugar->slug) }}"
+                @if($lugar->direccion), "address": "{{ addslashes($lugar->direccion) }}"@endif
+            }@if(!$loop->last),@endif
+            @endforeach
+        ]
+        @endif
     }
     </script>
 
@@ -214,6 +226,34 @@
         <div class="blogtext">
             {!! $contenidoFinal !!}
         </div>
+
+        {{-- Lugares mencionados --}}
+        @if($post->lugares->isNotEmpty())
+        <div class="mt-14 pt-8 border-t border-gray-100">
+            <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">📍 Lugares mencionados</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                @foreach($post->lugares as $lugar)
+                <a href="{{ route('puntos.show', $lugar->slug) }}"
+                   class="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all p-3">
+                    <div class="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 shrink-0">
+                        @if($lugar->imagenPrincipal)
+                            <img src="{{ asset('storage/' . $lugar->imagenPrincipal->ruta) }}" alt="{{ $lugar->title }}"
+                                 class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full flex items-center justify-center text-xl text-gray-300">📍</div>
+                        @endif
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-bold text-gray-800 text-sm truncate">{{ $lugar->title }}</p>
+                        @if($lugar->sector)
+                        <p class="text-xs text-gray-400 truncate">{{ $lugar->sector }}</p>
+                        @endif
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
 
         {{-- Footer del artículo --}}
         <div class="mt-16 pt-8 border-t border-gray-100 flex items-center justify-between flex-wrap gap-4">

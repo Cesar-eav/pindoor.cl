@@ -268,6 +268,27 @@
         </div>
     </div>
 
+    {{-- Lugares mencionados (opcional) --}}
+    <div class="w-[90vw] mx-auto bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">
+            Lugares mencionados en este post
+        </label>
+        <p class="text-xs text-gray-400 mb-3">
+            Vincula las fichas de Pindoor que se nombran en el artículo (ej: los bares de una guía "Bares de Valparaíso").
+            Aparecen como tarjetas al final del post y se agregan como <code>mentions</code> en los datos estructurados (JSON-LD) para SEO.
+        </p>
+        @php $lugaresSeleccionados = $post?->lugares->pluck('id')->all() ?? []; @endphp
+        <select name="lugares[]" multiple size="8"
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none bg-white">
+            @foreach($puntos as $p)
+            <option value="{{ $p->id }}" {{ in_array($p->id, $lugaresSeleccionados) ? 'selected' : '' }}>
+                {{ $p->title }}{{ $p->sector ? ' · ' . $p->sector : '' }}
+            </option>
+            @endforeach
+        </select>
+        <p class="text-xs text-gray-400 mt-1">Ctrl/Cmd + clic para elegir varios.</p>
+    </div>
+
     <script>
     function toggleEliminar(idx) {
         var overlay  = document.getElementById('overlay-eliminar-' + idx);

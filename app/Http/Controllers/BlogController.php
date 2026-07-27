@@ -16,6 +16,7 @@ class BlogController extends Controller
     {
         $post = Post::where('slug', $slug)
                     ->where('publicado', true)
+                    ->with('lugares')
                     ->firstOrFail();
 
         return view('blog.show', compact('post'));
