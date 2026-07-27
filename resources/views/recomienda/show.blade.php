@@ -94,7 +94,16 @@
             </h1>
 
             {{-- Negocio --}}
-            <p class="text-sm text-gray-600 font-semibold">🏪 {{ $recomendacion->negocio }}</p>
+            <div class="flex items-center gap-2.5">
+                @if($recomendacion->puntoInteres?->imagen_perfil)
+                <img src="{{ asset('storage/' . $recomendacion->puntoInteres->imagen_perfil) }}"
+                     alt="Logo de {{ $recomendacion->negocio }}"
+                     class="w-8 h-8 rounded-full object-cover border border-gray-100 shrink-0">
+                @else
+                <span class="shrink-0">🏪</span>
+                @endif
+                <p class="text-sm text-gray-600 font-semibold">{{ $recomendacion->negocio }}</p>
+            </div>
 
             {{-- Resumen destacado --}}
             @if($recomendacion->resumen)
