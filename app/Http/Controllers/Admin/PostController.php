@@ -61,6 +61,9 @@ class PostController extends Controller
 
         $this->sincronizarLugares($request, $post);
 
+        if ($request->input('accion') === 'seguir') {
+            return redirect()->route('admin.blog.edit', $post)->with('success', 'Post creado correctamente.');
+        }
         return redirect()->route('admin.blog.index')
             ->with('success', 'Post creado correctamente.');
     }
@@ -129,8 +132,17 @@ class PostController extends Controller
 
         $this->sincronizarLugares($request, $blog);
 
+        if ($request->input('accion') === 'seguir') {
+            return redirect()->route('admin.blog.edit', $blog)->with('success', 'Post actualizado.');
+        }
         return redirect()->route('admin.blog.index')
             ->with('success', 'Post actualizado.');
+    }
+
+    public function preview(Post $blog)
+    {
+        $blog->load('lugares');
+        return view('blog.show', ['post' => $blog]);
     }
 
     public function destroy(Post $blog)

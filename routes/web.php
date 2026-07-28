@@ -129,6 +129,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Blog
     Route::post('/blog/imagen', [PostController::class, 'uploadImagen'])->name('blog.imagen');
+    Route::get('/blog/{blog}/preview', [PostController::class, 'preview'])->name('blog.preview');
     Route::resource('blog', PostController::class)->except(['show']);
 
     // Panoramas — La Brújula
