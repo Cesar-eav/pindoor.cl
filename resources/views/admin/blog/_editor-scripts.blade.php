@@ -36,10 +36,13 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('blog-form').addEventListener('submit', function () {
         const activoId = 'contenido_' + currentLang;
         document.getElementById(activoId).value = quill.root.innerHTML;
-        const btn     = document.getElementById('guardar-btn');
-        const spinner = document.getElementById('guardar-spinner');
-        btn.disabled = true;
-        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        const btn        = document.getElementById('guardar-btn');
+        const btnSeguir  = document.getElementById('guardar-seguir-btn');
+        const spinner    = document.getElementById('guardar-spinner');
+        [btn, btnSeguir].forEach(b => {
+            b.disabled = true;
+            b.classList.add('opacity-50', 'cursor-not-allowed');
+        });
         spinner.style.display = 'flex';
     });
 
