@@ -53,7 +53,7 @@ class ClienteEventosController extends Controller
             'precio_texto'       => 'nullable|string|max:100',
             'url_entradas'       => 'nullable|url|max:255',
             'destacado'          => 'boolean',
-            'imagen'             => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'imagen'             => 'nullable|image|mimes:jpeg,png,jpg,webp|max:20480',
             'item_id'            => 'nullable|integer|exists:punto_modulo_items,id',
         ]);
 

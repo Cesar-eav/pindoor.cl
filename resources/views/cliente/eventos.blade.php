@@ -17,6 +17,22 @@
                 </div>
             @endif
 
+            @if(session('error'))
+                <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-5 py-3">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-5 py-3">
+                    <ul class="list-disc list-inside space-y-1">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             @if(!$punto->moduloActivo('agenda'))
                 <div class="bg-blue-50 border border-blue-200 rounded-2xl p-5 text-sm text-blue-700">
                     El módulo <strong>Agenda cultural</strong> no está habilitado. Contacta al administrador para activarlo.
@@ -28,20 +44,48 @@
                 editando: null,
                 imagenActual: null,
                 imagenPreview: null,
+                imagenError: null,
+                enviando: false,
                 resetForm() {
                     this.editando = null;
                     this.imagenActual = null;
+                    this.imagenError = null;
+                    this.enviando = false;
                     if (this.imagenPreview) URL.revokeObjectURL(this.imagenPreview);
                     this.imagenPreview = null;
                     this.$refs.form.reset();
                 },
                 previsualizar(input) {
+                    this.imagenError = null;
                     if (this.imagenPreview) URL.revokeObjectURL(this.imagenPreview);
-                    this.imagenPreview = input.files[0] ? URL.createObjectURL(input.files[0]) : null;
+                    this.imagenPreview = null;
+                    const file = input.files[0];
+                    if (!file) return;
+
+                    const MAX_MB = 20;
+                    const TIPOS_OK = ['image/jpeg', 'image/png', 'image/webp'];
+
+                    if (file.size > MAX_MB * 1024 * 1024) {
+                        this.imagenError = `La imagen pesa ${(file.size / (1024 * 1024)).toFixed(1)} MB. El máximo permitido es ${MAX_MB} MB.`;
+                        input.value = '';
+                        return;
+                    }
+                    if (!TIPOS_OK.includes(file.type)) {
+                        this.imagenError = 'Formato no permitido. Sube una imagen JPG, PNG o WEBP.';
+                        input.value = '';
+                        return;
+                    }
+                    try {
+                        this.imagenPreview = URL.createObjectURL(file);
+                    } catch (e) {
+                        this.imagenError = 'No se pudo cargar la imagen. Intenta con otro archivo.';
+                        input.value = '';
+                    }
                 },
                 editar(evento) {
                     this.editando = evento;
                     this.imagenActual = evento.imagen_url;
+                    this.imagenError = null;
                     if (this.imagenPreview) URL.revokeObjectURL(this.imagenPreview);
                     this.imagenPreview = null;
                     this.abierto = true;
@@ -75,7 +119,8 @@
                 </div>
 
                 <div x-show="abierto" x-transition class="border-t border-gray-100 pt-5 mt-2">
-                    <form method="POST" action="{{ route('cliente.eventos.guardar', $punto) }}" enctype="multipart/form-data" x-ref="form">
+                    <form method="POST" action="{{ route('cliente.eventos.guardar', $punto) }}" enctype="multipart/form-data" x-ref="form"
+                          @submit="enviando = true">
                         @csrf
                         <input type="hidden" name="item_id" :value="editando ? editando.id : ''">
 
@@ -157,6 +202,8 @@
                                 <input type="file" name="imagen" accept="image/*"
                                        @change="previsualizar($event.target)"
                                        class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                <p class="text-[11px] text-gray-400 mt-1">JPG, PNG o WEBP — máx. 20 MB</p>
+                                <p x-show="imagenError" x-text="imagenError" class="text-xs text-red-500 font-semibold mt-1"></p>
 
                                 <div class="flex items-center gap-4 mt-2" x-show="imagenActual || imagenPreview">
                                     <div x-show="imagenActual" class="text-center">
@@ -181,12 +228,18 @@
                             </div>
                         </div>
 
-                        <div class="flex justify-end mt-5 gap-3">
+                        <div class="flex justify-end items-center mt-5 gap-3">
                             <button type="button" @click="abierto = false; resetForm()"
-                                    class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">Cancelar</button>
+                                    :disabled="enviando"
+                                    class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">Cancelar</button>
                             <button type="submit"
-                                    class="px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:opacity-90 transition"
-                                    x-text="editando ? 'Guardar cambios' : 'Publicar en agenda'">
+                                    :disabled="enviando"
+                                    class="px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                                <svg x-show="enviando" x-cloak class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                                </svg>
+                                <span x-text="enviando ? 'Publicando…' : (editando ? 'Guardar cambios' : 'Publicar en agenda')"></span>
                             </button>
                         </div>
                     </form>
