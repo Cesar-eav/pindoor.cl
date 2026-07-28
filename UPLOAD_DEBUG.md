@@ -66,9 +66,48 @@ Verificar con `http://127.0.0.1:8000/debug-php` → debe mostrar `upload: 10M`.
 
 ## Producción (pindoor.cl, cPanel + LiteSpeed)
 
-El servidor de producción muestra límites correctos:
-```json
-{"sapi":"litespeed","ini":"/opt/cpanel/ea-php82/root/etc/php.ini","upload":"10M","post":"12M","memory":"2G"}
+El servidor de producción corre PHP nativo (no un ea-phpXX seleccionable), así que
+**"Seleccionar Versión PHP" → PHP Options no está disponible** — cPanel avisa que hay
+que cambiar a una versión no-nativa para desbloquear esa pantalla. Tampoco hay
+`.user.ini` ni `php.ini` propios en `public_html` ni en el home del usuario.
+
+**El límite real se controla desde `public/.htaccess`**, con directivas `php_value`:
+```apache
+php_value upload_max_filesize 20M
+php_value post_max_size 25M
 ```
 
-El problema en producción **no es el tamaño** — es que **Intervention Image no está instalada** en el vendor del servidor compartido. Pendiente de resolver.
+Bajo LiteSpeed (a diferencia de Apache + mod_php en el entorno local), `php_value` en
+`.htaccess` **sí funciona** para directivas `PHP_INI_PERDIR` como estas — contradice lo
+que se creía antes (ver nota más abajo).
+
+### Cómo diagnosticar los límites reales de la web (no de la terminal)
+
+La terminal (`php -f archivo.php` por SSH) usa el PHP **CLI** de la cuenta, que en
+hosting compartido puede tener un `php.ini` totalmente distinto (más permisivo) al que
+usa LiteSpeed para servir la web. Para ver lo que realmente aplica a los uploads del
+sitio, hay que pegarle por HTTP:
+```bash
+curl -s https://pindoor.cl/limits.php
+# upload: 20M | post: 25M | mem: 2G
+```
+`public/limits.php` es un script de debug que imprime `ini_get('upload_max_filesize')`,
+`post_max_size` y `memory_limit`.
+
+### Corrección: `.user.ini`/`.htaccess` sí funcionan en producción
+
+La sección "Por qué costó encontrarlo" (más arriba) dice que `upload_max_filesize` es
+`PHP_INI_SYSTEM` y que ni `.user.ini` ni `php_value` en `.htaccess` sirven. Eso es cierto
+para **Apache + mod_php** (el entorno local), pero **no** para LiteSpeed en el hosting de
+producción, donde PHP corre vía LSAPI (como PHP-FPM/CGI) y sí respeta `.htaccess` con
+`php_value` para directivas `PHP_INI_PERDIR` — que es justo el caso real de
+`upload_max_filesize` y `post_max_size` según el manual de PHP.
+
+### Estado: ✅ RESUELTO en producción (2026-07-28)
+
+- `public/.htaccess` → `upload_max_filesize = 20M`, `post_max_size = 25M`
+- Aplicado tanto en el repo (deploy por FTP) como directo en `~/public_html/.htaccess` vía SSH con `sed`
+- Verificado con `curl -s https://pindoor.cl/limits.php`
+
+El problema de **Intervention Image no instalada** en el vendor del servidor compartido
+sigue pendiente por separado — no está relacionado con el tamaño de subida.
