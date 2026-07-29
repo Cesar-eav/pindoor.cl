@@ -18,7 +18,7 @@
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
                 <p class="text-sm text-gray-500 mb-8">
-                    Con estos datos básicos tu espacio queda publicado en el mapa de Pindoor de inmediato.
+                    Con el nombre, dirección y categoría tu espacio queda registrado — y visible en el mapa de Pindoor apenas agregues una foto.
                     Podrás completar el resto del perfil (carta, ofertas, galería) desde tu panel.
                 </p>
 
@@ -61,9 +61,12 @@
 
                     {{-- Imagen principal --}}
                     <div class="mb-8">
-                        <x-input-label for="imagen" value="Foto principal *" />
-                        <p class="text-xs text-gray-400 mb-2">La imagen de portada de tu ficha. Formato JPG o PNG, máximo 5 MB.</p>
-                        <input id="imagen" name="imagen" type="file" accept="image/*" required
+                        <x-input-label for="imagen" value="Foto principal (opcional)" />
+                        <p class="text-xs text-gray-400 mb-2">
+                            La imagen de portada de tu ficha. Formato JPG o PNG, máximo 5 MB.
+                            Puedes agregarla más tarde desde tu panel — pero tu espacio no será visible en Pindoor hasta que subas al menos una foto.
+                        </p>
+                        <input id="imagen" name="imagen" type="file" accept="image/*"
                                class="block w-full text-sm text-gray-500
                                       file:mr-4 file:py-2 file:px-4
                                       file:rounded-xl file:border-0
@@ -104,6 +107,45 @@
         <p class="text-gray-300 text-sm mt-2">Esto puede tardar unos segundos</p>
     </div>
 
+    {{-- Popup: publicar sin foto --}}
+    <div id="modal-sin-foto"
+         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 px-4"
+         style="display:none">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            
+            <div class="flex items-start gap-3 mb-5">
+                {{-- Imagen de ejemplo de foto principal (369×475px reales) --}}
+                <img id="img-ejemplo-thumb" src="{{ asset('onboarding.png') }}" alt="Ejemplo de foto principal"
+                     class="w-24 h-28 shrink-0 object-contain bg-gray-50 rounded-lg border border-gray-200 cursor-zoom-in">
+                <div>
+                    <h3 class="font-extrabold text-gray-900 mb-1">Visibilidad de tu espacio</h3>
+                    <p class="text-sm text-gray-500">
+                        Tu espacio no será visible hasta que selecciones la imagen principal para tu ficha en Pindoor.
+                        No es obligatorio hacerlo ahora, puedes hacerlo más tarde desde tu panel.
+                    </p>
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <button type="button" id="btn-elegir-foto"
+                        class="w-full py-2.5 rounded-xl text-sm font-bold text-white bg-[#fc5648] hover:bg-[#e83a2c] transition">
+                    Elegir foto ahora
+                </button>
+                <button type="button" id="btn-publicar-sin-foto"
+                        class="w-full py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:text-gray-800 transition">
+                    Elegir después →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Lightbox: zoom de la imagen de ejemplo --}}
+    <div id="lightbox-ejemplo"
+         class="fixed inset-0 z-60 flex items-center justify-center bg-gray-900/90 p-6 cursor-zoom-out"
+         style="display:none">
+        <img src="{{ asset('onboarding.png') }}" alt="Ejemplo de foto principal (tamaño real)"
+             class="max-w-full max-h-full rounded-xl">
+    </div>
+
     <script>
     document.getElementById('imagen').addEventListener('change', function () {
         const file = this.files[0];
@@ -114,11 +156,55 @@
         wrap.classList.remove('hidden');
     });
 
-    document.getElementById('form-onboarding').addEventListener('submit', function () {
+    const form       = document.getElementById('form-onboarding');
+    const modalFoto  = document.getElementById('modal-sin-foto');
+    let confirmadoSinFoto = false;
+    let modalDesdeSubmit  = false;
+
+    function publicar() {
         const btn = document.getElementById('btn-publicar');
         btn.disabled = true;
         btn.textContent = 'Publicando…';
         document.getElementById('loading-overlay').style.display = 'flex';
+        form.submit();
+    }
+
+    // Aviso informativo al entrar a la página (con un pequeño delay para que no se sienta instantáneo)
+    modalDesdeSubmit = false;
+    setTimeout(() => { modalFoto.style.display = 'flex'; }, 500);
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const tieneFoto = document.getElementById('imagen').files.length > 0;
+        if (!tieneFoto && !confirmadoSinFoto) {
+            modalDesdeSubmit = true;
+            modalFoto.style.display = 'flex';
+            return;
+        }
+        publicar();
+    });
+
+    document.getElementById('btn-elegir-foto').addEventListener('click', function () {
+        modalFoto.style.display = 'none';
+        document.getElementById('imagen').click();
+    });
+
+    document.getElementById('btn-publicar-sin-foto').addEventListener('click', function () {
+        confirmadoSinFoto = true;
+        modalFoto.style.display = 'none';
+        // Si el popup se disparó al intentar enviar el formulario, continúa el envío;
+        // si fue el aviso inicial al cargar la página, solo lo cierra y deja seguir completando.
+        if (modalDesdeSubmit) {
+            publicar();
+        }
+    });
+
+    const lightbox = document.getElementById('lightbox-ejemplo');
+    document.getElementById('img-ejemplo-thumb').addEventListener('click', function () {
+        lightbox.style.display = 'flex';
+    });
+    lightbox.addEventListener('click', function () {
+        lightbox.style.display = 'none';
     });
     </script>
 </x-app-layout>

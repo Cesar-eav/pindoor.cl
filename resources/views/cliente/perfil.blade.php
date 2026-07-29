@@ -476,7 +476,7 @@
                                         </div>
                                         <div>
                                             <p class="text-sm font-semibold text-gray-700 mb-1">Haz clic en la imagen para cambiarla</p>
-                                            <p class="text-xs text-gray-400">JPG, PNG o WEBP · Máx. 2 MB</p>
+                                            <p class="text-xs text-gray-400">JPG, PNG o WEBP · Máx. 20 MB</p>
                                         </div>
                                     </div>
                                     <div class="flex justify-end mt-4 pt-4 border-t border-gray-100">
