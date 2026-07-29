@@ -9,13 +9,17 @@
                 . ($panorama->ubicacion ? ' en ' . $panorama->ubicacion : '')
                 . ', el ' . $fechaStr
                 . ($panorama->es_gratuito ? '. Entrada gratuita.' : '.');
+    // Panorama real (admin) tiene slug propio; evento de agenda de cliente usa su propia ruta.
+    $panoramaUrl = $panorama->slug
+                 ? route('panoramas.show', $panorama)
+                 : route('puntos.evento', ['slug' => $puntoRelacionado->slug, 'item' => $panorama->modulo_item_id]);
 @endphp
 
 @extends('layouts.pindoor')
 
 @section('title', $seoTitle)
 @section('description', $seoDesc)
-@section('canonical', route('panoramas.show', $panorama))
+@section('canonical', $panoramaUrl)
 @section('bodyClass', 'bg-gray-100 text-gray-900')
 
 @section('content')
@@ -31,7 +35,7 @@
         'dates'    => $gcStart . '/' . $gcEnd,
         'location' => $panorama->ubicacion ?? '',
     ]);
-    $waUrl = 'https://wa.me/?text=' . urlencode($panorama->titulo . ' — ' . route('panoramas.show', $panorama));
+    $waUrl = 'https://wa.me/?text=' . urlencode($panorama->titulo . ' — ' . $panoramaUrl);
 @endphp
 <div class="max-w-2xl mx-auto px-4 py-8">
 
@@ -134,7 +138,7 @@
                     </a>
 
                     @include('partials._share_panel', [
-                        'shareText' => $panorama->titulo . ' — ' . route('panoramas.show', $panorama)
+                        'shareText' => $panorama->titulo . ' — ' . $panoramaUrl
                     ])
                 </div>
             </div>
@@ -192,11 +196,11 @@
             </a>
             @endif
 
-            {{-- Ficha del negocio cliente --}}
+            {{-- Agenda del negocio cliente --}}
             @if($puntoRelacionado)
-            <a href="{{ route('puntos.show', $puntoRelacionado->slug) }}"
+            <a href="{{ route('puntos.show', $puntoRelacionado->slug) }}#agenda"
                class="inline-flex items-center gap-2 w-full justify-center bg-gray-900 hover:bg-gray-800 text-white font-bold text-sm px-5 py-3 rounded-xl transition">
-                Conocer {{ $puntoRelacionado->title }}
+                Ver agenda de {{ $puntoRelacionado->title }}
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>

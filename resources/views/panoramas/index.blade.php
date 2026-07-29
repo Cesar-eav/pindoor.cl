@@ -20,7 +20,7 @@ foreach ($jsonLdEventos as $i => $p) {
             'name'                => (string) $p->titulo,
             'startDate'           => $p->fecha instanceof \Carbon\Carbon ? $p->fecha->toDateString() : (string)$p->fecha,
             'location'            => ['@type' => 'Place', 'name' => $p->lugar ?: 'Valparaíso', 'address' => ['@type' => 'PostalAddress', 'addressLocality' => 'Valparaíso', 'addressCountry' => 'CL']],
-            'url'                 => route('panoramas.show', $p->slug ?? $p->id),
+            'url'                 => $p->slug ? route('panoramas.show', $p) : route('puntos.evento', ['slug' => $p->punto_slug, 'item' => $p->modulo_item_id]),
             'organizer'           => ['@type' => 'Organization', 'name' => 'Pindoor'],
             'eventStatus'         => 'https://schema.org/EventScheduled',
             'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
@@ -297,7 +297,7 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             @foreach($grupo as $panorama)
 
-            @php $cardHref = $panorama->slug ? route('panoramas.show', $panorama) : url('/lugar/' . $panorama->punto_slug . '#agenda'); @endphp
+            @php $cardHref = $panorama->slug ? route('panoramas.show', $panorama) : route('puntos.evento', ['slug' => $panorama->punto_slug, 'item' => $panorama->modulo_item_id]); @endphp
             <div class="group bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer
                         {{ $meta['esHoy'] ? 'ring-1 ring-[#fc5648]/20' : '' }}"
                  onclick="window.location.href='{{ $cardHref }}'"
@@ -393,7 +393,7 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
                             'location' => $panorama->ubicacion ?? '',
                         ]);
                         $waTitulo =  $panorama->titulo;
-                        $waUrl    = 'https://wa.me/?text=' . urlencode($waTitulo . ' — ' . ($panorama->slug ? url('/panoramas/' . $panorama->slug) : url('/lugar/' . $panorama->punto_slug . '#agenda')));
+                        $waUrl    = 'https://wa.me/?text=' . urlencode($waTitulo . ' — ' . $cardHref);
                     @endphp
 
                     <div class="mt-3 flex items-center gap-3 flex-wrap">

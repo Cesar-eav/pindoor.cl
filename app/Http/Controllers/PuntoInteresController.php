@@ -302,22 +302,70 @@ class PuntoInteresController extends Controller
     {
         abort_if(!$panorama->activo, 404);
         $panorama->load('imagenes');
-
-        // El panorama no guarda relación con el punto (tabla "panoramas" no tiene FK):
-        // se infiere por coincidencia de nombre entre "ubicacion" y la ficha del cliente.
         $puntoRelacionado = null;
-        if ($panorama->ubicacion) {
-            $normalizar = fn ($s) => mb_strtolower(preg_replace('/\s+/', '', trim($s)));
-            $ubicacionNorm = $normalizar($panorama->ubicacion);
-            $puntoRelacionado = PuntoInteres::where('es_cliente', true)
-                ->where('activo', true)
-                ->where('eliminado', false)
-                ->get(['id', 'slug', 'title'])
-                ->first(fn ($p) => str_contains($normalizar($p->title), $ubicacionNorm)
-                    || str_contains($ubicacionNorm, $normalizar($p->title)));
-        }
 
         return view('panoramas.show', compact('panorama', 'puntoRelacionado'));
+    }
+
+    /**
+     * Muestra un evento de la agenda de un cliente (punto_modulo_items, módulo 'eventos')
+     * con la misma vista que un panorama subido manualmente. A diferencia de showPanorama(),
+     * aquí sí conocemos el punto exacto (viene de la URL), sin necesidad de adivinarlo.
+     */
+    public function showEvento(string $slug, ModuloItem $item)
+    {
+        $punto = PuntoInteres::where('slug', $slug)
+            ->where('activo', true)
+            ->where('eliminado', false)
+            ->firstOrFail();
+
+        abort_if($item->punto_interes_id !== $punto->id || $item->modulo !== 'eventos' || !$item->activo, 404);
+
+        $item->setRelation('punto', $punto);
+        $panorama = $this->fakePanoramaDeModuloItem($item);
+        $puntoRelacionado = $punto;
+
+        return view('panoramas.show', compact('panorama', 'puntoRelacionado'));
+    }
+
+    private const TIPO_EVENTO_A_CATEGORIA = [
+        'concierto'  => 'musica',   'teatro'     => 'teatro',
+        'cine'       => 'cine',     'exposicion' => 'exposicion',
+        'taller'     => 'taller',   'danza'      => 'danza',
+        'conferencia'=> 'conferencia',
+    ];
+
+    /**
+     * Convierte un evento de agenda de cliente (ModuloItem) en una instancia Panorama de
+     * solo lectura, para reutilizar toda la vista/lógica de panoramas.show y panoramas.index.
+     * OJO: 'id' se castea a int automáticamente por ser la primary key de Panorama, así que
+     * cualquier id sintético no numérico ('ev_5') se lee como 0 — no usar $fake->id para nada
+     * que dependa de que sea único (ver PANORAMAS-EVENTOS-CLIENTE-BUG.md). El id real del
+     * ModuloItem va aparte, en 'modulo_item_id'.
+     */
+    private function fakePanoramaDeModuloItem(ModuloItem $item): Panorama
+    {
+        $fake = new Panorama();
+        $fake->fill([
+            'titulo'      => $item->campo('titulo', ''),
+            'descripcion' => $item->campo('descripcion', ''),
+            'ubicacion'   => $item->punto?->title,
+            'fecha'       => $item->fecha->format('Y-m-d'),
+            'fecha_fin'   => null,
+            'dias_semana' => null,
+            'hora'        => $item->campo('hora'),
+            'categoria'   => self::TIPO_EVENTO_A_CATEGORIA[$item->campo('tipo', 'otro')] ?? 'otros',
+            'es_gratuito' => (float) ($item->campo('precio', 1)) === 0.0,
+            'enlace'      => $item->campo('url_entradas'),
+            'imagen'      => $item->imagen,
+            'activo'      => true,
+        ]);
+        $fake->setAttribute('id', 'ev_' . $item->id);
+        $fake->setAttribute('modulo_item_id', $item->id);
+        $fake->setAttribute('punto_slug', $item->punto?->slug);
+        $fake->setRelation('imagenes', collect());
+
+        return $fake;
     }
 
     public function panoramas(Request $request)
@@ -332,12 +380,6 @@ class PuntoInteresController extends Controller
         $catActiva  = $request->input('categoria');
 
         // Eventos de agenda de clientes → convertir a instancias Panorama para reutilizar la vista
-        $tipoACat = [
-            'concierto'  => 'musica',   'teatro'     => 'teatro',
-            'cine'       => 'cine',     'exposicion' => 'exposicion',
-            'taller'     => 'taller',   'danza'      => 'danza',
-            'conferencia'=> 'conferencia',
-        ];
         $eventosCliente = ModuloItem::where('modulo', 'eventos')
             ->where('activo', true)
             ->whereNotNull('fecha')
@@ -345,26 +387,7 @@ class PuntoInteresController extends Controller
             ->whereHas('punto', fn($q) => $q->where('activo', true)->where('eliminado', false))
             ->with('punto')
             ->get()
-            ->map(function (ModuloItem $item) use ($tipoACat) {
-                $fake = new Panorama();
-                $fake->fill([
-                    'titulo'      => $item->campo('titulo', ''),
-                    'ubicacion'   => $item->punto?->title,
-                    'fecha'       => $item->fecha->format('Y-m-d'),
-                    'fecha_fin'   => null,
-                    'dias_semana' => null,
-                    'hora'        => $item->campo('hora'),
-                    'categoria'   => $tipoACat[$item->campo('tipo', 'otro')] ?? 'otros',
-                    'es_gratuito' => (float)($item->campo('precio', 1)) === 0.0,
-                    'enlace'      => $item->campo('url_entradas'),
-                    'imagen'      => $item->imagen,
-                    'activo'      => true,
-                ]);
-                $fake->setAttribute('id', 'ev_' . $item->id);
-                $fake->setAttribute('punto_slug', $item->punto?->slug);
-                $fake->setRelation('imagenes', collect());
-                return $fake;
-            });
+            ->map(fn (ModuloItem $item) => $this->fakePanoramaDeModuloItem($item));
 
         $panoramas = $panoramas->concat($eventosCliente)
             ->sortBy(fn($p) => $p->fecha->format('Y-m-d') . ($p->hora ?? '99:99'))
