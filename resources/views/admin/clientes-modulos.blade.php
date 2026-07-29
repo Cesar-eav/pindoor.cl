@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header">
         <div class="flex items-center gap-3">
             <a href="{{ route('admin.clientes') }}" class="text-gray-400 hover:text-gray-700 text-sm">&larr; Clientes</a>
@@ -75,4 +75,4 @@
 
         </div>
     </div>
-</x-app-layout>
+</x-admin-layout>

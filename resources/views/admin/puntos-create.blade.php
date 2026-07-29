@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Gestión de Puntos Públicos') }}
@@ -241,7 +241,7 @@
 
         </div>
     </div>
-</x-app-layout>
+</x-admin-layout>
 
 @vite('resources/js/quill-editor.js')
 

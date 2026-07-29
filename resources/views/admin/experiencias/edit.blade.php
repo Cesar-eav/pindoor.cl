@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header">
         <div class="flex items-center gap-3">
             <a href="{{ route('admin.experiencias.index') }}"
@@ -38,4 +38,4 @@
 
         </div>
     </div>
-</x-app-layout>
+</x-admin-layout>

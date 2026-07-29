@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Editar post</h2>
@@ -15,4 +15,4 @@
     </div>
 
     @include('admin.blog._editor-scripts', ['post' => $post])
-</x-app-layout>
+</x-admin-layout>
