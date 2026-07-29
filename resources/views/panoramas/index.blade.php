@@ -87,7 +87,7 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
         </div>
 
         {{-- Imágenes derecha --}}
-        @if($bannerFotos->isNotEmpty())
+        {{-- @if($bannerFotos->isNotEmpty())
         <div class="hidden sm:flex gap-2 shrink-0">
             @foreach($bannerFotos->take(4) as $foto)
             <a href="{{ route('panoramas.show', $foto) }}"
@@ -98,7 +98,7 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
             </a>
             @endforeach
         </div>
-        @endif
+        @endif --}}
 
     </div>
 </div>
