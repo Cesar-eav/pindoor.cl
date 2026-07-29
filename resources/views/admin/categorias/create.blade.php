@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header">
         <div class="flex items-center gap-3">
             <a href="{{ route('admin.categorias.index') }}" class="text-gray-400 hover:text-gray-600 transition">
@@ -163,4 +163,4 @@
         };
     });
     </script>
-</x-app-layout>
+</x-admin-layout>

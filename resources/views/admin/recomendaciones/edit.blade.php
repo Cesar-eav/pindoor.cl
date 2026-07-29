@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header">
         <div class="flex items-center gap-3">
             <a href="{{ route('admin.recomendaciones.index') }}"
@@ -44,4 +44,4 @@
     </div>
 
     @include('admin.recomendaciones._editor-scripts')
-</x-app-layout>
+</x-admin-layout>

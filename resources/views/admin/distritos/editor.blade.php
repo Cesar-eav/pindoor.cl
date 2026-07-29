@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
 <x-slot name="header">
     <div class="flex items-center justify-between">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Editor de Distritos</h2>
@@ -335,4 +335,4 @@ function eliminarDistrito(id) {
 }
 </script>
 
-</x-app-layout>
+</x-admin-layout>

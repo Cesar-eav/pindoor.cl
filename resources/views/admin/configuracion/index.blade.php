@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header">
         <h2 class="font-extrabold text-xl text-gray-900">Configuración general</h2>
     </x-slot>
@@ -40,4 +40,4 @@
 
         </div>
     </div>
-</x-app-layout>
+</x-admin-layout>

@@ -113,9 +113,9 @@
                 <x-responsive-nav-link :href="route('admin.clientes')" :active="request()->routeIs('admin.clientes')">
                     Clientes
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('admin.leads')" :active="request()->routeIs('admin.leads')">
+                {{-- <x-responsive-nav-link :href="route('admin.leads')" :active="request()->routeIs('admin.leads')">
                     Leads
-                </x-responsive-nav-link>
+                </x-responsive-nav-link> --}}
                 <x-responsive-nav-link :href="route('admin.usuarios')" :active="request()->routeIs('admin.usuarios')">
                     Usuarios
                 </x-responsive-nav-link>
