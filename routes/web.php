@@ -51,6 +51,7 @@ Route::get('/buscar', [PuntoInteresController::class, 'index'])->name('puntos.bu
 Route::get('/lugar/{slug}', [PuntoInteresController::class, 'show'])->name('puntos.show');
 Route::get('/lugar/{slug}/producto/{producto}', [PuntoInteresController::class, 'showProducto'])->name('puntos.producto');
 Route::get('/lugar/{slug}/exposicion/{item}', [PuntoInteresController::class, 'showExposicion'])->name('puntos.exposicion');
+Route::get('/lugar/{slug}/evento/{item}', [PuntoInteresController::class, 'showEvento'])->name('puntos.evento');
 
 
 Route::get('/labrujula', fn() => redirect('/', 301));
