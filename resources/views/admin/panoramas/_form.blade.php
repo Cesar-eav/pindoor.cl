@@ -97,7 +97,7 @@ function ubicacionAC(inicial) {
         <select name="categoria"
                 class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none bg-white">
             <option value="">— Sin categoría —</option>
-            @foreach(\App\Models\Panorama::CATEGORIAS as $slug => $cat)
+            @foreach(\App\Models\CategoriaEvento::catalogo() as $slug => $cat)
                 <option value="{{ $slug }}" {{ old('categoria', $panorama->categoria ?? '') === $slug ? 'selected' : '' }}>
                     {{ $cat['emoji'] }} {{ $cat['label'] }}
                 </option>

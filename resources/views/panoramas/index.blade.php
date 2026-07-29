@@ -142,7 +142,7 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
             <a href="{{ route('atractivos.panoramas', ['categoria' => $slug]) }}"
                class="shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-colors
                       {{ $catActiva === $slug ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-500' }}">
-                {{ $cat['emoji'] }} {{ __('ui.panoramas.cat.' . $slug) }}
+                {{ $cat['emoji'] }} {{ $cat['label'] }}
             </a>
             @endif
         @endforeach

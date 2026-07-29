@@ -30,7 +30,7 @@ class ClienteEventosController extends Controller
             ->orderByRaw("JSON_EXTRACT(datos, '$.hora')")
             ->get();
 
-        $tiposEvento = ModuloItem::catalogoTiposEvento();
+        $tiposEvento = \App\Models\CategoriaEvento::catalogo();
 
         return view('cliente.eventos', compact('punto', 'eventos', 'tiposEvento'));
     }
@@ -45,7 +45,7 @@ class ClienteEventosController extends Controller
         $request->validate([
             'titulo'             => 'required|string|max:255',
             'descripcion'        => 'nullable|string',
-            'tipo'               => 'required|string',
+            'tipo'               => 'required|string|in:' . implode(',', \App\Models\CategoriaEvento::slugs()),
             'fecha'              => 'required|date',
             'hora'               => 'nullable|date_format:H:i',
             'hora_fin'           => 'nullable|date_format:H:i',
