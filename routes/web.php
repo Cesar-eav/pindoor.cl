@@ -195,6 +195,7 @@ Route::middleware(['auth', 'verified', 'role:cliente'])->prefix('cliente')->name
     // Alta propia de negocio
     Route::get('/nuevo',  [ClienteController::class, 'onboarding'])->name('nuevo');
     Route::post('/nuevo', [ClienteController::class, 'crearNegocio'])->name('crear');
+    Route::get('/geocodificar', [ClienteController::class, 'geocodificar'])->name('geocodificar');
 
     // Perfil del negocio
     Route::get('/perfil', [ClienteController::class, 'perfil'])->name('perfil');                          // lista de negocios

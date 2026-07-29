@@ -49,11 +49,12 @@
                     {{-- Mapa --}}
                     <div class="mb-6">
                         <x-input-label value="Ubicación en el mapa *" />
-                        <p class="text-xs text-gray-400 mb-2">Haz clic en el mapa o arrastra el marcador para ajustar la posición exacta de tu espacio.</p>
+                        <p class="text-xs text-gray-400 mb-2">Escribe tu dirección y el pin se ubica solo. Si no queda exacto, arrástralo en el mapa.</p>
                         <div id="app">
                             <selector-mapa
                                 :initial-lat="-33.0472"
                                 :initial-lng="-71.6297"
+                                geocode-url="{{ route('cliente.geocodificar') }}"
                             ></selector-mapa>
                         </div>
                     </div>
