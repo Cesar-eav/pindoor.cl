@@ -21,6 +21,7 @@ class Post extends Model
     protected $fillable = [
         'titulo',
         'slug',
+        'dynamic_block_title',
         'resumen',
         'contenido',
         'imagen_portada',

@@ -18,7 +18,9 @@ class PostController extends Controller
 
     public function create()
     {
-        $puntos = PuntoInteres::where('eliminado', false)->get(['id', 'title', 'sector'])
+        $puntos = PuntoInteres::where('eliminado', false)
+            ->with('categoria:id,nombre,icono')
+            ->get(['id', 'title', 'sector', 'categoria_id'])
             ->sortBy(fn ($p) => $p->title)->values();
         return view('admin.blog.create', compact('puntos'));
     }
@@ -29,6 +31,7 @@ class PostController extends Controller
             'titulo_es'      => 'required|string|max:255',
             'titulo_en'      => 'nullable|string|max:255',
             'slug'           => 'nullable|string|max:255',
+            'dynamic_block_title' => 'nullable|string|max:255',
             'resumen_es'     => 'nullable|string|max:600',
             'resumen_en'     => 'nullable|string|max:600',
             'contenido_es'   => 'nullable|string',
@@ -46,7 +49,8 @@ class PostController extends Controller
         $publicado = (bool) ($data['publicado'] ?? false);
 
         $post = new Post();
-        $post->slug           = $slug;
+        $post->slug                 = $slug;
+        $post->dynamic_block_title  = $data['dynamic_block_title'] ?? null;
         $post->imagen_portada = $portada ?? null;
         $post->imagenes       = $this->recogerImagenesNuevas($request, []);
         $post->publicado      = $publicado;
@@ -71,7 +75,9 @@ class PostController extends Controller
     public function edit(Post $blog)
     {
         $blog->load('lugares');
-        $puntos = PuntoInteres::where('eliminado', false)->get(['id', 'title', 'sector'])
+        $puntos = PuntoInteres::where('eliminado', false)
+            ->with('categoria:id,nombre,icono')
+            ->get(['id', 'title', 'sector', 'categoria_id'])
             ->sortBy(fn ($p) => $p->title)->values();
         return view('admin.blog.edit', ['post' => $blog, 'puntos' => $puntos]);
     }
@@ -82,6 +88,7 @@ class PostController extends Controller
             'titulo_es'      => 'required|string|max:255',
             'titulo_en'      => 'nullable|string|max:255',
             'slug'           => 'nullable|string|max:255',
+            'dynamic_block_title' => 'nullable|string|max:255',
             'resumen_es'     => 'nullable|string|max:600',
             'resumen_en'     => 'nullable|string|max:600',
             'contenido_es'   => 'nullable|string',
@@ -90,7 +97,8 @@ class PostController extends Controller
             'publicado'      => 'nullable|boolean',
         ]);
 
-        $blog->slug = Post::generarSlug($data['slug'] ?: $data['titulo_es'], $blog->id);
+        $blog->slug                = Post::generarSlug($data['slug'] ?: $data['titulo_es'], $blog->id);
+        $blog->dynamic_block_title = $data['dynamic_block_title'] ?? null;
 
         if ($request->hasFile('imagen_portada')) {
             if ($blog->imagen_portada) Storage::disk('public')->delete($blog->imagen_portada);
