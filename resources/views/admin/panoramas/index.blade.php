@@ -199,7 +199,7 @@
                             </div>
                             <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
                                 @if($panorama->fuente === 'cliente')
-                                    @php $catInfo = \App\Models\Panorama::CATEGORIAS[$panorama->categoria] ?? null; @endphp
+                                    @php $catInfo = \App\Models\CategoriaEvento::catalogo()[$panorama->categoria] ?? null; @endphp
                                     @if($catInfo)
                                     <span class="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
                                         {{ $catInfo['emoji'] }} {{ $catInfo['label'] }}

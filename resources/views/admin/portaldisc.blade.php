@@ -134,7 +134,7 @@
     </div>
 
     <script>
-    const CATEGORIAS = @json(array_map(fn($v) => $v['label'], \App\Models\Panorama::CATEGORIAS));
+    const CATEGORIAS = @json(array_map(fn($v) => $v['label'], \App\Models\CategoriaEvento::catalogo()));
     const CSRF = '{{ csrf_token() }}';
 
     const TIMEOUT_MS = 5 * 60 * 1000; // 5 min: margen sobre lo que tarda el scraping (~1-2 min típico)

@@ -10,6 +10,7 @@ use App\Http\Controllers\ClienteProductosController;
 use App\Http\Controllers\PublicitaController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Admin\CategoriaController;
+use App\Http\Controllers\Admin\CategoriaEventoController;
 use App\Http\Controllers\Admin\PanoramaController;
 use App\Http\Controllers\ArtistaController;
 use App\Http\Controllers\BlogController;
@@ -127,6 +128,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Categorías
     Route::resource('categorias', CategoriaController::class)->except(['show']);
+    Route::resource('categoria-eventos', CategoriaEventoController::class)
+        ->except(['show'])
+        ->parameters(['categoria-eventos' => 'categoriaEvento']);
 
     // Blog
     Route::post('/blog/imagen', [PostController::class, 'uploadImagen'])->name('blog.imagen');

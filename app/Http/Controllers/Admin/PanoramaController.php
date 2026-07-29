@@ -48,7 +48,7 @@ class PanoramaController extends Controller
             ->values();
 
         $limiteDias = (int) Configuracion::get('panoramas_limite_dias', 15);
-        $categorias = Panorama::CATEGORIAS;
+        $categorias = \App\Models\CategoriaEvento::catalogo();
         $hoy        = Carbon::today();
         $semana     = $hoy->copy()->addDays(7);
 
@@ -87,19 +87,12 @@ class PanoramaController extends Controller
      */
     private function eventosDeClientes(?string $search, ?string $categoria)
     {
-        $tipoACategoria = [
-            'concierto'   => 'musica',   'teatro'      => 'teatro',
-            'cine'        => 'cine',     'exposicion'  => 'exposicion',
-            'taller'      => 'taller',   'danza'       => 'danza',
-            'conferencia' => 'conferencia',
-        ];
-
         $eventos = ModuloItem::where('modulo', 'eventos')
             ->whereNotNull('fecha')
             ->whereHas('punto', fn($q) => $q->where('eliminado', false))
             ->with('punto')
             ->get()
-            ->map(function (ModuloItem $item) use ($tipoACategoria) {
+            ->map(function (ModuloItem $item) {
                 $fake = new Panorama();
                 $fake->fill([
                     'titulo'      => $item->campo('titulo', ''),
@@ -108,7 +101,7 @@ class PanoramaController extends Controller
                     'fecha_fin'   => null,
                     'dias_semana' => null,
                     'hora'        => $item->campo('hora'),
-                    'categoria'   => $tipoACategoria[$item->campo('tipo', 'otro')] ?? 'otros',
+                    'categoria'   => $item->campo('tipo', 'otros'),
                     'es_gratuito' => (float) ($item->campo('precio', 1)) === 0.0,
                     'enlace'      => $item->campo('url_entradas'),
                     'imagen'      => $item->imagen,
@@ -175,7 +168,7 @@ class PanoramaController extends Controller
             'dias_semana.*'  => 'integer|between:1,7',
             'hora'           => 'nullable|string|max:100',
             'enlace'         => 'nullable|url|max:500',
-            'categoria'      => 'nullable|string|in:' . implode(',', array_keys(\App\Models\Panorama::CATEGORIAS)),
+            'categoria'      => 'nullable|string|in:' . implode(',', \App\Models\CategoriaEvento::slugs()),
             'orden'          => 'nullable|integer|min:0',
             'activo'         => 'nullable|boolean',
             'es_gratuito'    => 'nullable|boolean',
@@ -252,7 +245,7 @@ class PanoramaController extends Controller
             'dias_semana.*'  => 'integer|between:1,7',
             'hora'           => 'nullable|string|max:100',
             'enlace'         => 'nullable|url|max:500',
-            'categoria'      => 'nullable|string|in:' . implode(',', array_keys(\App\Models\Panorama::CATEGORIAS)),
+            'categoria'      => 'nullable|string|in:' . implode(',', \App\Models\CategoriaEvento::slugs()),
             'orden'          => 'nullable|integer|min:0',
             'activo'         => 'nullable|boolean',
             'es_gratuito'    => 'nullable|boolean',
@@ -367,7 +360,7 @@ class PanoramaController extends Controller
 
     public function actualizarCategoria(Request $request, Panorama $panorama)
     {
-        $request->validate(['categoria' => 'required|in:' . implode(',', array_keys(Panorama::CATEGORIAS))]);
+        $request->validate(['categoria' => 'required|in:' . implode(',', \App\Models\CategoriaEvento::slugs())]);
         $panorama->update(['categoria' => $request->categoria]);
         return response()->json(['ok' => true]);
     }

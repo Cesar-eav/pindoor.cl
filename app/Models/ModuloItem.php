@@ -32,22 +32,6 @@ class ModuloItem extends Model
         'fecha'     => 'date',
     ];
 
-    // ─── Catálogos estáticos ────────────────────────────────────────────────────
-
-    public static function catalogoTiposEvento(): array
-    {
-        return [
-            'teatro'      => ['emoji' => '🎭', 'label' => 'Teatro'],
-            'cine'        => ['emoji' => '🎬', 'label' => 'Cine'],
-            'concierto'   => ['emoji' => '🎵', 'label' => 'Concierto'],
-            'exposicion'  => ['emoji' => '🖼️', 'label' => 'Exposición'],
-            'taller'      => ['emoji' => '🎨', 'label' => 'Taller'],
-            'danza'       => ['emoji' => '💃', 'label' => 'Danza'],
-            'conferencia' => ['emoji' => '🎤', 'label' => 'Conferencia'],
-            'otro'        => ['emoji' => '📌', 'label' => 'Otro'],
-        ];
-    }
-
     // ─── Relaciones ────────────────────────────────────────────────────────────
 
     public function punto()
@@ -102,7 +86,7 @@ class ModuloItem extends Model
      */
     public function tipoEvento(): array
     {
-        $tipo = $this->datos['tipo'] ?? 'otro';
-        return static::catalogoTiposEvento()[$tipo] ?? ['emoji' => '📌', 'label' => $tipo];
+        $tipo = $this->datos['tipo'] ?? 'otros';
+        return CategoriaEvento::catalogo()[$tipo] ?? ['emoji' => '📌', 'label' => $tipo];
     }
 }

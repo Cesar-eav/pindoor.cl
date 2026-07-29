@@ -13,24 +13,6 @@ class Panorama extends Model
 
     public array $translatable = ['titulo', 'ubicacion', 'descripcion'];
 
-    const CATEGORIAS = [
-    'arte'        => ['label' => 'Arte',        'emoji' => '🎨'],    
-    'musica'      => ['label' => 'Música',      'emoji' => '🎵'],
-    'cine'        => ['label' => 'Cine',        'emoji' => '🎬'],
-    'conferencia' => ['label' => 'Conferencia',      'emoji' => '🎓'],
-    'danza'       => ['label' => 'Danza',       'emoji' => '💃'],
-    'exposicion'  => ['label' => 'Exposición',      'emoji' => '🧐'],
-    'feria'       => ['label' => 'Feria',       'emoji' => '🛍️'],
-    'gastronomia' => ['label' => 'Gastronomía', 'emoji' => '🍽️'],
-    'infantil'    => ['label' => 'Infantil',    'emoji' => '🧸'],
-    'literatura'  => ['label' => 'Literatura',  'emoji' => '📚'],
-    'standup'     => ['label' => 'Stand Up',    'emoji' => '🎤'],
-    'teatro'      => ['label' => 'Teatro',      'emoji' => '🎭'],            
-    'tour'        => ['label' => 'Tour',        'emoji' => '🗺️'],
-    'taller'      => ['label' => 'Taller',      'emoji' => '🛠️'],      
-    'otros'       => ['label' => 'Otros',      'emoji' => '🫘'],
-    ];
-
     const FUENTES = [
         'manual'     => ['label' => 'Manual',     'emoji' => '✍️'],
         'passline'   => ['label' => 'Passline',   'emoji' => '🎫'],

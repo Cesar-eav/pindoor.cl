@@ -328,13 +328,6 @@ class PuntoInteresController extends Controller
         return view('panoramas.show', compact('panorama', 'puntoRelacionado'));
     }
 
-    private const TIPO_EVENTO_A_CATEGORIA = [
-        'concierto'  => 'musica',   'teatro'     => 'teatro',
-        'cine'       => 'cine',     'exposicion' => 'exposicion',
-        'taller'     => 'taller',   'danza'      => 'danza',
-        'conferencia'=> 'conferencia',
-    ];
-
     /**
      * Convierte un evento de agenda de cliente (ModuloItem) en una instancia Panorama de
      * solo lectura, para reutilizar toda la vista/lógica de panoramas.show y panoramas.index.
@@ -354,7 +347,7 @@ class PuntoInteresController extends Controller
             'fecha_fin'   => null,
             'dias_semana' => null,
             'hora'        => $item->campo('hora'),
-            'categoria'   => self::TIPO_EVENTO_A_CATEGORIA[$item->campo('tipo', 'otro')] ?? 'otros',
+            'categoria'   => $item->campo('tipo', 'otros'),
             'es_gratuito' => (float) ($item->campo('precio', 1)) === 0.0,
             'enlace'      => $item->campo('url_entradas'),
             'imagen'      => $item->imagen,
@@ -376,7 +369,7 @@ class PuntoInteresController extends Controller
         $hoy       = Carbon::today();
         $manana    = Carbon::tomorrow();
         $tope      = $hoy->copy()->addDays($limite);
-        $categorias = Panorama::CATEGORIAS;
+        $categorias = \App\Models\CategoriaEvento::catalogo();
         $catActiva  = $request->input('categoria');
 
         // Eventos de agenda de clientes → convertir a instancias Panorama para reutilizar la vista

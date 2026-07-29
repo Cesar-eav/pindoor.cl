@@ -1,5 +1,5 @@
 @php
-    $categLabel = \App\Models\Panorama::CATEGORIAS[$panorama->categoria]['label'] ?? null;
+    $categLabel = \App\Models\CategoriaEvento::catalogo()[$panorama->categoria]['label'] ?? null;
     $fechaStr   = \Carbon\Carbon::parse($panorama->fecha)->locale('es')->isoFormat('D [de] MMMM [de] YYYY');
     $seoTitle   = $panorama->titulo
                 . ($panorama->ubicacion ? ', ' . $panorama->ubicacion : ', Valparaíso')
@@ -120,8 +120,8 @@
 
             {{-- Badges + acciones --}}
             <div class="flex flex-wrap items-center gap-2 mb-4">
-                @if(isset(\App\Models\Panorama::CATEGORIAS[$panorama->categoria]))
-                    @php $cat = \App\Models\Panorama::CATEGORIAS[$panorama->categoria]; @endphp
+                @if(isset(\App\Models\CategoriaEvento::catalogo()[$panorama->categoria]))
+                    @php $cat = \App\Models\CategoriaEvento::catalogo()[$panorama->categoria]; @endphp
                     <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#fff0ef] text-[#fc5648] text-xs font-bold">
                         {{ $cat['emoji'] }} {{ $cat['label'] }}
                     </span>

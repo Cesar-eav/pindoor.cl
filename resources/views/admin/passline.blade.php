@@ -131,7 +131,7 @@
     </div>
 
     <script>
-    const CATEGORIAS = @json(array_map(fn($v) => $v['label'], \App\Models\Panorama::CATEGORIAS));
+    const CATEGORIAS = @json(array_map(fn($v) => $v['label'], \App\Models\CategoriaEvento::catalogo()));
     const CSRF = '{{ csrf_token() }}';
 
     function passlineImport() {
