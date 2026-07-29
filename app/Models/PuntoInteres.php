@@ -37,6 +37,8 @@ class PuntoInteres extends Model
         'autor',
         'tags',
         'activo',
+        'estado_aprobacion',
+        'contacto_whatsapp',
         'eliminado',
         'es_cliente',
         'modulos_habilitados',

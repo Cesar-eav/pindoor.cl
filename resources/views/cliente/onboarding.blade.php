@@ -46,6 +46,16 @@
                         </div>
                     </div>
 
+                    @if($requiereAprobacion)
+                    {{-- WhatsApp de contacto (solo si la aprobación de admin está activa) --}}
+                    <div class="mb-6">
+                        <x-input-label for="contacto_whatsapp" value="WhatsApp de contacto *" />
+                        <p class="text-xs text-gray-400 mb-2">El equipo de Pindoor te va a contactar acá para confirmar los datos antes de publicar tu ficha.</p>
+                        <x-text-input id="contacto_whatsapp" name="contacto_whatsapp" type="text" class="block mt-1 w-full"
+                                      placeholder="+56 9 1234 5678" :value="old('contacto_whatsapp')" required />
+                    </div>
+                    @endif
+
                     {{-- Mapa --}}
                     <div class="mb-6">
                         <x-input-label value="Ubicación en el mapa *" />

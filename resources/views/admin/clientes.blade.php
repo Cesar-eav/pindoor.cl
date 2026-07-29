@@ -34,6 +34,60 @@
                 @endif
             </div>
 
+            {{-- Pendientes de aprobación --}}
+            @if($pendientes->isNotEmpty())
+            <div class="bg-white rounded-2xl shadow-sm border border-amber-200 overflow-hidden">
+                <div class="p-6 border-b border-amber-100 bg-amber-50 flex items-center justify-between">
+                    <h3 class="font-bold text-amber-800">⏳ Pendientes de aprobación</h3>
+                    <span class="text-xs text-amber-600">{{ $pendientes->count() }} esperando revisión</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50 text-gray-500 uppercase text-xs font-bold">
+                            <tr>
+                                <th class="px-6 py-4">Negocio</th>
+                                <th class="px-6 py-4">Categoría</th>
+                                <th class="px-6 py-4">WhatsApp</th>
+                                <th class="px-6 py-4">Email usuario</th>
+                                <th class="px-6 py-4 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @foreach($pendientes as $punto)
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-4 font-medium text-gray-900">{{ $punto->title }}</td>
+                                <td class="px-6 py-4 text-gray-500">{{ $punto->categoria?->nombre ?? '—' }}</td>
+                                <td class="px-6 py-4 text-gray-500">{{ $punto->contacto_whatsapp ?: '—' }}</td>
+                                <td class="px-6 py-4 text-gray-500">{{ $punto->user?->email ?? '—' }}</td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex justify-end gap-3">
+                                        <a href="{{ route('admin.puntos.edit', $punto) }}"
+                                           class="text-xs text-gray-500 hover:text-gray-800 font-medium">
+                                            Editar
+                                        </a>
+                                        <form method="POST" action="{{ route('admin.clientes.aprobar', $punto) }}">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="text-xs text-green-600 hover:text-green-800 font-bold">
+                                                Aprobar
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ route('admin.clientes.rechazar', $punto) }}"
+                                              onsubmit="return confirm('¿Rechazar «{{ $punto->title }}»? Queda oculto pero editable.')">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="text-xs text-red-400 hover:text-red-600 font-medium">
+                                                Rechazar
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @endif
+
             {{-- Tabla de clientes activos --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="p-6 border-b border-gray-100 flex items-center justify-between">
@@ -95,6 +149,15 @@
                                         <span class="px-2 py-1 rounded-full text-xs font-bold {{ $punto->activo ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
                                             {{ $punto->activo ? 'Activo' : 'Pausado' }}
                                         </span>
+                                        @if($punto->estado_aprobacion === 'rechazado')
+                                            <span class="block mt-1 px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-600 w-fit">
+                                                Rechazado
+                                            </span>
+                                        @elseif($punto->estado_aprobacion === 'pendiente')
+                                            <span class="block mt-1 px-2 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 w-fit">
+                                                Pendiente
+                                            </span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 text-right">
                                         <div class="flex justify-end gap-3">

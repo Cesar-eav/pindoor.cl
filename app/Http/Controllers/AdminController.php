@@ -193,7 +193,13 @@ class AdminController extends Controller
             ->orderBy('title')
             ->get();
 
-        return view('admin.clientes', compact('clientes', 'puntosDisponibles'));
+        $pendientes = PuntoInteres::where('estado_aprobacion', 'pendiente')
+            ->where('eliminado', false)
+            ->with(['user', 'categoria'])
+            ->latest()
+            ->get();
+
+        return view('admin.clientes', compact('clientes', 'puntosDisponibles', 'pendientes'));
     }
 
     public function mostrarActivarCliente(PuntoInteres $punto)
@@ -281,6 +287,26 @@ class AdminController extends Controller
 
         return redirect()->route('admin.clientes')
             ->with('success', "\"{$punto->title}\" ya no figura como cliente.");
+    }
+
+    public function aprobarCliente(PuntoInteres $punto)
+    {
+        $datos = ['estado_aprobacion' => 'aprobado'];
+        if ($punto->imagenes()->where('es_principal', true)->exists()) {
+            $datos['activo'] = true;
+        }
+        $punto->update($datos);
+
+        return redirect()->route('admin.clientes')
+            ->with('success', "\"{$punto->title}\" fue aprobado.");
+    }
+
+    public function rechazarCliente(PuntoInteres $punto)
+    {
+        $punto->update(['estado_aprobacion' => 'rechazado', 'activo' => false]);
+
+        return redirect()->route('admin.clientes')
+            ->with('success', "\"{$punto->title}\" fue rechazado. Sigue oculto pero puedes editarlo o aprobarlo más tarde.");
     }
 
     // ─────────────────────────────────────────────────────────────────────────

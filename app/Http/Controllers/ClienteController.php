@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;
+use App\Models\Configuracion;
 use App\Models\ImagenPunto;
 use App\Models\ModuloDato;
 use App\Models\PuntoInteres;
+use App\Models\User;
+use App\Notifications\NegocioPendienteAprobacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -28,7 +32,8 @@ class ClienteController extends Controller
         $categorias = Categoria::whereIn('slug', ['cafeterias', 'cultura', 'museos', 'picadas', 'comer', 'alojar', 'tiendas', 'artesania','centro-deportivo','bar'])
             ->orderBy('nombre')
             ->get();
-        return view('cliente.onboarding', compact('categorias'));
+        $requiereAprobacion = (bool) Configuracion::get('aprobacion_negocios_activa', false);
+        return view('cliente.onboarding', compact('categorias', 'requiereAprobacion'));
     }
 
     /** Geocodifica una dirección dentro de Valparaíso. Usa Google Maps si hay API key configurada, si no cae a Nominatim (OSM). */
@@ -116,14 +121,17 @@ class ClienteController extends Controller
             'imagen_kb'     => $request->file('imagen') ? round($request->file('imagen')->getSize() / 1024) : null,
         ]);
 
+        $requiereAprobacion = (bool) Configuracion::get('aprobacion_negocios_activa', false);
+
         try {
             $data = $request->validate([
-                'title'       => ['required', 'string', 'max:255'],
-                'categoria_id'=> ['required', 'exists:categorias,id'],
-                'lat'         => ['required', 'numeric', 'between:-90,90'],
-                'lng'         => ['required', 'numeric', 'between:-180,180'],
-                'direccion'   => ['nullable', 'string', 'max:255'],
-                'imagen'      => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:25600'],
+                'title'             => ['required', 'string', 'max:255'],
+                'categoria_id'      => ['required', 'exists:categorias,id'],
+                'lat'               => ['required', 'numeric', 'between:-90,90'],
+                'lng'               => ['required', 'numeric', 'between:-180,180'],
+                'direccion'         => ['nullable', 'string', 'max:255'],
+                'contacto_whatsapp' => [$requiereAprobacion ? 'required' : 'nullable', 'string', 'max:30'],
+                'imagen'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:25600'],
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::warning('[onboarding] validación falló', ['user_id' => $userId, 'errores' => $e->errors()]);
@@ -147,6 +155,8 @@ class ClienteController extends Controller
             'lat'                => $data['lat'],
             'lng'                => $data['lng'],
             'direccion'          => $data['direccion'] ?? '',
+            'contacto_whatsapp'  => $data['contacto_whatsapp'] ?? null,
+            'estado_aprobacion'  => $requiereAprobacion ? 'pendiente' : null,
             'sector'             => '',
             'description'        => '',
             'es_cliente'         => true,
@@ -154,7 +164,7 @@ class ClienteController extends Controller
             'modulos_habilitados'=> PuntoInteres::modulosDefecto($data['categoria_id']),
         ]);
 
-        Log::info('[onboarding] punto creado', ['user_id' => $userId, 'punto_id' => $punto->id, 'slug' => $slug]);
+        Log::info('[onboarding] punto creado', ['user_id' => $userId, 'punto_id' => $punto->id, 'slug' => $slug, 'requiere_aprobacion' => $requiereAprobacion]);
 
         $mensaje = 'Guardamos tu espacio. Sube al menos una foto desde tu panel para que sea visible en Pindoor.';
 
@@ -167,16 +177,28 @@ class ClienteController extends Controller
                     'es_principal'     => true,
                     'orden'            => 0,
                 ]);
-                $punto->update(['activo' => true]);
-                $mensaje = '¡Tu perfil ya está activo en Pindoor!';
+                if (!$requiereAprobacion) {
+                    $punto->update(['activo' => true]);
+                    $mensaje = '¡Tu perfil ya está activo en Pindoor!';
+                }
                 Log::info('[onboarding] imagen procesada OK', ['user_id' => $userId, 'punto_id' => $punto->id, 'ruta' => $ruta]);
             } catch (\RuntimeException $e) {
-                $mensaje = 'Guardamos tu espacio, pero no pudimos procesar esa foto (' . $e->getMessage() . '). Sube otra desde tu panel para que sea visible en Pindoor.';
                 Log::error('[onboarding] fallo al procesar imagen', [
                     'user_id'  => $userId,
                     'punto_id' => $punto->id,
                     'error'    => $e->getMessage(),
                 ]);
+                if (!$requiereAprobacion) {
+                    $mensaje = 'Guardamos tu espacio, pero no pudimos procesar esa foto (' . $e->getMessage() . '). Sube otra desde tu panel para que sea visible en Pindoor.';
+                }
+            }
+        }
+
+        if ($requiereAprobacion) {
+            $mensaje = 'Registramos tu espacio. El equipo de Pindoor te va a contactar a ' . $data['contacto_whatsapp'] . ' para confirmar los datos antes de publicarlo.';
+            $admins = User::where('type', 'admin')->pluck('email');
+            if ($admins->isNotEmpty()) {
+                Notification::route('mail', $admins->all())->notify(new NegocioPendienteAprobacion($punto));
             }
         }
 
@@ -442,9 +464,10 @@ class ClienteController extends Controller
             }
         }
 
-        // Primera foto que sube el negocio: la convierte en visible en Pindoor.
+        // Primera foto que sube el negocio: la convierte en visible en Pindoor
+        // (salvo que esté pendiente de aprobación del admin).
         $seActivo = false;
-        if ($esPrimera && $subidas > 0 && !$punto->activo) {
+        if ($esPrimera && $subidas > 0 && !$punto->activo && $punto->estado_aprobacion !== 'pendiente') {
             $punto->update(['activo' => true]);
             $seActivo = true;
         }
