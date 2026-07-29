@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Artista;
 use App\Models\Categoria;
 use App\Models\Experiencia;
+use App\Models\ModuloItem;
 use App\Models\Panorama;
 use App\Models\Post;
 use App\Models\PuntoInteres;
@@ -102,11 +103,22 @@ class AtractivosGrid extends Component
         }
 
         $hoy = Carbon::today();
+
+        // Eventos de agenda de clientes → convertir a instancias Panorama para incluirlos junto a los del admin
+        $eventosCliente = $hayFiltros ? collect() : ModuloItem::where('modulo', 'eventos')
+            ->where('activo', true)
+            ->where('fecha', '>=', $hoy)
+            ->whereHas('punto', fn($q) => $q->where('activo', true)->where('eliminado', false))
+            ->with('punto')
+            ->get()
+            ->map(fn (ModuloItem $item) => $item->comoPanorama());
+
         $proximosPanoramas = $hayFiltros ? collect() : Panorama::where('activo', true)
             ->whereNull('dias_semana')
             ->where(fn($q) => $q->whereNull('fecha_fin')->where('fecha', '>=', $hoy)
                 ->orWhere('fecha_fin', '>=', $hoy))
             ->get()
+            ->concat($eventosCliente)
             ->map(fn($p) => tap($p, fn($p) => $p->fecha_proxima = $p->proximaOcurrencia($hoy)))
             ->filter(fn($p) => $p->fecha_proxima !== null)
             ->sortBy('fecha_proxima')

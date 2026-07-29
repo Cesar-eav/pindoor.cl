@@ -85,7 +85,8 @@
                  @mousemove="if (dragging) { $el.scrollLeft = dragScrollLeft - ($event.pageX - $el.offsetLeft - dragStartX) * 1.5 }">
                 <div class="flex">
                     @foreach($proximosPanoramas->take(30) as $p)
-                    <a href="{{ route('panoramas.show', $p) }}"
+                    @php $hrefPanorama = $p->slug ? route('panoramas.show', $p) : route('puntos.evento', ['slug' => $p->punto_slug, 'item' => $p->modulo_item_id]); @endphp
+                    <a href="{{ $hrefPanorama }}"
                        class="bg-white hover:bg-gray-50 transition group shrink-0 w-44 border-r border-gray-100">
                         @if($p->imagen)
                             <img src="{{ asset('storage/' . $p->imagen) }}" alt="{{ $p->titulo }}"

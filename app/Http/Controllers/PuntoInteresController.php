@@ -113,6 +113,15 @@ class PuntoInteresController extends Controller
 
         $hoy = Carbon::today();
 
+        // Eventos de agenda de clientes → convertir a instancias Panorama para incluirlos junto a los del admin
+        $eventosCliente = ModuloItem::where('modulo', 'eventos')
+            ->where('activo', true)
+            ->where('fecha', '>=', $hoy)
+            ->whereHas('punto', fn($q) => $q->where('activo', true)->where('eliminado', false))
+            ->with('punto')
+            ->get()
+            ->map(fn (ModuloItem $item) => $item->comoPanorama());
+
         $proximosPanoramas = Panorama::where('activo', true)
                     ->whereNull('dias_semana')
 
@@ -121,6 +130,7 @@ class PuntoInteresController extends Controller
                   ->orWhere('fecha_fin', '>=', $hoy);
             })
             ->get()
+            ->concat($eventosCliente)
             ->map(function ($p) use ($hoy) {
                 $p->fecha_proxima = $p->proximaOcurrencia($hoy);
                 return $p;
@@ -322,43 +332,10 @@ class PuntoInteresController extends Controller
         abort_if($item->punto_interes_id !== $punto->id || $item->modulo !== 'eventos' || !$item->activo, 404);
 
         $item->setRelation('punto', $punto);
-        $panorama = $this->fakePanoramaDeModuloItem($item);
+        $panorama = $item->comoPanorama();
         $puntoRelacionado = $punto;
 
         return view('panoramas.show', compact('panorama', 'puntoRelacionado'));
-    }
-
-    /**
-     * Convierte un evento de agenda de cliente (ModuloItem) en una instancia Panorama de
-     * solo lectura, para reutilizar toda la vista/lógica de panoramas.show y panoramas.index.
-     * OJO: 'id' se castea a int automáticamente por ser la primary key de Panorama, así que
-     * cualquier id sintético no numérico ('ev_5') se lee como 0 — no usar $fake->id para nada
-     * que dependa de que sea único (ver PANORAMAS-EVENTOS-CLIENTE-BUG.md). El id real del
-     * ModuloItem va aparte, en 'modulo_item_id'.
-     */
-    private function fakePanoramaDeModuloItem(ModuloItem $item): Panorama
-    {
-        $fake = new Panorama();
-        $fake->fill([
-            'titulo'      => $item->campo('titulo', ''),
-            'descripcion' => $item->campo('descripcion', ''),
-            'ubicacion'   => $item->punto?->title,
-            'fecha'       => $item->fecha->format('Y-m-d'),
-            'fecha_fin'   => null,
-            'dias_semana' => null,
-            'hora'        => $item->campo('hora'),
-            'categoria'   => $item->campo('tipo', 'otros'),
-            'es_gratuito' => (float) ($item->campo('precio', 1)) === 0.0,
-            'enlace'      => $item->campo('url_entradas'),
-            'imagen'      => $item->imagen,
-            'activo'      => true,
-        ]);
-        $fake->setAttribute('id', 'ev_' . $item->id);
-        $fake->setAttribute('modulo_item_id', $item->id);
-        $fake->setAttribute('punto_slug', $item->punto?->slug);
-        $fake->setRelation('imagenes', collect());
-
-        return $fake;
     }
 
     public function panoramas(Request $request)
@@ -380,7 +357,7 @@ class PuntoInteresController extends Controller
             ->whereHas('punto', fn($q) => $q->where('activo', true)->where('eliminado', false))
             ->with('punto')
             ->get()
-            ->map(fn (ModuloItem $item) => $this->fakePanoramaDeModuloItem($item));
+            ->map(fn (ModuloItem $item) => $item->comoPanorama());
 
         $panoramas = $panoramas->concat($eventosCliente)
             ->sortBy(fn($p) => $p->fecha->format('Y-m-d') . ($p->hora ?? '99:99'))
