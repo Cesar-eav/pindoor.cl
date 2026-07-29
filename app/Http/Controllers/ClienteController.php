@@ -9,6 +9,7 @@ use App\Models\PuntoInteres;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -106,14 +107,28 @@ class ClienteController extends Controller
 
     public function crearNegocio(Request $request)
     {
-        $data = $request->validate([
-            'title'       => ['required', 'string', 'max:255'],
-            'categoria_id'=> ['required', 'exists:categorias,id'],
-            'lat'         => ['required', 'numeric', 'between:-90,90'],
-            'lng'         => ['required', 'numeric', 'between:-180,180'],
-            'direccion'   => ['nullable', 'string', 'max:255'],
-            'imagen'      => ['required', 'image', 'max:5120'],
+        $userId = Auth::id();
+        Log::info('[onboarding] inicio', [
+            'user_id'       => $userId,
+            'tiene_imagen'  => $request->hasFile('imagen'),
+            'imagen_nombre' => $request->file('imagen')?->getClientOriginalName(),
+            'imagen_mime'   => $request->file('imagen')?->getMimeType(),
+            'imagen_kb'     => $request->file('imagen') ? round($request->file('imagen')->getSize() / 1024) : null,
         ]);
+
+        try {
+            $data = $request->validate([
+                'title'       => ['required', 'string', 'max:255'],
+                'categoria_id'=> ['required', 'exists:categorias,id'],
+                'lat'         => ['required', 'numeric', 'between:-90,90'],
+                'lng'         => ['required', 'numeric', 'between:-180,180'],
+                'direccion'   => ['nullable', 'string', 'max:255'],
+                'imagen'      => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:25600'],
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('[onboarding] validación falló', ['user_id' => $userId, 'errores' => $e->errors()]);
+            throw $e;
+        }
 
         // Slug único
         $slug = Str::slug($data['title']);
@@ -125,7 +140,7 @@ class ClienteController extends Controller
         }
 
         $punto = PuntoInteres::create([
-            'user_id'            => Auth::id(),
+            'user_id'            => $userId,
             'title'              => $data['title'],
             'slug'               => $slug,
             'categoria_id'       => $data['categoria_id'],
@@ -135,21 +150,39 @@ class ClienteController extends Controller
             'sector'             => '',
             'description'        => '',
             'es_cliente'         => true,
-            'activo'             => true,
+            'activo'             => false,
             'modulos_habilitados'=> PuntoInteres::modulosDefecto($data['categoria_id']),
         ]);
 
-        $ruta = $this->guardarImagenComprimida($request->file('imagen'), 'puntos');
+        Log::info('[onboarding] punto creado', ['user_id' => $userId, 'punto_id' => $punto->id, 'slug' => $slug]);
 
-        ImagenPunto::create([
-            'punto_interes_id' => $punto->id,
-            'ruta'             => $ruta,
-            'es_principal'     => true,
-            'orden'            => 0,
-        ]);
+        $mensaje = 'Guardamos tu espacio. Sube al menos una foto desde tu panel para que sea visible en Pindoor.';
 
-        return redirect()->route('cliente.perfil.ver', $punto)
-            ->with('success', '¡Tu perfil ya está activo en Pindoor!');
+        if ($request->hasFile('imagen')) {
+            try {
+                $ruta = $this->guardarImagenComprimida($request->file('imagen'), 'puntos');
+                ImagenPunto::create([
+                    'punto_interes_id' => $punto->id,
+                    'ruta'             => $ruta,
+                    'es_principal'     => true,
+                    'orden'            => 0,
+                ]);
+                $punto->update(['activo' => true]);
+                $mensaje = '¡Tu perfil ya está activo en Pindoor!';
+                Log::info('[onboarding] imagen procesada OK', ['user_id' => $userId, 'punto_id' => $punto->id, 'ruta' => $ruta]);
+            } catch (\RuntimeException $e) {
+                $mensaje = 'Guardamos tu espacio, pero no pudimos procesar esa foto (' . $e->getMessage() . '). Sube otra desde tu panel para que sea visible en Pindoor.';
+                Log::error('[onboarding] fallo al procesar imagen', [
+                    'user_id'  => $userId,
+                    'punto_id' => $punto->id,
+                    'error'    => $e->getMessage(),
+                ]);
+            }
+        }
+
+        Log::info('[onboarding] fin', ['user_id' => $userId, 'punto_id' => $punto->id, 'activo' => $punto->fresh()->activo]);
+
+        return redirect()->route('cliente.perfil.ver', $punto)->with('success', $mensaje);
     }
 
     // ─── Dashboard ─────────────────────────────────────────────────────────────
@@ -209,7 +242,7 @@ class ClienteController extends Controller
             'video_url'           => 'nullable|url|max:255',
             'tags'                => 'nullable|string',
             'descripcion_busqueda'=> 'nullable|string',
-            'imagen_perfil'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'imagen_perfil'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:25600',
             'categoria_id'        => 'sometimes|nullable|exists:categorias,id',
             // Alimentación
             'carta'               => 'nullable|string',
@@ -239,10 +272,20 @@ class ClienteController extends Controller
         ], fn($v) => $v !== null);
 
         if ($request->hasFile('imagen_perfil')) {
-            if ($punto->imagen_perfil) {
-                Storage::disk('public')->delete($punto->imagen_perfil);
+            try {
+                $ruta = $this->guardarImagenComprimida($request->file('imagen_perfil'), 'perfiles');
+                if ($punto->imagen_perfil) {
+                    Storage::disk('public')->delete($punto->imagen_perfil);
+                }
+                $datosPunto['imagen_perfil'] = $ruta;
+            } catch (\RuntimeException $e) {
+                Log::error('[logo] fallo al procesar imagen', [
+                    'user_id'  => Auth::id(),
+                    'punto_id' => $punto->id,
+                    'error'    => $e->getMessage(),
+                ]);
+                return back()->withErrors(['imagen_perfil' => $e->getMessage()]);
             }
-            $datosPunto['imagen_perfil'] = $this->guardarImagenComprimida($request->file('imagen_perfil'), 'perfiles');
         } elseif (!$punto->imagen_perfil && auth()->user()->imagen_logo) {
             $datosPunto['imagen_perfil'] = auth()->user()->imagen_logo;
         }
@@ -361,6 +404,7 @@ class ClienteController extends Controller
 
         $actual      = $punto->imagenes()->count();
         $disponibles = 10 - $actual;
+        $esPrimera   = $actual === 0;
 
         if ($disponibles <= 0) {
             return back()->with('error', 'Has alcanzado el límite de 10 fotos.');
@@ -374,20 +418,47 @@ class ClienteController extends Controller
         $archivos = array_slice($request->file('imagenes'), 0, $disponibles);
         $orden    = ($punto->imagenes()->max('orden') ?? 0) + 1;
 
+        $fallidas         = 0;
+        $subidas          = 0;
+        $yaAsignoPrincipal = false;
         foreach ($archivos as $archivo) {
-            ImagenPunto::create([
-                'punto_interes_id' => $punto->id,
-                'ruta'             => $this->guardarImagenComprimida($archivo, 'puntos'),
-                'es_principal'     => false,
-                'orden'            => $orden++,
-            ]);
+            try {
+                ImagenPunto::create([
+                    'punto_interes_id' => $punto->id,
+                    'ruta'             => $this->guardarImagenComprimida($archivo, 'puntos'),
+                    'es_principal'     => $esPrimera && !$yaAsignoPrincipal,
+                    'orden'            => $orden++,
+                ]);
+                $subidas++;
+                $yaAsignoPrincipal = $esPrimera || $yaAsignoPrincipal;
+            } catch (\RuntimeException $e) {
+                $fallidas++;
+                Log::error('[galeria] fallo al procesar imagen', [
+                    'user_id'  => Auth::id(),
+                    'punto_id' => $punto->id,
+                    'archivo'  => $archivo->getClientOriginalName(),
+                    'error'    => $e->getMessage(),
+                ]);
+            }
         }
 
-        $subidas  = count($archivos);
-        $omitidas = count($request->file('imagenes')) - $subidas;
+        // Primera foto que sube el negocio: la convierte en visible en Pindoor.
+        $seActivo = false;
+        if ($esPrimera && $subidas > 0 && !$punto->activo) {
+            $punto->update(['activo' => true]);
+            $seActivo = true;
+        }
+
+        $omitidas = count($request->file('imagenes')) - $subidas - $fallidas;
         $msg      = $subidas === 1 ? '1 foto añadida.' : "{$subidas} fotos añadidas.";
+        if ($fallidas > 0) {
+            $msg .= " {$fallidas} no se pudo procesar (formato no compatible, prueba con JPG o PNG).";
+        }
         if ($omitidas > 0) {
             $msg .= " ({$omitidas} omitida(s): límite de 10 alcanzado.)";
+        }
+        if ($seActivo) {
+            $msg = '¡Tu ficha ya es visible en Pindoor! ' . $msg;
         }
 
         return back()->with('success', $msg);
@@ -413,7 +484,17 @@ class ClienteController extends Controller
 
     private function guardarImagenComprimida($archivo, string $carpeta, int $maxWidth = 1600, int $calidad = 80): string
     {
+        if (!extension_loaded('gd')) {
+            throw new \RuntimeException('El servidor no tiene la extensión GD de PHP habilitada, no se pueden procesar imágenes.');
+        }
+
         $img = imagecreatefromstring(file_get_contents($archivo->getPathname()));
+
+        if ($img === false) {
+            // GD no pudo decodificar el archivo — típico con fotos HEIC de iPhone,
+            // que "pasan" la validación 'image' de Laravel pero GD no las soporta.
+            throw new \RuntimeException('No pudimos procesar esa imagen. Prueba con un formato JPG o PNG.');
+        }
 
         $w = imagesx($img);
         $h = imagesy($img);
