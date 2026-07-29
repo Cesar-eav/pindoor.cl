@@ -34,6 +34,9 @@
                         <x-nav-link :href="route('admin.categoria-eventos.index')" :active="request()->routeIs('admin.categoria-eventos.*')">
                             Categorías de eventos
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.configuracion.index')" :active="request()->routeIs('admin.configuracion.*')">
+                            Configuración
+                        </x-nav-link>
                         <x-nav-link :href="route('admin.panoramas.index')" :active="request()->routeIs('admin.panoramas.*')">
                             Panoramas
                         </x-nav-link>
@@ -124,6 +127,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.categoria-eventos.index')" :active="request()->routeIs('admin.categoria-eventos.*')">
                     Categorías de eventos
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.configuracion.index')" :active="request()->routeIs('admin.configuracion.*')">
+                    Configuración
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.panoramas.index')" :active="request()->routeIs('admin.panoramas.*')">
                     Panoramas

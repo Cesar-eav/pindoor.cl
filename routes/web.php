@@ -11,6 +11,7 @@ use App\Http\Controllers\PublicitaController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Admin\CategoriaController;
 use App\Http\Controllers\Admin\CategoriaEventoController;
+use App\Http\Controllers\Admin\ConfiguracionController;
 use App\Http\Controllers\Admin\PanoramaController;
 use App\Http\Controllers\ArtistaController;
 use App\Http\Controllers\BlogController;
@@ -183,8 +184,14 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/puntos/{punto}/activar-cliente', [AdminController::class, 'mostrarActivarCliente'])->name('clientes.activar.form');
     Route::post('/puntos/{punto}/activar-cliente', [AdminController::class, 'activarCliente'])->name('clientes.activar');
     Route::patch('/puntos/{punto}/desactivar-cliente', [AdminController::class, 'desactivarCliente'])->name('clientes.desactivar');
+    Route::patch('/puntos/{punto}/aprobar-cliente', [AdminController::class, 'aprobarCliente'])->name('clientes.aprobar');
+    Route::patch('/puntos/{punto}/rechazar-cliente', [AdminController::class, 'rechazarCliente'])->name('clientes.rechazar');
     Route::get('/puntos/{punto}/modulos', [AdminController::class, 'editarModulos'])->name('clientes.modulos.form');
     Route::put('/puntos/{punto}/modulos', [AdminController::class, 'actualizarModulos'])->name('clientes.modulos');
+
+    // Configuración general
+    Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion.index');
+    Route::post('/configuracion', [ConfiguracionController::class, 'actualizar'])->name('configuracion.actualizar');
 });
 
 /* --- RUTAS CLIENTES (NEGOCIOS) --- */
