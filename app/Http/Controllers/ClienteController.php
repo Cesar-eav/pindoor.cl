@@ -8,6 +8,7 @@ use App\Models\ModuloDato;
 use App\Models\PuntoInteres;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -29,6 +30,80 @@ class ClienteController extends Controller
         return view('cliente.onboarding', compact('categorias'));
     }
 
+    /** Geocodifica una dirección dentro de Valparaíso. Usa Google Maps si hay API key configurada, si no cae a Nominatim (OSM). */
+    public function geocodificar(Request $request)
+    {
+        $request->validate(['q' => 'required|string|max:255']);
+        $query = $request->q . ', Valparaíso, Chile';
+
+        $mapsKey = config('services.google.maps_key');
+        if ($mapsKey) {
+            $resultado = $this->geocodificarConGoogle($query, $mapsKey);
+            if ($resultado) {
+                return response()->json($resultado);
+            }
+        }
+
+        return response()->json($this->geocodificarConNominatim($query) ?? ['encontrado' => false]);
+    }
+
+    private function geocodificarConGoogle(string $query, string $key): ?array
+    {
+        try {
+            $response = Http::timeout(5)->get('https://maps.googleapis.com/maps/api/geocode/json', [
+                'address' => $query,
+                'region'  => 'cl',
+                'bounds'  => '-33.15,-71.72|-32.90,-71.55',
+                'key'     => $key,
+            ]);
+            $data = $response->json();
+
+            if (($data['status'] ?? null) !== 'OK' || empty($data['results'])) {
+                return null;
+            }
+
+            $r = $data['results'][0];
+            return [
+                'encontrado' => true,
+                'lat'        => $r['geometry']['location']['lat'],
+                'lng'        => $r['geometry']['location']['lng'],
+                'direccion'  => $r['formatted_address'],
+            ];
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    private function geocodificarConNominatim(string $query): ?array
+    {
+        try {
+            $response = Http::timeout(5)
+                ->withHeaders(['User-Agent' => 'Pindoor/1.0 (https://pindoor.cl)'])
+                ->get('https://nominatim.openstreetmap.org/search', [
+                    'q'            => $query,
+                    'format'       => 'json',
+                    'limit'        => 1,
+                    'countrycodes' => 'cl',
+                    'viewbox'      => '-71.72,-32.90,-71.55,-33.15',
+                    'bounded'      => 1,
+                ]);
+            $resultados = $response->json();
+
+            if (empty($resultados)) {
+                return null;
+            }
+
+            return [
+                'encontrado' => true,
+                'lat'        => (float) $resultados[0]['lat'],
+                'lng'        => (float) $resultados[0]['lon'],
+                'direccion'  => $resultados[0]['display_name'],
+            ];
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
     public function crearNegocio(Request $request)
     {
         $data = $request->validate([
@@ -36,6 +111,7 @@ class ClienteController extends Controller
             'categoria_id'=> ['required', 'exists:categorias,id'],
             'lat'         => ['required', 'numeric', 'between:-90,90'],
             'lng'         => ['required', 'numeric', 'between:-180,180'],
+            'direccion'   => ['nullable', 'string', 'max:255'],
             'imagen'      => ['required', 'image', 'max:5120'],
         ]);
 
@@ -55,6 +131,7 @@ class ClienteController extends Controller
             'categoria_id'       => $data['categoria_id'],
             'lat'                => $data['lat'],
             'lng'                => $data['lng'],
+            'direccion'          => $data['direccion'] ?? '',
             'sector'             => '',
             'description'        => '',
             'es_cliente'         => true,
