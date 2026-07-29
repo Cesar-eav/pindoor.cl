@@ -192,6 +192,16 @@
             </a>
             @endif
 
+            {{-- Ficha del negocio cliente --}}
+            @if($puntoRelacionado)
+            <a href="{{ route('puntos.show', $puntoRelacionado->slug) }}"
+               class="inline-flex items-center gap-2 w-full justify-center bg-gray-900 hover:bg-gray-800 text-white font-bold text-sm px-5 py-3 rounded-xl transition">
+                Conocer {{ $puntoRelacionado->title }}
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </a>
+            @endif
 
         </div>
     </div>

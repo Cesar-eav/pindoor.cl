@@ -302,7 +302,22 @@ class PuntoInteresController extends Controller
     {
         abort_if(!$panorama->activo, 404);
         $panorama->load('imagenes');
-        return view('panoramas.show', compact('panorama'));
+
+        // El panorama no guarda relación con el punto (tabla "panoramas" no tiene FK):
+        // se infiere por coincidencia de nombre entre "ubicacion" y la ficha del cliente.
+        $puntoRelacionado = null;
+        if ($panorama->ubicacion) {
+            $normalizar = fn ($s) => mb_strtolower(preg_replace('/\s+/', '', trim($s)));
+            $ubicacionNorm = $normalizar($panorama->ubicacion);
+            $puntoRelacionado = PuntoInteres::where('es_cliente', true)
+                ->where('activo', true)
+                ->where('eliminado', false)
+                ->get(['id', 'slug', 'title'])
+                ->first(fn ($p) => str_contains($normalizar($p->title), $ubicacionNorm)
+                    || str_contains($ubicacionNorm, $normalizar($p->title)));
+        }
+
+        return view('panoramas.show', compact('panorama', 'puntoRelacionado'));
     }
 
     public function panoramas(Request $request)
@@ -351,7 +366,7 @@ class PuntoInteresController extends Controller
                 return $fake;
             });
 
-        $panoramas = $panoramas->merge($eventosCliente)
+        $panoramas = $panoramas->concat($eventosCliente)
             ->sortBy(fn($p) => $p->fecha->format('Y-m-d') . ($p->hora ?? '99:99'))
             ->values();
 

@@ -43,7 +43,7 @@ class PanoramaController extends Controller
         }
 
         $panoramas = $query->get()
-            ->merge($this->eventosDeClientes($search, $categoria))
+            ->concat($this->eventosDeClientes($search, $categoria))
             ->sortBy(fn ($p) => ($p->fecha?->format('Y-m-d') ?? '9999-99-99') . ($p->hora ?? '99:99'))
             ->values();
 
