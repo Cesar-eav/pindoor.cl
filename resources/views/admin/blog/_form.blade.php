@@ -284,6 +284,14 @@
 
     {{-- Lugares mencionados (opcional) --}}
     <div class="w-[90vw] mx-auto bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <label for="dynamic_block_title" class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">
+            Título del Bloque de Locales Recomendados
+        </label>
+        <input type="text" name="dynamic_block_title" id="dynamic_block_title"
+               value="{{ old('dynamic_block_title', $post?->dynamic_block_title) }}"
+               placeholder="Encuentra estos locales en el mapa de Pindoor"
+               class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none mb-5">
+
         <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">
             Lugares mencionados en este post
         </label>
@@ -291,16 +299,86 @@
             Vincula las fichas de Pindoor que se nombran en el artículo (ej: los bares de una guía "Bares de Valparaíso").
             Aparecen como tarjetas al final del post y se agregan como <code>mentions</code> en los datos estructurados (JSON-LD) para SEO.
         </p>
-        @php $lugaresSeleccionados = $post?->lugares->pluck('id')->all() ?? []; @endphp
-        <select name="lugares[]" multiple size="8"
-                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none bg-white">
-            @foreach($puntos as $p)
-            <option value="{{ $p->id }}" {{ in_array($p->id, $lugaresSeleccionados) ? 'selected' : '' }}>
-                {{ $p->title }}{{ $p->sector ? ' · ' . $p->sector : '' }}
-            </option>
-            @endforeach
-        </select>
-        <p class="text-xs text-gray-400 mt-1">Ctrl/Cmd + clic para elegir varios.</p>
+
+        @php
+            $lugaresSeleccionados = $post?->lugares->pluck('id')->all() ?? [];
+            $puntosData = $puntos->map(fn ($p) => [
+                'id'        => $p->id,
+                'title'     => (string) $p->title,
+                'sector'    => $p->sector,
+                'categoria' => $p->categoria?->nombre,
+                'emoji'     => $p->categoria?->icono,
+            ])->values();
+            $categoriasDisponibles = $puntosData->pluck('categoria')->filter()->unique()->sort()->values();
+        @endphp
+
+        <div x-data="{
+                todos: {{ Illuminate\Support\Js::from($puntosData) }},
+                categorias: {{ Illuminate\Support\Js::from($categoriasDisponibles) }},
+                seleccionados: {{ Illuminate\Support\Js::from($lugaresSeleccionados) }},
+                busqueda: '',
+                categoria: '',
+                get filtrados() {
+                    const q = this.busqueda.trim().toLowerCase();
+                    return this.todos.filter(p =>
+                        !this.seleccionados.includes(p.id) &&
+                        (this.categoria === '' || p.categoria === this.categoria) &&
+                        (q === '' || (p.title + ' ' + (p.sector || '')).toLowerCase().includes(q))
+                    );
+                },
+                agregar(id) { if (!this.seleccionados.includes(id)) this.seleccionados.push(id); },
+                quitar(id) { this.seleccionados = this.seleccionados.filter(x => x !== id); },
+                info(id) { return this.todos.find(p => p.id === id) || {}; },
+             }">
+
+            {{-- Seleccionados --}}
+            <div class="flex flex-wrap gap-2 mb-3" x-show="seleccionados.length">
+                <template x-for="id in seleccionados" :key="id">
+                    <span class="inline-flex items-center gap-1.5 bg-[#fff0ef] text-[#fc5648] text-xs font-bold pl-3 pr-1.5 py-1.5 rounded-full">
+                        <span x-text="info(id).title"></span>
+                        <button type="button" @click="quitar(id)"
+                                class="hover:bg-[#fc5648]/20 rounded-full w-4 h-4 flex items-center justify-center leading-none">×</button>
+                    </span>
+                </template>
+            </div>
+            <p x-show="!seleccionados.length" class="text-xs text-gray-300 italic mb-3">Ningún lugar seleccionado todavía.</p>
+
+            {{-- Filtro por categoría --}}
+            <div class="flex flex-wrap gap-1.5 mb-2">
+                <button type="button" @click="categoria = ''"
+                        :class="categoria === '' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
+                        class="px-3 py-1 rounded-full text-xs font-bold transition">Todas</button>
+                <template x-for="cat in categorias" :key="cat">
+                    <button type="button" @click="categoria = cat"
+                            :class="categoria === cat ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
+                            class="px-3 py-1 rounded-full text-xs font-bold transition" x-text="cat"></button>
+                </template>
+            </div>
+
+            {{-- Buscador --}}
+            <input type="text" x-model="busqueda" placeholder="Busca por nombre o sector…"
+                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none mb-2">
+
+            {{-- Resultados --}}
+            <div class="border border-gray-100 rounded-xl divide-y divide-gray-50 max-h-56 overflow-y-auto">
+                <template x-for="p in filtrados.slice(0, 50)" :key="p.id">
+                    <button type="button" @click="agregar(p.id)"
+                            class="w-full text-left px-4 py-2.5 hover:bg-gray-50 flex items-center justify-between gap-2 text-sm transition">
+                        <span>
+                            <span class="font-medium text-gray-800" x-text="p.title"></span>
+                            <span class="text-gray-400" x-text="p.sector ? ' · ' + p.sector : ''"></span>
+                        </span>
+                        <span class="text-[10px] text-gray-400 shrink-0" x-text="p.categoria ? (p.emoji ?? '') + ' ' + p.categoria : ''"></span>
+                    </button>
+                </template>
+                <p x-show="!filtrados.length" class="px-4 py-3 text-xs text-gray-300 italic">Sin resultados.</p>
+            </div>
+            <p x-show="filtrados.length > 50" class="text-[11px] text-gray-400 mt-1">Mostrando los primeros 50 — refina la búsqueda para ver más.</p>
+
+            <template x-for="id in seleccionados" :key="'input-' + id">
+                <input type="hidden" name="lugares[]" :value="id">
+            </template>
+        </div>
     </div>
 
     <script>

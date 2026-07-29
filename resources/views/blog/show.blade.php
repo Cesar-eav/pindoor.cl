@@ -304,10 +304,12 @@
         </div>
         @endif
 
-        {{-- Lugares mencionados --}}
+        {{-- Bloque dinámico de locales recomendados --}}
         @if($post->lugares->isNotEmpty())
         <div class="mt-14 pt-8 border-t border-gray-100">
-            <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">📍 Lugares mencionados</p>
+            <h3 class="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
+                📍 {{ $post->dynamic_block_title ?: 'Locales recomendados en Pindoor para esta ruta' }}
+            </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 @foreach($post->lugares as $lugar)
                 <a href="{{ route('puntos.show', $lugar->slug) }}"
@@ -328,6 +330,17 @@
                     </div>
                 </a>
                 @endforeach
+            </div>
+
+            {{-- CTA: registro de negocios --}}
+            <div class="mt-5 flex items-center justify-between gap-4 flex-wrap bg-[#fff0ef] border border-[#fc5648]/20 rounded-2xl px-5 py-4">
+                <p class="text-sm text-gray-700">
+                    ¿Tienes un local en Valparaíso? Registra tu negocio gratis en Pindoor.cl y aparece en nuestras guías.
+                </p>
+                <a href="{{ route('register') }}"
+                   class="shrink-0 inline-flex items-center gap-2 bg-[#fc5648] hover:bg-[#e04035] text-white text-sm font-bold px-5 py-2.5 rounded-xl transition">
+                    Registrar mi espacio →
+                </a>
             </div>
         </div>
         @endif
