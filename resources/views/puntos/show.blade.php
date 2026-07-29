@@ -1642,7 +1642,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const map = L.map('mini-mapa', {
-                zoomControl: true, dragging: true,
+                zoomControl: true, dragging: false,
                 scrollWheelZoom: false, attributionControl: false
             }).setView([{{ $punto->lat }}, {{ $punto->lng }}], 16);
 
