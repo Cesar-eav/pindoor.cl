@@ -13,7 +13,7 @@
 
     <div class="py-8">
         <div class="mx-auto px-4 sm:px-6" style="max-width:90%">
-            <form action="{{ route('admin.categorias.update', $categoria) }}" method="POST">
+            <form action="{{ route('admin.categorias.update', $categoria) }}" method="POST" enctype="multipart/form-data">
                 @csrf @method('PUT')
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 

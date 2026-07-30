@@ -16,14 +16,17 @@ class Categoria extends Model
         'slug',
         'tipo',
         'icono',
+        'imagen_portada',
+        'mostrar_nombre_en_imagen',
         'descripcion',
         'modulos_defecto',
         'es_cliente',
     ];
 
     protected $casts = [
-        'modulos_defecto' => 'array',
-        'es_cliente'      => 'boolean',
+        'modulos_defecto'          => 'array',
+        'es_cliente'               => 'boolean',
+        'mostrar_nombre_en_imagen' => 'boolean',
     ];
 
     /**

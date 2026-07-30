@@ -137,7 +137,7 @@
 
 <div id="vista-listado-mobile" class="flex-1 px-3 pt-4 pb-6">
 
-    @if($atractivos->count())
+    @if($hayFiltros && $atractivos->count())
     {{-- Cabecera sección atractivos --}}
     <div class="flex items-center gap-2 mb-3">
         <span class="w-1 h-4 rounded-full bg-gray-800 shrink-0"></span>
@@ -161,9 +161,48 @@
         </a>
     </div>
     @endif
+    @endif
 
+    @if(!$hayFiltros && isset($categoriasConPuntos) && $categoriasConPuntos->isNotEmpty())
+    @foreach($categoriasConPuntos as $entry)
+    <div class="mb-5">
+        <div class="flex items-center gap-2 mb-2">
+            @if($entry->categoria->imagen_portada)
+                <a href="{{ route('puntos.explorar', ['category' => $entry->categoria->slug]) }}"
+                   class="relative block w-full h-16 rounded-2xl overflow-hidden">
+                    <img src="{{ asset('storage/' . $entry->categoria->imagen_portada) }}"
+                         alt="{{ $entry->categoria->nombre }}"
+                         class="absolute inset-0 w-full h-full object-cover">
+                    @if($entry->categoria->mostrar_nombre_en_imagen)
+                        <div class="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent"></div>
+                        <span class="absolute bottom-2 left-3 text-sm font-bold text-white tracking-tight">{{ $entry->categoria->nombre }}</span>
+                    @endif
+                </a>
+            @else
+                <span class="w-7 h-7 rounded-lg bg-[#fff0ef] text-[#fc5648] flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-{{ $entry->categoria->icono ?: 'tag' }} text-sm"></i>
+                </span>
+                <span class="text-md font-bold text-gray-900 tracking-tight">{{ $entry->categoria->nombre }}</span>
+                <span class="flex-1 h-px bg-gray-200"></span>
+                <a href="{{ route('puntos.explorar', ['category' => $entry->categoria->slug]) }}"
+                   class="text-[11px] font-semibold text-[#fc5648] shrink-0">{{ __('ui.home.ver_todos') }}</a>
+            @endif
+        </div>
 
+        <div class="overflow-x-auto pb-1 scrollbar-hide" style="scrollbar-width:none">
+            <div class="flex gap-2">
+                @foreach($entry->puntos as $atractivo)
+                <div class="flex-none w-36">
+                    @include('puntos.partials._card_mobile')
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endforeach
+    @endif
 
+    @if($atractivos->count())
     {{-- Mensaje fase piloto --}}
     <div class="mt-6 mb-2 px-4 py-4 bg-[#fff0ef] rounded-2xl text-center">
         <p class="text-xs text-gray-700 leading-relaxed">
@@ -172,7 +211,6 @@
             <a href="{{ route('contacto.index') }}" class="font-bold text-[#fc5648] underline underline-offset-2">contáctanos</a>.
         </p>
     </div>
-
     @elseif((empty($panoramas) || $panoramas->isEmpty()) && (empty($artistas) || $artistas->isEmpty()))
         <div class="text-center py-16">
             <div class="text-5xl mb-3">🕵️‍♂️</div>

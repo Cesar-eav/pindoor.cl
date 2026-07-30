@@ -78,6 +78,28 @@ class AtractivosGrid extends Component
 
         $hayFiltros = (bool) ($this->search || $this->category || $this->lat);
 
+        $categoriasConPuntos = collect();
+        if (!$hayFiltros) {
+            $poolSize = 8 * $categorias->count();
+            $puntosPool = PuntoInteres::where('activo', 1)
+                ->where('eliminado', false)
+                ->sinExcluidos()
+                ->whereNotNull('categoria_id')
+                ->with('imagenPrincipal')
+                ->latest('updated_at')
+                ->limit($poolSize)
+                ->get()
+                ->groupBy('categoria_id');
+
+            $categoriasConPuntos = $categorias
+                ->filter(fn($cat) => $puntosPool->has($cat->id))
+                ->map(fn($cat) => (object) [
+                    'categoria' => $cat,
+                    'puntos'    => $puntosPool->get($cat->id)->take(8),
+                ])
+                ->values();
+        }
+
         $panoramas = collect();
         $artistas  = collect();
         if ($this->search) {
@@ -130,7 +152,7 @@ class AtractivosGrid extends Component
         $ultimasExperiencias = $hayFiltros ? collect() : Experiencia::activas()->take(10)->get();
 
         return view('livewire.atractivos-grid', compact(
-            'atractivos', 'categorias', 'hayFiltros', 'panoramas',
+            'atractivos', 'categorias', 'categoriasConPuntos', 'hayFiltros', 'panoramas',
             'proximosPanoramas', 'ultimosPosts', 'ultimasExperiencias', 'artistas'
         ));
     }

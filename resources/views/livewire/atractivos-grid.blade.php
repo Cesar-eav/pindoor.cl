@@ -172,11 +172,49 @@
         </div>
         @endif
 
-        <div class="flex items-center gap-3 mb-4">
-            <span class="w-1 h-5 rounded-full bg-gray-800 shrink-0"></span>
-            <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">{{ __('ui.home.atractivos_titulo') }}</h2>
-            <span class="flex-1 h-px bg-gray-200"></span>
+        @if(isset($categoriasConPuntos) && $categoriasConPuntos->isNotEmpty())
+        @foreach($categoriasConPuntos as $entry)
+        <div class="mb-10">
+            <div class="flex items-center gap-3 mb-4">
+                @if($entry->categoria->imagen_portada)
+                    <div class="relative w-full h-24 rounded-2xl overflow-hidden">
+                        <img src="{{ asset('storage/' . $entry->categoria->imagen_portada) }}"
+                             alt="{{ $entry->categoria->nombre }}"
+                             class="absolute inset-0 w-full h-full object-cover">
+                        @if($entry->categoria->mostrar_nombre_en_imagen)
+                            <div class="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent"></div>
+                            <span class="absolute bottom-3 left-4 text-lg font-extrabold text-white tracking-tight">{{ $entry->categoria->nombre }}</span>
+                        @endif
+                        <button type="button" wire:click="$set('category', '{{ $entry->categoria->slug }}')"
+                                class="absolute bottom-3 right-4 text-xs font-semibold text-white/90 hover:text-white hover:underline">
+                            {{ __('ui.home.ver_todos') }}
+                        </button>
+                    </div>
+                @else
+                    <span class="w-9 h-9 rounded-xl bg-[#fff0ef] text-[#fc5648] flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-{{ $entry->categoria->icono ?: 'tag' }}"></i>
+                    </span>
+                    <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">{{ $entry->categoria->nombre }}</h2>
+                    <span class="flex-1 h-px bg-gray-200"></span>
+                    <button type="button" wire:click="$set('category', '{{ $entry->categoria->slug }}')"
+                            class="text-sm font-semibold text-[#fc5648] hover:underline shrink-0">
+                        {{ __('ui.home.ver_todos') }}
+                    </button>
+                @endif
+            </div>
+
+            <div class="overflow-x-auto pb-2" style="scrollbar-width:none">
+                <div class="flex gap-4">
+                    @foreach($entry->puntos as $atractivo)
+                    <div class="shrink-0 w-56">
+                        @include('puntos.partials._card_desktop')
+                    </div>
+                    @endforeach
+                </div>
+            </div>
         </div>
+        @endforeach
+        @endif
 
     @endif
 
@@ -190,6 +228,7 @@
 
     {{-- Grid de atractivos --}}
     <div wire:loading.remove class="pb-12">
+        @if($hayFiltros)
         @if($atractivos->count())
             <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($atractivos as $atractivo)
@@ -209,6 +248,7 @@
                     {{ __('ui.explorar.ver_todos') }}
                 </button>
             </div>
+        @endif
         @endif
 
         @if($panoramas->isNotEmpty())

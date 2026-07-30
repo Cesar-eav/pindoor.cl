@@ -58,7 +58,7 @@ class PuntoInteresController extends Controller
         }
 
         $atractivos = $query
-        
+
             ->with(['categoria', 'imagenPrincipal'])
             ->paginate(48)
             ->withQueryString();
@@ -66,6 +66,30 @@ class PuntoInteresController extends Controller
         $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->where('activo', 1)->where('eliminado', false)])
             ->orderByDesc('puntos_interes_count')
             ->get();
+
+        $sinFiltros = !$request->anyFilled(['category', 'search', 'lat']);
+
+        $categoriasConPuntos = collect();
+        if ($sinFiltros) {
+            $poolSize = 8 * $categorias->count();
+            $puntosPool = PuntoInteres::where('activo', 1)
+                ->where('eliminado', false)
+                ->sinExcluidos()
+                ->whereNotNull('categoria_id')
+                ->with('imagenPrincipal')
+                ->latest('updated_at')
+                ->limit($poolSize)
+                ->get()
+                ->groupBy('categoria_id');
+
+            $categoriasConPuntos = $categorias
+                ->filter(fn($cat) => $puntosPool->has($cat->id))
+                ->map(fn($cat) => (object) [
+                    'categoria' => $cat,
+                    'puntos'    => $puntosPool->get($cat->id)->take(8),
+                ])
+                ->values();
+        }
 
         $puntosMapData = PuntoInteres::where('activo', 1)
             ->where('eliminado', false)
@@ -145,7 +169,7 @@ class PuntoInteresController extends Controller
 
         $ultimasExperiencias = Experiencia::activas()->latest()->take(10)->get();
 
-        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts', 'ultimasExperiencias', 'artistas'));
+        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'categoriasConPuntos', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts', 'ultimasExperiencias', 'artistas'));
 
     } catch (\Exception $e) {
         \Log::error('Error en index: ' . $e->getMessage());
