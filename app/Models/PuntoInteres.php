@@ -181,7 +181,13 @@ class PuntoInteres extends Model
     /** Comprueba si un módulo está habilitado para este punto. */
     public function moduloActivo(string $modulo): bool
     {
-        return in_array($modulo, $this->modulos_habilitados ?? []);
+        return !$this->esBasico() && in_array($modulo, $this->modulos_habilitados ?? []);
+    }
+
+    /** True si el punto es un perfil básico (sin dueño real, aún no reclamado). */
+    public function esBasico(): bool
+    {
+        return (bool) $this->usuario?->es_sistema;
     }
 
     /**

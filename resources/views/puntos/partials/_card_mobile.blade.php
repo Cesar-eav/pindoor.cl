@@ -10,11 +10,7 @@
             @endif
         </a>
 
-        @if($atractivo->categoria)
-        <span class="absolute top-3 left-3 bg-[#fc5648] text-white text-[9px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full shadow">
-            {{ $atractivo->categoria->nombre }} 
-        </span>
-        @endif
+
 
         @if($atractivo->es_cliente && $atractivo->oferta_del_dia && $atractivo->oferta_activa)
         <span class="absolute top-3 right-3 bg-amber-400 text-amber-900 text-[9px] uppercase font-bold px-2.5 py-1 rounded-full shadow">

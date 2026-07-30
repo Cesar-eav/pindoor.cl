@@ -118,6 +118,20 @@
                             </div>
                         </div>
 
+                        {{-- Perfil básico (sin dueño) --}}
+                        <div class="mb-6 p-4 rounded-xl border border-gray-200 bg-gray-50">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" name="publicar_como_basico" value="1"
+                                       class="mt-1 rounded border-gray-300 text-pindoor-accent focus:ring-pindoor-accent">
+                                <div>
+                                    <span class="text-sm font-semibold text-gray-800">Publicar como perfil básico (sin dueño asignado)</span>
+                                    <p class="text-xs text-gray-500 mt-0.5">
+                                        El negocio aparece en Pindoor con información básica y podrá activar su perfil más adelante para desbloquear galería, menú, eventos y promociones.
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+
                         {{-- Errores de validación --}}
                         <div id="form-errors" class="hidden mb-6 bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-4">
                             <p class="text-sm font-bold mb-1">Por favor completa los campos obligatorios:</p>

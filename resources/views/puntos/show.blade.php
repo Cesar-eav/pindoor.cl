@@ -446,7 +446,13 @@
                         @endphp
 
                         <div class="mb-10">
-                            @if($imagenes->count())
+                            @if($punto->esBasico() && $principal)
+                                {{-- Básico: solo la foto principal, sin miniaturas ni zoom — la galería completa se desbloquea al activar el perfil --}}
+                                <div class="aspect-[16/10] md:aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl shadow-gray-200">
+                                    <img src="{{ asset('storage/' . $principal->ruta) }}" alt="{{ $punto->title }}"
+                                         class="w-full h-full object-cover">
+                                </div>
+                            @elseif($imagenes->count())
                                 <div x-data='{
                                     images: @json($imagenes->values()->map(fn($img) => asset("storage/" . $img->ruta))),
                                     current: {{ $principalIndex !== false ? $principalIndex : 0 }},
@@ -564,7 +570,7 @@
 
 
                             {{-- Video YouTube --}}
-                            @if($punto->video_url)
+                            @if(!$punto->esBasico() && $punto->video_url)
                                 @php
                                     $videoId = null;
                                     if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $punto->video_url, $m)) {
@@ -1396,6 +1402,20 @@
                     </a>
                     @endforeach
                 </div>
+            </section>
+            @endif
+
+            @if($punto->esBasico())
+            <section class="mt-10 rounded-3xl bg-linear-to-br from-[#fff0ef] to-[#ffe0dd] border border-[#fc5648]/20 p-6 md:p-8 text-center">
+                <span class="text-3xl">✨</span>
+                <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 mt-2">¿Eres el propietario de este negocio?</h2>
+                <p class="text-sm md:text-base text-gray-600 mt-2 max-w-xl mx-auto leading-relaxed">
+                    Activa gratuitamente este perfil para agregar fotografías, menú, eventos, promociones, videos y mantener tu información siempre actualizada.
+                </p>
+                <a href="{{ route('puntos.activar', $punto->slug) }}"
+                   class="inline-block mt-4 bg-[#fc5648] text-white font-extrabold text-sm px-6 py-3 rounded-full shadow hover:bg-[#d94439] transition">
+                    Activa tu perfil gratis
+                </a>
             </section>
             @endif
 
