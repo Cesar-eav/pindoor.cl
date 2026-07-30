@@ -1,7 +1,8 @@
-{{-- Uso: @include('partials._share_panel', ['shareText' => 'Título — https://...']) --}}
+{{-- Uso: @include('partials._share_panel', ['shareText' => 'Título — https://...', 'imageUrl' => $urlImagen (opcional)]) --}}
 <div x-data="sharePanel()"
-     x-init="text = $el.dataset.text"
+     x-init="text = $el.dataset.text; image = $el.dataset.image"
      data-text="{{ e($shareText) }}"
+     data-image="{{ $imageUrl ?? '' }}"
      @click.outside="open = false"
      @click.stop
      class="relative">

@@ -270,9 +270,23 @@
 <script>
 function sharePanel() {
     return {
-        open: false, copiado: false, text: '',
+        open: false, copiado: false, text: '', image: '',
         toggle() { this.open = !this.open; },
-        nativo() { navigator.share({ text: this.text }).catch(() => {}); this.open = false; },
+        async nativo() {
+            this.open = false;
+            if (this.image) {
+                try {
+                    const res = await fetch(this.image);
+                    const blob = await res.blob();
+                    const file = new File([blob], 'pindoor.jpg', { type: blob.type || 'image/jpeg' });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({ text: this.text, files: [file] });
+                        return;
+                    }
+                } catch (e) {}
+            }
+            navigator.share({ text: this.text }).catch(() => {});
+        },
         wa() { window.location.href = 'whatsapp://send?text=' + encodeURIComponent(this.text); this.open = false; },
         telegram() { window.location.href = 'https://t.me/share/url?text=' + encodeURIComponent(this.text); this.open = false; },
         email() {
