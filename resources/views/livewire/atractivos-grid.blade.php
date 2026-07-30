@@ -219,10 +219,11 @@
                     <div class="shrink-0 w-56">
                         @if($entry->categoria->es_cliente)
                             <a href="{{ route('publicita.index') }}"
-                               class="w-full h-full flex flex-col items-center justify-center gap-2 text-center px-5 rounded-2xl border-2 border-dashed border-[#fc5648]/40 text-[#fc5648] hover:border-[#fc5648] hover:bg-[#fff0ef] transition">
+                               class="w-full h-full flex flex-col items-center justify-center gap-2 text-center px-5 rounded-2xl bg-linear-to-br from-[#fff0ef] to-[#ffe0dd] border border-[#fc5648]/20 text-[#fc5648] hover:shadow-md transition">
                                 <span class="text-3xl">✨</span>
-                                <span class="text-sm font-bold leading-snug">¿Quieres que tu espacio aparezca aquí?</span>
-                                <span class="text-sm font-extrabold underline underline-offset-2">Regístrate gratis</span>
+                                <span class="text-sm font-bold leading-snug">Llega a más visitantes y clientes</span>
+                                <span class="text-xs text-[#fc5648]/70 leading-snug">Promociona tu espacio en Pindoor de forma gratuita</span>
+                                <span class="mt-1 inline-block bg-[#fc5648] text-white text-xs font-extrabold px-4 py-1.5 rounded-full">Comenzar ahora</span>
                             </a>
                         @else
                             <button type="button" wire:click="$set('category', '{{ $entry->categoria->slug }}')"
