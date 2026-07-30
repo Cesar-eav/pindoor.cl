@@ -156,27 +156,31 @@
 
 {{-- Barra inferior --}}
 <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#fc5648] shadow-[0_-2px_16px_rgba(252,86,72,0.35)]">
-    <div class="flex items-end justify-around px-2 pt-2" style="padding-bottom: calc(12px + var(--inset-bottom, 0px))">
+    <div class="flex items-center justify-around px-2 pt-2" style="padding-bottom: calc(12px + var(--inset-bottom, 0px))">
 
         {{-- Inicio --}}
         <a href="{{ route('puntos.index') }}"
-           class="flex flex-col items-center gap-1 px-2 text-white">
+           class="flex items-center justify-center px-2 py-2 text-white" title="{{ __('ui.nav.inicio') }}">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                       d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4a1 1 0 001-1v-4h2v4a1 1 0 001 1h4a1 1 0 001-1V10"/>
             </svg>
-            <span class="text-[10px] font-semibold">{{ __('ui.nav.inicio') }}</span>
         </a>
 
-                {{-- Lupa / Buscar --}}
-        <a href="{{ route('puntos.buscar.vista') }}"
-           class="flex flex-col items-center gap-1 px-2 text-white">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {{-- Geolocalización / cerca de ti --}}
+        <button type="button" id="btn-gps-bottom" onclick="geolocateBottomNav(this)"
+                class="flex items-center justify-center px-2 py-2 text-white" title="{{ __('ui.fab.cerca') }}">
+            <svg id="gps-bottom-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
-            <span class="text-[10px] font-semibold">{{ __('ui.nav.buscar') }}</span>
-        </a>
+            <svg id="gps-bottom-spinner" class="w-6 h-6 hidden animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+        </button>
+
         {{-- Botón (+) central --}}
         <button onclick="toggleFab()" id="fab-btn"
                 class="relative -mt-5 w-14 h-14 rounded-full bg-white text-[#fc5648] shadow-lg flex items-center justify-center transition-transform duration-200">
@@ -190,21 +194,19 @@
 
         {{-- Mapa --}}
         <button onclick="if(typeof setView==='function'){setView('mapa')}else{window.location='{{ route('puntos.index') }}?vista=mapa'}"
-                class="flex flex-col items-center gap-1 px-2 text-white">
+                class="flex items-center justify-center px-2 py-2 text-white" title="{{ __('ui.nav.mapa') }}">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                       d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
             </svg>
-            <span class="text-[10px] font-semibold">{{ __('ui.nav.mapa') }}</span>
         </button>
 
         {{-- Instagram --}}
         <a href="https://www.instagram.com/pindoor.cl/" target="_blank" rel="noopener noreferrer"
-           class="flex flex-col items-center gap-1 px-2 text-white">
+           class="flex items-center justify-center px-2 py-2 text-white" title="{{ __('ui.nav.instagram') }}">
             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
             </svg>
-            <span class="text-[10px] font-semibold">{{ __('ui.nav.instagram') }}</span>
         </a>
 
     </div>
@@ -212,13 +214,6 @@
 
 
 <script>
-    function toggleSearch() {
-        const bar = document.getElementById('search-bar');
-        if (bar) {
-            bar.classList.toggle('hidden');
-            if (!bar.classList.contains('hidden')) bar.querySelector('input[type=text]')?.focus();
-        }
-    }
     function toggleFab() {
         const menu    = document.getElementById('fab-menu');
         const overlay = document.getElementById('fab-overlay');
@@ -262,6 +257,28 @@
                 alert('No se pudo obtener tu ubicación.');
                 btn.disabled = false;
                 btn.innerHTML = orig;
+            },
+            { enableHighAccuracy: true, timeout: 8000 }
+        );
+    }
+    function geolocateBottomNav(btn) {
+        if (!navigator.geolocation) { alert('Tu navegador no soporta geolocalización.'); return; }
+        const icon    = document.getElementById('gps-bottom-icon');
+        const spinner = document.getElementById('gps-bottom-spinner');
+        btn.disabled = true;
+        icon?.classList.add('hidden');
+        spinner?.classList.remove('hidden');
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                document.getElementById('lat-m').value = pos.coords.latitude;
+                document.getElementById('lng-m').value = pos.coords.longitude;
+                document.getElementById('filterForm-mobile').submit();
+            },
+            () => {
+                alert('No se pudo obtener tu ubicación.');
+                btn.disabled = false;
+                icon?.classList.remove('hidden');
+                spinner?.classList.add('hidden');
             },
             { enableHighAccuracy: true, timeout: 8000 }
         );
