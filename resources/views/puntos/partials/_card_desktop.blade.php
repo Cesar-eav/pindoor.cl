@@ -57,7 +57,7 @@
         @endif
 
         <p class="text-gray-500 text-sm leading-relaxed">
-            {{ Str::limit(strip_tags($atractivo->description), 250) }}
+            {{ Str::limit(strip_tags($atractivo->description), 100) }}
         </p>
     </div>
 </article>

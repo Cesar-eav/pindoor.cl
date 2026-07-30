@@ -203,13 +203,28 @@
                 @endif
             </div>
 
-            <div class="overflow-x-auto pb-2" style="scrollbar-width:none">
+            <div class="overflow-x-auto pb-2"
+                 style="scrollbar-width:none;cursor:grab"
+                 x-data="{ dragging: false, startX: 0, scrollStart: 0 }"
+                 @mousedown.prevent="dragging = true; startX = $event.pageX - $el.offsetLeft; scrollStart = $el.scrollLeft; $el.style.cursor = 'grabbing'"
+                 @mouseup="dragging = false; $el.style.cursor = 'grab'"
+                 @mouseleave="dragging = false; $el.style.cursor = 'grab'"
+                 @mousemove="if (dragging) { $el.scrollLeft = scrollStart - ($event.pageX - $el.offsetLeft - startX) * 1.5 }">
                 <div class="flex gap-4">
                     @foreach($entry->puntos as $atractivo)
                     <div class="shrink-0 w-56">
                         @include('puntos.partials._card_desktop')
                     </div>
                     @endforeach
+                    <div class="shrink-0 w-56">
+                        <button type="button" wire:click="$set('category', '{{ $entry->categoria->slug }}')"
+                                class="w-full h-full flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 text-[#fc5648] hover:border-[#fc5648] hover:bg-[#fff0ef] transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                            <span class="text-sm font-bold">Ver más</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

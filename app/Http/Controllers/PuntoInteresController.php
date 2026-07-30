@@ -86,7 +86,7 @@ class PuntoInteresController extends Controller
                 ->filter(fn($cat) => $puntosPool->has($cat->id))
                 ->map(fn($cat) => (object) [
                     'categoria' => $cat,
-                    'puntos'    => $puntosPool->get($cat->id)->take(8),
+                    'puntos'    => $puntosPool->get($cat->id)->take(7),
                 ])
                 ->values();
         }
