@@ -499,7 +499,7 @@ class PuntoInteresController extends Controller
      */
     public function show($slug)
     {
-        $punto = PuntoInteres::with(['categoria', 'imagenes', 'moduloDatos', 'moduloItems'])
+        $punto = PuntoInteres::with(['categoria', 'imagenes', 'moduloDatos', 'moduloItems', 'usuario'])
                              ->where('slug', $slug)
                              ->where('activo', true)
                              ->where('eliminado', false)
@@ -524,6 +524,19 @@ class PuntoInteresController extends Controller
         }
 
         return view('puntos.show', compact('punto', 'cercanos'));
+    }
+
+    public function activar(string $slug)
+    {
+        $punto = PuntoInteres::with(['categoria', 'usuario'])
+            ->where('slug', $slug)
+            ->where('activo', true)
+            ->where('eliminado', false)
+            ->firstOrFail();
+
+        abort_unless($punto->esBasico(), 404);
+
+        return view('puntos.activar', compact('punto'));
     }
 
     public function experiencias(Request $request)

@@ -22,6 +22,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'google_id',
         'imagen_logo',
         'email_verified_at',
+        'es_sistema',
     ];
 
     /**
@@ -42,6 +43,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'es_sistema' => 'boolean',
     ];
 
     public function sendEmailVerificationNotification(): void

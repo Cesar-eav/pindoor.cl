@@ -133,6 +133,22 @@
                         </div>
                     </div>
 
+                    {{-- Perfil básico (sin dueño) --}}
+                    <div class="mb-6 p-4 rounded-xl border border-gray-200 bg-gray-50">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" name="publicar_como_basico" value="1"
+                                   {{ $punto->esBasico() ? 'checked' : '' }}
+                                   class="mt-1 rounded border-gray-300 text-pindoor-accent focus:ring-pindoor-accent">
+                            <div>
+                                <span class="text-sm font-semibold text-gray-800">Publicar como perfil básico (sin dueño asignado)</span>
+                                <p class="text-xs text-gray-500 mt-0.5">
+                                    El negocio aparece en Pindoor con información básica y podrá activar su perfil más adelante para desbloquear galería, menú, eventos y promociones.
+                                    Si ya tiene un dueño real asignado, desmarcar esta opción no le quita su cuenta.
+                                </p>
+                            </div>
+                        </label>
+                    </div>
+
                     <div class="flex justify-end gap-4">
                         <a href="{{ route('admin.puntos.create') }}"
                            class="px-6 py-3 rounded-2xl font-bold text-gray-600 hover:text-gray-900 transition">

@@ -99,7 +99,7 @@ class AdminController extends Controller
     public function editPunto(PuntoInteres $punto)
     {
         $categorias = Categoria::orderBy('nombre')->get();
-        $punto->load('imagenes');
+        $punto->load('imagenes', 'usuario');
         return view('admin.puntos-edit', compact('punto', 'categorias'));
     }
 
@@ -113,6 +113,17 @@ class AdminController extends Controller
         ]);
 
         $categoria = Categoria::find($request->categoria_id);
+
+        $eraBasico = $punto->esBasico();
+        $marcarBasico = $request->boolean('publicar_como_basico');
+        if ($marcarBasico && !$eraBasico) {
+            $sistemaId = User::where('es_sistema', true)->value('id');
+            if ($sistemaId) {
+                $punto->user_id = $sistemaId;
+            }
+        } elseif (!$marcarBasico && $eraBasico) {
+            $punto->user_id = auth()->id();
+        }
 
         $punto->update([
             'categoria_id' => $request->categoria_id,
@@ -358,8 +369,12 @@ class AdminController extends Controller
 
         $categoria = Categoria::find($request->categoria_id);
 
+        $userId = $request->boolean('publicar_como_basico')
+            ? (User::where('es_sistema', true)->value('id') ?? auth()->id())
+            : auth()->id();
+
         $punto = PuntoInteres::create([
-            'user_id'      => auth()->id(),
+            'user_id'      => $userId,
             'categoria_id' => $request->categoria_id,
             'title'        => $request->title,
             'slug' => Str::slug($request->title) . '-' . rand(100, 999),
