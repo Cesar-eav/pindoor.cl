@@ -40,6 +40,59 @@
 </div>
 
 <div>
+    <label class="block text-sm font-semibold text-gray-700 mb-2">Imagen de portada</label>
+    <p class="text-xs text-gray-400 mb-2">Si subes una imagen, se usa en vez del ícono para mostrar esta categoría en el home. Si no subes nada, se usa el ícono de arriba.</p>
+
+    @if($categoria->imagen_portada ?? false)
+        <div class="mb-3">
+            <img src="{{ asset('storage/' . $categoria->imagen_portada) }}"
+                 alt="Imagen actual"
+                 class="h-32 w-auto rounded-xl border border-gray-200 object-cover">
+            <p class="text-xs text-gray-400 mt-1">Imagen actual. Sube una nueva para reemplazarla.</p>
+        </div>
+    @endif
+
+    <input id="cat-imagen-input" type="file" name="imagen_portada" accept="image/*"
+           class="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-xl file:border-0
+                  file:text-sm file:font-bold
+                  file:bg-[#fff0ef] file:text-[#fc5648]
+                  hover:file:bg-[#ffe0dd] cursor-pointer">
+    <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP — máx. 4 MB</p>
+
+    <div id="cat-imagen-preview" class="mt-3 hidden">
+        <img id="cat-imagen-preview-img" src="" alt="Preview"
+             class="h-32 w-auto rounded-xl border border-[#fc5648]/40 object-cover">
+    </div>
+    @error('imagen_portada') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+
+    <div id="cat-mostrar-nombre-wrap" class="mt-3 {{ ($categoria->imagen_portada ?? false) ? '' : 'hidden' }}">
+        <label class="flex items-center gap-2.5 cursor-pointer">
+            <input type="hidden" name="mostrar_nombre_en_imagen" value="0">
+            <input type="checkbox" name="mostrar_nombre_en_imagen" value="1" id="cat-mostrar-nombre"
+                   {{ old('mostrar_nombre_en_imagen', $categoria->mostrar_nombre_en_imagen ?? true) ? 'checked' : '' }}
+                   class="w-4 h-4 accent-[#fc5648] rounded">
+            <span class="text-sm text-gray-700">Mostrar el nombre de la categoría sobre la imagen</span>
+        </label>
+    </div>
+</div>
+
+<script>
+document.getElementById('cat-imagen-input').addEventListener('change', function () {
+    const file = this.files[0];
+    const wrap = document.getElementById('cat-imagen-preview');
+    const img  = document.getElementById('cat-imagen-preview-img');
+    const nombreWrap = document.getElementById('cat-mostrar-nombre-wrap');
+    if (!file) { wrap.classList.add('hidden'); return; }
+    img.src = URL.createObjectURL(file);
+    img.onload = () => URL.revokeObjectURL(img.src);
+    wrap.classList.remove('hidden');
+    nombreWrap.classList.remove('hidden');
+});
+</script>
+
+<div>
     <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo</label>
     <input type="text" name="tipo" value="{{ old('tipo', $categoria->tipo ?? '') }}"
            placeholder="gastronomia, cultura, naturaleza…"
