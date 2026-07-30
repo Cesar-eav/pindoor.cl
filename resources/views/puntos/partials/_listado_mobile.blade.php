@@ -199,10 +199,11 @@
                 <div class="flex-none w-36">
                     @if($entry->categoria->es_cliente)
                         <a href="{{ route('publicita.index') }}"
-                           class="h-full flex flex-col items-center justify-center gap-1.5 text-center px-3 rounded-2xl border-2 border-dashed border-[#fc5648]/40 text-[#fc5648] hover:border-[#fc5648] hover:bg-[#fff0ef] transition">
+                           class="h-full flex flex-col items-center justify-center gap-1 text-center px-3 py-3 rounded-2xl bg-linear-to-br from-[#fff0ef] to-[#ffe0dd] border border-[#fc5648]/20 text-[#fc5648] hover:shadow-md transition">
                             <span class="text-xl">✨</span>
-                            <span class="text-[11px] font-bold leading-snug">¿Quieres que tu espacio aparezca aquí?</span>
-                            <span class="text-[11px] font-extrabold underline underline-offset-2">Regístrate gratis</span>
+                            <span class="text-xs font-bold leading-snug">Llega a más visitantes y clientes</span>
+                            <span class="text-[10px] text-[#fc5648]/70 leading-snug">Promociona tu espacio en Pindoor de forma gratuita</span>
+                            <span class="mt-1 inline-block bg-[#fc5648] text-white text-[10px] font-extrabold px-3 py-1 rounded-full">Comenzar ahora</span>
                         </a>
                     @else
                         <a href="{{ route('puntos.explorar', ['category' => $entry->categoria->slug]) }}"
