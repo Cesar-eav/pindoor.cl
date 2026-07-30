@@ -217,13 +217,22 @@
                     </div>
                     @endforeach
                     <div class="shrink-0 w-56">
-                        <button type="button" wire:click="$set('category', '{{ $entry->categoria->slug }}')"
-                                class="w-full h-full flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 text-[#fc5648] hover:border-[#fc5648] hover:bg-[#fff0ef] transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                            <span class="text-sm font-bold">Ver más</span>
-                        </button>
+                        @if($entry->categoria->es_cliente)
+                            <a href="{{ route('publicita.index') }}"
+                               class="w-full h-full flex flex-col items-center justify-center gap-2 text-center px-5 rounded-2xl border-2 border-dashed border-[#fc5648]/40 text-[#fc5648] hover:border-[#fc5648] hover:bg-[#fff0ef] transition">
+                                <span class="text-3xl">✨</span>
+                                <span class="text-sm font-bold leading-snug">¿Quieres que tu espacio aparezca aquí?</span>
+                                <span class="text-sm font-extrabold underline underline-offset-2">Regístrate gratis</span>
+                            </a>
+                        @else
+                            <button type="button" wire:click="$set('category', '{{ $entry->categoria->slug }}')"
+                                    class="w-full h-full flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 text-[#fc5648] hover:border-[#fc5648] hover:bg-[#fff0ef] transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                                <span class="text-sm font-bold">Ver más</span>
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>

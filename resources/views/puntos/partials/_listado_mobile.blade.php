@@ -197,13 +197,22 @@
                 </div>
                 @endforeach
                 <div class="flex-none w-36">
-                    <a href="{{ route('puntos.explorar', ['category' => $entry->categoria->slug]) }}"
-                       class="h-full flex flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-gray-200 text-[#fc5648] hover:border-[#fc5648] hover:bg-[#fff0ef] transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                        <span class="text-xs font-bold">Ver más</span>
-                    </a>
+                    @if($entry->categoria->es_cliente)
+                        <a href="{{ route('publicita.index') }}"
+                           class="h-full flex flex-col items-center justify-center gap-1.5 text-center px-3 rounded-2xl border-2 border-dashed border-[#fc5648]/40 text-[#fc5648] hover:border-[#fc5648] hover:bg-[#fff0ef] transition">
+                            <span class="text-xl">✨</span>
+                            <span class="text-[11px] font-bold leading-snug">¿Quieres que tu espacio aparezca aquí?</span>
+                            <span class="text-[11px] font-extrabold underline underline-offset-2">Regístrate gratis</span>
+                        </a>
+                    @else
+                        <a href="{{ route('puntos.explorar', ['category' => $entry->categoria->slug]) }}"
+                           class="h-full flex flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-gray-200 text-[#fc5648] hover:border-[#fc5648] hover:bg-[#fff0ef] transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                            <span class="text-xs font-bold">Ver más</span>
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>
