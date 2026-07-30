@@ -65,4 +65,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->type === 'artista';
     }
+
+    public function operador()
+    {
+        return $this->hasOne(OperadorTuristico::class);
+    }
+
+    public function esOperador(): bool
+    {
+        return $this->type === 'operador';
+    }
 }

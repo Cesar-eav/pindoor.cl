@@ -135,6 +135,11 @@ class PuntoInteres extends Model
         return $this->belongsTo(Categoria::class);
     }
 
+    public function operadores()
+    {
+        return $this->belongsToMany(OperadorTuristico::class, 'operador_punto_interes', 'punto_interes_id', 'operador_turistico_id');
+    }
+
     public function imagenes()
     {
         return $this->hasMany(ImagenPunto::class, 'punto_interes_id');

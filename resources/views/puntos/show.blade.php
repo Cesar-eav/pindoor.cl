@@ -1277,8 +1277,8 @@
 
                 {{-- COLUMNA DERECHA: sidebar --}}
                 <aside class="lg:col-span-4">
-                    <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/50 border border-white lg:sticky lg:top-8">
-      
+                    <div class="lg:bg-white lg:rounded-[2.5rem] lg:p-8 lg:shadow-xl lg:shadow-gray-200/50 lg:border lg:border-white lg:sticky lg:top-8">
+
                         {{-- Logo del negocio (solo si es cliente) --}}
                         @if($punto->es_cliente && $punto->imagen_perfil)
                             <div class="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
@@ -1292,11 +1292,18 @@
                             </div>
                         @endif
 
+                        {{-- Ubicación (mobile): solo texto + ícono de pin --}}
+                        <p class="lg:hidden flex items-center gap-1.5 text-sm text-gray-700 mb-6">
+                            <svg class="w-4 h-2 shrink-0 text-pindoor-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            {{ $punto->sector }}{{ $punto->direccion ? ' · ' . $punto->direccion : '' }}
+                        </p>
 
+                        {{-- Ubicación (escritorio) --}}
+                        <h2 class="hidden lg:block text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-6">Ubicación</h2>
 
-                        <h2 class="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-6">Ubicación</h2>
-
-                        <div class="space-y-4 mb-8">
+                        <div class="hidden lg:block space-y-4 mb-8">
                             <div class="flex items-start gap-4">
                                 <div class="bg-pindoor-accent/10 p-3 rounded-2xl text-pindoor-accent">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1312,14 +1319,16 @@
                             </div>
                         </div>
 
-                        {{-- Mapa --}}
+                        {{-- Mapa (solo escritorio) --}}
                         @if($punto->lat && $punto->lng)
-                            <div id="mini-mapa" class="h-64 rounded-3xl overflow-hidden border border-gray-100 shadow-inner"></div>
-                            <button onclick="window.dispatchEvent(new CustomEvent('geo-modal'))"
-                               class="mt-3 flex items-center justify-center gap-2 w-full py-2.5 rounded-2xl text-sm font-bold text-[#fc5648] border border-[#fc5648]/30 hover:bg-[#fff0ef] transition-colors">
-                                <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
-                                {{ __('ui.lugar.como_llegar') }}
-                            </button>
+                            <div class="hidden lg:block">
+                                <div id="mini-mapa" class="h-64 rounded-3xl overflow-hidden border border-gray-100 shadow-inner"></div>
+                                <button onclick="window.dispatchEvent(new CustomEvent('geo-modal'))"
+                                   class="mt-3 flex items-center justify-center gap-2 w-full py-2.5 rounded-2xl text-sm font-bold text-[#fc5648] border border-[#fc5648]/30 hover:bg-[#fff0ef] transition-colors">
+                                    <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+                                    {{ __('ui.lugar.como_llegar') }}
+                                </button>
+                            </div>
                         @endif
 
                         {{-- Horario --}}
@@ -1348,6 +1357,33 @@
                 </aside>
 
             </div>{{-- /grid --}}
+
+            {{-- ¿Quién te puede llevar aquí? --}}
+            @if($punto->operadores->isNotEmpty())
+            <section class="mt-0 pt-10 border-t border-gray-200">
+                <p class="text-[10px] font-black uppercase tracking-[.2em] text-teal-600 mb-1">Tours y visitas guiadas</p>
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">¿Quién te puede llevar aquí?</h2>
+                <div class="flex gap-4 overflow-x-auto pb-2">
+                    @foreach($punto->operadores as $operador)
+                    <a href="{{ route('operador.show', $operador->slug) }}"
+                       class="shrink-0 w-56 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition p-4 flex items-center gap-3">
+                        @if($operador->imagen_perfil)
+                            <img src="{{ asset('storage/' . $operador->imagen_perfil) }}" alt="{{ $operador->nombre }}"
+                                 class="w-12 h-12 rounded-full object-cover border border-gray-100 shrink-0">
+                        @else
+                            <div class="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center text-xl shrink-0">🧭</div>
+                        @endif
+                        <div class="min-w-0">
+                            <p class="font-bold text-gray-900 text-sm leading-tight truncate">{{ $operador->nombre }}</p>
+                            @if($operador->ciudad)
+                                <p class="text-xs text-gray-400 mt-0.5">{{ $operador->ciudad }}</p>
+                            @endif
+                        </div>
+                    </a>
+                    @endforeach
+                </div>
+            </section>
+            @endif
 
             {{-- Puntos cercanos (200 m) --}}
             @if($cercanos->count())

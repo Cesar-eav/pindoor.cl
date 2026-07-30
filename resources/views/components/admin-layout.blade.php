@@ -88,6 +88,7 @@
                             <a href="{{ route('admin.panoramas.index') }}" class="sidebar-link {{ request()->routeIs('admin.panoramas.*') ? 'active' : '' }}">🌅 Panoramas</a>
                             <a href="{{ route('admin.experiencias.index') }}" class="sidebar-link {{ request()->routeIs('admin.experiencias.*') ? 'active' : '' }}">✨ Experiencias</a>
                             <a href="{{ route('admin.artistas') }}" class="sidebar-link {{ request()->routeIs('admin.artistas*') ? 'active' : '' }}">🎨 Artistas</a>
+                            <a href="{{ route('admin.operadores') }}" class="sidebar-link {{ request()->routeIs('admin.operadores*') ? 'active' : '' }}">🧭 Operadores</a>
                             <a href="{{ route('admin.blog.index') }}" class="sidebar-link {{ request()->routeIs('admin.blog*') ? 'active' : '' }}">📰 Blog</a>
                             <a href="{{ route('admin.recomendaciones.index') }}" class="sidebar-link {{ request()->routeIs('admin.recomendaciones*') ? 'active' : '' }}">⭐ Recomienda</a>
                         </div>
@@ -146,6 +147,7 @@
                             <a href="{{ route('admin.panoramas.index') }}" class="sidebar-link {{ request()->routeIs('admin.panoramas.*') ? 'active' : '' }}">🌅 Panoramas</a>
                             <a href="{{ route('admin.experiencias.index') }}" class="sidebar-link {{ request()->routeIs('admin.experiencias.*') ? 'active' : '' }}">✨ Experiencias</a>
                             <a href="{{ route('admin.artistas') }}" class="sidebar-link {{ request()->routeIs('admin.artistas*') ? 'active' : '' }}">🎨 Artistas</a>
+                            <a href="{{ route('admin.operadores') }}" class="sidebar-link {{ request()->routeIs('admin.operadores*') ? 'active' : '' }}">🧭 Operadores</a>
                             <a href="{{ route('admin.blog.index') }}" class="sidebar-link {{ request()->routeIs('admin.blog*') ? 'active' : '' }}">📰 Blog</a>
                             <a href="{{ route('admin.recomendaciones.index') }}" class="sidebar-link {{ request()->routeIs('admin.recomendaciones*') ? 'active' : '' }}">⭐ Recomienda</a>
                         </div>

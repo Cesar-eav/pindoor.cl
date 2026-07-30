@@ -499,7 +499,10 @@ class PuntoInteresController extends Controller
      */
     public function show($slug)
     {
-        $punto = PuntoInteres::with(['categoria', 'imagenes', 'moduloDatos', 'moduloItems', 'usuario'])
+        $punto = PuntoInteres::with([
+                                'categoria', 'imagenes', 'moduloDatos', 'moduloItems', 'usuario',
+                                'operadores' => fn($q) => $q->where('activo', true),
+                             ])
                              ->where('slug', $slug)
                              ->where('activo', true)
                              ->where('eliminado', false)

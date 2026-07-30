@@ -35,6 +35,8 @@ class AuthenticatedSessionController extends Controller
             return redirect()->intended(route('admin.stats'));
         } elseif ($user->type === 'cliente') {
             return redirect()->intended(route('cliente.perfil'));
+        } elseif ($user->type === 'operador') {
+            return redirect()->intended(route('operador.perfil'));
         }
 
         return redirect()->intended(RouteServiceProvider::HOME);

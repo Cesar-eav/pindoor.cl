@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialiteController extends Controller
 {
-    public function redirect()
+    public function redirect(Request $request)
     {
+        $tipo = in_array($request->query('tipo'), ['operador', 'artista']) ? $request->query('tipo') : 'cliente';
+        session(['registro_tipo' => $tipo]);
+
         return Socialite::driver('google')->redirect();
     }
 
@@ -42,6 +46,7 @@ class SocialiteController extends Controller
                 'google_id'         => $googleUser->getId(),
                 'email_verified_at' => now(),
                 'password'          => null,
+                'type'              => session()->pull('registro_tipo', 'cliente'),
             ]);
         }
 
