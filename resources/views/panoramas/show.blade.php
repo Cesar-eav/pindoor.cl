@@ -35,7 +35,8 @@
         'dates'    => $gcStart . '/' . $gcEnd,
         'location' => $panorama->ubicacion ?? '',
     ]);
-    $waUrl = 'https://wa.me/?text=' . urlencode($panorama->titulo . ' — ' . $panoramaUrl);
+    $waHora      = $panorama->hora ? substr($panorama->hora, 0, 5) . ' hrs' : null;
+    $waFechaHora = $fechaStr . ($waHora ? ', ' . $waHora : '');
 @endphp
 <div class="max-w-2xl mx-auto px-4 py-8">
 
@@ -138,7 +139,8 @@
                     </a>
 
                     @include('partials._share_panel', [
-                        'shareText' => $panorama->titulo . ' — ' . $panoramaUrl
+                        'shareText' => $panorama->titulo . ' — ' . $waFechaHora . ' — ' . $panoramaUrl,
+                        'imageUrl' => $panorama->imagen ? asset('storage/' . $panorama->imagen) : null,
                     ])
                 </div>
             </div>

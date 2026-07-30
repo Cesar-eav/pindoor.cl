@@ -392,8 +392,10 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
                             'dates'    => $gcStart . '/' . $gcEnd,
                             'location' => $panorama->ubicacion ?? '',
                         ]);
-                        $waTitulo =  $panorama->titulo;
-                        $waUrl    = 'https://wa.me/?text=' . urlencode($waTitulo . ' — ' . $cardHref);
+                        $waTitulo   = $panorama->titulo;
+                        $waFecha    = $panorama->fecha->locale('es')->translatedFormat('j \d\e F');
+                        $waHora     = $panorama->hora ? substr($panorama->hora, 0, 5) . ' hrs' : null;
+                        $waFechaHora = $waFecha . ($waHora ? ', ' . $waHora : '');
                     @endphp
 
                     <div class="mt-3 flex items-center gap-3 flex-wrap">
@@ -404,7 +406,8 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
                                 Agregar Calendario
                         </a>
                         @include('partials._share_panel', [
-                            'shareText' => $waTitulo . ' — ' . ($panorama->slug ? url('/panoramas/' . $panorama->slug) : url('/lugar/' . $panorama->punto_slug . '#agenda'))
+                            'shareText' => $waTitulo . ' — ' . $waFechaHora . ' — ' . ($panorama->slug ? url('/panoramas/' . $panorama->slug) : url('/lugar/' . $panorama->punto_slug . '#agenda')),
+                            'imageUrl' => $panorama->imagen ? asset('storage/' . $panorama->imagen) : null,
                         ])
                     </div>
                 </div>
