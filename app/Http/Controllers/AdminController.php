@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PuntoInteres;
 use App\Models\Artista;
+use App\Models\OperadorTuristico;
 use App\Models\Categoria;
 use App\Models\LeadPublicita;
 use App\Models\Panorama;
@@ -355,6 +356,29 @@ class AdminController extends Controller
         $artista->delete();
 
         return back()->with('success', 'Perfil de artista eliminado.');
+    }
+
+    public function operadores()
+    {
+        $operadores = OperadorTuristico::with('usuario')->latest()->paginate(25);
+
+        return view('admin.operadores', compact('operadores'));
+    }
+
+    public function toggleOperador(OperadorTuristico $operador)
+    {
+        $operador->update(['activo' => !$operador->activo]);
+        return back()->with('success', 'Estado del operador actualizado.');
+    }
+
+    public function destroyOperador(OperadorTuristico $operador)
+    {
+        if ($operador->imagen_perfil) {
+            \Storage::disk('public')->delete($operador->imagen_perfil);
+        }
+        $operador->delete();
+
+        return back()->with('success', 'Perfil de operador eliminado.');
     }
 
     public function storePunto(Request $request)

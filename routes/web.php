@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\CategoriaEventoController;
 use App\Http\Controllers\Admin\ConfiguracionController;
 use App\Http\Controllers\Admin\PanoramaController;
 use App\Http\Controllers\ArtistaController;
+use App\Http\Controllers\OperadorController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\Admin\PostController;
@@ -96,14 +97,19 @@ Route::post('/registro-artista', [ArtistaController::class, 'register'])->name('
 // Directorio público de artistas
 Route::get('/la-escena', [ArtistaController::class, 'directorio'])->name('artista.index');
 
+// Registro operador turístico
+Route::get('/registro-operador',  [OperadorController::class, 'showRegister'])->name('operador.register');
+Route::post('/registro-operador', [OperadorController::class, 'register'])->name('operador.register.store');
+
 
 
 /* --- RUTAS PROTEGIDAS (BREEZE) --- */
 Route::get('/dashboard', function () {
     $type = auth()->user()->type ?? '';
-    if ($type === 'admin')   return redirect()->route('admin.stats');
-    if ($type === 'cliente') return redirect()->route('cliente.perfil');
-    if ($type === 'artista') return redirect()->route('artista.perfil');
+    if ($type === 'admin')    return redirect()->route('admin.stats');
+    if ($type === 'cliente')  return redirect()->route('cliente.perfil');
+    if ($type === 'artista')  return redirect()->route('artista.perfil');
+    if ($type === 'operador') return redirect()->route('operador.perfil');
     return redirect()->route('puntos.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -175,6 +181,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/artistas', [\App\Http\Controllers\AdminController::class, 'artistas'])->name('artistas');
     Route::patch('/artistas/{artista}/toggle', [\App\Http\Controllers\AdminController::class, 'toggleArtista'])->name('artistas.toggle');
     Route::delete('/artistas/{artista}', [\App\Http\Controllers\AdminController::class, 'destroyArtista'])->name('artistas.destroy');
+
+    // Operadores turísticos
+    Route::get('/operadores', [\App\Http\Controllers\AdminController::class, 'operadores'])->name('operadores');
+    Route::patch('/operadores/{operador}/toggle', [\App\Http\Controllers\AdminController::class, 'toggleOperador'])->name('operadores.toggle');
+    Route::delete('/operadores/{operador}', [\App\Http\Controllers\AdminController::class, 'destroyOperador'])->name('operadores.destroy');
 
     // Leads de Publicita
     Route::get('/leads', [AdminController::class, 'leads'])->name('leads');
@@ -253,5 +264,18 @@ Route::middleware(['auth', 'verified', 'role:artista'])->prefix('artista')->name
 
 // Perfil público artista — debe ir DESPUÉS del grupo protegido para que /artista/nuevo no sea capturado como slug
 Route::get('/artista/{slug}', [ArtistaController::class, 'show'])->name('artista.show');
+
+/* --- RUTAS OPERADORES TURÍSTICOS --- */
+Route::middleware(['auth', 'verified', 'role:operador'])->prefix('operador')->name('operador.')->group(function () {
+    Route::get('/nuevo',  [OperadorController::class, 'onboarding'])->name('nuevo');
+    Route::post('/nuevo', [OperadorController::class, 'crearPerfil'])->name('crear');
+
+    Route::get('/perfil',              [OperadorController::class, 'perfil'])->name('perfil');
+    Route::put('/perfil/actualizar',   [OperadorController::class, 'actualizarPerfil'])->name('perfil.actualizar');
+    Route::put('/perfil/lugares',      [OperadorController::class, 'guardarPuntos'])->name('perfil.lugares');
+});
+
+// Perfil público operador — debe ir DESPUÉS del grupo protegido, mismo motivo que artista/{slug}
+Route::get('/operador/{slug}', [OperadorController::class, 'show'])->name('operador.show');
 
 require __DIR__.'/auth.php';

@@ -12,8 +12,9 @@ class CheckRole
     {
         if (!$request->user() || $request->user()->type !== $role) {
             $type = $request->user()?->type;
-            if ($type === 'cliente') return redirect()->route('cliente.mis-puntos');
-            if ($type === 'artista') return redirect()->route('artista.perfil');
+            if ($type === 'cliente')  return redirect()->route('cliente.mis-puntos');
+            if ($type === 'artista')  return redirect()->route('artista.perfil');
+            if ($type === 'operador') return redirect()->route('operador.perfil');
             return redirect('/dashboard');
         }
         return $next($request);

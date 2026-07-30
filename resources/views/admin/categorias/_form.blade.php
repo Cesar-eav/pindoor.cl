@@ -339,6 +339,19 @@ document.addEventListener('DOMContentLoaded', () => buildGrid(allIcons));
 </div>
 
 <div>
+    <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition
+                  {{ old('disponible_para_operadores', $categoria->disponible_para_operadores ?? false) ? 'border-teal-500 bg-teal-50' : 'border-gray-200 bg-gray-50 hover:border-gray-300' }}">
+        <input type="checkbox" name="disponible_para_operadores" value="1"
+               class="shrink-0 accent-teal-600"
+               {{ old('disponible_para_operadores', $categoria->disponible_para_operadores ?? false) ? 'checked' : '' }}>
+        <div>
+            <span class="text-sm font-semibold text-gray-800">Disponible para operadores turísticos</span>
+            <p class="text-xs text-gray-400 mt-0.5">Los operadores turísticos podrán asociarse a puntos de esta categoría (miradores, museos, etc.).</p>
+        </div>
+    </label>
+</div>
+
+<div>
     <label class="block text-sm font-semibold text-gray-700 mb-2">Módulos activos por defecto</label>
     <p class="text-xs text-gray-400 mb-3">Se asignan automáticamente cuando se activa un negocio en esta categoría.</p>
 

@@ -21,12 +21,14 @@ class Categoria extends Model
         'descripcion',
         'modulos_defecto',
         'es_cliente',
+        'disponible_para_operadores',
     ];
 
     protected $casts = [
-        'modulos_defecto'          => 'array',
-        'es_cliente'               => 'boolean',
-        'mostrar_nombre_en_imagen' => 'boolean',
+        'modulos_defecto'             => 'array',
+        'es_cliente'                  => 'boolean',
+        'mostrar_nombre_en_imagen'    => 'boolean',
+        'disponible_para_operadores'  => 'boolean',
     ];
 
     /**

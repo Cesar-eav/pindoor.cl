@@ -34,12 +34,14 @@ class CategoriaController extends Controller
             'modulos_defecto'          => 'nullable|array',
             'modulos_defecto.*'        => 'string',
             'es_cliente'               => 'nullable|boolean',
+            'disponible_para_operadores' => 'nullable|boolean',
         ]);
 
         $data['slug']            = Str::slug($data['nombre']);
         $data['modulos_defecto'] = $request->input('modulos_defecto', []);
         $data['es_cliente']      = $request->boolean('es_cliente');
         $data['mostrar_nombre_en_imagen'] = $request->boolean('mostrar_nombre_en_imagen', true);
+        $data['disponible_para_operadores'] = $request->boolean('disponible_para_operadores');
 
         if ($request->hasFile('imagen_portada')) {
             $data['imagen_portada'] = $request->file('imagen_portada')->store('categorias', 'public');
@@ -78,12 +80,14 @@ class CategoriaController extends Controller
             'modulos_defecto'          => 'nullable|array',
             'modulos_defecto.*'        => 'string',
             'es_cliente'               => 'nullable|boolean',
+            'disponible_para_operadores' => 'nullable|boolean',
         ]);
 
         $data['slug']            = Str::slug($data['nombre']);
         $data['modulos_defecto'] = $request->input('modulos_defecto', []);
         $data['es_cliente']      = $request->boolean('es_cliente');
         $data['mostrar_nombre_en_imagen'] = $request->boolean('mostrar_nombre_en_imagen', true);
+        $data['disponible_para_operadores'] = $request->boolean('disponible_para_operadores');
 
         if ($request->hasFile('imagen_portada')) {
             if ($categoria->imagen_portada) {
