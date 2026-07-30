@@ -399,7 +399,7 @@
                     <div x-show="vista === 'contenido'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
 
                         {{-- CABECERA DEL NEGOCIO --}}
-                        @if($punto->es_cliente || $punto->categoria_id==7)
+                        @if($punto->es_cliente || $punto->categoria_id==7 || $punto->esBasico())
                         <div class="flex gap-4 items-start bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-8">
                             @if($punto->imagen_perfil)
                                 <img src="{{ asset('storage/' . $punto->imagen_perfil) }}"
@@ -446,7 +446,7 @@
                         @endphp
 
                         <div class="mb-10">
-                            @if($punto->esBasico() && $principal)
+                            @if(!$punto->esBasico() && $principal)
                                 {{-- Básico: solo la foto principal, sin miniaturas ni zoom — la galería completa se desbloquea al activar el perfil --}}
                                 <div class="aspect-[16/10] md:aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl shadow-gray-200">
                                     <img src="{{ asset('storage/' . $principal->ruta) }}" alt="{{ $punto->title }}"
