@@ -270,31 +270,39 @@
 <script>
 function sharePanel() {
     return {
-        open: false, copiado: false, text: '', image: '',
+        open: false, copiado: false, text: '', image: '', file: null, fetchingFile: false,
+        // Al hacer click en el ícono: si el navegador soporta compartir nativo, lo dispara
+        // directo (el sheet del sistema ya prioriza las apps más usadas por la persona).
+        // Si no lo soporta (desktop), abre el panel de fallback (WhatsApp / Copiar enlace).
+        click() {
+            if ('share' in navigator) {
+                this.nativo();
+            } else {
+                this.toggle();
+            }
+        },
         toggle() { this.open = !this.open; },
-        async nativo() {
+        async prefetchImage() {
+            this.fetchingFile = true;
+            try {
+                const res = await fetch(this.image);
+                const blob = await res.blob();
+                this.file = new File([blob], 'pindoor.jpg', { type: blob.type || 'image/jpeg' });
+            } catch (e) {
+                this.file = null;
+            }
+            this.fetchingFile = false;
+        },
+        nativo() {
             this.open = false;
-            if (this.image) {
-                try {
-                    const res = await fetch(this.image);
-                    const blob = await res.blob();
-                    const file = new File([blob], 'pindoor.jpg', { type: blob.type || 'image/jpeg' });
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        await navigator.share({ text: this.text, files: [file] });
-                        return;
-                    }
-                } catch (e) {}
+            if (this.file && navigator.canShare && navigator.canShare({ files: [this.file] })) {
+                navigator.share({ text: this.text, files: [this.file] })
+                    .catch(() => navigator.share({ text: this.text }).catch(() => {}));
+                return;
             }
             navigator.share({ text: this.text }).catch(() => {});
         },
         wa() { window.location.href = 'whatsapp://send?text=' + encodeURIComponent(this.text); this.open = false; },
-        telegram() { window.location.href = 'https://t.me/share/url?text=' + encodeURIComponent(this.text); this.open = false; },
-        email() {
-            const lines = this.text.split('\n');
-            const subject = encodeURIComponent(lines[0] || 'Info de Pindoor');
-            window.location.href = 'mailto:?subject=' + subject + '&body=' + encodeURIComponent(this.text);
-            this.open = false;
-        },
         copiar() {
             navigator.clipboard?.writeText(this.text).then(() => {
                 this.copiado = true;
