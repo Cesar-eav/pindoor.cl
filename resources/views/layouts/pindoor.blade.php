@@ -91,6 +91,18 @@
 <div id="fab-overlay" onclick="closeFab()"
      class="hidden fixed inset-0 z-40 md:hidden"></div>
 
+{{-- Overlay de búsqueda por geolocalización --}}
+<div id="gps-locating-overlay"
+     class="hidden fixed inset-0 z-60 flex items-center justify-center bg-black/40 px-8">
+    <div class="bg-white rounded-2xl shadow-xl px-6 py-5 flex flex-col items-center gap-3 max-w-xs text-center">
+        <svg class="w-8 h-8 animate-spin text-[#fc5648]" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+        </svg>
+        <p class="font-extrabold text-gray-900 text-sm">Buscando lugares cerca de ti…</p>
+    </div>
+</div>
+
 {{-- FAB expandido: fila horizontal --}}
 <div id="fab-menu"
      class="hidden fixed left-0 right-0 z-50 flex-wrap justify-center gap-3 px-4 md:hidden"
@@ -242,11 +254,15 @@
         document.getElementById('fab-icon-plus')?.classList.remove('hidden');
         document.getElementById('fab-icon-close')?.classList.add('hidden');
     }
+    function toggleGpsOverlay(show) {
+        document.getElementById('gps-locating-overlay')?.classList.toggle('hidden', !show);
+    }
     function geolocateFab(btn) {
         if (!navigator.geolocation) { alert('Tu navegador no soporta geolocalización.'); return; }
         const orig = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = '⌛ Localizando…';
+        toggleGpsOverlay(true);
         navigator.geolocation.getCurrentPosition(
             pos => {
                 document.getElementById('lat-m').value = pos.coords.latitude;
@@ -257,6 +273,7 @@
                 alert('No se pudo obtener tu ubicación.');
                 btn.disabled = false;
                 btn.innerHTML = orig;
+                toggleGpsOverlay(false);
             },
             { enableHighAccuracy: true, timeout: 8000 }
         );
@@ -268,6 +285,7 @@
         btn.disabled = true;
         icon?.classList.add('hidden');
         spinner?.classList.remove('hidden');
+        toggleGpsOverlay(true);
         navigator.geolocation.getCurrentPosition(
             pos => {
                 document.getElementById('lat-m').value = pos.coords.latitude;
@@ -279,6 +297,7 @@
                 btn.disabled = false;
                 icon?.classList.remove('hidden');
                 spinner?.classList.add('hidden');
+                toggleGpsOverlay(false);
             },
             { enableHighAccuracy: true, timeout: 8000 }
         );
