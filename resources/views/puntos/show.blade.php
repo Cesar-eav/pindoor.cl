@@ -446,8 +446,12 @@
                         @endphp
 
                         <div class="mb-10">
-                            @if(!$punto->esBasico() && $principal)
-                                {{-- Básico: solo la foto principal, sin miniaturas ni zoom — la galería completa se desbloquea al activar el perfil --}}
+                            @if($punto->categoria?->es_cliente && $punto->esBasico() && $principal)
+                                {{-- Básico: solo la foto principal, sin miniaturas ni zoom — la galería completa se desbloquea al activar el perfil.
+                                     Se usa la categoría (no $punto->es_cliente) porque hay negocios reales cargados directamente
+                                     por el admin para completar el directorio, cuyo campo es_cliente propio quedó en false
+                                     (ej. Sala Rivoli, categoría Restaurante). Los atractivos turísticos (categoría es_cliente=false)
+                                     siempre muestran la galería completa. --}}
                                 <div class="aspect-[16/10] md:aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl shadow-gray-200">
                                     <img src="{{ asset('storage/' . $principal->ruta) }}" alt="{{ $punto->title }}"
                                          class="w-full h-full object-cover">
@@ -1444,7 +1448,7 @@
             @if($punto->esBasico())
             <section class="mt-10 rounded-3xl bg-linear-to-br from-[#fff0ef] to-[#ffe0dd] border border-[#fc5648]/20 p-6 md:p-8 text-center">
                 <span class="text-3xl">✨</span>
-                <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 mt-2">¿Eres el propietario de este negocio?</h2>
+                <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 mt-2">¿Eres el propietario de este espacio?</h2>
                 <p class="text-sm md:text-base text-gray-600 mt-2 max-w-xl mx-auto leading-relaxed">
                     Activa gratuitamente este perfil para agregar fotografías, menú, eventos, promociones, videos y mantener tu información siempre actualizada.
                 </p>
