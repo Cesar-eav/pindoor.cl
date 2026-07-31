@@ -6,10 +6,12 @@ use App\Models\Categoria;
 use App\Models\OperadorTuristico;
 use App\Models\PuntoInteres;
 use App\Models\User;
+use App\Notifications\AdminNewOperadorNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules;
 
@@ -42,6 +44,10 @@ class OperadorController extends Controller
         ]);
 
         event(new Registered($user));
+
+        Notification::route('mail', ['cesar.eav@gmail.com', 'cesarandrade@pindoor.cl'])
+            ->notify(new AdminNewOperadorNotification($user));
+
         Auth::login($user);
 
         return redirect()->route('operador.nuevo');

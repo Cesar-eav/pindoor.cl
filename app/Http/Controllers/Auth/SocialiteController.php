@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\AdminNewOperadorNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialiteController extends Controller
@@ -48,6 +50,11 @@ class SocialiteController extends Controller
                 'password'          => null,
                 'type'              => session()->pull('registro_tipo', 'cliente'),
             ]);
+
+            if ($user->type === 'operador') {
+                Notification::route('mail', ['cesar.eav@gmail.com', 'cesarandrade@pindoor.cl'])
+                    ->notify(new AdminNewOperadorNotification($user));
+            }
         }
 
         Auth::login($user, remember: true);
