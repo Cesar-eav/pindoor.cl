@@ -72,21 +72,18 @@ class AtractivosGrid extends Component
 
         $categoriasConPuntos = collect();
         if (!$hayFiltros) {
-            $poolSize = 8 * $categorias->count();
-            $puntosPool = PuntoInteres::publico()
-                ->whereNotNull('categoria_id')
-                ->with('imagenPrincipal')
-                ->latest('updated_at')
-                ->limit($poolSize)
-                ->get()
-                ->groupBy('categoria_id');
-
+            $porCategoria = 15;
             $categoriasConPuntos = $categorias
-                ->filter(fn($cat) => $puntosPool->has($cat->id))
                 ->map(fn($cat) => (object) [
                     'categoria' => $cat,
-                    'puntos'    => $puntosPool->get($cat->id)->take(7),
+                    'puntos'    => PuntoInteres::publico()
+                        ->where('categoria_id', $cat->id)
+                        ->with('imagenPrincipal')
+                        ->latest('updated_at')
+                        ->limit($porCategoria)
+                        ->get(),
                 ])
+                ->filter(fn($entry) => $entry->puntos->isNotEmpty())
                 ->values();
         }
 
