@@ -139,6 +139,7 @@ class AdminController extends Controller
             'enlace'    => $request->enlace,
             'lat'       => $request->lat,
             'lng'       => $request->lng,
+            'descripcion_busqueda_admin' => $request->descripcion_busqueda_admin,
         ]);
 
         // Actualizar imágenes existentes que se conservan
@@ -414,6 +415,7 @@ class AdminController extends Controller
             'lng'       => $request->lng,
             'activo'    => true,
             'eliminado' => false,
+            'descripcion_busqueda_admin' => $request->descripcion_busqueda_admin,
             // Podríamos añadir una marca de "Lugar Público" si quisieras más adelante
         ]);
 

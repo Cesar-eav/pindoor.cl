@@ -1,5 +1,21 @@
 {{-- App Bar mobile —————————————————————————————————————————— --}}
-<header x-data="{ buscando: false }"
+<header x-data="{
+            buscando: false,
+            q: @js(request('search', '')),
+            sugerencias: [],
+            cargando: false,
+            async buscar() {
+                if (this.q.trim().length < 2) { this.sugerencias = []; return; }
+                this.cargando = true;
+                try {
+                    const res = await fetch('{{ route('puntos.sugerencias') }}?q=' + encodeURIComponent(this.q));
+                    this.sugerencias = await res.json();
+                } catch (e) {
+                    this.sugerencias = [];
+                }
+                this.cargando = false;
+            },
+        }"
         class="md:hidden sticky top-0 z-40 bg-white border-b border-gray-100 px-4 pb-3 flex items-center justify-between shadow-sm" style="padding-top: calc(12px + var(--inset-top, 0px))">
 
     <div class="flex items-center gap-1 min-w-0" x-show="!buscando">
@@ -53,9 +69,23 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
-            <input type="text" name="search" x-ref="buscarInput" value="{{ request('search') }}"
+            <input type="text" name="search" x-ref="buscarInput" x-model="q"
+                   @input.debounce.300ms="buscar()"
+                   autocomplete="off"
                    placeholder="{{ __('ui.home.buscar_placeholder') }}"
                    class="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-[#fc5648] outline-none bg-gray-50">
+
+            {{-- Sugerencias instantáneas --}}
+            <div x-show="sugerencias.length > 0" x-cloak
+                 class="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-gray-100 max-h-72 overflow-y-auto z-50">
+                <template x-for="s in sugerencias" :key="s.url">
+                    <a :href="s.url" @click="buscando = false"
+                       class="block px-4 py-2.5 hover:bg-gray-50 border-b border-gray-50 last:border-0 transition">
+                        <p class="text-sm font-semibold text-gray-800" x-text="s.title"></p>
+                        <p class="text-xs text-gray-400" x-text="[s.sector, s.categoria].filter(Boolean).join(' · ')"></p>
+                    </a>
+                </template>
+            </div>
         </div>
         <button type="button" @click="buscando = false"
                 class="p-1.5 text-gray-400 hover:text-gray-700 transition shrink-0" title="Cerrar">
