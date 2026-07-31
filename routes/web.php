@@ -134,6 +134,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/puntos/{punto}/editar', [AdminController::class, 'editPunto'])->name('puntos.edit');
     Route::put('/puntos/{punto}/actualizar', [AdminController::class, 'updatePunto'])->name('puntos.update');
     Route::patch('/puntos/{punto}/toggle', [AdminController::class, 'togglePunto'])->name('puntos.toggle');
+    Route::get('/geocodificar', [ClienteController::class, 'geocodificar'])->name('geocodificar');
+    Route::get('/geocodificar-inverso', [ClienteController::class, 'geocodificarInverso'])->name('geocodificar-inverso');
 
     // Categorías
     Route::resource('categorias', CategoriaController::class)->except(['show']);
@@ -217,6 +219,7 @@ Route::middleware(['auth', 'verified', 'role:cliente'])->prefix('cliente')->name
     Route::get('/nuevo',  [ClienteController::class, 'onboarding'])->name('nuevo');
     Route::post('/nuevo', [ClienteController::class, 'crearNegocio'])->name('crear');
     Route::get('/geocodificar', [ClienteController::class, 'geocodificar'])->name('geocodificar');
+    Route::get('/geocodificar-inverso', [ClienteController::class, 'geocodificarInverso'])->name('geocodificar-inverso');
 
     // Perfil del negocio
     Route::get('/perfil', [ClienteController::class, 'perfil'])->name('perfil');                          // lista de negocios
@@ -234,19 +237,16 @@ Route::middleware(['auth', 'verified', 'role:cliente'])->prefix('cliente')->name
     Route::patch('/aviso/{punto}',      [ClienteController::class, 'actualizarAviso'])->name('aviso.actualizar');
     Route::patch('/promocion/{punto}',  [ClienteController::class, 'actualizarPromocion'])->name('promocion.actualizar');
 
-    // Módulo museo
-    Route::get('/museo/{punto}', [ClienteMuseoController::class, 'index'])->name('museo');
+    // Módulo museo — se gestiona embebido en el dashboard (cliente.perfil.ver#museo)
     Route::post('/museo/{punto}/entradas', [ClienteMuseoController::class, 'guardarEntradas'])->name('museo.entradas.guardar');
     Route::post('/museo/{punto}/exposicion', [ClienteMuseoController::class, 'guardarExposicion'])->name('museo.exposicion.guardar');
     Route::delete('/museo/{punto}/exposicion/{exposicion}', [ClienteMuseoController::class, 'eliminarExposicion'])->name('museo.exposicion.eliminar');
 
-    // Módulo agenda cultural (categoría 5)
-    Route::get('/eventos/{punto}', [ClienteEventosController::class, 'index'])->name('eventos');
+    // Módulo agenda cultural (categoría 5) — embebido en el dashboard (cliente.perfil.ver#eventos)
     Route::post('/eventos/{punto}/guardar', [ClienteEventosController::class, 'guardarEvento'])->name('eventos.guardar');
     Route::delete('/eventos/{punto}/{evento}', [ClienteEventosController::class, 'eliminarEvento'])->name('eventos.eliminar');
 
-    // Catálogo de productos (tiendas / artesanía)
-    Route::get('/productos',                        [ClienteProductosController::class, 'index'])->name('productos.index');
+    // Catálogo de productos (tiendas / artesanía) — embebido en el dashboard (cliente.perfil.ver#catalogo)
     Route::post('/productos',                       [ClienteProductosController::class, 'store'])->name('productos.store');
     Route::post('/productos/{producto}',            [ClienteProductosController::class, 'update'])->name('productos.update');
     Route::delete('/productos/{producto}',          [ClienteProductosController::class, 'destroy'])->name('productos.destroy');

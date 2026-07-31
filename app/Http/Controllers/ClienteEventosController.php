@@ -15,26 +15,6 @@ class ClienteEventosController extends Controller
         return !$punto->eliminado && $punto->user_id === Auth::id();
     }
 
-    /** Dashboard del centro cultural: gestión de agenda de eventos. */
-    public function index(PuntoInteres $punto)
-    {
-        if (!$this->verificarPunto($punto)) {
-            return redirect()->route('cliente.perfil');
-        }
-
-        $punto->load('moduloItems');
-
-        $eventos = ModuloItem::where('punto_interes_id', $punto->id)
-            ->where('modulo', 'eventos')
-            ->orderBy('fecha')
-            ->orderByRaw("JSON_EXTRACT(datos, '$.hora')")
-            ->get();
-
-        $tiposEvento = \App\Models\CategoriaEvento::catalogo();
-
-        return view('cliente.eventos', compact('punto', 'eventos', 'tiposEvento'));
-    }
-
     /** Crea o actualiza un evento en la agenda. */
     public function guardarEvento(Request $request, PuntoInteres $punto)
     {
@@ -105,7 +85,7 @@ class ClienteEventosController extends Controller
             ]);
         }
 
-        return redirect()->route('cliente.eventos', $punto)
+        return redirect()->route('cliente.perfil.ver', $punto)
             ->with('success', 'Evento guardado en la agenda.');
     }
 
@@ -122,7 +102,7 @@ class ClienteEventosController extends Controller
 
         $evento->delete();
 
-        return redirect()->route('cliente.eventos', $punto)
+        return redirect()->route('cliente.perfil.ver', $punto)
             ->with('success', 'Evento eliminado.');
     }
 }

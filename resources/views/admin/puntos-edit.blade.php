@@ -129,10 +129,12 @@
 
                     <div id="app" class="mb-6">
                         <x-input-label value="Ubicación en el mapa" />
-                        <p class="text-xs text-gray-400 mb-2">Haz clic en el mapa o arrastra el marcador para ajustar la posición exacta.</p>
+                        <p class="text-xs text-gray-400 mb-2">Escribe la dirección y el pin se ubica solo. Si no queda exacto, haz clic en el mapa o arrastra el marcador.</p>
                         <selector-mapa
                             :initial-lat="{{ $punto->lat ?? -33.0472 }}"
                             :initial-lng="{{ $punto->lng ?? -71.6297 }}"
+                            geocode-url="{{ route('admin.geocodificar') }}"
+                            reverse-geocode-url="{{ route('admin.geocodificar-inverso') }}"
                         ></selector-mapa>
 
                         <div class="mt-6">

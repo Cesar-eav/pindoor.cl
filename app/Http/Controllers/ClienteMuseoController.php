@@ -15,21 +15,6 @@ class ClienteMuseoController extends Controller
         return !$punto->eliminado && $punto->user_id === Auth::id();
     }
 
-    /** Dashboard de módulos museo/exposiciones. */
-    public function index(PuntoInteres $punto)
-    {
-        if (!$this->verificarPunto($punto)) {
-            return redirect()->route('cliente.perfil');
-        }
-
-        $punto->load('moduloDatos', 'moduloItems');
-
-        $entradas     = $punto->items('entradas');
-        $exposiciones = $punto->items('exposiciones');
-
-        return view('cliente.museo', compact('punto', 'entradas', 'exposiciones'));
-    }
-
     /**
      * Reemplaza el set completo de tarifas de entrada.
      * Borra las existentes y recrea desde el formulario.
@@ -65,7 +50,7 @@ class ClienteMuseoController extends Controller
             ]);
         }
 
-        return redirect()->route('cliente.museo', $punto)
+        return redirect()->route('cliente.perfil.ver', $punto)
             ->with('success', 'Tarifas de entrada actualizadas.');
     }
 
@@ -132,7 +117,7 @@ class ClienteMuseoController extends Controller
             ]);
         }
 
-        return redirect()->route('cliente.museo', $punto)
+        return redirect()->route('cliente.perfil.ver', $punto)
             ->with('success', 'Exposición guardada.');
     }
 
@@ -149,7 +134,7 @@ class ClienteMuseoController extends Controller
 
         $exposicion->delete();
 
-        return redirect()->route('cliente.museo', $punto)
+        return redirect()->route('cliente.perfil.ver', $punto)
             ->with('success', 'Exposición eliminada.');
     }
 }

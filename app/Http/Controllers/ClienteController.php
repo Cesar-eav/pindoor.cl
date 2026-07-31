@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;
+use App\Models\CategoriaEvento;
 use App\Models\Configuracion;
 use App\Models\ImagenPunto;
 use App\Models\ModuloDato;
@@ -73,7 +74,7 @@ class ClienteController extends Controller
                 'encontrado' => true,
                 'lat'        => $r['geometry']['location']['lat'],
                 'lng'        => $r['geometry']['location']['lng'],
-                'direccion'  => $r['formatted_address'],
+                'direccion'  => $this->direccionCortaGoogle($r['address_components'] ?? []) ?? $r['formatted_address'],
             ];
         } catch (\Throwable $e) {
             return null;
@@ -86,12 +87,13 @@ class ClienteController extends Controller
             $response = Http::timeout(5)
                 ->withHeaders(['User-Agent' => 'Pindoor/1.0 (https://pindoor.cl)'])
                 ->get('https://nominatim.openstreetmap.org/search', [
-                    'q'            => $query,
-                    'format'       => 'json',
-                    'limit'        => 1,
-                    'countrycodes' => 'cl',
-                    'viewbox'      => '-71.72,-32.90,-71.55,-33.15',
-                    'bounded'      => 1,
+                    'q'             => $query,
+                    'format'        => 'json',
+                    'limit'         => 1,
+                    'countrycodes'  => 'cl',
+                    'viewbox'       => '-71.72,-32.90,-71.55,-33.15',
+                    'bounded'       => 1,
+                    'addressdetails'=> 1,
                 ]);
             $resultados = $response->json();
 
@@ -103,7 +105,123 @@ class ClienteController extends Controller
                 'encontrado' => true,
                 'lat'        => (float) $resultados[0]['lat'],
                 'lng'        => (float) $resultados[0]['lon'],
-                'direccion'  => $resultados[0]['display_name'],
+                'direccion'  => $this->direccionCortaNominatim($resultados[0]['address'] ?? []) ?? $resultados[0]['display_name'],
+            ];
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /** Arma "Calle Número, Sector" a partir de los address_components de Google, sin niveles administrativos ni país. */
+    private function direccionCortaGoogle(array $components): ?string
+    {
+        $buscar = function (string $tipo) use ($components) {
+            foreach ($components as $c) {
+                if (in_array($tipo, $c['types'] ?? [], true)) {
+                    return $c['long_name'];
+                }
+            }
+            return null;
+        };
+
+        $calle    = $buscar('route');
+        $numero   = $buscar('street_number');
+        $sector   = $buscar('sublocality_level_1') ?? $buscar('sublocality') ?? $buscar('neighborhood');
+        $ciudad   = $buscar('locality');
+
+        if (!$calle) {
+            return null;
+        }
+
+        $linea = $numero ? "{$calle} {$numero}" : $calle;
+        $resto = $sector ?? $ciudad;
+
+        return $resto ? "{$linea}, {$resto}" : $linea;
+    }
+
+    /** Arma "Calle Número, Sector" a partir del address estructurado de Nominatim, sin provincia/región/país/código postal. */
+    private function direccionCortaNominatim(array $address): ?string
+    {
+        $calle  = $address['road'] ?? null;
+        $numero = $address['house_number'] ?? null;
+        $sector = $address['suburb'] ?? $address['neighbourhood'] ?? $address['city_district'] ?? null;
+        $ciudad = $address['city'] ?? $address['town'] ?? $address['village'] ?? null;
+
+        if (!$calle) {
+            return null;
+        }
+
+        $linea = $numero ? "{$calle} {$numero}" : $calle;
+        $resto = $sector ?? $ciudad;
+
+        return $resto ? "{$linea}, {$resto}" : $linea;
+    }
+
+    /** Geocodificación inversa: a partir de lat/lng obtiene la dirección textual (al mover el pin). */
+    public function geocodificarInverso(Request $request)
+    {
+        $request->validate([
+            'lat' => ['required', 'numeric', 'between:-90,90'],
+            'lng' => ['required', 'numeric', 'between:-180,180'],
+        ]);
+
+        $lat = (float) $request->lat;
+        $lng = (float) $request->lng;
+
+        $mapsKey = config('services.google.maps_key');
+        if ($mapsKey) {
+            $resultado = $this->geocodificarInversoConGoogle($lat, $lng, $mapsKey);
+            if ($resultado) {
+                return response()->json($resultado);
+            }
+        }
+
+        return response()->json($this->geocodificarInversoConNominatim($lat, $lng) ?? ['encontrado' => false]);
+    }
+
+    private function geocodificarInversoConGoogle(float $lat, float $lng, string $key): ?array
+    {
+        try {
+            $response = Http::timeout(5)->get('https://maps.googleapis.com/maps/api/geocode/json', [
+                'latlng' => "{$lat},{$lng}",
+                'key'    => $key,
+            ]);
+            $data = $response->json();
+
+            if (($data['status'] ?? null) !== 'OK' || empty($data['results'])) {
+                return null;
+            }
+
+            $r = $data['results'][0];
+            return [
+                'encontrado' => true,
+                'direccion'  => $this->direccionCortaGoogle($r['address_components'] ?? []) ?? $r['formatted_address'],
+            ];
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    private function geocodificarInversoConNominatim(float $lat, float $lng): ?array
+    {
+        try {
+            $response = Http::timeout(5)
+                ->withHeaders(['User-Agent' => 'Pindoor/1.0 (https://pindoor.cl)'])
+                ->get('https://nominatim.openstreetmap.org/reverse', [
+                    'lat'            => $lat,
+                    'lon'            => $lng,
+                    'format'         => 'json',
+                    'addressdetails' => 1,
+                ]);
+            $data = $response->json();
+
+            if (empty($data['display_name'])) {
+                return null;
+            }
+
+            return [
+                'encontrado' => true,
+                'direccion'  => $this->direccionCortaNominatim($data['address'] ?? []) ?? $data['display_name'],
             ];
         } catch (\Throwable $e) {
             return null;
@@ -249,7 +367,19 @@ class ClienteController extends Controller
             'cafeterias', 'cultura', 'museos', 'picadas', 'comer',
             'alojar', 'tiendas', 'artesania', 'centro-deportivo', 'bar'
         ])->orderBy('nombre')->get();
-        return view('cliente.perfil', compact('punto', 'modulos', 'datoCarta', 'datoAlojamiento', 'categorias'));
+
+        // Contenido de los módulos "avanzados" (antes vivían en páginas aparte:
+        // /museo, /eventos, /productos). Se muestran embebidos en el dashboard.
+        $entradas     = $punto->items('entradas');
+        $exposiciones = $punto->items('exposiciones');
+        $eventos      = $punto->moduloItems->where('modulo', 'eventos')->values();
+        $tiposEvento  = CategoriaEvento::catalogo();
+        $productos    = $punto->productos;
+
+        return view('cliente.perfil', compact(
+            'punto', 'modulos', 'datoCarta', 'datoAlojamiento', 'categorias',
+            'entradas', 'exposiciones', 'eventos', 'tiposEvento', 'productos'
+        ));
     }
 
     public function actualizarPerfil(Request $request, PuntoInteres $punto)

@@ -201,13 +201,13 @@
                     <x-responsive-nav-link href="#alojamiento" onclick="toggleMobileMenu()">🛏️ Alojamiento</x-responsive-nav-link>
                     @endif
                     @if(in_array('entradas', $modulos) || in_array('exposiciones', $modulos))
-                    <x-responsive-nav-link :href="route('cliente.museo', $punto)">🎟️ Museo ↗</x-responsive-nav-link>
+                    <x-responsive-nav-link href="#museo" onclick="toggleMobileMenu()">🎟️ Museo</x-responsive-nav-link>
                     @endif
                     @if(in_array('agenda', $modulos))
-                    <x-responsive-nav-link :href="route('cliente.eventos', $punto)">📅 Eventos ↗</x-responsive-nav-link>
+                    <x-responsive-nav-link href="#eventos" onclick="toggleMobileMenu()">📅 Eventos</x-responsive-nav-link>
                     @endif
                     @if(in_array($punto->categoria_id, [13,14]))
-                    <x-responsive-nav-link :href="route('cliente.productos.index')">🛍️ Catálogo ↗</x-responsive-nav-link>
+                    <x-responsive-nav-link href="#catalogo" onclick="toggleMobileMenu()">🛍️ Catálogo</x-responsive-nav-link>
                     @endif
                     @endif
 
