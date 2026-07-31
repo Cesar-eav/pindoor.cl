@@ -528,7 +528,7 @@
                                 <p class="section-sub">Se muestra en tu ficha pública con el botón "Ver carta"</p>
                             </div>
                             <div class="section-card-body">
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                                <div class="space-y-5">
                                     <div>
                                         <x-input-label for="carta-texto" value="Descripción de la carta" />
                                         <div id="carta-editor" class="mt-1 bg-white border border-gray-200 rounded-xl text-sm min-h-44"></div>
@@ -536,18 +536,23 @@
                                     </div>
                                     <div>
                                         <x-input-label for="carta_pdf" value="Carta en PDF (opcional)" />
+                                        <p class="text-xs text-gray-400 mt-0.5 mb-2">Si subes un archivo nuevo, reemplaza automáticamente al actual.</p>
+
                                         @if($datoCarta['pdf_ruta'] ?? null)
-                                            <div class="flex items-center gap-3 mt-1 mb-2">
-                                                <a href="{{ asset('storage/' . $datoCarta['pdf_ruta']) }}" target="_blank"
-                                                   class="text-xs text-[#fc5648] font-bold hover:underline">📄 Ver carta actual</a>
-                                                <label class="flex items-center gap-1 text-xs text-gray-400 cursor-pointer">
-                                                    <input type="checkbox" name="eliminar_carta_pdf" value="1" class="rounded"> Eliminar PDF
-                                                </label>
-                                            </div>
+                                        <div class="flex items-center gap-3 mb-3 p-3 bg-gray-50 border border-gray-100 rounded-xl">
+                                            <span class="w-9 h-9 shrink-0 rounded-lg bg-[#fff0ef] text-[#fc5648] flex items-center justify-center text-base">📄</span>
+                                            <a href="{{ asset('storage/' . $datoCarta['pdf_ruta']) }}" target="_blank"
+                                               class="flex-1 min-w-0 text-sm text-[#fc5648] font-bold hover:underline">Ver carta actual</a>
+                                            <label class="flex items-center gap-1.5 text-xs text-gray-500 cursor-pointer shrink-0">
+                                                <input type="checkbox" name="eliminar_carta_pdf" value="1" class="rounded border-gray-300 text-red-500 focus:ring-red-400">
+                                                Eliminar
+                                            </label>
+                                        </div>
                                         @endif
+
                                         <input type="file" name="carta_pdf" id="carta_pdf" accept="application/pdf"
-                                               class="block w-full mt-1 text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer" />
-                                        <p class="text-xs text-gray-400 mt-1">Solo PDF · Máx. 30 MB</p>
+                                               class="block w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#fff0ef] file:text-[#fc5648] hover:file:bg-[#ffe0dd] cursor-pointer" />
+                                        <p class="text-xs text-gray-400 mt-1.5">Solo PDF · Máx. 30 MB</p>
                                     </div>
                                 </div>
                                 <div class="flex justify-end mt-5 pt-4 border-t border-gray-100">
