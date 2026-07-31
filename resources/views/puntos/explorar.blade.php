@@ -77,7 +77,7 @@
         <div class="mt-8 flex justify-center">
             {{ $atractivos->links() }}
         </div>
-    @elseif($artistas->isEmpty())
+    @elseif($artistas->isEmpty() && $operadores->isEmpty())
         <div class="text-center py-16">
             <div class="text-5xl mb-3">🕵️‍♂️</div>
             <p class="font-bold text-gray-700 mb-1">{{ __('ui.explorar.sin_resultados') }}</p>
@@ -111,6 +111,34 @@
                     <p class="text-xs text-violet-600 font-semibold mt-0.5">{{ $artista->disciplinaLabel() }}</p>
                     @if($artista->ciudad)
                         <p class="text-xs text-gray-400 truncate">📍 {{ $artista->ciudad }}</p>
+                    @endif
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Operadores turísticos en búsqueda --}}
+    @if(isset($operadores) && $operadores->isNotEmpty())
+    <div class="mt-8">
+        <h2 class="text-sm font-bold text-gray-700 mb-3">Operadores turísticos</h2>
+        <div class="flex flex-col gap-3">
+            @foreach($operadores as $operador)
+            <a href="{{ route('operador.show', $operador->slug) }}"
+               class="flex gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm p-3 items-center">
+                @if($operador->imagen_perfil)
+                    <img src="{{ asset('storage/' . $operador->imagen_perfil) }}"
+                         alt="{{ $operador->nombre }}"
+                         class="w-16 h-16 rounded-full object-cover border-2 border-teal-100 shrink-0">
+                @else
+                    <div class="w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center text-2xl shrink-0">🧭</div>
+                @endif
+                <div class="min-w-0">
+                    <p class="font-bold text-gray-900 text-sm leading-snug">{{ $operador->nombre }}</p>
+                    <p class="text-xs text-teal-600 font-semibold mt-0.5">Operador turístico</p>
+                    @if($operador->ciudad)
+                        <p class="text-xs text-gray-400 truncate">📍 {{ $operador->ciudad }}</p>
                     @endif
                 </div>
             </a>

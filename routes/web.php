@@ -64,6 +64,7 @@ Route::get('/atractivos/{atractivo}', fn($slug) => redirect()->route('puntos.sho
 Route::get('/atractivos/categoria/{categoria}', [PuntoInteresController::class, 'filtrarPorCategoria'])->name('atractivos.categoria');
 Route::get('/atractivos/ciudad/{ciudad}', [PuntoInteresController::class, 'filtrarPorCiudad'])->name('atractivos.ciudad');
 Route::get('/explorar', [PuntoInteresController::class, 'explorar'])->name('puntos.explorar');
+Route::get('/buscar/sugerencias', [PuntoInteresController::class, 'sugerencias'])->name('puntos.sugerencias');
 Route::get('/categorias', [PuntoInteresController::class, 'buscar'])->name('puntos.buscar.vista');
 Route::get('/info', fn() => view('puntos.info'))->name('puntos.info');
 Route::post('/api/share', function () {
@@ -204,6 +205,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     // Configuración general
     Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion.index');
     Route::post('/configuracion', [ConfiguracionController::class, 'actualizar'])->name('configuracion.actualizar');
+    Route::post('/configuracion/excluidos', [ConfiguracionController::class, 'actualizarExcluidos'])->name('configuracion.excluidos');
 });
 
 /* --- RUTAS CLIENTES (NEGOCIOS) --- */

@@ -11,6 +11,7 @@ use App\Models\Experiencia;
 use App\Models\Categoria;
 use App\Models\PuntoProducto;
 use App\Models\Artista;
+use App\Models\OperadorTuristico;
 use App\Mail\NuevaExperienciaPropuesta;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -24,25 +25,14 @@ class PuntoInteresController extends Controller
   public function index(Request $request)
 {
     try {
-        $query = PuntoInteres::query()
-            ->where('activo', 1)
-            ->sinExcluidos()
-            ->where('eliminado', false);
+        $query = PuntoInteres::publico();
 
         if ($request->filled('category')) {
             $query->whereHas('categoria', fn($q) => $q->where('slug', $request->category));
         }
 
         if ($request->filled('search')) {
-            $search = $request->search;
-            $searchLower = mb_strtolower($search);
-            $query->where(function($q) use ($search, $searchLower) {
-                // title/tags son JSON: el LIKE normal castea con collation binaria (case-sensitive)
-                $q->whereRaw('LOWER(title) LIKE ?', ["%{$searchLower}%"])
-                  ->orWhereRaw('LOWER(description) LIKE ?', ["%{$searchLower}%"])
-                  ->orWhere('descripcion_busqueda', 'like', "%{$search}%")
-                  ->orWhereRaw('LOWER(tags) LIKE ?', ["%{$searchLower}%"]);
-            });
+            $query->buscar($request->search);
         }
 
         // GPS: ordenar por cercanía, sin filtro de radio
@@ -63,7 +53,7 @@ class PuntoInteresController extends Controller
             ->paginate(48)
             ->withQueryString();
 
-        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->where('activo', 1)->where('eliminado', false)])
+        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->publico()])
             ->orderByDesc('puntos_interes_count')
             ->get();
 
@@ -72,9 +62,7 @@ class PuntoInteresController extends Controller
         $categoriasConPuntos = collect();
         if ($sinFiltros) {
             $poolSize = 8 * $categorias->count();
-            $puntosPool = PuntoInteres::where('activo', 1)
-                ->where('eliminado', false)
-                ->sinExcluidos()
+            $puntosPool = PuntoInteres::publico()
                 ->whereNotNull('categoria_id')
                 ->with('imagenPrincipal')
                 ->latest('updated_at')
@@ -91,8 +79,7 @@ class PuntoInteresController extends Controller
                 ->values();
         }
 
-        $puntosMapData = PuntoInteres::where('activo', 1)
-            ->where('eliminado', false)
+        $puntosMapData = PuntoInteres::publico()
             ->whereNotNull('lat')
             ->whereNotNull('lng')
             ->with(['categoria', 'imagenPrincipal'])
@@ -114,6 +101,7 @@ class PuntoInteresController extends Controller
 
         $panoramas = collect();
         $artistas  = collect();
+        $operadores = collect();
         if ($request->filled('search')) {
             $s = $request->search;
             $sLower = mb_strtolower($s);
@@ -133,6 +121,13 @@ class PuntoInteresController extends Controller
                                     ->orWhere('disciplina', 'like', "%{$s}%"))
                 ->limit(6)
                 ->get();
+
+            $operadores = OperadorTuristico::where('activo', true)
+                ->where(fn($q) => $q->where('nombre', 'like', "%{$s}%")
+                                    ->orWhere('descripcion', 'like', "%{$s}%")
+                                    ->orWhere('ciudad', 'like', "%{$s}%"))
+                ->limit(6)
+                ->get();
         }
 
         $hoy = Carbon::today();
@@ -141,7 +136,7 @@ class PuntoInteresController extends Controller
         $eventosCliente = ModuloItem::where('modulo', 'eventos')
             ->where('activo', true)
             ->where('fecha', '>=', $hoy)
-            ->whereHas('punto', fn($q) => $q->where('activo', true)->where('eliminado', false))
+            ->whereHas('punto', fn($q) => $q->publico())
             ->with('punto')
             ->get()
             ->map(fn (ModuloItem $item) => $item->comoPanorama());
@@ -169,7 +164,7 @@ class PuntoInteresController extends Controller
 
         $ultimasExperiencias = Experiencia::activas()->latest()->take(10)->get();
 
-        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'categoriasConPuntos', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts', 'ultimasExperiencias', 'artistas'));
+        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'categoriasConPuntos', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts', 'ultimasExperiencias', 'artistas', 'operadores'));
 
     } catch (\Exception $e) {
         \Log::error('Error en index: ' . $e->getMessage());
@@ -182,7 +177,7 @@ class PuntoInteresController extends Controller
 
     public function buscar(Request $request)
     {
-        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->where('activo', 1)->where('eliminado', false)->sinExcluidos()])
+        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->publico()])
             ->having('puntos_interes_count', '>', 0)
             ->orderByDesc('puntos_interes_count')
             ->get();
@@ -215,25 +210,14 @@ class PuntoInteresController extends Controller
 
     public function explorar(Request $request)
     {
-        $query = PuntoInteres::query()
-            ->where('activo', 1)
-            ->sinExcluidos()
-            ->where('eliminado', false);
+        $query = PuntoInteres::publico();
 
         if ($request->filled('category')) {
             $query->whereHas('categoria', fn($q) => $q->where('slug', $request->category));
         }
 
         if ($request->filled('search')) {
-            $search = $request->search;
-            $searchLower = mb_strtolower($search);
-            $query->where(function($q) use ($search, $searchLower) {
-                // title/tags son JSON: el LIKE normal castea con collation binaria (case-sensitive)
-                $q->whereRaw('LOWER(title) LIKE ?', ["%{$searchLower}%"])
-                  ->orWhereRaw('LOWER(description) LIKE ?', ["%{$searchLower}%"])
-                  ->orWhere('descripcion_busqueda', 'like', "%{$search}%")
-                  ->orWhereRaw('LOWER(tags) LIKE ?', ["%{$searchLower}%"]);
-            });
+            $query->buscar($request->search);
         }
 
         $query->latest('updated_at');
@@ -243,15 +227,12 @@ class PuntoInteresController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q
-        ->where('activo', 1)
-        ->where('eliminado', false)
-        ->sinExcluidos()
-        ])
+        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->publico()])
             ->orderByDesc('puntos_interes_count')
             ->get();
 
         $artistas = collect();
+        $operadores = collect();
         if ($request->filled('search')) {
             $s = $request->search;
             $artistas = Artista::where('activo', true)
@@ -260,9 +241,16 @@ class PuntoInteresController extends Controller
                                     ->orWhere('disciplina', 'like', "%{$s}%"))
                 ->limit(6)
                 ->get();
+
+            $operadores = OperadorTuristico::where('activo', true)
+                ->where(fn($q) => $q->where('nombre', 'like', "%{$s}%")
+                                    ->orWhere('descripcion', 'like', "%{$s}%")
+                                    ->orWhere('ciudad', 'like', "%{$s}%"))
+                ->limit(6)
+                ->get();
         }
 
-        return view('puntos.explorar', compact('atractivos', 'categorias', 'artistas'));
+        return view('puntos.explorar', compact('atractivos', 'categorias', 'artistas', 'operadores'));
     }
 
     /**
@@ -348,9 +336,8 @@ class PuntoInteresController extends Controller
      */
     public function showEvento(string $slug, ModuloItem $item)
     {
-        $punto = PuntoInteres::where('slug', $slug)
-            ->where('activo', true)
-            ->where('eliminado', false)
+        $punto = PuntoInteres::publico()
+            ->where('slug', $slug)
             ->firstOrFail();
 
         abort_if($item->punto_interes_id !== $punto->id || $item->modulo !== 'eventos' || !$item->activo, 404);
@@ -378,7 +365,7 @@ class PuntoInteresController extends Controller
             ->where('activo', true)
             ->whereNotNull('fecha')
             ->whereBetween('fecha', [$hoy, $tope])
-            ->whereHas('punto', fn($q) => $q->where('activo', true)->where('eliminado', false))
+            ->whereHas('punto', fn($q) => $q->publico())
             ->with('punto')
             ->get()
             ->map(fn (ModuloItem $item) => $item->comoPanorama());
@@ -499,20 +486,17 @@ class PuntoInteresController extends Controller
      */
     public function show($slug)
     {
-        $punto = PuntoInteres::with([
+        $punto = PuntoInteres::publico()
+                             ->with([
                                 'categoria', 'imagenes', 'moduloDatos', 'moduloItems', 'usuario',
                                 'operadores' => fn($q) => $q->where('activo', true),
                              ])
                              ->where('slug', $slug)
-                             ->where('activo', true)
-                             ->where('eliminado', false)
                              ->firstOrFail();
 
         $cercanos = collect();
         if ($punto->lat && $punto->lng) {
-            $cercanos = PuntoInteres::where('activo', true)
-                ->where('eliminado', false)
-                ->sinExcluidos()
+            $cercanos = PuntoInteres::publico()
                 ->where('id', '!=', $punto->id)
                 ->whereNotNull('lat')
                 ->whereNotNull('lng')
@@ -531,10 +515,9 @@ class PuntoInteresController extends Controller
 
     public function activar(string $slug)
     {
-        $punto = PuntoInteres::with(['categoria', 'usuario'])
+        $punto = PuntoInteres::publico()
+            ->with(['categoria', 'usuario'])
             ->where('slug', $slug)
-            ->where('activo', true)
-            ->where('eliminado', false)
             ->firstOrFail();
 
         abort_unless($punto->esBasico(), 404);
@@ -647,10 +630,9 @@ class PuntoInteresController extends Controller
 
     public function showProducto($slug, PuntoProducto $producto)
     {
-        $punto = PuntoInteres::with(['categoria', 'imagenes', 'productos'])
+        $punto = PuntoInteres::publico()
+                             ->with(['categoria', 'imagenes', 'productos'])
                              ->where('slug', $slug)
-                             ->where('activo', true)
-                             ->where('eliminado', false)
                              ->firstOrFail();
 
         abort_if($producto->punto_interes_id !== $punto->id, 404);
@@ -660,10 +642,9 @@ class PuntoInteresController extends Controller
 
     public function showExposicion($slug, ModuloItem $item)
     {
-        $punto = PuntoInteres::with(['categoria', 'imagenPrincipal'])
+        $punto = PuntoInteres::publico()
+                             ->with(['categoria', 'imagenPrincipal'])
                              ->where('slug', $slug)
-                             ->where('activo', true)
-                             ->where('eliminado', false)
                              ->firstOrFail();
 
         abort_if($item->punto_interes_id !== $punto->id || $item->modulo !== 'exposiciones', 404);
@@ -677,5 +658,32 @@ class PuntoInteresController extends Controller
                            ->get();
 
         return view('puntos.exposicion', compact('punto', 'item', 'otras'));
+    }
+
+    /**
+     * Sugerencias de búsqueda instantánea para el buscador del appbar mobile (dropdown al escribir).
+     * Solo puntos de interés — panoramas/artistas/operadores quedan para la página de resultados completa.
+     */
+    public function sugerencias(Request $request)
+    {
+        $q = trim((string) $request->query('q', ''));
+
+        if (mb_strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $resultados = PuntoInteres::publico()
+            ->buscar($q)
+            ->with(['categoria', 'imagenPrincipal'])
+            ->take(6)
+            ->get()
+            ->map(fn($p) => [
+                'title'    => $p->title,
+                'url'      => route('puntos.show', $p->slug),
+                'sector'   => $p->sector,
+                'categoria'=> $p->categoria?->nombre,
+            ]);
+
+        return response()->json($resultados);
     }
 }

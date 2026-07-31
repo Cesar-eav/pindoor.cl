@@ -102,8 +102,7 @@ class OperadorController extends Controller
 
         $puntosSeleccionados = $operador->puntos->pluck('id')->all();
 
-        $puntosData = PuntoInteres::where('activo', 1)
-            ->where('eliminado', false)
+        $puntosData = PuntoInteres::publico()
             ->whereIn('categoria_id', $categorias->pluck('id'))
             ->with('categoria:id,nombre,icono')
             ->get(['id', 'title', 'sector', 'categoria_id'])
@@ -157,9 +156,9 @@ class OperadorController extends Controller
 
         $categoriasPermitidas = Categoria::where('disponible_para_operadores', true)->pluck('id');
 
-        $idsValidos = PuntoInteres::whereIn('id', collect($request->input('puntos', []))->filter())
+        $idsValidos = PuntoInteres::publico()
+            ->whereIn('id', collect($request->input('puntos', []))->filter())
             ->whereIn('categoria_id', $categoriasPermitidas)
-            ->where('eliminado', false)
             ->pluck('id');
 
         $operador->puntos()->sync($idsValidos);

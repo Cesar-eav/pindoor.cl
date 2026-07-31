@@ -263,7 +263,7 @@
             <div class="mt-12 mb-4 flex justify-center">
                 {{ $atractivos->links() }}
             </div>
-        @elseif($panoramas->isEmpty() && $artistas->isEmpty())
+        @elseif($panoramas->isEmpty() && $artistas->isEmpty() && $operadores->isEmpty())
             <div class="bg-white rounded-2xl shadow-sm p-16 text-center border-2 border-dashed border-gray-200">
                 <div class="text-5xl mb-4">🕵️‍♂️</div>
                 <h3 class="text-xl font-bold text-gray-800 mb-2">{{ __('ui.explorar.sin_resultados') }}</h3>
@@ -341,6 +341,36 @@
                         <p class="text-xs text-violet-600 font-semibold mt-0.5">{{ $artista->disciplinaLabel() }}</p>
                         @if($artista->ciudad)
                             <p class="text-xs text-gray-400 mt-0.5 truncate">📍 {{ $artista->ciudad }}</p>
+                        @endif
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        @if($operadores->isNotEmpty())
+        <div class="mt-10">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-bold text-gray-700">
+                    Operadores turísticos con "{{ $search }}"
+                </h2>
+            </div>
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                @foreach($operadores as $operador)
+                <a href="{{ route('operador.show', $operador->slug) }}"
+                   class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition overflow-hidden group flex items-center gap-4 p-4">
+                    @if($operador->imagen_perfil)
+                        <img src="{{ asset('storage/' . $operador->imagen_perfil) }}" alt="{{ $operador->nombre }}"
+                             class="w-14 h-14 rounded-full object-cover border-2 border-teal-100 shrink-0">
+                    @else
+                        <div class="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center text-2xl shrink-0">🧭</div>
+                    @endif
+                    <div class="min-w-0">
+                        <p class="font-bold text-gray-900 text-sm leading-snug group-hover:text-teal-700 transition">{{ $operador->nombre }}</p>
+                        <p class="text-xs text-teal-600 font-semibold mt-0.5">Operador turístico</p>
+                        @if($operador->ciudad)
+                            <p class="text-xs text-gray-400 mt-0.5 truncate">📍 {{ $operador->ciudad }}</p>
                         @endif
                     </div>
                 </a>

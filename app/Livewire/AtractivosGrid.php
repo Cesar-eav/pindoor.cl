@@ -6,6 +6,7 @@ use App\Models\Artista;
 use App\Models\Categoria;
 use App\Models\Experiencia;
 use App\Models\ModuloItem;
+use App\Models\OperadorTuristico;
 use App\Models\Panorama;
 use App\Models\Post;
 use App\Models\PuntoInteres;
@@ -43,23 +44,14 @@ class AtractivosGrid extends Component
 
     public function render()
     {
-        $query = PuntoInteres::query()
-            ->where('activo', 1)
-            ->sinExcluidos()
-            ->where('eliminado', false);
+        $query = PuntoInteres::publico();
 
         if ($this->category) {
             $query->whereHas('categoria', fn($q) => $q->where('slug', $this->category));
         }
 
         if ($this->search) {
-            $s = $this->search;
-            $query->where(fn($q) => $q
-                ->where('title', 'like', "%{$s}%")
-                ->orWhere('description', 'like', "%{$s}%")
-                ->orWhere('descripcion_busqueda', 'like', "%{$s}%")
-                ->orWhere('tags', 'like', "%{$s}%")
-            );
+            $query->buscar($this->search);
         }
 
         if ($this->lat && $this->lng) {
@@ -72,7 +64,7 @@ class AtractivosGrid extends Component
 
         $atractivos = $query->with(['categoria', 'imagenPrincipal'])->paginate(48);
 
-        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->where('activo', 1)->where('eliminado', false)])
+        $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->publico()])
             ->orderByDesc('puntos_interes_count')
             ->get();
 
@@ -81,9 +73,7 @@ class AtractivosGrid extends Component
         $categoriasConPuntos = collect();
         if (!$hayFiltros) {
             $poolSize = 8 * $categorias->count();
-            $puntosPool = PuntoInteres::where('activo', 1)
-                ->where('eliminado', false)
-                ->sinExcluidos()
+            $puntosPool = PuntoInteres::publico()
                 ->whereNotNull('categoria_id')
                 ->with('imagenPrincipal')
                 ->latest('updated_at')
@@ -102,6 +92,7 @@ class AtractivosGrid extends Component
 
         $panoramas = collect();
         $artistas  = collect();
+        $operadores = collect();
         if ($this->search) {
             $s = $this->search;
             $panoramas = Panorama::where('activo', true)
@@ -122,6 +113,15 @@ class AtractivosGrid extends Component
                 )
                 ->limit(6)
                 ->get();
+
+            $operadores = OperadorTuristico::where('activo', true)
+                ->where(fn($q) => $q
+                    ->where('nombre', 'like', "%{$s}%")
+                    ->orWhere('descripcion', 'like', "%{$s}%")
+                    ->orWhere('ciudad', 'like', "%{$s}%")
+                )
+                ->limit(6)
+                ->get();
         }
 
         $hoy = Carbon::today();
@@ -130,7 +130,7 @@ class AtractivosGrid extends Component
         $eventosCliente = $hayFiltros ? collect() : ModuloItem::where('modulo', 'eventos')
             ->where('activo', true)
             ->where('fecha', '>=', $hoy)
-            ->whereHas('punto', fn($q) => $q->where('activo', true)->where('eliminado', false))
+            ->whereHas('punto', fn($q) => $q->publico())
             ->with('punto')
             ->get()
             ->map(fn (ModuloItem $item) => $item->comoPanorama());
@@ -153,7 +153,7 @@ class AtractivosGrid extends Component
 
         return view('livewire.atractivos-grid', compact(
             'atractivos', 'categorias', 'categoriasConPuntos', 'hayFiltros', 'panoramas',
-            'proximosPanoramas', 'ultimosPosts', 'ultimasExperiencias', 'artistas'
+            'proximosPanoramas', 'ultimosPosts', 'ultimasExperiencias', 'artistas', 'operadores'
         ));
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
@@ -15,11 +16,23 @@ class PuntoInteres extends Model
     protected $table = 'puntosinteres';
 
     protected $casts = [
-        'tags'               => 'array',
         'modulos_habilitados'=> 'array',
         'oferta_expira_at'   => 'datetime',
         'oferta_activa'      => 'boolean',
     ];
+
+    /**
+     * Cast manual (no el 'array' genérico): ese escapa acentos como ó al guardar,
+     * lo que rompe la búsqueda por palabra completa (REGEXP \b) — "bar" quedaba "separado"
+     * de "ón" en "Barón" porque la barra invertida cuenta como límite de palabra.
+     */
+    protected function tags(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ? json_decode($value, true) : [],
+            set: fn ($value) => json_encode($value ?? [], JSON_UNESCAPED_UNICODE),
+        );
+    }
 
     protected $fillable = [
         'user_id',
@@ -46,14 +59,102 @@ class PuntoInteres extends Model
         'oferta_activa',
         'oferta_expira_at',
         'descripcion_busqueda',
+        'descripcion_busqueda_admin',
         'imagen_perfil',
     ];
 
-    const IDS_EXCLUIDOS = [81,64, 80, 87, 115, 128];
+    /**
+     * IDs de puntos de ejemplo/demo — no son negocios reales, se crearon para que un cliente
+     * prospecto viera cómo quedaría su local antes de registrarse. Se muestran a propósito
+     * en PublicitaController y ContactoController (las páginas de "mira un ejemplo"); en
+     * cualquier otro lugar público (mapa, sitemap, listados, búsqueda, ficha directa) deben
+     * quedar afuera — usar siempre scopePublico() en vez de armar los where() a mano.
+     *
+     * Editable desde /admin/configuracion (no hardcodeado) — se guarda como string
+     * separado por comas en Configuracion::get('puntos_demo_excluidos').
+     */
+    public static function idsExcluidos(): array
+    {
+        $valor = Configuracion::get('puntos_demo_excluidos', '');
+
+        return collect(explode(',', $valor))
+            ->map(fn($id) => (int) trim($id))
+            ->filter()
+            ->values()
+            ->all();
+    }
 
     public function scopeSinExcluidos($query)
     {
-        return $query->whereNotIn('id', self::IDS_EXCLUIDOS);
+        $ids = static::idsExcluidos();
+
+        return $ids ? $query->whereNotIn('id', $ids) : $query;
+    }
+
+    /**
+     * Único lugar que define "punto visible públicamente": activo, no eliminado, y sin los
+     * IDs de ejemplo/demo. Reemplaza el patrón repetido where('activo',1)->where('eliminado',false)
+     * [->sinExcluidos()] — así cambiar la definición de "visible" solo requiere tocar acá.
+     */
+    public function scopePublico($query)
+    {
+        return $query->where('activo', true)->where('eliminado', false)->sinExcluidos();
+    }
+
+    /**
+     * Búsqueda de texto libre, ordenada por relevancia (no por fecha).
+     * Prioridad: título > descripción curada (cliente o admin) > sector/dirección.
+     * No busca en "description" (la reseña larga) — daba demasiados falsos positivos
+     * (ej. un mural que menciona "color café" apareciendo al buscar "café").
+     * descripcion_busqueda la rellena el cliente desde su panel; descripcion_busqueda_admin
+     * es la misma idea pero solo editable desde el admin (útil para puntos sin cliente asociado).
+     *
+     * Usa coincidencia de palabra completa (REGEXP con \b), no substring — un LIKE '%bar%'
+     * hacía match con "Cerro Barón" o "Barrio Puerto" (sectores reales de Valparaíso) y
+     * mostraba iglesias/plazas sin ninguna relación al buscar "bar". Se tolera un plural
+     * simple (s/es) para que "mirador" siga encontrando "miradores".
+     *
+     * El REGEXP de MySQL 8 (motor ICU) no ignora tildes como sí lo hacía el LIKE anterior
+     * (con la collation actual, "cafe" SÍ encontraba "café" vía LIKE, pero no vía REGEXP) —
+     * por eso cada vocal se expande a una clase [aá] para tolerar ambas formas.
+     */
+    public function scopeBuscar($query, string $termino)
+    {
+        $lower  = mb_strtolower(trim($termino));
+        $patron = '\\b' . static::patronTolerante($lower) . '(es|s)?\\b';
+
+        return $query
+            ->where(function ($q) use ($patron) {
+                $q->whereRaw('LOWER(title) REGEXP ?', [$patron])
+                  ->orWhereRaw('LOWER(descripcion_busqueda) REGEXP ?', [$patron])
+                  ->orWhereRaw('LOWER(descripcion_busqueda_admin) REGEXP ?', [$patron])
+                  ->orWhereRaw('LOWER(tags) REGEXP ?', [$patron])
+                  ->orWhereRaw('LOWER(sector) REGEXP ?', [$patron])
+                  ->orWhereRaw('LOWER(direccion) REGEXP ?', [$patron]);
+            })
+            ->selectRaw('puntosinteres.*, (CASE
+                WHEN LOWER(title) REGEXP ? THEN 1
+                WHEN LOWER(descripcion_busqueda) REGEXP ? THEN 2
+                WHEN LOWER(descripcion_busqueda_admin) REGEXP ? THEN 2
+                WHEN LOWER(sector) REGEXP ? THEN 3
+                WHEN LOWER(direccion) REGEXP ? THEN 4
+                ELSE 5
+            END) as relevancia_busqueda', [$patron, $patron, $patron, $patron, $patron])
+            ->orderBy('relevancia_busqueda');
+    }
+
+    /** Arma un patrón REGEXP tolerante a tildes: cada vocal (y ñ) matchea con o sin acento. */
+    private static function patronTolerante(string $termino): string
+    {
+        $sinAcentos = strtr($termino, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n']);
+        $variantes  = ['a' => '[aá]', 'e' => '[eé]', 'i' => '[ií]', 'o' => '[oó]', 'u' => '[uúü]', 'n' => '[nñ]'];
+
+        $partes = [];
+        foreach (mb_str_split($sinAcentos) as $char) {
+            $partes[] = $variantes[$char] ?? preg_quote($char, '/');
+        }
+
+        return implode('', $partes);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════

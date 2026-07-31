@@ -102,6 +102,19 @@
                              style="min-height: 180px;"></div>
                     </div>
 
+                    {{-- Perfil de búsqueda (admin) --}}
+                    <div class="mb-6 p-4 rounded-xl border border-amber-200 bg-amber-50">
+                        <label class="block text-sm font-semibold text-amber-900 mb-1">🔍 Palabras clave de búsqueda (uso interno)</label>
+                        <p class="text-xs text-amber-700 mb-2">
+                            Invisible para los turistas, pero se usa para que este punto aparezca en el buscador.
+                            Es el equivalente al "Perfil de búsqueda" que rellena el cliente desde su panel, pero editable solo desde acá
+                            — útil para puntos sin dueño real (básicos) o atractivos que administra Pindoor directamente.
+                        </p>
+                        <textarea name="descripcion_busqueda_admin" rows="4"
+                                  class="block w-full border-amber-200 bg-white rounded-lg shadow-sm text-sm focus:ring-amber-400 resize-none"
+                                  placeholder="Sinónimos, palabras que la gente buscaría, tipo de lugar, características…">{{ old('descripcion_busqueda_admin', $punto->descripcion_busqueda_admin) }}</textarea>
+                    </div>
+
                     {{-- Mapa + Galería (Vue) --}}
                     @php
                         $imagenesJson = json_encode($punto->imagenes->map(function($img) {
