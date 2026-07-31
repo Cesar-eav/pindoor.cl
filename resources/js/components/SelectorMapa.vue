@@ -6,7 +6,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"/>
       </svg>
       <input type="text" v-model="direccion" @keydown.enter.prevent="buscarDireccion" @blur="buscarDireccion"
-        placeholder="Ej: Condell 1234, Cerro Alegre"
+        placeholder="Ej: Condell 1234, Cerro Alegre" autocomplete="off" autocorrect="off" spellcheck="false"
         class="block bg-white w-full pl-12 pr-12 py-3.5 border-2 border-[#fc5648]/40 rounded-xl text-base shadow-sm focus:ring-2 focus:ring-[#fc5648] focus:border-[#fc5648] outline-none transition">
       <div v-if="buscando" class="absolute right-4 top-1/2 -translate-y-1/2">
         <svg class="animate-spin h-5 w-5 text-[#fc5648]" fill="none" viewBox="0 0 24 24">
@@ -35,6 +35,7 @@ const props = defineProps({
   initialLat: { type: Number, default: -33.0472 },
   initialLng: { type: Number, default: -71.6297 },
   geocodeUrl: { type: String, required: true },
+  reverseGeocodeUrl: { type: String, default: '' },
 });
 
 const ZOOM_CERCA = 17;
@@ -75,17 +76,17 @@ onMounted(() => {
   // Evento al hacer clic en el mapa
   map.on('click', (e) => {
     const { lat: newLat, lng: newLng } = e.latlng;
-    updatePosition(newLat, newLng);
+    updatePosition(newLat, newLng, { reverseGeocode: true });
   });
 
   // Evento al arrastrar el marcador
   marker.on('dragend', () => {
     const position = marker.getLatLng();
-    updatePosition(position.lat, position.lng);
+    updatePosition(position.lat, position.lng, { reverseGeocode: true });
   });
 });
 
-function updatePosition(newLat, newLng, zoom = null) {
+function updatePosition(newLat, newLng, { zoom = null, reverseGeocode = false } = {}) {
   lat.value = newLat.toFixed(6);
   lng.value = newLng.toFixed(6);
   marker.setLatLng([newLat, newLng]);
@@ -93,6 +94,36 @@ function updatePosition(newLat, newLng, zoom = null) {
     map.setView([newLat, newLng], zoom);
   } else {
     map.panTo([newLat, newLng]);
+  }
+  if (reverseGeocode) {
+    buscarDireccionInversa(newLat, newLng);
+  }
+}
+
+async function buscarDireccionInversa(latVal, lngVal) {
+  if (!props.reverseGeocodeUrl) return;
+
+  buscando.value = true;
+  mensaje.value = '';
+
+  try {
+    const res = await fetch(props.reverseGeocodeUrl + `?lat=${latVal}&lng=${lngVal}`);
+    const data = await res.json();
+
+    if (data.encontrado) {
+      direccion.value = data.direccion;
+      ultimaBusqueda = data.direccion;
+      encontrada.value = true;
+      mensaje.value = '✓ ' + data.direccion;
+    } else {
+      encontrada.value = false;
+      mensaje.value = 'No pudimos identificar la dirección de este punto. Puedes escribirla manualmente.';
+    }
+  } catch (e) {
+    encontrada.value = false;
+    mensaje.value = 'No pudimos identificar la dirección de este punto. Puedes escribirla manualmente.';
+  } finally {
+    buscando.value = false;
   }
 }
 
@@ -109,7 +140,7 @@ async function buscarDireccion() {
     const data = await res.json();
 
     if (data.encontrado) {
-      updatePosition(parseFloat(data.lat), parseFloat(data.lng), ZOOM_CERCA);
+      updatePosition(parseFloat(data.lat), parseFloat(data.lng), { zoom: ZOOM_CERCA });
       encontrada.value = true;
       mensaje.value = '✓ Encontramos: ' + data.direccion;
     } else {

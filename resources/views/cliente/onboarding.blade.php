@@ -65,6 +65,7 @@
                                 :initial-lat="-33.0472"
                                 :initial-lng="-71.6297"
                                 geocode-url="{{ route('cliente.geocodificar') }}"
+                                reverse-geocode-url="{{ route('cliente.geocodificar-inverso') }}"
                             ></selector-mapa>
                         </div>
                     </div>

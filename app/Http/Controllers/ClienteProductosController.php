@@ -14,13 +14,6 @@ class ClienteProductosController extends Controller
         return Auth::user()->puntoInteres()->firstOrFail();
     }
 
-    public function index()
-    {
-        $punto = $this->puntoAutorizado();
-        $productos = $punto->productos;
-        return view('cliente.productos.index', compact('punto', 'productos'));
-    }
-
     public function store(Request $request)
     {
         $punto = $this->puntoAutorizado();

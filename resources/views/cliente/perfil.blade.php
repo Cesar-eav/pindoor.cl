@@ -21,6 +21,7 @@
         'galeria'       => ['ok' => $imagenes->isNotEmpty(),                                         'label' => 'Al menos 1 foto',          'href' => '#galeria'],
         'horario'       => ['ok' => !empty(trim($punto->horario ?? '')),                            'label' => 'Horario de atención',      'href' => '#ubicacion'],
         'direccion'     => ['ok' => !empty(trim($punto->direccion ?? '')),                          'label' => 'Dirección',                'href' => '#ubicacion'],
+        'sector'        => ['ok' => !empty(trim($punto->sector ?? '')),                             'label' => 'Sector / Cerro',           'href' => '#ubicacion'],
     ];
     if ($datoCarta !== null) {
         $checks['carta'] = ['ok' => !empty($datoCarta['url'] ?? '') || !empty($datoCarta['texto'] ?? ''), 'label' => 'Carta / Menú', 'href' => '#carta'];
@@ -34,145 +35,7 @@
 
 <div class="flex bg-white" style="min-height: calc(100vh - 3.5rem)">
 
-    {{-- ══════════════════════════════════════════════════════════════
-         SIDEBAR IZQUIERDO
-         ══════════════════════════════════════════════════════════════ --}}
-    <aside class="hidden lg:flex flex-col w-60 shrink-0 sticky top-14 overflow-y-auto" style="height: calc(100vh - 3.5rem); background: #0f172a;">
-
-        {{-- Identidad del negocio --}}
-        <div class="p-5" style="border-bottom: 1px solid rgba(255,255,255,0.08)">
-            <div class="flex items-center gap-3">
-
-                {{-- Logo clickeable — mini-form, XHR con preview y progreso --}}
-                <form id="logo-sidebar-form" method="POST" action="{{ route('cliente.perfil.actualizar', $punto) }}" enctype="multipart/form-data" class="shrink-0">
-                    @csrf @method('PUT')
-                    <input type="file" id="logo-sidebar-input" name="imagen_perfil"
-                           accept="image/jpeg,image/png,image/jpg,image/webp"
-                           class="hidden">
-                    <label for="logo-sidebar-input" class="relative cursor-pointer group block w-11 h-11">
-                        @if($logoUrl)
-                            <img id="logo-sidebar-preview" src="{{ $logoUrl }}" alt="Logo" class="w-11 h-11 rounded-xl object-cover" style="border: 2px solid rgba(255,255,255,0.15)">
-                        @else
-                            <div id="logo-sidebar-placeholder" class="w-11 h-11 rounded-xl flex items-center justify-center text-xl" style="background: rgba(255,255,255,0.08)">🏪</div>
-                        @endif
-                        {{-- Overlay cámara --}}
-                        <div id="logo-camera-overlay" class="absolute inset-0 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style="background: rgba(0,0,0,0.55)">
-                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                        </div>
-                        {{-- Overlay progreso --}}
-                        <div id="logo-progress-overlay" class="absolute inset-0 rounded-xl flex flex-col items-center justify-center hidden" style="background: rgba(0,0,0,0.72)">
-                            <span id="logo-progress-pct" class="text-white font-black" style="font-size:0.65rem; line-height:1">0%</span>
-                        </div>
-                    </label>
-                </form>
-
-                <div class="min-w-0">
-                    <p class="text-sm font-bold text-white truncate leading-tight">{{ $punto->title }}</p>
-                    <span class="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full font-bold {{ $punto->activo ? 'bg-green-500/20 text-green-400' : 'bg-orange-500/20 text-orange-400' }}">
-                        {{ $punto->activo ? '● Visible' : '● Pausado' }}
-                    </span>
-                </div>
-            </div>
-            @if($pendientes->isNotEmpty())
-            <div class="mt-3 rounded-xl px-3 py-2" style="background: rgba(252,86,72,0.15); border: 1px solid rgba(252,86,72,0.3)">
-                <p class="text-[11px] font-bold" style="color: #fc5648">⚠ {{ $pendientes->count() }} campo{{ $pendientes->count() > 1 ? 's' : '' }} pendiente{{ $pendientes->count() > 1 ? 's' : '' }}</p>
-            </div>
-            @endif
-        </div>
-
-        {{-- Navegación --}}
-        <nav class="flex-1 p-3 space-y-6 overflow-y-auto">
-
-            @if($tieneActividadDiaria)
-            <div>
-                <p class="sidebar-group-label" style="color: #fc5648">Actividad de hoy</p>
-                <div class="space-y-0.5">
-                    @if(in_array('oferta_del_dia', $modulos))
-                    <a href="#oferta" class="sidebar-link">🏷️ Oferta del día</a>
-                    @endif
-                    @if(in_array('menu_del_dia', $modulos))
-                    <a href="#menu" class="sidebar-link">🥘 Menú del día</a>
-                    @endif
-                    @if(in_array('avisos', $modulos))
-                    <a href="#avisos" class="sidebar-link">📢 Avisos</a>
-                    @endif
-                    @if(in_array('promociones', $modulos))
-                    <a href="#promociones" class="sidebar-link">🎁 Promociones</a>
-                    @endif
-                </div>
-            </div>
-            @endif
-
-            <div>
-                <p class="sidebar-group-label" style="color: #60a5fa">Tu perfil</p>
-                <div class="space-y-0.5">
-                    <a href="#descripcion" class="sidebar-link justify-between">
-                        <span>📝 Descripción</span>
-                        @if(!$checks['description']['ok'])<span class="sidebar-dot"></span>@endif
-                    </a>
-                    <a href="#galeria" class="sidebar-link justify-between">
-                        <span>🖼️ Galería</span>
-                        @if(!$checks['galeria']['ok'])<span class="sidebar-dot"></span>@endif
-                    </a>
-                    <a href="#imagen-perfil" class="sidebar-link justify-between">
-                        <span>🏷️ Logo / imagen</span>
-                        @if(!$checks['imagen_perfil']['ok'])<span class="sidebar-dot"></span>@endif
-                    </a>
-                    <a href="#ubicacion" class="sidebar-link justify-between">
-                        <span>📍 Ubicación</span>
-                        @if(!$checks['horario']['ok'] || !$checks['direccion']['ok'])<span class="sidebar-dot"></span>@endif
-                    </a>
-                    <a href="#contacto" class="sidebar-link">🔗 Contacto y redes</a>
-                    <a href="#busqueda" class="sidebar-link">🔍 Búsqueda SEO</a>
-                </div>
-            </div>
-
-            @if($tieneContenido || $tieneModuloAlojamiento)
-            <div>
-                <p class="sidebar-group-label" style="color: #34d399">Contenido</p>
-                <div class="space-y-0.5">
-                    @if(in_array('carta', $modulos))
-                    <a href="#carta" class="sidebar-link justify-between">
-                        <span>🍽️ Carta / Menú</span>
-                        @if(isset($checks['carta']) && !$checks['carta']['ok'])<span class="sidebar-dot"></span>@endif
-                    </a>
-                    @endif
-                    @if($tieneModuloAlojamiento)
-                    <a href="#alojamiento" class="sidebar-link">🛏️ Alojamiento</a>
-                    @endif
-                    @if(in_array('entradas', $modulos) || in_array('exposiciones', $modulos))
-                    <a href="{{ route('cliente.museo', $punto) }}" class="sidebar-link sidebar-link-external">🎟️ Museo <span class="ml-auto">↗</span></a>
-                    @endif
-                    @if(in_array('agenda', $modulos))
-                    <a href="{{ route('cliente.eventos', $punto) }}" class="sidebar-link sidebar-link-external">📅 Eventos <span class="ml-auto">↗</span></a>
-                    @endif
-                    @if(in_array($punto->categoria_id, [13, 14]))
-                    <a href="{{ route('cliente.productos.index') }}" class="sidebar-link sidebar-link-external">🛍️ Catálogo <span class="ml-auto">↗</span></a>
-                    @endif
-                </div>
-            </div>
-            @endif
-
-        </nav>
-
-        {{-- Footer --}}
-        <div class="p-4 space-y-2" style="border-top: 1px solid rgba(255,255,255,0.08)">
-            <a href="{{ route('puntos.show', $punto->slug) }}" target="_blank"
-               class="flex items-center justify-between text-xs font-medium transition"
-               style="color: rgba(255,255,255,0.5)"
-               onmouseover="this.style.color='#fc5648'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">
-                Ver ficha pública
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-            </a>
-            @if(auth()->user()->puntoInteres()->count() > 1)
-            <a href="{{ route('cliente.perfil') }}" class="block text-xs transition" style="color: rgba(255,255,255,0.35)">← Mis negocios</a>
-            @endif
-        </div>
-
-    </aside>
+    @include('cliente.partials._sidebar', ['punto' => $punto])
 
     {{-- ══════════════════════════════════════════════════════════════
          CONTENIDO PRINCIPAL
@@ -190,27 +53,29 @@
             </div>
             @endif
 
-            {{-- Banner de completitud --}}
+            {{-- Popup de datos pendientes --}}
             @if($pendientes->isNotEmpty())
-            <div x-data="{ open: true }" x-show="open">
-                <div class="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex items-start justify-between gap-3">
-                    <div class="flex items-start gap-3">
-                        <span class="text-xl shrink-0 mt-0.5">⚠️</span>
-                        <div>
-                            <p class="text-sm font-bold text-amber-800 mb-2">Faltan {{ $pendientes->count() }} dato{{ $pendientes->count() > 1 ? 's' : '' }} para que los turistas puedan encontrarte</p>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach($pendientes as $check)
-                                <a href="{{ $check['href'] }}"
-                                   class="text-xs bg-amber-100 text-amber-700 font-semibold px-3 py-1 rounded-full hover:bg-amber-200 transition">
-                                    {{ $check['label'] }} →
-                                </a>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-                    <button @click="open = false" class="text-amber-400 hover:text-amber-600 shrink-0 mt-0.5">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            <div x-data="{ open: true }" x-show="open"
+                 class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 px-4">
+                <div class="relative bg-white text-gray-900 rounded-2xl shadow-xl max-w-md w-full p-6">
+                    <button @click="open = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
+                    <div class="flex items-start gap-3 mb-4">
+                        <span class="w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-lg" style="background: #fff0ef">✨</span>
+                        <p class="font-extrabold text-lg leading-snug pr-6">
+                            Te falta{{ $pendientes->count() > 1 ? 'n' : '' }} {{ $pendientes->count() }} dato{{ $pendientes->count() > 1 ? 's' : '' }} para que las personas puedan encontrarte
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($pendientes as $check)
+                        <a href="{{ $check['href'] }}" @click="open = false"
+                           class="text-xs font-semibold px-3 py-1.5 rounded-full transition hover:opacity-80"
+                           style="background: #fff0ef; color: #fc5648">
+                            {{ $check['label'] }} →
+                        </a>
+                        @endforeach
+                    </div>
                 </div>
             </div>
             @endif
@@ -383,12 +248,14 @@
                             @foreach($imagenes as $imagen)
                             <div class="relative group aspect-square">
                                 <img src="{{ asset('storage/' . $imagen->ruta) }}" alt="Foto"
-                                     class="w-full h-full object-cover rounded-xl border border-gray-200 {{ $imagen->es_principal ? 'ring-2 ring-[#fc5648]' : '' }}">
+                                     class="w-full h-full object-cover rounded-xl border-2 {{ $imagen->es_principal ? 'border-[#fc5648] ring-2 ring-[#fc5648] ring-offset-1' : 'border-gray-200' }}">
                                 @if($imagen->es_principal)
-                                    <span class="absolute bottom-1 left-1 text-[9px] bg-[#fc5648] text-white px-1.5 py-0.5 rounded font-bold">★ Principal</span>
+                                    <span class="absolute top-0 left-0 right-0 text-[10px] bg-[#fc5648] text-white text-center py-1 rounded-t-lg font-extrabold uppercase tracking-wide shadow-sm">
+                                        ★ Portada de tu ficha
+                                    </span>
                                 @endif
                                 <form method="POST" action="{{ route('cliente.imagenes.eliminar', [$punto, $imagen]) }}"
-                                      class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition"
+                                      class="absolute top-1 right-1 z-10 opacity-0 group-hover:opacity-100 transition"
                                       onsubmit="return confirm('¿Eliminar esta foto?')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="w-6 h-6 bg-red-500 text-white rounded-full text-[11px] flex items-center justify-center hover:bg-red-600 shadow">✕</button>
@@ -508,7 +375,8 @@
                             @php
                                 $horarioVacio  = empty(trim($punto->horario ?? ''));
                                 $direccionVacia = empty(trim($punto->direccion ?? ''));
-                                $ubicVacia = $horarioVacio || $direccionVacia;
+                                $sectorVacio    = empty(trim($punto->sector ?? ''));
+                                $ubicVacia = $horarioVacio || $direccionVacia || $sectorVacio;
                             @endphp
                             <div id="ubicacion" class="section-card section-card-blue scroll-mt-20">
                                 <div class="section-card-head flex items-center justify-between">
@@ -541,7 +409,10 @@
                                                           placeholder="Lun–Vie 09:00–20:00" />
                                         </div>
                                         <div>
-                                            <x-input-label for="sector" value="Sector / Cerro" />
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <x-input-label for="sector" value="Sector / Cerro" />
+                                                @if($sectorVacio)<span class="empty-hint">Sin completar</span>@endif
+                                            </div>
                                             @include('admin.partials._sector-select', ['selected' => old('sector', $punto->sector)])
                                         </div>
                                         <div>
@@ -768,53 +639,671 @@
                     </form>
                     @endif
 
-                    {{-- Links a secciones externas --}}
-                    @if(in_array('entradas', $modulos) || in_array('exposiciones', $modulos) || in_array('agenda', $modulos) || in_array($punto->categoria_id, [13,14]))
-                    <div class="section-card section-card-green">
-                        <div class="section-card-head">
-                            <h3 class="section-title">⚙️ Gestión avanzada</h3>
-                            <p class="section-sub">Secciones con su propio panel de edición</p>
+                    {{-- ===== MUSEO: tarifas de entrada + exposiciones ===== --}}
+                    @if(in_array('entradas', $modulos) || in_array('exposiciones', $modulos))
+                    <div id="museo" class="scroll-mt-20 space-y-4">
+
+                        @if($punto->moduloActivo('entradas'))
+                        <div x-data="{
+                            entradas: {{ json_encode($entradas->map(fn($e) => ['etiqueta' => $e->datos['etiqueta'] ?? '', 'precio' => $e->datos['precio'] ?? 0, 'nota' => $e->datos['nota'] ?? ''])->values()) }},
+                            agregar() {
+                                this.entradas.push({ label: '', precio: 0, descripcion: '' });
+                            },
+                            quitar(i) {
+                                this.entradas.splice(i, 1);
+                            }
+                        }" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+
+                            <div class="flex items-center justify-between mb-2">
+                                <div>
+                                    <h4 class="font-bold text-gray-700">🎟️ Tarifas de entrada</h4>
+                                    <p class="text-xs text-gray-400 mt-0.5">Define los tipos de entrada y sus precios. Precio 0 = Gratuito.</p>
+                                </div>
+                            </div>
+
+                            <form method="POST" action="{{ route('cliente.museo.entradas.guardar', $punto) }}">
+                                @csrf
+
+                                <div class="space-y-3 mb-4">
+                                    <template x-for="(entrada, i) in entradas" :key="i">
+                                        <div class="flex gap-3 items-start">
+                                            <div class="flex-1">
+                                                <input type="text"
+                                                       :name="`entradas[${i}][etiqueta]`"
+                                                       x-model="entrada.etiqueta"
+                                                       placeholder="Ej: Adulto, Niño menor de 12, Estudiante…"
+                                                       class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-amber-400">
+                                            </div>
+                                            <div class="w-32">
+                                                <input type="number"
+                                                       :name="`entradas[${i}][precio]`"
+                                                       x-model="entrada.precio"
+                                                       min="0" step="100"
+                                                       placeholder="0"
+                                                       class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-amber-400">
+                                            </div>
+                                            <div class="flex-1">
+                                                <input type="text"
+                                                       :name="`entradas[${i}][nota]`"
+                                                       x-model="entrada.nota"
+                                                       placeholder="Nota opcional (ej: Gratis domingos)"
+                                                       class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-amber-400">
+                                            </div>
+                                            <button type="button" @click="quitar(i)"
+                                                    class="mt-1 text-red-400 hover:text-red-600 transition text-lg leading-none">✕</button>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                    <button type="button" @click="agregar()"
+                                            class="text-sm text-amber-700 font-bold hover:underline">
+                                        + Agregar tipo de entrada
+                                    </button>
+                                    <button type="submit"
+                                            class="btn-save-track px-5 py-2 bg-amber-600 text-white text-sm font-bold rounded-xl hover:opacity-90 transition">
+                                        Guardar tarifas
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <div class="section-card-body">
-                        <div class="space-y-2">
-                            @if(in_array('entradas', $modulos) || in_array('exposiciones', $modulos))
-                            <a href="{{ route('cliente.museo', $punto) }}"
-                               class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-amber-300 hover:bg-amber-50 transition group">
-                                <span class="text-xl">🎟️</span>
-                                <div class="flex-1">
-                                    <p class="text-sm font-semibold text-gray-800">Entradas y exposiciones</p>
-                                    <p class="text-xs text-gray-400">Tarifas y colecciones del museo</p>
+                        @endif
+
+                        @if($punto->moduloActivo('exposiciones'))
+                        <div x-data="{ modalAbierto: false, editando: null }" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h4 class="font-bold text-gray-700">🖼️ Exposiciones</h4>
+                                    <p class="text-xs text-gray-400 mt-0.5">Gestiona las colecciones permanentes y exposiciones temporales.</p>
                                 </div>
-                                <span class="text-gray-300 group-hover:text-amber-400 text-lg">›</span>
-                            </a>
+                                <button @click="modalAbierto = true; editando = null"
+                                        class="px-4 py-2 bg-purple-600 text-white text-sm font-bold rounded-xl hover:opacity-90 transition">
+                                    + Nueva
+                                </button>
+                            </div>
+
+                            {{-- Listado --}}
+                            @if($exposiciones->count())
+                            <div class="space-y-3 mb-2">
+                                @foreach($exposiciones as $expo)
+                                @php
+                                    $expoParaEditar = [
+                                        'id'           => $expo->id,
+                                        'titulo'       => $expo->datos['titulo']      ?? '',
+                                        'descripcion'  => $expo->datos['descripcion'] ?? '',
+                                        'tipo'         => $expo->datos['tipo']        ?? 'temporal',
+                                        'fecha_inicio' => $expo->datos['fecha_inicio'] ?? null,
+                                        'fecha_fin'    => $expo->datos['fecha_fin']   ?? null,
+                                        'imagen'       => $expo->imagen,
+                                    ];
+                                @endphp
+                                <div class="flex items-start gap-4 border border-gray-100 rounded-xl p-4">
+                                    @if($expo->imagen)
+                                        <img src="{{ asset('storage/' . $expo->imagen) }}" alt="{{ $expo->datos['titulo'] ?? '' }}"
+                                             class="w-16 h-16 rounded-xl object-cover border border-gray-100 shrink-0">
+                                    @else
+                                        <div class="w-16 h-16 rounded-xl bg-gray-50 flex items-center justify-center text-2xl shrink-0 border border-gray-100">🖼️</div>
+                                    @endif
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <p class="font-semibold text-gray-800 text-sm">{{ $expo->datos['titulo'] ?? '' }}</p>
+                                            @php $tipoExpo = $expo->datos['tipo'] ?? 'temporal'; @endphp
+                                            <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full
+                                                {{ $tipoExpo === 'permanente' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700' }}">
+                                                {{ $tipoExpo === 'permanente' ? 'Permanente' : 'Temporal' }}
+                                            </span>
+                                        </div>
+                                        @if($expo->datos['descripcion'] ?? null)
+                                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ $expo->datos['descripcion'] }}</p>
+                                        @endif
+                                        @if($tipoExpo === 'temporal' && (($expo->datos['fecha_inicio'] ?? null) || ($expo->datos['fecha_fin'] ?? null)))
+                                            <p class="text-xs text-gray-400 mt-1">
+                                                📅
+                                                {{ $expo->datos['fecha_inicio'] ? \Carbon\Carbon::parse($expo->datos['fecha_inicio'])->translatedFormat('d M Y') : '—' }}
+                                                →
+                                                {{ $expo->datos['fecha_fin'] ? \Carbon\Carbon::parse($expo->datos['fecha_fin'])->translatedFormat('d M Y') : 'Sin fecha fin' }}
+                                            </p>
+                                        @endif
+                                    </div>
+                                    <div class="flex gap-2 shrink-0">
+                                        <button @click="editando = {{ json_encode($expoParaEditar) }}; modalAbierto = true"
+                                                class="text-xs text-blue-600 font-bold hover:underline">Editar</button>
+                                        <form method="POST" action="{{ route('cliente.museo.exposicion.eliminar', [$punto, $expo]) }}"
+                                              onsubmit="return confirm('¿Eliminar esta exposición?')">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="text-xs text-red-500 font-bold hover:underline">Eliminar</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                            @else
+                                <p class="text-sm text-gray-400 italic py-4 text-center">No hay exposiciones registradas aún.</p>
                             @endif
-                            @if(in_array('agenda', $modulos))
-                            <a href="{{ route('cliente.eventos', $punto) }}"
-                               class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-blue-300 hover:bg-blue-50 transition group">
-                                <span class="text-xl">📅</span>
-                                <div class="flex-1">
-                                    <p class="text-sm font-semibold text-gray-800">Agenda de eventos</p>
-                                    <p class="text-xs text-gray-400">Obras, conciertos y actividades</p>
+
+                            {{-- Modal nueva/editar exposición --}}
+                            <div x-show="modalAbierto" x-cloak
+                                 class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
+                                 @keydown.escape.window="modalAbierto = false">
+                                <div @click.stop class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+                                    <div class="flex items-center justify-between mb-5">
+                                        <h3 class="font-bold text-gray-800" x-text="editando ? 'Editar exposición' : 'Nueva exposición'"></h3>
+                                        <button @click="modalAbierto = false" class="text-gray-400 hover:text-gray-700 text-xl">✕</button>
+                                    </div>
+
+                                    <form method="POST" action="{{ route('cliente.museo.exposicion.guardar', $punto) }}" enctype="multipart/form-data">
+                                        @csrf
+                                        <input type="hidden" name="item_id" :value="editando ? editando.id : ''">
+
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-xs font-bold text-gray-600 mb-1">Título *</label>
+                                                <input type="text" name="titulo" required
+                                                       :value="editando ? editando.titulo : ''"
+                                                       class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-purple-400">
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-xs font-bold text-gray-600 mb-1">Descripción</label>
+                                                <textarea name="descripcion" rows="3"
+                                                          class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-purple-400 resize-none"
+                                                          x-text="editando ? editando.descripcion : ''"></textarea>
+                                            </div>
+
+                                            <div x-data="{ tipo: 'temporal' }" x-init="if(editando) tipo = editando.tipo">
+                                                <label class="block text-xs font-bold text-gray-600 mb-1">Tipo *</label>
+                                                <select name="tipo" x-model="tipo"
+                                                        class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-purple-400">
+                                                    <option value="permanente">Permanente</option>
+                                                    <option value="temporal">Temporal</option>
+                                                </select>
+
+                                                <div x-show="tipo === 'temporal'" class="grid grid-cols-2 gap-3 mt-3">
+                                                    <div>
+                                                        <label class="block text-xs text-gray-500 mb-1">Inicio</label>
+                                                        <input type="date" name="fecha_inicio"
+                                                               :value="editando ? editando.fecha_inicio : ''"
+                                                               class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-purple-400">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-xs text-gray-500 mb-1">Fin</label>
+                                                        <input type="date" name="fecha_fin"
+                                                               :value="editando ? editando.fecha_fin : ''"
+                                                               class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-purple-400">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-xs font-bold text-gray-600 mb-1">Imagen (opcional)</label>
+                                                <input type="file" name="imagen" accept="image/*"
+                                                       class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                                                <template x-if="editando && editando.imagen">
+                                                    <p class="text-xs text-gray-400 mt-1">Ya tiene imagen. Sube una nueva para reemplazarla.</p>
+                                                </template>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex justify-end gap-3 mt-6">
+                                            <button type="button" @click="modalAbierto = false"
+                                                    class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">Cancelar</button>
+                                            <button type="submit"
+                                                    class="btn-save-track px-5 py-2 bg-purple-600 text-white text-sm font-bold rounded-xl hover:opacity-90 transition">
+                                                Guardar
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
-                                <span class="text-gray-300 group-hover:text-blue-400 text-lg">›</span>
-                            </a>
-                            @endif
-                            @if(in_array($punto->categoria_id, [13, 14]))
-                            @php $totalProductos = $punto->productos()->count(); @endphp
-                            <a href="{{ route('cliente.productos.index') }}"
-                               class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-[#fc5648]/40 hover:bg-red-50 transition group">
-                                <span class="text-xl">🛍️</span>
-                                <div class="flex-1">
-                                    <p class="text-sm font-semibold text-gray-800">Catálogo de productos</p>
-                                    <p class="text-xs {{ $totalProductos ? 'text-green-600' : 'text-gray-400' }}">
-                                        {{ $totalProductos ? $totalProductos . ' producto' . ($totalProductos !== 1 ? 's' : '') : 'Sin productos aún' }}
-                                    </p>
+                            </div>
+                        </div>
+                        @endif
+
+                    </div>
+                    @endif
+
+                    {{-- ===== EVENTOS: agenda cultural ===== --}}
+                    @if(in_array('agenda', $modulos))
+                    <div id="eventos" class="scroll-mt-20"
+                         x-data="{
+                            abierto: {{ $errors->any() ? 'true' : 'false' }},
+                            editando: null,
+                            imagenActual: null,
+                            imagenPreview: null,
+                            imagenError: null,
+                            enviando: false,
+                            resetForm() {
+                                this.editando = null;
+                                this.imagenActual = null;
+                                this.imagenError = null;
+                                this.enviando = false;
+                                if (this.imagenPreview) URL.revokeObjectURL(this.imagenPreview);
+                                this.imagenPreview = null;
+                                this.$refs.form.reset();
+                            },
+                            previsualizar(input) {
+                                this.imagenError = null;
+                                if (this.imagenPreview) URL.revokeObjectURL(this.imagenPreview);
+                                this.imagenPreview = null;
+                                const file = input.files[0];
+                                if (!file) return;
+
+                                const MAX_MB = 20;
+                                const TIPOS_OK = ['image/jpeg', 'image/png', 'image/webp'];
+
+                                if (file.size > MAX_MB * 1024 * 1024) {
+                                    this.imagenError = `La imagen pesa ${(file.size / (1024 * 1024)).toFixed(1)} MB. El máximo permitido es ${MAX_MB} MB.`;
+                                    input.value = '';
+                                    return;
+                                }
+                                if (!TIPOS_OK.includes(file.type)) {
+                                    this.imagenError = 'Formato no permitido. Sube una imagen JPG, PNG o WEBP.';
+                                    input.value = '';
+                                    return;
+                                }
+                                try {
+                                    this.imagenPreview = URL.createObjectURL(file);
+                                } catch (e) {
+                                    this.imagenError = 'No se pudo cargar la imagen. Intenta con otro archivo.';
+                                    input.value = '';
+                                }
+                            },
+                            editar(evento) {
+                                this.editando = evento;
+                                this.imagenActual = evento.imagen_url;
+                                this.imagenError = null;
+                                if (this.imagenPreview) URL.revokeObjectURL(this.imagenPreview);
+                                this.imagenPreview = null;
+                                this.abierto = true;
+                                this.$nextTick(() => {
+                                    const f = this.$refs.form;
+                                    f.titulo.value = evento.titulo;
+                                    f.tipo.value = evento.tipo;
+                                    f.fecha.value = evento.fecha;
+                                    f.hora.value = evento.hora || '';
+                                    f.hora_fin.value = evento.hora_fin || '';
+                                    f.precio.value = evento.precio || '';
+                                    f.precio_texto.value = evento.precio_texto || '';
+                                    f.descripcion.value = evento.descripcion || '';
+                                    f.url_entradas.value = evento.url_entradas || '';
+                                    f.destacado.checked = evento.destacado;
+                                });
+                            }
+                        }" class="space-y-6">
+
+                        {{-- ===== FORMULARIO NUEVO / EDITAR EVENTO ===== --}}
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h4 class="font-bold text-gray-700" x-text="editando ? '✏️ Editar evento' : '📅 Programar evento'"></h4>
+                                    <p class="text-xs text-gray-400 mt-0.5">Agrega obras de teatro, proyecciones, conciertos, talleres y más.</p>
                                 </div>
-                                <span class="text-gray-300 group-hover:text-[#fc5648] text-lg">›</span>
-                            </a>
+                                <button @click="abierto = !abierto; if (!abierto) resetForm()"
+                                        class="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:opacity-90 transition"
+                                        x-text="abierto ? 'Cerrar' : '+ Nuevo evento'"></button>
+                            </div>
+
+                            <div x-show="abierto" x-transition class="border-t border-gray-100 pt-5 mt-2">
+                                <form method="POST" action="{{ route('cliente.eventos.guardar', $punto) }}" enctype="multipart/form-data" x-ref="form"
+                                      @submit="enviando = true">
+                                    @csrf
+                                    <input type="hidden" name="item_id" :value="editando ? editando.id : ''">
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                                        <div class="md:col-span-2">
+                                            <label class="block text-xs font-bold text-gray-600 mb-1">Título del evento *</label>
+                                            <input type="text" name="titulo" required
+                                                   value="{{ old('titulo') }}"
+                                                   placeholder="Ej: La Tempestad — Compañía Nacional de Teatro"
+                                                   class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-blue-400">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-600 mb-1">Tipo de evento *</label>
+                                            <select name="tipo" class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-blue-400">
+                                                @foreach($tiposEvento as $slug => $info)
+                                                    <option value="{{ $slug }}" @selected(old('tipo') === $slug)>
+                                                        {{ $info['emoji'] }} {{ $info['label'] }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-600 mb-1">Fecha *</label>
+                                            <input type="date" name="fecha" required
+                                                   value="{{ old('fecha') }}"
+                                                   class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-blue-400">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-600 mb-1">Hora de inicio</label>
+                                            <input type="time" name="hora"
+                                                   value="{{ old('hora') }}"
+                                                   class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-blue-400">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-600 mb-1">Hora de término</label>
+                                            <input type="time" name="hora_fin"
+                                                   value="{{ old('hora_fin') }}"
+                                                   class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-blue-400">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-600 mb-1">Precio (0 = gratuito)</label>
+                                            <input type="number" name="precio" min="0" step="100"
+                                                   value="{{ old('precio') }}"
+                                                   placeholder="Ej: 5000"
+                                                   class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-blue-400">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-600 mb-1">Texto de precio (reemplaza al número)</label>
+                                            <input type="text" name="precio_texto"
+                                                   value="{{ old('precio_texto') }}"
+                                                   placeholder="Ej: Desde $3.000 · Entrada liberada"
+                                                   class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-blue-400">
+                                        </div>
+
+                                        <div class="md:col-span-2">
+                                            <label class="block text-xs font-bold text-gray-600 mb-1">Descripción</label>
+                                            <textarea name="descripcion" rows="3"
+                                                      placeholder="Sinopsis, artistas, duración, clasificación..."
+                                                      class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-blue-400 resize-none">{{ old('descripcion') }}</textarea>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-600 mb-1">Link de compra de entradas</label>
+                                            <input type="url" name="url_entradas"
+                                                   value="{{ old('url_entradas') }}"
+                                                   placeholder="https://..."
+                                                   class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-blue-400">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-600 mb-1">Imagen del evento (opcional)</label>
+                                            <input type="file" name="imagen" accept="image/*"
+                                                   @change="previsualizar($event.target)"
+                                                   class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                            <p class="text-[11px] text-gray-400 mt-1">JPG, PNG o WEBP — máx. 20 MB</p>
+                                            <p x-show="imagenError" x-text="imagenError" class="text-xs text-red-500 font-semibold mt-1"></p>
+
+                                            <div class="flex items-center gap-4 mt-2" x-show="imagenActual || imagenPreview">
+                                                <div x-show="imagenActual" class="text-center">
+                                                    <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Actual</p>
+                                                    <img :src="imagenActual" class="w-16 h-16 rounded-xl object-cover border border-gray-200">
+                                                </div>
+                                                <div x-show="imagenPreview" class="text-center">
+                                                    <p class="text-[10px] font-bold text-blue-500 uppercase mb-1">Nueva</p>
+                                                    <img :src="imagenPreview" class="w-16 h-16 rounded-xl object-cover border border-blue-200">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="md:col-span-2 flex items-center gap-3">
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input type="checkbox" name="destacado" value="1"
+                                                       @checked(old('destacado'))
+                                                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-400">
+                                                <span class="text-sm text-gray-700 font-medium">Destacar este evento</span>
+                                            </label>
+                                            <span class="text-xs text-gray-400">(aparece primero en la ficha pública)</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-end items-center mt-5 gap-3">
+                                        <button type="button" @click="abierto = false; resetForm()"
+                                                :disabled="enviando"
+                                                class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">Cancelar</button>
+                                        <button type="submit"
+                                                :disabled="enviando"
+                                                class="btn-save-track px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                                            <svg x-show="enviando" x-cloak class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                                            </svg>
+                                            <span x-text="enviando ? 'Publicando…' : (editando ? 'Guardar cambios' : 'Publicar en agenda')"></span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        {{-- ===== LISTADO DE EVENTOS ===== --}}
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h4 class="font-bold text-gray-700 mb-4">Eventos programados</h4>
+
+                            @php
+                                $proximos  = $eventos->filter(fn($e) => $e->fecha && $e->fecha->greaterThanOrEqualTo(today()))->sortBy('fecha');
+                                $pasados   = $eventos->filter(fn($e) => $e->fecha && $e->fecha->lessThan(today()))->sortByDesc('fecha');
+                            @endphp
+
+                            @if($eventos->count())
+                                {{-- Próximos --}}
+                                @if($proximos->count())
+                                <div class="space-y-3 mb-6">
+                                    <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Próximos</p>
+                                    @foreach($proximos as $evento)
+                                    @php $tipoInfo = $evento->tipoEvento(); @endphp
+                                    <div class="flex items-start gap-4 border border-gray-100 rounded-xl p-4
+                                        {{ $evento->destacado ? 'border-blue-200 bg-blue-50/30' : '' }}">
+                                        @if($evento->imagen)
+                                            <img src="{{ asset('storage/' . $evento->imagen) }}" alt="{{ $evento->datos['titulo'] ?? '' }}"
+                                                 class="w-16 h-16 rounded-xl object-cover border border-gray-100 shrink-0">
+                                        @else
+                                            <div class="w-16 h-16 rounded-xl bg-gray-50 flex items-center justify-center text-2xl shrink-0 border border-gray-100">
+                                                {{ $tipoInfo['emoji'] }}
+                                            </div>
+                                        @endif
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <p class="font-semibold text-gray-800 text-sm">{{ $evento->datos['titulo'] ?? '' }}</p>
+                                                @if($evento->destacado)
+                                                    <span class="text-[10px] font-black uppercase bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Destacado</span>
+                                                @endif
+                                                <span class="text-[10px] font-black uppercase bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                                                    {{ $tipoInfo['emoji'] }} {{ $tipoInfo['label'] }}
+                                                </span>
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                📅 {{ $evento->fecha->translatedFormat('l d \d\e F Y') }}
+                                                @if($evento->datos['hora'] ?? null)· 🕐 {{ \Carbon\Carbon::parse($evento->datos['hora'])->format('H:i') }}@endif
+                                                @if($evento->datos['hora_fin'] ?? null)– {{ \Carbon\Carbon::parse($evento->datos['hora_fin'])->format('H:i') }}@endif
+                                            </p>
+                                            <p class="text-xs font-bold text-blue-700 mt-0.5">{{ $evento->precioEvento() }}</p>
+                                        </div>
+                                        <div class="flex gap-2 shrink-0">
+                                            <button type="button"
+                                                    @click="editar(@js([
+                                                        'id'           => $evento->id,
+                                                        'titulo'       => $evento->datos['titulo'] ?? '',
+                                                        'tipo'         => $evento->datos['tipo'] ?? '',
+                                                        'fecha'        => optional($evento->fecha)->format('Y-m-d'),
+                                                        'hora'         => $evento->datos['hora'] ?? '',
+                                                        'hora_fin'     => $evento->datos['hora_fin'] ?? '',
+                                                        'precio'       => $evento->datos['precio'] ?? '',
+                                                        'precio_texto' => $evento->datos['precio_texto'] ?? '',
+                                                        'descripcion'  => $evento->datos['descripcion'] ?? '',
+                                                        'url_entradas' => $evento->datos['url_entradas'] ?? '',
+                                                        'destacado'    => (bool) $evento->destacado,
+                                                        'imagen_url'   => $evento->imagen ? asset('storage/' . $evento->imagen) : null,
+                                                    ])); window.scrollTo({ top: 0, behavior: 'smooth' })"
+                                                    class="text-xs text-blue-600 font-bold hover:underline">Editar</button>
+                                            <form method="POST" action="{{ route('cliente.eventos.eliminar', [$punto, $evento]) }}"
+                                                  onsubmit="return confirm('¿Eliminar este evento?')">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="text-xs text-red-500 font-bold hover:underline">Eliminar</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                @endif
+
+                                {{-- Pasados --}}
+                                @if($pasados->count())
+                                <details class="mt-4">
+                                    <summary class="text-xs font-black uppercase tracking-widest text-gray-400 cursor-pointer hover:text-gray-600">
+                                        Eventos pasados ({{ $pasados->count() }})
+                                    </summary>
+                                    <div class="space-y-2 mt-3">
+                                        @foreach($pasados as $evento)
+                                        <div class="flex items-center justify-between border border-gray-100 rounded-xl p-3 opacity-60">
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-700">{{ $evento->datos['titulo'] ?? '' }}</p>
+                                                <p class="text-xs text-gray-400">{{ $evento->fecha->translatedFormat('d M Y') }}</p>
+                                            </div>
+                                            <form method="POST" action="{{ route('cliente.eventos.eliminar', [$punto, $evento]) }}"
+                                                  onsubmit="return confirm('¿Eliminar?')">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="text-xs text-red-400 hover:text-red-600">Eliminar</button>
+                                            </form>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </details>
+                                @endif
+                            @else
+                                <p class="text-sm text-gray-400 italic text-center py-6">No hay eventos en la agenda. ¡Programa el primero!</p>
                             @endif
                         </div>
-                        </div>{{-- /section-card-body --}}
+
+                    </div>
+                    @endif
+
+                    {{-- ===== CATÁLOGO: productos (tiendas / artesanía) ===== --}}
+                    @if(in_array($punto->categoria_id, [13, 14]))
+                    <div id="catalogo" class="scroll-mt-20 space-y-4">
+
+                        {{-- Agregar producto --}}
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h3 class="font-bold text-gray-800 mb-4">🛍️ Agregar producto</h3>
+                            <form action="{{ route('cliente.productos.store') }}" method="POST" enctype="multipart/form-data"
+                                  class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                @csrf
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Nombre *</label>
+                                    <input type="text" name="nombre" required placeholder="Ej: Polera estampada"
+                                           class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Precio</label>
+                                    <input type="text" name="precio" placeholder="Ej: $12.000 / Desde $5.000"
+                                           class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Imagen</label>
+                                    <input type="file" name="imagen" accept="image/*"
+                                           class="block w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-[#fff0ef] file:text-[#fc5648] hover:file:bg-[#ffe0dd] cursor-pointer">
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Descripción corta</label>
+                                    <input type="text" name="descripcion" placeholder="Descripción opcional del producto"
+                                           class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <button type="submit"
+                                            class="btn-save-track bg-[#fc5648] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#d94439] transition">
+                                        + Agregar producto
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        {{-- Lista de productos --}}
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                                <h3 class="font-bold text-gray-800">Mis productos <span class="text-gray-400 font-normal">({{ $productos->count() }})</span></h3>
+                            </div>
+
+                            @if($productos->isEmpty())
+                            <div class="px-6 py-12 text-center text-gray-400">
+                                <div class="text-4xl mb-3">🛍️</div>
+                                <p class="font-semibold">Aún no tienes productos cargados.</p>
+                                <p class="text-sm mt-1">Agrégalos arriba y aparecerán en tu catálogo público.</p>
+                            </div>
+                            @else
+                            <div class="divide-y divide-gray-50">
+                                @foreach($productos as $producto)
+                                <div class="flex items-center gap-4 px-6 py-4">
+                                    {{-- Imagen --}}
+                                    <div class="shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-gray-100 border border-gray-100">
+                                        @if($producto->imagen)
+                                            <img src="{{ $producto->imagen_url }}" alt="{{ $producto->nombre }}"
+                                                 class="w-full h-full object-cover">
+                                        @else
+                                            <div class="w-full h-full flex items-center justify-center text-2xl text-gray-300">📦</div>
+                                        @endif
+                                    </div>
+
+                                    {{-- Info --}}
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-semibold text-gray-800 truncate">{{ $producto->nombre }}</p>
+                                        @if($producto->precio)
+                                        <p class="text-sm text-[#fc5648] font-bold">{{ $producto->precio }}</p>
+                                        @endif
+                                        @if($producto->descripcion)
+                                        <p class="text-xs text-gray-400 truncate">{{ $producto->descripcion }}</p>
+                                        @endif
+                                    </div>
+
+                                    {{-- Acciones --}}
+                                    <div class="flex items-center gap-3 shrink-0">
+                                        <button onclick="toggleEditarProducto({{ $producto->id }})"
+                                                class="text-xs font-bold text-blue-600 hover:underline">Editar</button>
+                                        <form action="{{ route('cliente.productos.destroy', $producto) }}" method="POST"
+                                              onsubmit="return confirm('¿Eliminar «{{ addslashes($producto->nombre) }}»?')">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="text-xs font-bold text-red-400 hover:underline">Eliminar</button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                {{-- Fila edición inline --}}
+                                <div id="editar-producto-{{ $producto->id }}" class="hidden bg-gray-50 px-6 py-4 border-t border-dashed border-gray-200">
+                                    <form action="{{ route('cliente.productos.update', $producto) }}" method="POST"
+                                          enctype="multipart/form-data" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        @csrf
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-500 mb-1">Nombre</label>
+                                            <input type="text" name="nombre" value="{{ $producto->nombre }}" required
+                                                   class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-500 mb-1">Precio</label>
+                                            <input type="text" name="precio" value="{{ $producto->precio }}"
+                                                   class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                                        </div>
+                                        <div class="sm:col-span-2">
+                                            <label class="block text-xs font-bold text-gray-500 mb-1">Descripción</label>
+                                            <input type="text" name="descripcion" value="{{ $producto->descripcion }}"
+                                                   class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-500 mb-1">Nueva imagen</label>
+                                            <input type="file" name="imagen" accept="image/*"
+                                                   class="block w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#fff0ef] file:text-[#fc5648]">
+                                        </div>
+                                        <div class="flex items-end gap-2">
+                                            <button type="submit"
+                                                    class="bg-gray-900 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-black transition">
+                                                Guardar
+                                            </button>
+                                            <button type="button" onclick="toggleEditarProducto({{ $producto->id }})"
+                                                    class="px-4 py-2 rounded-xl border border-gray-200 text-xs font-semibold text-gray-500 hover:bg-gray-100 transition">
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                                @endforeach
+                            </div>
+                            @endif
+                        </div>
+
                     </div>
                     @endif
 
@@ -833,34 +1322,6 @@
 @vite('resources/js/quill-editor.js')
 
 <style>
-/* ── Sidebar ─────────────────────────────────────── */
-.sidebar-group-label {
-    font-size: 0.65rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 0 0.75rem;
-    margin-bottom: 0.375rem;
-    display: block;
-}
-.sidebar-link {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.625rem;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: rgba(255,255,255,0.6);
-    transition: all 0.15s;
-    text-decoration: none;
-}
-.sidebar-link:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.95); }
-.sidebar-link.active { background: rgba(252,86,72,0.18); color: #fc5648; font-weight: 700; }
-.sidebar-link-external { color: rgba(255,255,255,0.35); font-size: 0.75rem; }
-.sidebar-link-external:hover { color: rgba(255,255,255,0.65); }
-.sidebar-dot { width: 0.5rem; height: 0.5rem; background: #f59e0b; border-radius: 9999px; flex-shrink: 0; margin-left: auto; }
-
 /* ── Separadores de grupo ────────────────────────── */
 .group-header {
     display: flex;
@@ -1156,6 +1617,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // ── Igual que arriba, pero para los botones de Museo/Eventos/Catálogo
+    //    que ya tienen su propio color/estilo (no reusan .btn-save) ──
+    document.querySelectorAll('.btn-save-track').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const section = this.closest('.scroll-mt-20');
+            if (section?.id) sessionStorage.setItem('_pindoor_section', section.id);
+        });
+    });
+
     @if(session('success'))
     const _sec = sessionStorage.getItem('_pindoor_section');
     if (_sec) {
@@ -1166,6 +1636,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     @endif
 });
+</script>
+
+<script>
+function toggleEditarProducto(id) {
+    document.getElementById('editar-producto-' + id).classList.toggle('hidden');
+}
 </script>
 
 {{-- Toast de éxito fijo --}}
