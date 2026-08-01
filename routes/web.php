@@ -67,6 +67,7 @@ Route::get('/explorar', [PuntoInteresController::class, 'explorar'])->name('punt
 Route::get('/buscar/sugerencias', [PuntoInteresController::class, 'sugerencias'])->name('puntos.sugerencias');
 Route::get('/categorias', [PuntoInteresController::class, 'buscar'])->name('puntos.buscar.vista');
 Route::get('/info', fn() => view('puntos.info'))->name('puntos.info');
+Route::get('/privacidad', fn() => view('legal.privacidad'))->name('legal.privacidad');
 Route::post('/api/share', function () {
     $text = request('text', '');
     $url  = request('url', '');
