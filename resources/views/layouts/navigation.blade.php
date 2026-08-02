@@ -31,6 +31,9 @@
                         <x-nav-link :href="route('admin.categorias.index')" :active="request()->routeIs('admin.categorias.*')">
                             Categorías
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.categoria-grupos.index')" :active="request()->routeIs('admin.categoria-grupos.*')">
+                            Grupos de categorías
+                        </x-nav-link>
                         <x-nav-link :href="route('admin.categoria-eventos.index')" :active="request()->routeIs('admin.categoria-eventos.*')">
                             Categorías de eventos
                         </x-nav-link>
@@ -124,6 +127,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.categorias.index')" :active="request()->routeIs('admin.categorias.*')">
                     Categorías
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.categoria-grupos.index')" :active="request()->routeIs('admin.categoria-grupos.*')">
+                    Grupos de categorías
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.categoria-eventos.index')" :active="request()->routeIs('admin.categoria-eventos.*')">
                     Categorías de eventos

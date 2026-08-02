@@ -80,9 +80,12 @@
                  class="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-gray-100 max-h-72 overflow-y-auto z-50">
                 <template x-for="s in sugerencias" :key="s.url">
                     <a :href="s.url" @click="buscando = false"
-                       class="block px-4 py-2.5 hover:bg-gray-50 border-b border-gray-50 last:border-0 transition">
-                        <p class="text-sm font-semibold text-gray-800" x-text="s.title"></p>
-                        <p class="text-xs text-gray-400" x-text="[s.sector, s.categoria].filter(Boolean).join(' · ')"></p>
+                       class="flex items-start gap-2 px-4 py-2.5 hover:bg-gray-50 border-b border-gray-50 last:border-0 transition">
+                        <span class="shrink-0 mt-0.5" x-text="s.tipo === 'panorama' ? '🗓' : '📍'"></span>
+                        <span class="min-w-0">
+                            <p class="text-sm font-semibold text-gray-800 truncate" x-text="s.title"></p>
+                            <p class="text-xs text-gray-400 truncate" x-text="s.subtitle"></p>
+                        </span>
                     </a>
                 </template>
             </div>

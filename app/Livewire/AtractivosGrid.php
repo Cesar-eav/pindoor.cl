@@ -21,25 +21,38 @@ class AtractivosGrid extends Component
 
     public string $search   = '';
     public string $category = '';
-    public ?float $lat      = null;
-    public ?float $lng      = null;
+    public string $grupo    = '';
+
+    public function mount(): void
+    {
+        $this->search   = (string) request('search', '');
+        $this->category = (string) request('category', '');
+        $this->grupo    = (string) request('grupo', '');
+    }
 
     public function updatedSearch(): void   { $this->resetPage(); }
     public function updatedCategory(): void { $this->resetPage(); }
+    public function updatedGrupo(): void    { $this->resetPage(); }
 
-    #[On('gps-update')]
-    public function setGps(float $lat, float $lng): void
+    #[On('search-updated')]
+    public function setBusqueda(string $value): void
     {
-        $this->lat = $lat;
-        $this->lng = $lng;
-        $this->resetPage();
+        $this->search = $value;
     }
 
-    public function clearGps(): void
+    #[On('category-updated')]
+    public function setCategoria(string $slug): void
     {
-        $this->lat = null;
-        $this->lng = null;
-        $this->resetPage();
+        $this->category = $slug;
+        $this->grupo    = '';
+    }
+
+    /** Íconos de grupo en la barra unificada (Atractivos / Comida y tragos / Cultura / Otros). */
+    #[On('grupo-updated')]
+    public function setGrupo(string $slug): void
+    {
+        $this->grupo    = $slug;
+        $this->category = '';
     }
 
     public function render()
@@ -48,19 +61,15 @@ class AtractivosGrid extends Component
 
         if ($this->category) {
             $query->whereHas('categoria', fn($q) => $q->where('slug', $this->category));
+        } elseif ($this->grupo) {
+            $query->whereHas('categoria.grupo', fn($q) => $q->where('slug', $this->grupo));
         }
 
         if ($this->search) {
             $query->buscar($this->search);
         }
 
-        if ($this->lat && $this->lng) {
-            $query->whereNotNull('lat')->whereNotNull('lng')
-                ->selectRaw('*, ST_Distance_Sphere(POINT(lng, lat), POINT(?, ?)) as distancia', [$this->lng, $this->lat])
-                ->orderBy('distancia');
-        } else {
-            $query->orderBy('updated_at', 'desc');
-        }
+        $query->orderBy('updated_at', 'desc');
 
         $atractivos = $query->with(['categoria', 'imagenPrincipal'])->paginate(48);
 
@@ -68,7 +77,7 @@ class AtractivosGrid extends Component
             ->orderByDesc('puntos_interes_count')
             ->get();
 
-        $hayFiltros = (bool) ($this->search || $this->category || $this->lat);
+        $hayFiltros = (bool) ($this->search || $this->category || $this->grupo);
 
         $categoriasConPuntos = collect();
         if (!$hayFiltros) {
@@ -92,11 +101,12 @@ class AtractivosGrid extends Component
         $operadores = collect();
         if ($this->search) {
             $s = $this->search;
+            $sLower = mb_strtolower($s);
             $panoramas = Panorama::where('activo', true)
                 ->where('fecha', '>=', now()->toDateString())
                 ->where(fn($q) => $q
-                    ->where('titulo', 'like', "%{$s}%")
-                    ->orWhere('ubicacion', 'like', "%{$s}%")
+                    ->whereRaw('LOWER(titulo) LIKE ?', ["%{$sLower}%"])
+                    ->orWhereRaw('LOWER(ubicacion) LIKE ?', ["%{$sLower}%"])
                 )
                 ->orderBy('fecha')
                 ->limit(6)

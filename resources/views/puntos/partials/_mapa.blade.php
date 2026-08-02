@@ -64,6 +64,7 @@ function setView(vista) {
             btnM?.classList.remove('text-gray-500', 'hover:text-gray-700');
             btnL?.classList.remove('bg-white', 'shadow', 'text-[#fc5648]');
             btnL?.classList.add('text-gray-500', 'hover:text-gray-700');
+            document.getElementById('barra-buscar-wrap')?.classList.add('invisible');
         }
         const containerId = mobile ? 'mapa-mobile' : 'mapa-principal';
         if (!mapaIniciado) {
@@ -99,6 +100,7 @@ function setView(vista) {
             btnL?.classList.remove('text-gray-500', 'hover:text-gray-700');
             btnM?.classList.remove('bg-white', 'shadow', 'text-[#fc5648]');
             btnM?.classList.add('text-gray-500', 'hover:text-gray-700');
+            document.getElementById('barra-buscar-wrap')?.classList.remove('invisible');
         }
     }
 }
@@ -170,6 +172,74 @@ function filtrarMapa(slug) {
 
     const contador = document.getElementById('mapa-contador');
     if (contador) contador.textContent = datos.filter(p => p.lat && p.lng).length;
+}
+
+// Pills de categoría de la barra unificada: filtran el mapa y la vista Listado (Livewire) a la vez
+function seleccionarCategoria(slug) {
+    filtrarMapa(slug);
+    if (window.Livewire) {
+        Livewire.dispatch('category-updated', { slug: slug });
+    }
+}
+
+function filtrarMapaPorGrupo(slug) {
+    // Actualizar íconos de grupo en la barra
+    document.querySelectorAll('.grupo-pill').forEach(p => {
+        const activo = (p.dataset.grupo === slug) || (!slug && p.dataset.grupo === '');
+        p.classList.toggle('bg-gray-900',  activo);
+        p.classList.toggle('text-white',   activo);
+        p.classList.toggle('border-gray-900', activo);
+        p.classList.toggle('bg-white',     !activo);
+        p.classList.toggle('text-gray-500',!activo);
+        p.classList.toggle('border-gray-300', !activo);
+    });
+
+    if (!mapaLeaflet || !markerGroup) return;
+
+    markerGroup.clearLayers();
+    const datos = slug ? PUNTOS_DATA.filter(p => p.grupo_slug === slug) : PUNTOS_DATA;
+    datos.forEach(p => {
+        if (!p.lat || !p.lng) return;
+        L.marker([p.lat, p.lng], { icon: crearIcono(p) })
+            .bindPopup(crearPopup(p), { maxWidth: 230 })
+            .addTo(markerGroup);
+    });
+
+    const contador = document.getElementById('mapa-contador');
+    if (contador) contador.textContent = datos.filter(p => p.lat && p.lng).length;
+}
+
+// Íconos de grupo de la barra unificada: filtran el mapa y la vista Listado (Livewire) a la vez
+function seleccionarGrupo(slug) {
+    filtrarMapaPorGrupo(slug);
+    if (window.Livewire) {
+        Livewire.dispatch('grupo-updated', { slug: slug });
+    }
+}
+
+// Cuando se filtra por una categoría puntual (ej. "Ver todos" de un carrusel), el ícono
+// de grupo activo deja de ser válido — lo apaga visualmente sin volver a tocar el mapa.
+function apagarGrupoPillsVisual() {
+    document.querySelectorAll('.grupo-pill').forEach(p => {
+        const activo = p.dataset.grupo === '';
+        p.classList.toggle('bg-gray-900',  activo);
+        p.classList.toggle('text-white',   activo);
+        p.classList.toggle('border-gray-900', activo);
+        p.classList.toggle('bg-white',     !activo);
+        p.classList.toggle('text-gray-500',!activo);
+        p.classList.toggle('border-gray-300', !activo);
+    });
+}
+
+// Buscador de la barra unificada: solo aplica a la vista Listado (Livewire)
+let _debounceBusqueda;
+function onBuscarInput(value) {
+    clearTimeout(_debounceBusqueda);
+    _debounceBusqueda = setTimeout(() => {
+        if (window.Livewire) {
+            Livewire.dispatch('search-updated', { value: value });
+        }
+    }, 350);
 }
 
 function iniciarMapa(containerId) {
@@ -344,19 +414,6 @@ document.addEventListener('DOMContentLoaded', function () {
         activarVistaMapa();
     }
 
-    // Desktop GPS — Livewire
-    const btnGpsLw = document.getElementById('btn-gps-lw');
-    if (btnGpsLw) {
-        btnGpsLw.addEventListener('click', () => {
-            if (!navigator.geolocation) { alert('Tu navegador no soporta geolocalización.'); return; }
-            btnGpsLw.disabled = true;
-            navigator.geolocation.getCurrentPosition(
-                pos => Livewire.dispatch('gps-update', { lat: pos.coords.latitude, lng: pos.coords.longitude }),
-                ()  => { btnGpsLw.disabled = false; }
-            );
-        });
-    }
-
     // Mobile GPS (botón del drawer)
     const btnGpsM = document.getElementById('btn-gps-m');
     const fFormM  = document.getElementById('filterForm-mobile');
@@ -366,9 +423,14 @@ document.addEventListener('DOMContentLoaded', function () {
         ));
     }
 
-    // Pills de categoría en mapa desktop
+    // Pills de categoría — filtran el mapa y, si corresponde, la vista Listado (Livewire)
     document.querySelectorAll('.pill-mapa').forEach(pill => {
-        pill.addEventListener('click', () => filtrarMapa(pill.dataset.slug || null));
+        pill.addEventListener('click', () => seleccionarCategoria(pill.dataset.slug || ''));
+    });
+
+    // Íconos de grupo de la barra unificada
+    document.querySelectorAll('.grupo-pill').forEach(pill => {
+        pill.addEventListener('click', () => seleccionarGrupo(pill.dataset.grupo || ''));
     });
 
     // AJAX category pill filter — no page reload
