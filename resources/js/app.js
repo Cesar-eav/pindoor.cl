@@ -3,14 +3,13 @@ import { createApp } from 'vue';
 import PindoorTest from './components/PindoorTest.vue';
 import SelectorMapa from './components/SelectorMapa.vue';
 import GaleriaSubida from './components/GaleriaSubida.vue'
-import Alpine from 'alpinejs';
 import axios from 'axios';
 
-window.Alpine = Alpine;
+// Alpine.js lo trae y arranca Livewire (@livewireScripts, presente en todos los
+// layouts) — si lo arrancamos nosotros también, quedan dos instancias corriendo
+// a la vez y Livewire deja de registrar sus componentes (wire:click, wire:model, etc.).
 window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-
-Alpine.start();
 
 // Dropdown handler for data-dropdown components
 document.addEventListener('DOMContentLoaded', () => {

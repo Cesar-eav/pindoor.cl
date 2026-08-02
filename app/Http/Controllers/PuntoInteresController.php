@@ -79,7 +79,7 @@ class PuntoInteresController extends Controller
         $puntosMapData = PuntoInteres::publico()
             ->whereNotNull('lat')
             ->whereNotNull('lng')
-            ->with(['categoria', 'imagenPrincipal'])
+            ->with(['categoria.grupo', 'imagenPrincipal'])
             ->get()
             ->map(fn($p) => [
                 'id'        => $p->id,
@@ -91,6 +91,7 @@ class PuntoInteresController extends Controller
                 'categoria'      => $p->categoria?->nombre,
                 'categoria_id'   => $p->categoria_id,
                 'categoria_slug' => $p->categoria?->slug,
+                'grupo_slug'     => $p->categoria?->grupo?->slug,
                 'icono'          => $p->categoria?->icono,
                 'imagen'       => $p->imagenPrincipal ? asset('storage/' . $p->imagenPrincipal->ruta) : null,
                 'es_cliente'   => (bool) $p->es_cliente,
@@ -659,7 +660,7 @@ class PuntoInteresController extends Controller
 
     /**
      * Sugerencias de búsqueda instantánea para el buscador del appbar mobile (dropdown al escribir).
-     * Solo puntos de interés — panoramas/artistas/operadores quedan para la página de resultados completa.
+     * Mezcla atractivos y panoramas intercalados para que ningún tipo quede relegado al final.
      */
     public function sugerencias(Request $request)
     {
@@ -669,18 +670,42 @@ class PuntoInteresController extends Controller
             return response()->json([]);
         }
 
-        $resultados = PuntoInteres::publico()
+        $atractivos = PuntoInteres::publico()
             ->buscar($q)
             ->with(['categoria', 'imagenPrincipal'])
-            ->take(6)
+            ->take(4)
             ->get()
             ->map(fn($p) => [
+                'tipo'     => 'atractivo',
                 'title'    => $p->title,
                 'url'      => route('puntos.show', $p->slug),
-                'sector'   => $p->sector,
-                'categoria'=> $p->categoria?->nombre,
+                'subtitle' => collect([$p->sector, $p->categoria?->nombre])->filter()->implode(' · '),
             ]);
 
-        return response()->json($resultados);
+        $qLower = mb_strtolower($q);
+        $panoramas = Panorama::where('activo', true)
+            ->where('fecha', '>=', now()->toDateString())
+            ->where(fn($qq) => $qq
+                ->whereRaw('LOWER(titulo) LIKE ?', ["%{$qLower}%"])
+                ->orWhereRaw('LOWER(ubicacion) LIKE ?', ["%{$qLower}%"])
+            )
+            ->orderBy('fecha')
+            ->take(4)
+            ->get()
+            ->map(fn($p) => [
+                'tipo'     => 'panorama',
+                'title'    => $p->titulo,
+                'url'      => route('panoramas.show', $p),
+                'subtitle' => collect([\Carbon\Carbon::parse($p->fecha)->locale('es')->isoFormat('D MMM'), $p->ubicacion])->filter()->implode(' · '),
+            ]);
+
+        // Intercalados (no anexados al final) para que tengan la misma jerarquía visual en el dropdown.
+        $resultados = collect();
+        for ($i = 0; $i < max($atractivos->count(), $panoramas->count()); $i++) {
+            if (isset($atractivos[$i])) $resultados->push($atractivos[$i]);
+            if (isset($panoramas[$i])) $resultados->push($panoramas[$i]);
+        }
+
+        return response()->json($resultados->values());
     }
 }

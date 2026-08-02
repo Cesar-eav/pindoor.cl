@@ -1,17 +1,5 @@
 {{-- Sidebar lateral — solo visible en md+ --}}
-<aside class="hidden md:flex flex-col w-56 fixed top-0 left-0 h-full bg-white border-r border-gray-100 z-40">
-
-    {{-- Brand --}}
-    <div class="px-5 py-5 border-b border-gray-100">
-        <a href="{{ route('puntos.index') }}" class="flex flex-col gap-0.5">
-            <span class="text-2xl font-black tracking-tight leading-none">
-                <span class="text-[#fc5648]">Pin</span><span class="text-gray-900">door</span>
-            </span>
-            <span class="text-[10px] text-gray-400 font-semibold tracking-wider uppercase mt-1">
-                V 0.0.1
-            </span>
-        </a>
-    </div>
+<aside class="hidden md:flex flex-col w-56 fixed left-0 bottom-0 bg-white border-r border-gray-100 z-40 top-24">
 
     {{-- Navegación --}}
     <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">

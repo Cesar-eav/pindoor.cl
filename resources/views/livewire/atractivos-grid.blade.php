@@ -1,56 +1,4 @@
 <div>
-    {{-- Filtros --}}
-    <div class="bg-white rounded-2xl shadow-sm p-5 mb-8 border border-gray-100">
-        <div class="grid grid-cols-3 gap-4 items-end">
-            <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">{{ __('ui.home.categoria_label') }}</label>
-                <select wire:model.live="category"
-                        class="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#fc5648] outline-none bg-gray-50 text-sm">
-                    <option value="">{{ __('ui.home.todas_categorias') }}</option>
-                    @foreach($categorias as $cat)
-                        <option value="{{ $cat->slug }}">{{ $cat->nombre }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">{{ __('ui.nav.buscar') }}</label>
-                <div class="relative">
-                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <input wire:model.live.debounce.350ms="search"
-                           type="text"
-                           placeholder="{{ __('ui.home.buscar_placeholder') }}"
-                           class="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#fc5648] outline-none text-sm">
-                </div>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">{{ __('ui.home.cerca_label') }}</label>
-                <button type="button" id="btn-gps-lw"
-                        wire:loading.attr="disabled"
-                        class="w-full py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm font-bold transition
-                               {{ $lat ? 'bg-[#fc5648] text-white hover:bg-[#d94439]' : 'bg-gray-900 text-white hover:bg-black' }}">
-                    @if($lat)
-                        {{ __('ui.home.cerca_activo') }}
-                    @else
-                        {{ __('ui.home.buscar_cerca') }}
-                    @endif
-                </button>
-            </div>
-        </div>
-
-        @if($hayFiltros)
-        <div class="flex justify-end mt-3 pt-3 border-t border-gray-50">
-            <button wire:click="$set('search', ''); $set('category', ''); clearGps()"
-                    class="text-sm font-semibold text-gray-400 hover:text-[#fc5648] transition flex items-center gap-1">
-                {{ __('ui.home.borrar_filtros') }}
-            </button>
-        </div>
-        @endif
-    </div>
-
     {{-- Secciones sin filtros --}}
     @if(!$hayFiltros)
 
@@ -186,6 +134,7 @@
                             <span class="absolute bottom-3 left-4 text-lg font-extrabold text-white tracking-tight">{{ $entry->categoria->nombre }}</span>
                         @endif
                         <button type="button" wire:click="$set('category', '{{ $entry->categoria->slug }}')"
+                                onclick="if (window.filtrarMapa) filtrarMapa('{{ $entry->categoria->slug }}'); if (window.apagarGrupoPillsVisual) apagarGrupoPillsVisual()"
                                 class="absolute bottom-3 right-4 text-xs font-semibold text-white/90 hover:text-white hover:underline">
                             {{ __('ui.home.ver_todos') }}
                         </button>
@@ -197,6 +146,7 @@
                     <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">{{ $entry->categoria->nombre }}</h2>
                     <span class="flex-1 h-px bg-gray-200"></span>
                     <button type="button" wire:click="$set('category', '{{ $entry->categoria->slug }}')"
+                                onclick="if (window.filtrarMapa) filtrarMapa('{{ $entry->categoria->slug }}'); if (window.apagarGrupoPillsVisual) apagarGrupoPillsVisual()"
                             class="text-sm font-semibold text-[#fc5648] hover:underline shrink-0">
                         {{ __('ui.home.ver_todos') }}
                     </button>
@@ -227,6 +177,7 @@
                             </a>
                         @else
                             <button type="button" wire:click="$set('category', '{{ $entry->categoria->slug }}')"
+                                onclick="if (window.filtrarMapa) filtrarMapa('{{ $entry->categoria->slug }}'); if (window.apagarGrupoPillsVisual) apagarGrupoPillsVisual()"
                                     class="w-full h-full flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 text-[#fc5648] hover:border-[#fc5648] hover:bg-[#fff0ef] transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -268,7 +219,8 @@
                 <div class="text-5xl mb-4">🕵️‍♂️</div>
                 <h3 class="text-xl font-bold text-gray-800 mb-2">{{ __('ui.explorar.sin_resultados') }}</h3>
                 <p class="text-gray-400 mb-5 text-sm">{{ __('ui.home.sin_resultados_sub') }}</p>
-                <button wire:click="$set('search', ''); $set('category', ''); clearGps()"
+                <button wire:click="$set('search', ''); $set('category', ''); $set('grupo', '')"
+                        onclick="document.getElementById('barra-buscar-input').value = ''; if (window.filtrarMapaPorGrupo) filtrarMapaPorGrupo('')"
                         class="bg-[#fc5648] text-white px-5 py-2.5 rounded-xl font-bold hover:bg-gray-900 transition text-sm">
                     {{ __('ui.explorar.ver_todos') }}
                 </button>

@@ -22,6 +22,7 @@ class Categoria extends Model
         'modulos_defecto',
         'es_cliente',
         'disponible_para_operadores',
+        'grupo_id',
     ];
 
     protected $casts = [
@@ -37,5 +38,10 @@ class Categoria extends Model
     public function puntosInteres()
     {
         return $this->hasMany(PuntoInteres::class);
+    }
+
+    public function grupo()
+    {
+        return $this->belongsTo(CategoriaGrupo::class, 'grupo_id');
     }
 }

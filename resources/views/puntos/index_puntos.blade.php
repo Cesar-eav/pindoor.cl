@@ -144,58 +144,20 @@
 
 {{-- ══ DESKTOP (md+) ══════════════════════════════════════════════════════ --}}
 <div class="hidden md:block w-full md:p-4">
-    <div class="max-w-7xl mx-auto px-4">
 
-        <div class="flex items-center justify-between my-6">
-            <h1 class="text-3xl font-bold text-gray-900">
-                {{ $categoriaActiva ? $categoriaActiva->nombre . ' en Valparaíso' : __('ui.home.titulo') }}
-            </h1>
-            <div class="inline-flex bg-gray-200 p-1 rounded-xl gap-1">
-                <button id="btn-listado" onclick="setView('listado')"
-                        class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all bg-white shadow text-[#fc5648]">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-                    </svg>
-                    {{ __('ui.nav.listado') }}
-                </button>
-                <button id="btn-mapa" onclick="setView('mapa')"
-                        class="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all text-gray-500 hover:text-gray-700">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-                    </svg>
-                    {{ __('ui.nav.mapa') }}
-                </button>
-            </div>
-        </div>
+    <div class="max-w-7xl mx-auto px-4">
 
         {{-- Vista Mapa --}}
         <div id="vista-mapa" class="{{ request('vista') === 'mapa' ? '' : 'hidden' }} mb-8">
-            {{-- Pills de categoría --}}
-            <div id="pills-mapa-desktop" class="flex flex-wrap gap-2 mb-4">
-                <button data-slug=""
-                        class="pill-mapa px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors
-                               {{ !request('category') ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-500' }}">
-                    {{ __('ui.home.todos_label') }}
-                </button>
-                @foreach($categorias as $cat)
-                <button data-slug="{{ $cat->slug }}"
-                        class="pill-mapa px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors
-                               {{ request('category') == $cat->slug ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-500' }}">
-                    {{ $cat->nombre }}
-                </button>
-                @endforeach
-            </div>
-
             <div id="mapa-principal"></div>
-            
+
             <p class="text-xs text-gray-400 text-center mt-2">
                 <span id="mapa-contador">{{ count($puntosMapData) }}</span> {{ __('ui.mapa.puntos') }} · {{ __('ui.mapa.clic_marcador') }}
             </p>
         </div>
 
         {{-- Vista Listado — Livewire --}}
-        <div id="vista-listado" class="{{ request('vista') === 'mapa' ? 'hidden' : '' }}">
+        <div id="vista-listado" class="{{ request('vista') === 'mapa' ? 'hidden' : '' }} mt-6">
             @livewire('atractivos-grid')
         </div>{{-- /vista-listado --}}
 
