@@ -153,40 +153,69 @@
                 @endif
             </div>
 
-            <div class="overflow-x-auto pb-2"
-                 style="scrollbar-width:none;cursor:grab"
-                 x-data="{ dragging: false, startX: 0, scrollStart: 0 }"
-                 @mousedown.prevent="dragging = true; startX = $event.pageX - $el.offsetLeft; scrollStart = $el.scrollLeft; $el.style.cursor = 'grabbing'"
-                 @mouseup="dragging = false; $el.style.cursor = 'grab'"
-                 @mouseleave="dragging = false; $el.style.cursor = 'grab'"
-                 @mousemove="if (dragging) { $el.scrollLeft = scrollStart - ($event.pageX - $el.offsetLeft - startX) * 1.5 }">
-                <div class="flex gap-4">
-                    @foreach($entry->puntos as $atractivo)
-                    <div class="shrink-0 w-56">
-                        @include('puntos.partials._card_desktop')
-                    </div>
-                    @endforeach
-                    <div class="shrink-0 w-56">
-                        @if($entry->categoria->es_cliente)
-                            <a href="{{ route('publicita.index') }}"
-                               class="w-full h-full flex flex-col items-center justify-center gap-2 text-center px-5 rounded-2xl bg-linear-to-br from-[#fff0ef] to-[#ffe0dd] border border-[#fc5648]/20 text-[#fc5648] hover:shadow-md transition">
-                                <span class="text-3xl">✨</span>
-                                <span class="text-sm font-bold leading-snug">Llega a más turistas y nuevos clientes</span>
-                                <span class="text-xs text-[#fc5648]/70 leading-snug">Publica tu negocio en Pindoor y comparte fotos, eventos, promociones y mucho más</span>
-                                <span class="mt-1 inline-block bg-[#fc5648] text-white text-xs font-extrabold px-4 py-1.5 rounded-full">Comenzar ahora</span>
-                            </a>
-                        @else
-                            <button type="button" wire:click="$set('category', '{{ $entry->categoria->slug }}')"
-                                onclick="if (window.filtrarMapa) filtrarMapa('{{ $entry->categoria->slug }}'); if (window.apagarGrupoPillsVisual) apagarGrupoPillsVisual()"
-                                    class="w-full h-full flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 text-[#fc5648] hover:border-[#fc5648] hover:bg-[#fff0ef] transition">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                </svg>
-                                <span class="text-sm font-bold">Ver más</span>
-                            </button>
-                        @endif
+            <div class="relative"
+                 x-data="{
+                     dragging: false, startX: 0, scrollStart: 0, canScrollRight: false, canScrollLeft: false,
+                     check() {
+                         this.canScrollRight = this.$refs.scroller.scrollLeft + this.$refs.scroller.clientWidth < this.$refs.scroller.scrollWidth - 4;
+                         this.canScrollLeft = this.$refs.scroller.scrollLeft > 4;
+                     },
+                 }"
+                 x-init="check()">
+                <div x-ref="scroller"
+                     class="overflow-x-auto pb-2"
+                     style="scrollbar-width:none;cursor:grab"
+                     @scroll="check()"
+                     @mousedown.prevent="dragging = true; startX = $event.pageX - $el.offsetLeft; scrollStart = $el.scrollLeft; $el.style.cursor = 'grabbing'"
+                     @mouseup="dragging = false; $el.style.cursor = 'grab'"
+                     @mouseleave="dragging = false; $el.style.cursor = 'grab'"
+                     @mousemove="if (dragging) { $el.scrollLeft = scrollStart - ($event.pageX - $el.offsetLeft - startX) * 1.5; check(); }">
+                    <div class="flex gap-4">
+                        @foreach($entry->puntos as $atractivo)
+                        <div class="shrink-0 w-56">
+                            @include('puntos.partials._card_desktop')
+                        </div>
+                        @endforeach
+                        <div class="shrink-0 w-56">
+                            @if($entry->categoria->es_cliente)
+                                <a href="{{ route('publicita.index') }}"
+                                   class="w-full h-full flex flex-col items-center justify-center gap-2 text-center px-5 rounded-2xl bg-linear-to-br from-[#fff0ef] to-[#ffe0dd] border border-[#fc5648]/20 text-[#fc5648] hover:shadow-md transition">
+                                    <span class="text-3xl">✨</span>
+                                    <span class="text-sm font-bold leading-snug">Llega a más turistas y nuevos clientes</span>
+                                    <span class="text-xs text-[#fc5648]/70 leading-snug">Publica tu negocio en Pindoor y comparte fotos, eventos, promociones y mucho más</span>
+                                    <span class="mt-1 inline-block bg-[#fc5648] text-white text-xs font-extrabold px-4 py-1.5 rounded-full">Comenzar ahora</span>
+                                </a>
+                            @else
+                                <button type="button" wire:click="$set('category', '{{ $entry->categoria->slug }}')"
+                                    onclick="if (window.filtrarMapa) filtrarMapa('{{ $entry->categoria->slug }}'); if (window.apagarGrupoPillsVisual) apagarGrupoPillsVisual()"
+                                        class="w-full h-full flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 text-[#fc5648] hover:border-[#fc5648] hover:bg-[#fff0ef] transition">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                    <span class="text-sm font-bold">Ver más</span>
+                                </button>
+                            @endif
+                        </div>
                     </div>
                 </div>
+
+                {{-- Flechas: indican que hay más puntos para ver a los lados --}}
+                <button type="button"
+                        x-show="canScrollLeft" x-cloak
+                        @click="$refs.scroller.scrollBy({ left: -420, behavior: 'smooth' })"
+                        class="absolute left-1 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center text-gray-500 hover:text-[#fc5648] hover:shadow-lg transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <button type="button"
+                        x-show="canScrollRight" x-cloak
+                        @click="$refs.scroller.scrollBy({ left: 420, behavior: 'smooth' })"
+                        class="absolute right-1 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center text-gray-500 hover:text-[#fc5648] hover:shadow-lg transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
             </div>
         </div>
         @endforeach
