@@ -94,6 +94,7 @@ class PuntoInteresController extends Controller
                 'grupo_slug'     => $p->categoria?->grupo?->slug,
                 'icono'          => $p->categoria?->icono,
                 'imagen'       => $p->imagenPrincipal ? asset('storage/' . $p->imagenPrincipal->ruta) : null,
+                'logo'         => $p->imagen_perfil ? asset('storage/' . $p->imagen_perfil) : null,
                 'es_cliente'   => (bool) $p->es_cliente,
             ]);
 
