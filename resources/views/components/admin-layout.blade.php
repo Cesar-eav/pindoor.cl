@@ -78,6 +78,7 @@
                         <p class="sidebar-group-label">Catálogos</p>
                         <div class="space-y-0.5">
                             <a href="{{ route('admin.categorias.index') }}" class="sidebar-link {{ request()->routeIs('admin.categorias.*') ? 'active' : '' }}">🏷️ Categorías</a>
+                            <a href="{{ route('admin.categoria-grupos.index') }}" class="sidebar-link {{ request()->routeIs('admin.categoria-grupos.*') ? 'active' : '' }}">🗂️ Grupos de categorías</a>
                             <a href="{{ route('admin.categoria-eventos.index') }}" class="sidebar-link {{ request()->routeIs('admin.categoria-eventos.*') ? 'active' : '' }}">🎉 Categorías de eventos</a>
                             <a href="{{ route('admin.configuracion.index') }}" class="sidebar-link {{ request()->routeIs('admin.configuracion.*') ? 'active' : '' }}">⚙️ Configuración</a>
                         </div>
@@ -138,6 +139,7 @@
                         <p class="sidebar-group-label">Catálogos</p>
                         <div class="space-y-0.5">
                             <a href="{{ route('admin.categorias.index') }}" class="sidebar-link {{ request()->routeIs('admin.categorias.*') ? 'active' : '' }}">🏷️ Categorías</a>
+                            <a href="{{ route('admin.categoria-grupos.index') }}" class="sidebar-link {{ request()->routeIs('admin.categoria-grupos.*') ? 'active' : '' }}">🗂️ Grupos de categorías</a>
                             <a href="{{ route('admin.categoria-eventos.index') }}" class="sidebar-link {{ request()->routeIs('admin.categoria-eventos.*') ? 'active' : '' }}">🎉 Categorías de eventos</a>
                             <a href="{{ route('admin.configuracion.index') }}" class="sidebar-link {{ request()->routeIs('admin.configuracion.*') ? 'active' : '' }}">⚙️ Configuración</a>
                         </div>
