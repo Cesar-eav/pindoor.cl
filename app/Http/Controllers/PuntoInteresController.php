@@ -68,6 +68,7 @@ class PuntoInteresController extends Controller
                     'puntos'    => PuntoInteres::publico()
                         ->where('categoria_id', $cat->id)
                         ->with('imagenPrincipal')
+                        ->orderByDesc('es_cliente')
                         ->latest('updated_at')
                         ->limit($porCategoria)
                         ->get(),
