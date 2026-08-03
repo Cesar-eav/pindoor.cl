@@ -88,6 +88,7 @@ class PortaldiscImporter
 
             $item['slug']      = $panorama->slug;
             $item['categoria'] = $panorama->categoria;
+            $item['imagen']    = $panorama->imagen ? asset('storage/' . $panorama->imagen) : null;
 
             $panorama->wasRecentlyCreated ? ($creados[] = $item) : ($actualizados[] = $item);
         }
