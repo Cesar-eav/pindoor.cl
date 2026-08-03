@@ -14,10 +14,13 @@ class ContactoController extends Controller
     {
         $atractivos = PuntoInteres::query()
             ->where('activo', 1)
-            //->whereIn('id', [64, 80, 81, 87,74])
-            ->whereIn('id', [64, 80, 81, 87,128])
+            ->whereIn('id', PuntoInteres::idsExcluidos())
             ->where('eliminado', false)
             ->get();
+
+        // Permite ver la ficha directa de estos puntos de ejemplo solo durante esta sesión,
+        // habiendo pasado por /contacto — en cualquier otro lugar público siguen excluidos.
+        session(['demo_ficha_ok' => true]);
 
         return view('contacto.index', compact('atractivos'));
     }

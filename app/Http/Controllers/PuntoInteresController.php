@@ -486,7 +486,7 @@ class PuntoInteresController extends Controller
      */
     public function show($slug)
     {
-        $punto = PuntoInteres::publico()
+        $punto = PuntoInteres::visibleFicha()
                              ->with([
                                 'categoria', 'imagenes', 'moduloDatos', 'moduloItems', 'usuario',
                                 'operadores' => fn($q) => $q->where('activo', true),
