@@ -102,6 +102,22 @@ class PuntoInteres extends Model
     }
 
     /**
+     * Igual que scopePublico(), pero deja pasar los puntos de ejemplo/demo si la sesión
+     * viene de /contacto o /registro (ContactoController y PublicitaController marcan la
+     * sesión al cargar esas páginas). Solo la ficha directa (PuntoInteresController::show)
+     * usa esto — mapa, sitemap, listados y búsqueda deben seguir usando scopePublico() sin
+     * excepción.
+     */
+    public function scopeVisibleFicha($query)
+    {
+        if (session('demo_ficha_ok')) {
+            return $query->where('activo', true)->where('eliminado', false);
+        }
+
+        return $query->publico();
+    }
+
+    /**
      * Búsqueda de texto libre, ordenada por relevancia (no por fecha).
      * Prioridad: título > descripción curada (cliente o admin) > sector/dirección.
      * No busca en "description" (la reseña larga) — daba demasiados falsos positivos
