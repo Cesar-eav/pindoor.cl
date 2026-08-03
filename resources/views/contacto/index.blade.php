@@ -20,7 +20,7 @@
                 Conecta con Pindoor
             </div>
             <h1 class="text-4xl md:text-5xl font-black leading-tight mb-4">
-                ¿Tienes un <span class="text-[#fc5648]">local</span>, eres <span class="text-[#fc5648]">artista</span><br>o formas parte de una <span class="text-[#fc5648]">agrupación cultural</span>?
+                ¿Tienes un <span class="text-[#fc5648]">local</span>?
             </h1>
             <p class="text-white/60 text-base md:text-lg mb-8">
                 Cuéntanos quién eres y te contactamos para mostrarte cómo crecer en la red Pindoor.
