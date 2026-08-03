@@ -123,12 +123,15 @@ const EMOJI_CAT = {
 };
 
 function crearIcono(p) {
-    const emoji  = EMOJI_CAT[p.categoria_id] || (p.es_cliente ? '🏪' : '📍');
     const border = p.es_cliente ? '#fc5648' : '#9ca3af';
+    // Negocios registrados con logo: el logo reemplaza el ícono de categoría.
+    const contenido = (p.es_cliente && p.logo)
+        ? `<img src="${p.logo}" style="width:100%;height:100%;object-fit:cover;">`
+        : `<span style="font-size:17px;line-height:1;">${EMOJI_CAT[p.categoria_id] || (p.es_cliente ? '🏪' : '📍')}</span>`;
     return L.divIcon({
         className: '',
         html: `<div style="display:flex;flex-direction:column;align-items:center;">
-            <div style="background:white;border:2.5px solid ${border};border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 2px 10px rgba(0,0,0,.22);line-height:1;">${emoji}</div>
+            <div style="background:white;border:2.5px solid ${border};border-radius:50%;width:34px;height:34px;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.22);">${contenido}</div>
             <div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid ${border};margin-top:-1px;"></div>
         </div>`,
         iconSize:    [34, 41],
