@@ -64,7 +64,15 @@
                             <ul class="divide-y divide-gray-50">
                                 <template x-for="ev in resumen.creados" :key="ev.nombre">
                                     <li class="px-5 py-3 flex items-center justify-between gap-4">
-                                        <span class="text-sm text-gray-800 font-medium flex-1" x-text="ev.nombre"></span>
+                                        <button type="button" x-show="ev.imagen" x-cloak
+                                                @click="abrir(ev.imagen)"
+                                                class="w-10 h-10 rounded-lg overflow-hidden shrink-0 cursor-zoom-in">
+                                            <img :src="ev.imagen" class="w-full h-full object-cover">
+                                        </button>
+                                        <span class="flex-1 min-w-0">
+                                            <span class="block text-sm text-gray-800 font-medium truncate" x-text="ev.nombre"></span>
+                                            <span class="block text-xs text-gray-400 truncate" x-text="ev.lugar"></span>
+                                        </span>
                                         <span class="text-xs text-gray-400 whitespace-nowrap" x-text="ev.fecha + (ev.hora ? ' ' + ev.hora : '')"></span>
                                         <span x-show="guardado === ev.slug" x-cloak
                                               class="text-xs text-green-600 font-medium whitespace-nowrap">Guardado</span>
@@ -90,7 +98,15 @@
                             <ul class="divide-y divide-gray-50">
                                 <template x-for="ev in resumen.actualizados" :key="ev.nombre">
                                     <li class="px-5 py-3 flex items-center justify-between gap-4">
-                                        <span class="text-sm text-gray-800 font-medium flex-1" x-text="ev.nombre"></span>
+                                        <button type="button" x-show="ev.imagen" x-cloak
+                                                @click="abrir(ev.imagen)"
+                                                class="w-10 h-10 rounded-lg overflow-hidden shrink-0 cursor-zoom-in">
+                                            <img :src="ev.imagen" class="w-full h-full object-cover">
+                                        </button>
+                                        <span class="flex-1 min-w-0">
+                                            <span class="block text-sm text-gray-800 font-medium truncate" x-text="ev.nombre"></span>
+                                            <span class="block text-xs text-gray-400 truncate" x-text="ev.lugar"></span>
+                                        </span>
                                         <span class="text-xs text-gray-400 whitespace-nowrap" x-text="ev.fecha + (ev.hora ? ' ' + ev.hora : '')"></span>
                                         <span x-show="guardado === ev.slug" x-cloak
                                               class="text-xs text-green-600 font-medium whitespace-nowrap">Guardado</span>
@@ -127,6 +143,41 @@
                 </div>
             </template>
 
+            {{-- Lightbox de imagen, con zoom para revisar el afiche importado --}}
+            <div x-show="lightbox" x-cloak
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @click.self="cerrar()"
+                 @keydown.escape.window="cerrar()"
+                 class="fixed inset-0 z-999 bg-black/95 flex items-center justify-center p-4">
+
+                <button @click="cerrar()"
+                        class="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+
+                <div class="absolute top-4 left-4 flex items-center gap-1 bg-white/10 rounded-full p-1">
+                    <button @click.stop="zoomOut()"
+                            class="w-8 h-8 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 rounded-full transition text-lg font-bold">−</button>
+                    <span class="text-white/70 text-xs font-bold w-10 text-center" x-text="Math.round(zoom * 100) + '%'"></span>
+                    <button @click.stop="zoomIn()"
+                            class="w-8 h-8 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 rounded-full transition text-lg font-bold">+</button>
+                </div>
+
+                <div class="w-full h-full overflow-auto flex items-center justify-center" @wheel="onWheel($event)" @click.self="cerrar()">
+                    <img :src="lightbox" @dblclick="zoom = zoom > 1 ? 1 : 2.5"
+                         :style="`transform: scale(${zoom}); transform-origin: center center;`"
+                         class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl select-none transition-transform duration-100 cursor-zoom-in"
+                         :class="zoom > 1 && 'cursor-move'">
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -141,6 +192,16 @@
             progreso: '',
             resumen:  null,
             guardado: null,
+            lightbox: null,
+            zoom:     1,
+            abrir(url) { this.lightbox = url; this.zoom = 1; },
+            cerrar() { this.lightbox = null; this.zoom = 1; },
+            zoomIn() { this.zoom = Math.min(4, this.zoom + 0.5); },
+            zoomOut() { this.zoom = Math.max(1, this.zoom - 0.5); },
+            onWheel(e) {
+                e.preventDefault();
+                this.zoom = Math.min(4, Math.max(1, this.zoom + (e.deltaY < 0 ? 0.25 : -0.25)));
+            },
 
             async importar() {
                 this.estado   = 'consultando';

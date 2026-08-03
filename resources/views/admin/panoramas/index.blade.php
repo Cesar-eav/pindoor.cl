@@ -20,7 +20,18 @@
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6" x-data="{ lightbox: null }">
+        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6" x-data="{
+                lightbox: null,
+                zoom: 1,
+                abrir(url) { this.lightbox = url; this.zoom = 1; },
+                cerrar() { this.lightbox = null; this.zoom = 1; },
+                zoomIn() { this.zoom = Math.min(4, this.zoom + 0.5); },
+                zoomOut() { this.zoom = Math.max(1, this.zoom - 0.5); },
+                onWheel(e) {
+                    e.preventDefault();
+                    this.zoom = Math.min(4, Math.max(1, this.zoom + (e.deltaY < 0 ? 0.25 : -0.25)));
+                },
+            }">
 
             @if(session('success'))
                 <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
@@ -175,7 +186,7 @@
                         <div class="shrink-0 w-16 self-stretch">
                             @if($panorama->imagen)
                                 <button type="button"
-                                        @click="lightbox = '{{ asset('storage/' . $panorama->imagen) }}'"
+                                        @click="abrir('{{ asset('storage/' . $panorama->imagen) }}')"
                                         class="w-full h-full cursor-zoom-in focus:outline-none">
                                     <img src="{{ asset('storage/' . $panorama->imagen) }}"
                                          alt="{{ $panorama->titulo }}"
@@ -293,7 +304,7 @@
 
             @endif
 
-            {{-- Lightbox de imagen --}}
+            {{-- Lightbox de imagen, con zoom para revisar detalles del afiche importado --}}
             <div x-show="lightbox" x-cloak
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0"
@@ -301,16 +312,32 @@
                  x-transition:leave="transition ease-in duration-150"
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
-                 @click.self="lightbox = null"
-                 @keydown.escape.window="lightbox = null"
+                 @click.self="cerrar()"
+                 @keydown.escape.window="cerrar()"
                  class="fixed inset-0 z-999 bg-black/95 flex items-center justify-center p-4">
-                <button @click="lightbox = null"
+
+                <button @click="cerrar()"
                         class="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
-                <img :src="lightbox" class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl select-none">
+
+                {{-- Controles de zoom --}}
+                <div class="absolute top-4 left-4 flex items-center gap-1 bg-white/10 rounded-full p-1">
+                    <button @click.stop="zoomOut()"
+                            class="w-8 h-8 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 rounded-full transition text-lg font-bold">−</button>
+                    <span class="text-white/70 text-xs font-bold w-10 text-center" x-text="Math.round(zoom * 100) + '%'"></span>
+                    <button @click.stop="zoomIn()"
+                            class="w-8 h-8 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 rounded-full transition text-lg font-bold">+</button>
+                </div>
+
+                <div class="w-full h-full overflow-auto flex items-center justify-center" @wheel="onWheel($event)" @click.self="cerrar()">
+                    <img :src="lightbox" @dblclick="zoom = zoom > 1 ? 1 : 2.5"
+                         :style="`transform: scale(${zoom}); transform-origin: center center;`"
+                         class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl select-none transition-transform duration-100 cursor-zoom-in"
+                         :class="zoom > 1 && 'cursor-move'">
+                </div>
             </div>
 
         </div>
