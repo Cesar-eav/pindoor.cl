@@ -494,7 +494,7 @@
                                     <p class="text-xs text-amber-700 mb-3">Describe en detalle: tipo de café, platos, ambiente, opciones especiales, servicios, etc.</p>
                                     <textarea id="descripcion_busqueda" name="descripcion_busqueda" rows="6"
                                               class="block w-full border-amber-200 bg-amber-50 rounded-xl shadow-sm text-sm focus:ring-amber-400 resize-none"
-                                              placeholder="Cafetería especialidad, V60, chemex, leche de avena, desayunos, vegano, sin gluten, terraza, perros permitidos, wifi...">{{ old('descripcion_busqueda', $punto->descripcion_busqueda) }}</textarea>
+                                              placeholder="">{{ old('descripcion_busqueda', $punto->descripcion_busqueda) }}</textarea>
                                     <div class="flex justify-end mt-4 pt-4 border-t border-amber-100">
                                         <button type="submit" class="btn-save" style="background:#f59e0b" onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">Guardar</button>
                                     </div>
@@ -1015,7 +1015,7 @@
 
                                         <div class="md:col-span-2">
                                             <label class="block text-xs font-bold text-gray-600 mb-1">Descripción</label>
-                                            <textarea name="descripcion" rows="3"
+                                            <textarea name="descripcion" rows="8"
                                                       placeholder="Sinopsis, artistas, duración, clasificación..."
                                                       class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-blue-400 resize-none">{{ old('descripcion') }}</textarea>
                                         </div>
@@ -1651,7 +1651,7 @@ function toggleEditarProducto(id) {
 
 {{-- Toast de éxito fijo --}}
 @if(session('success'))
-<div id="toast-ok" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;display:flex;align-items:flex-start;gap:12px;background:#fff;border:1px solid #bbf7d0;box-shadow:0 20px 60px rgba(0,0,0,.18);border-radius:20px;padding:20px 22px;max-width:360px;width:90%">
+<div id="toast-ok" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;display:flex;align-items:flex-start;gap:12px;background:#fff;border:1px solid #bbf7d0;box-shadow:0 20px 60px rgba(0,0,0,.18);border-radius:20px;padding:20px 22px;max-width:360px;width:90%;transition:opacity .3s ease">
     <div style="width:32px;height:32px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;flex-shrink:0">
         <svg style="width:16px;height:16px;color:#16a34a" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
@@ -1667,6 +1667,13 @@ function toggleEditarProducto(id) {
         </svg>
     </button>
 </div>
-<script>setTimeout(() => document.getElementById('toast-ok')?.remove(), 5000);</script>
+<script>
+setTimeout(() => {
+    const toast = document.getElementById('toast-ok');
+    if (!toast) return;
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 300);
+}, 2500);
+</script>
 @endif
 </x-app-layout>
