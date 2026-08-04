@@ -363,10 +363,7 @@ class ClienteController extends Controller
         $modulos         = $punto->modulos_habilitados ?? [];
         $datoCarta       = $punto->dato('carta');
         $datoAlojamiento = $punto->dato('alojamiento');
-        $categorias      = Categoria::whereIn('slug', [
-            'cafeterias', 'cultura', 'museos', 'picadas', 'comer',
-            'alojar', 'tiendas', 'artesania', 'centro-deportivo', 'bar'
-        ])->orderBy('nombre')->get();
+        $categorias      = Categoria::where('es_cliente', true)->orderBy('nombre')->get();
 
         // Contenido de los módulos "avanzados" (antes vivían en páginas aparte:
         // /museo, /eventos, /productos). Se muestran embebidos en el dashboard.
