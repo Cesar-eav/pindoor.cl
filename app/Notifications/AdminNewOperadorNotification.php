@@ -16,7 +16,7 @@ class AdminNewOperadorNotification extends Notification implements ShouldQueue
 
     public function via(): array
     {
-        return ['mail'];
+        return ['mail', \App\Notifications\Channels\TelegramChannel::class];
     }
 
     public function toMail(): MailMessage
@@ -29,5 +29,13 @@ class AdminNewOperadorNotification extends Notification implements ShouldQueue
             ->line("Fecha: " . $this->user->created_at->format('d/m/Y H:i'))
             ->action('Ver en el panel', url('/admin/operadores'))
             ->salutation('Pindoor');
+    }
+
+    public function toTelegram(): string
+    {
+        return "🧭 <b>Nuevo operador turístico registrado</b>\n"
+            . "Nombre: {$this->user->name}\n"
+            . "Email: {$this->user->email}\n"
+            . "Fecha: " . $this->user->created_at->format('d/m/Y H:i');
     }
 }
