@@ -19,6 +19,7 @@ class PuntoInteres extends Model
         'modulos_habilitados'=> 'array',
         'oferta_expira_at'   => 'datetime',
         'oferta_activa'      => 'boolean',
+        'fuera_de_servicio'  => 'boolean',
     ];
 
     /**
@@ -61,6 +62,8 @@ class PuntoInteres extends Model
         'descripcion_busqueda',
         'descripcion_busqueda_admin',
         'imagen_perfil',
+        'fuera_de_servicio',
+        'fuera_de_servicio_motivo',
     ];
 
     /**

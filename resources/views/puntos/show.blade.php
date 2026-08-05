@@ -103,36 +103,17 @@
                 <span class="text-pindoor-accent">{{ $punto->title }}</span>
             </nav>
 
-            {{-- Aviso especial para ascensores --}}
-            @if($punto->categoria?->slug === 'ascensores')
-            @php $esOperativo = str_contains($punto->getTranslation('description', 'es') ?? '', '*OPERATIVO*'); @endphp
-            @if($esOperativo)
-            <div class="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-5 space-y-3">
-                <div class="flex items-start gap-3">
-                    <span class="text-2xl leading-none mt-0.5">⚠️</span>
-                    <div class="space-y-2 text-sm text-amber-900">
-                        <p class="font-bold text-base">{{ __('ui.lugar.ascensor_aviso_titulo') }}</p>
-                        <p>{!! __('ui.lugar.ascensor_operativo_aviso') !!}</p>
-                        <div class="bg-amber-100 rounded-xl px-4 py-3 space-y-1">
-                            <p class="font-bold text-amber-800">{{ __('ui.lugar.ascensor_aviso_horario') }}</p>
-                            <p>{{ __('ui.lugar.ascensor_aviso_horario_semana') }}</p>
-                            <p>{{ __('ui.lugar.ascensor_aviso_horario_finde') }}</p>
-                        </div>
-                        <p class="text-amber-700 text-xs">{!! __('ui.lugar.ascensor_operativo_mantenc') !!}</p>
-                    </div>
-                </div>
-            </div>
-            @else
+            {{-- Aviso de ascensor fuera de servicio (admin-managed vía /admin/configuracion) --}}
+            @if($punto->fuera_de_servicio)
             <div class="mb-6 bg-red-50 border border-red-200 rounded-2xl p-5">
                 <div class="flex items-start gap-3">
                     <span class="text-2xl leading-none mt-0.5">🚫</span>
                     <div class="space-y-1 text-sm text-red-900">
                         <p class="font-bold text-base">{{ __('ui.lugar.ascensor_fuera_titulo') }}</p>
-                        <p>{!! __('ui.lugar.ascensor_fuera_descripcion') !!}</p>
+                        <p>{{ $punto->fuera_de_servicio_motivo ?: __('ui.lugar.ascensor_fuera_descripcion') }}</p>
                     </div>
                 </div>
             </div>
-            @endif
             @endif
 
             {{-- Tabs móvil --}}
@@ -452,9 +433,14 @@
                                      por el admin para completar el directorio, cuyo campo es_cliente propio quedó en false
                                      (ej. Sala Rivoli, categoría Restaurante). Los atractivos turísticos (categoría es_cliente=false)
                                      siempre muestran la galería completa. --}}
-                                <div class="aspect-[16/10] md:aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl shadow-gray-200">
+                                <div class="relative aspect-[16/10] md:aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl shadow-gray-200">
                                     <img src="{{ asset('storage/' . $principal->ruta) }}" alt="{{ $punto->title }}"
                                          class="w-full h-full object-cover">
+                                    @if($punto->fuera_de_servicio)
+                                    <span class="absolute top-4 left-4 bg-red-600 text-white text-xs font-extrabold uppercase tracking-wide px-3 py-1.5 rounded-full shadow-lg">
+                                        🚫 {{ __('ui.lugar.ascensor_fuera_titulo') }}
+                                    </span>
+                                    @endif
                                 </div>
                             @elseif($imagenes->count())
                                 <div x-data='{
@@ -470,10 +456,15 @@
                                 }'>
 
                                     {{-- Imagen principal --}}
-                                    <div class="aspect-[16/10] md:aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl shadow-gray-200 mb-4 cursor-zoom-in"
+                                    <div class="relative aspect-[16/10] md:aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl shadow-gray-200 mb-4 cursor-zoom-in"
                                          @click="open()">
                                         <img :src="images[current]" alt="{{ $punto->title }}"
                                              class="w-full h-full object-cover transition duration-500" />
+                                        @if($punto->fuera_de_servicio)
+                                        <span class="absolute top-4 left-4 bg-red-600 text-white text-xs font-extrabold uppercase tracking-wide px-3 py-1.5 rounded-full shadow-lg">
+                                            🚫 {{ __('ui.lugar.ascensor_fuera_titulo') }}
+                                        </span>
+                                        @endif
                                     </div>
 
                                     {{-- Miniaturas --}}

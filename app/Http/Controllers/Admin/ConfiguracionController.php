@@ -29,8 +29,13 @@ class ConfiguracionController extends Controller
 
         $categoriasDisponibles = $puntosData->pluck('categoria')->filter()->unique()->sort()->values();
 
+        $ascensores = PuntoInteres::whereHas('categoria', fn($q) => $q->where('slug', 'ascensores'))
+            ->where('eliminado', false)
+            ->orderBy('title')
+            ->get(['id', 'title', 'sector', 'fuera_de_servicio', 'fuera_de_servicio_motivo']);
+
         return view('admin.configuracion.index', compact(
-            'aprobacionActiva', 'idsExcluidos', 'puntosData', 'categoriasDisponibles'
+            'aprobacionActiva', 'idsExcluidos', 'puntosData', 'categoriasDisponibles', 'ascensores'
         ));
     }
 
@@ -50,5 +55,26 @@ class ConfiguracionController extends Controller
         Configuracion::set('puntos_demo_excluidos', $ids->implode(','));
 
         return back()->with('success', 'Puntos de ejemplo actualizados.');
+    }
+
+    public function actualizarAscensores(Request $request)
+    {
+        $estados = $request->input('fuera_de_servicio', []);
+        $motivos = $request->input('motivo', []);
+
+        $ascensores = PuntoInteres::whereHas('categoria', fn($q) => $q->where('slug', 'ascensores'))
+            ->where('eliminado', false)
+            ->get(['id']);
+
+        foreach ($ascensores as $ascensor) {
+            $fueraDeServicio = (bool) ($estados[$ascensor->id] ?? false);
+
+            $ascensor->update([
+                'fuera_de_servicio'        => $fueraDeServicio,
+                'fuera_de_servicio_motivo' => $fueraDeServicio ? trim((string) ($motivos[$ascensor->id] ?? '')) : null,
+            ]);
+        }
+
+        return back()->with('success', 'Estado de los ascensores actualizado.');
     }
 }

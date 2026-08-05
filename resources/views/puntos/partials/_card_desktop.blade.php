@@ -15,6 +15,11 @@
             Oferta hoy
         </span>
         @endif
+        @if($atractivo->fuera_de_servicio)
+        <span class="absolute top-3 left-3 bg-red-600 text-white text-[9px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full">
+            🚫 Fuera de servicio
+        </span>
+        @endif
         @if($atractivo->es_cliente && $atractivo->imagen_perfil)
         <img src="{{ asset('storage/' . $atractivo->imagen_perfil) }}"
              alt="Logo {{ $atractivo->title }}"
