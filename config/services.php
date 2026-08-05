@@ -46,4 +46,9 @@ return [
         'cf_clearance' => env('PASSLINE_CF_CLEARANCE'),
     ],
 
+    'telegram' => [
+        'token' => env('TELEGRAM_BOT_TOKEN'),
+        'chat_id' => env('TELEGRAM_CHAT_ID'),
+    ],
+
 ];

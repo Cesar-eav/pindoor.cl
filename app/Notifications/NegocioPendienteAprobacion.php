@@ -16,7 +16,7 @@ class NegocioPendienteAprobacion extends Notification implements ShouldQueue
 
     public function via(): array
     {
-        return ['mail'];
+        return ['mail', \App\Notifications\Channels\TelegramChannel::class];
     }
 
     public function toMail(): MailMessage
@@ -30,5 +30,14 @@ class NegocioPendienteAprobacion extends Notification implements ShouldQueue
             ->line("Email del usuario: " . ($this->punto->user?->email ?? '—'))
             ->action('Revisar en el panel', url('/admin/clientes'))
             ->salutation('Pindoor');
+    }
+
+    public function toTelegram(): string
+    {
+        return "🏪 <b>Nuevo negocio pendiente de aprobación</b>\n"
+            . "Nombre: {$this->punto->title}\n"
+            . "Categoría: " . ($this->punto->categoria?->nombre ?? '—') . "\n"
+            . "WhatsApp: " . ($this->punto->contacto_whatsapp ?: '—') . "\n"
+            . "Email del usuario: " . ($this->punto->user?->email ?? '—');
     }
 }
