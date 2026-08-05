@@ -124,6 +124,50 @@
                 </form>
             </div>
 
+            {{-- Ascensores fuera de servicio --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
+                <p class="font-bold text-gray-900">Ascensores fuera de servicio</p>
+                <p class="text-xs text-gray-500 mt-1 mb-4">
+                    Los ascensores de Valparaíso a veces cierran por mantención o fallas. Marca los que
+                    están fuera de servicio para que se muestre un aviso en su ficha y en la imagen de
+                    portada que ve el turista.
+                </p>
+
+                <form action="{{ route('admin.configuracion.ascensores') }}" method="POST">
+                    @csrf
+
+                    <div class="divide-y divide-gray-50 border border-gray-100 rounded-xl">
+                        @forelse($ascensores as $ascensor)
+                        <div class="p-4" x-data="{ fuera: {{ $ascensor->fuera_de_servicio ? 'true' : 'false' }} }">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" name="fuera_de_servicio[{{ $ascensor->id }}]" value="1"
+                                       x-model="fuera"
+                                       class="mt-1 rounded border-gray-300 text-[#fc5648] focus:ring-[#fc5648]">
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-semibold text-gray-800 text-sm">{{ $ascensor->title }}</p>
+                                    @if($ascensor->sector)
+                                    <p class="text-xs text-gray-400">{{ $ascensor->sector }}</p>
+                                    @endif
+                                </div>
+                            </label>
+                            <div x-show="fuera" class="mt-3 ml-7">
+                                <textarea name="motivo[{{ $ascensor->id }}]" rows="2"
+                                          placeholder="Describe el problema (ej: en mantención hasta nuevo aviso)"
+                                          class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none resize-none">{{ $ascensor->fuera_de_servicio_motivo }}</textarea>
+                            </div>
+                        </div>
+                        @empty
+                        <p class="px-4 py-3 text-xs text-gray-300 italic">No hay ascensores registrados.</p>
+                        @endforelse
+                    </div>
+
+                    <button type="submit"
+                            class="mt-5 bg-[#fc5648] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#d94439] transition">
+                        Guardar
+                    </button>
+                </form>
+            </div>
+
         </div>
     </div>
 </x-admin-layout>

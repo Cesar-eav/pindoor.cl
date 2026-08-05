@@ -18,6 +18,12 @@
         </span>
         @endif
 
+        @if($atractivo->fuera_de_servicio)
+        <span class="absolute top-3 left-3 bg-red-600 text-white text-[9px] uppercase font-bold px-2.5 py-1 rounded-full shadow">
+            🚫 Fuera de servicio
+        </span>
+        @endif
+
         @if($atractivo->es_cliente && $atractivo->imagen_perfil)
         <img src="{{ asset('storage/' . $atractivo->imagen_perfil) }}"
              class="absolute bottom-2 right-2 w-8 h-8 rounded-lg object-cover border-2 border-white shadow">
