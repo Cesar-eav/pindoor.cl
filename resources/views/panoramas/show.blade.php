@@ -133,9 +133,8 @@
                 <div class="ml-auto flex items-center gap-2">
                     <a href="{{ $gcUrl }}" target="_blank" rel="noopener noreferrer"
                        title="Agregar al calendario"
-                       class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 hover:bg-blue-100 transition text-lg leading-none">
-                        📅 
-                        
+                       class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-blue-50 hover:bg-blue-100 transition text-xs font-bold text-blue-700 whitespace-nowrap">
+                        Agregar calendario
                     </a>
 
                     @include('partials._share_panel', [
