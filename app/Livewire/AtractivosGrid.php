@@ -87,6 +87,7 @@ class AtractivosGrid extends Component
                     'categoria' => $cat,
                     'puntos'    => PuntoInteres::publico()
                         ->where('categoria_id', $cat->id)
+                        ->when($cat->slug === 'ascensores', fn($q) => $q->where('fuera_de_servicio', false))
                         ->with('imagenPrincipal')
                         ->orderByDesc('es_cliente')
                         ->latest('updated_at')
