@@ -4,63 +4,64 @@ namespace App\Http\Controllers;
 
 use App\Mail\NuevoContacto;
 use App\Models\LeadContacto;
-use App\Models\PuntoInteres;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class ContactoController extends Controller
 {
     public function index()
     {
-        $atractivos = PuntoInteres::query()
-            ->where('activo', 1)
-            ->whereIn('id', PuntoInteres::idsExcluidos())
-            ->where('eliminado', false)
-            ->get();
-
-        // Permite ver la ficha directa de estos puntos de ejemplo solo durante esta sesión,
-        // habiendo pasado por /contacto — en cualquier otro lugar público siguen excluidos.
-        session(['demo_ficha_ok' => true]);
-
-        return view('contacto.index', compact('atractivos'));
+        return view('contacto.index');
     }
 
     public function store(Request $request)
     {
-        $tipo = $request->input('tipo');
-
-        $rules = [
-            'tipo'     => 'required|in:cliente,artista',
+        $request->validate([
             'nombre'   => 'required|string|max:120',
             'email'    => 'required|email|max:160',
             'telefono' => 'nullable|string|max:25',
-            'ciudad'   => 'nullable|string|max:100',
             'mensaje'  => 'nullable|string|max:1200',
-        ];
-
-        if ($tipo === 'cliente') {
-            $rules['tipo_local']   = 'required|string|max:60';
-            $rules['nombre_local'] = 'required|string|max:150';
-        } else {
-            $rules['especialidad'] = 'required|string|max:100';
-        }
-
-        $request->validate($rules);
+        ]);
 
         $lead = LeadContacto::create([
-            'tipo'           => $tipo,
-            'nombre'         => $request->nombre,
-            'email'          => $request->email,
-            'telefono'       => $request->telefono,
-            'tipo_negocio'   => $request->tipo_local,   // campo del form → columna BD
-            'nombre_negocio' => $request->nombre_local,
-            'especialidad'   => $request->especialidad,
-            'ciudad'         => $request->ciudad,
-            'mensaje'        => $request->mensaje,
+            'nombre'   => $request->nombre,
+            'email'    => $request->email,
+            'telefono' => $request->telefono,
+            'mensaje'  => $request->mensaje,
         ]);
 
         Mail::to(['soporte@pindoor.cl', 'cesar.eav@gmail.com'])->send(new NuevoContacto($lead));
 
+        $this->avisarTelegram($lead);
+
         return back()->with('success', '¡Mensaje enviado! Te contactaremos pronto.');
+    }
+
+    private function avisarTelegram(LeadContacto $lead): void
+    {
+        $token = config('services.telegram.token');
+        $chatId = config('services.telegram.chat_id');
+
+        if (! $token || ! $chatId) {
+            return;
+        }
+
+        $texto = "📩 <b>Nuevo mensaje de contacto</b>\n"
+            . "Nombre: {$lead->nombre}\n"
+            . "Email: {$lead->email}\n"
+            . ($lead->telefono ? "Teléfono: {$lead->telefono}\n" : '')
+            . ($lead->mensaje ? "Mensaje: {$lead->mensaje}" : '');
+
+        $response = Http::post("https://api.telegram.org/bot{$token}/sendMessage", [
+            'chat_id' => $chatId,
+            'text' => $texto,
+            'parse_mode' => 'HTML',
+        ]);
+
+        if ($response->failed()) {
+            Log::warning('[telegram] envío falló', ['response' => $response->body()]);
+        }
     }
 }

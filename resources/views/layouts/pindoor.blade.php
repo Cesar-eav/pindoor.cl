@@ -158,6 +158,16 @@
         <span class="text-[10px] font-bold leading-none">Info</span>
     </a>
 
+    {{-- Ingresar / Registrarme --}}
+    <a href="{{ route('publicita.index') }}" onclick="closeFab()"
+       class="flex flex-col items-center gap-1.5 bg-white border border-gray-200 text-gray-700 px-5 py-3.5 rounded-2xl shadow-xl min-w-19">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 12H3m0 0l4-4m-4 4l4 4m6-9v-1a2 2 0 012-2h5a2 2 0 012 2v14a2 2 0 01-2 2h-5a2 2 0 01-2-2v-1"/>
+        </svg>
+        <span class="text-[10px] font-bold leading-none">Ingresar</span>
+    </a>
+
 </div>
 
 {{-- Barra inferior --}}
