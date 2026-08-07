@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\CategoriaEventoController;
 use App\Http\Controllers\Admin\ConfiguracionController;
 use App\Http\Controllers\Admin\PanoramaController;
 use App\Http\Controllers\ArtistaController;
+use App\Http\Controllers\ArtistaEventosController;
 use App\Http\Controllers\OperadorController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactoController;
@@ -268,10 +269,14 @@ Route::middleware(['auth', 'verified', 'role:artista'])->prefix('artista')->name
 
     Route::post('/perfil/imagenes',           [ArtistaController::class, 'subirImagen'])->name('imagen.subir');
     Route::delete('/perfil/imagenes/{imagen}', [ArtistaController::class, 'eliminarImagen'])->name('imagen.eliminar');
+
+    Route::post('/eventos/{artista}/guardar',    [ArtistaEventosController::class, 'guardarEvento'])->name('eventos.guardar');
+    Route::delete('/eventos/{artista}/{evento}', [ArtistaEventosController::class, 'eliminarEvento'])->name('eventos.eliminar');
 });
 
 // Perfil público artista — debe ir DESPUÉS del grupo protegido para que /artista/nuevo no sea capturado como slug
 Route::get('/artista/{slug}', [ArtistaController::class, 'show'])->name('artista.show');
+Route::get('/artista/{slug}/evento/{item}', [ArtistaController::class, 'showEvento'])->name('artista.evento');
 
 /* --- RUTAS OPERADORES TURÍSTICOS --- */
 Route::middleware(['auth', 'verified', 'role:operador'])->prefix('operador')->name('operador.')->group(function () {

@@ -144,12 +144,21 @@ class AtractivosGrid extends Component
             ->get()
             ->map(fn (ModuloItem $item) => $item->comoPanorama());
 
+        // Eventos de artistas → mismo tratamiento
+        $eventosArtista = $hayFiltros ? collect() : \App\Models\ArtistaEvento::where('activo', true)
+            ->where('fecha', '>=', $hoy)
+            ->whereHas('artista', fn($q) => $q->where('activo', true))
+            ->with('artista')
+            ->get()
+            ->map(fn (\App\Models\ArtistaEvento $item) => $item->comoPanorama());
+
         $proximosPanoramas = $hayFiltros ? collect() : Panorama::where('activo', true)
             ->whereNull('dias_semana')
             ->where(fn($q) => $q->whereNull('fecha_fin')->where('fecha', '>=', $hoy)
                 ->orWhere('fecha_fin', '>=', $hoy))
             ->get()
             ->concat($eventosCliente)
+            ->concat($eventosArtista)
             ->map(fn($p) => tap($p, fn($p) => $p->fecha_proxima = $p->proximaOcurrencia($hoy)))
             ->filter(fn($p) => $p->fecha_proxima !== null)
             ->sortBy('fecha_proxima')

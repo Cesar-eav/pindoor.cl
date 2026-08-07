@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Artista;
+use App\Models\ArtistaEvento;
 use App\Models\ArtistaImagen;
 use App\Models\User;
 use App\Notifications\AdminNewArtistaNotification;
@@ -111,7 +112,10 @@ class ArtistaController extends Controller
         }
 
         $artista->load('imagenes');
-        return view('artista.perfil', compact('artista'));
+        $eventos = $artista->eventos()->orderBy('fecha')->orderBy('hora')->get();
+        $tiposEvento = \App\Models\CategoriaEvento::catalogo();
+
+        return view('artista.perfil', compact('artista', 'eventos', 'tiposEvento'));
     }
 
     public function actualizarPerfil(Request $request)
@@ -181,6 +185,31 @@ class ArtistaController extends Controller
     {
         $artista = Artista::where('slug', $slug)->where('activo', true)->firstOrFail();
         $artista->load('imagenes');
-        return view('artista.show', compact('artista'));
+
+        $eventosProximos = $artista->eventos()
+            ->where('activo', true)
+            ->where('fecha', '>=', now()->toDateString())
+            ->orderBy('fecha')->orderBy('hora')
+            ->get();
+
+        return view('artista.show', compact('artista', 'eventosProximos'));
+    }
+
+    /**
+     * Muestra un evento de un artista con la misma vista que un panorama subido
+     * manualmente. Mismo patrón que PuntoInteresController::showEvento().
+     */
+    public function showEvento(string $slug, ArtistaEvento $item)
+    {
+        $artista = Artista::where('activo', true)->where('slug', $slug)->firstOrFail();
+
+        abort_if($item->artista_id !== $artista->id || !$item->activo, 404);
+
+        $item->setRelation('artista', $artista);
+        $panorama = $item->comoPanorama();
+        $puntoRelacionado = $artista;
+        $origenTipo = 'artista';
+
+        return view('panoramas.show', compact('panorama', 'puntoRelacionado', 'origenTipo'));
     }
 }

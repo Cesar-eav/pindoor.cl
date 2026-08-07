@@ -44,6 +44,11 @@ class Artista extends Model
         return $this->hasMany(ArtistaImagen::class)->orderBy('orden');
     }
 
+    public function eventos()
+    {
+        return $this->hasMany(ArtistaEvento::class);
+    }
+
     public static function slugUnico(string $nombre): string
     {
         $base = Str::slug($nombre);

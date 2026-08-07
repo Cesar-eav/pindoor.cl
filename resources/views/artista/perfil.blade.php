@@ -57,6 +57,22 @@
                         </span>
                     @endif
                 </button>
+                <button type="button" @click="tab = 'eventos'"
+                        :class="tab === 'eventos'
+                            ? 'bg-violet-600 text-white shadow-sm'
+                            : 'text-gray-500 hover:text-gray-800'"
+                        class="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    Eventos
+                    @if($eventos->isNotEmpty())
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                              :class="tab === 'eventos' ? 'bg-white/20 text-white' : 'bg-violet-100 text-violet-600'">
+                            {{ $eventos->count() }}
+                        </span>
+                    @endif
+                </button>
             </div>
 
             {{-- Pestaña: Perfil --}}
@@ -292,6 +308,315 @@
                         </div>
                     </form>
                 </div>
+            </div>
+
+            {{-- Pestaña: Eventos --}}
+            <div x-show="tab === 'eventos'" x-transition:enter="transition ease-out duration-150"
+                 x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+                 style="display:none"
+                 x-data="{
+                    abierto: {{ $errors->any() ? 'true' : 'false' }},
+                    editando: null,
+                    imagenActual: null,
+                    imagenPreview: null,
+                    imagenError: null,
+                    enviando: false,
+                    resetForm() {
+                        this.editando = null;
+                        this.imagenActual = null;
+                        this.imagenError = null;
+                        this.enviando = false;
+                        if (this.imagenPreview) URL.revokeObjectURL(this.imagenPreview);
+                        this.imagenPreview = null;
+                        this.$refs.form.reset();
+                    },
+                    previsualizar(input) {
+                        this.imagenError = null;
+                        if (this.imagenPreview) URL.revokeObjectURL(this.imagenPreview);
+                        this.imagenPreview = null;
+                        const file = input.files[0];
+                        if (!file) return;
+
+                        const MAX_MB = 20;
+                        const TIPOS_OK = ['image/jpeg', 'image/png', 'image/webp'];
+
+                        if (file.size > MAX_MB * 1024 * 1024) {
+                            this.imagenError = `La imagen pesa ${(file.size / (1024 * 1024)).toFixed(1)} MB. El máximo permitido es ${MAX_MB} MB.`;
+                            input.value = '';
+                            return;
+                        }
+                        if (!TIPOS_OK.includes(file.type)) {
+                            this.imagenError = 'Formato no permitido. Sube una imagen JPG, PNG o WEBP.';
+                            input.value = '';
+                            return;
+                        }
+                        try {
+                            this.imagenPreview = URL.createObjectURL(file);
+                        } catch (e) {
+                            this.imagenError = 'No se pudo cargar la imagen. Intenta con otro archivo.';
+                            input.value = '';
+                        }
+                    },
+                    editar(evento) {
+                        this.editando = evento;
+                        this.imagenActual = evento.imagen_url;
+                        this.imagenError = null;
+                        if (this.imagenPreview) URL.revokeObjectURL(this.imagenPreview);
+                        this.imagenPreview = null;
+                        this.abierto = true;
+                        this.$nextTick(() => {
+                            const f = this.$refs.form;
+                            f.titulo.value = evento.titulo;
+                            f.tipo.value = evento.tipo;
+                            f.fecha.value = evento.fecha;
+                            f.hora.value = evento.hora || '';
+                            f.hora_fin.value = evento.hora_fin || '';
+                            f.precio.value = evento.precio || '';
+                            f.precio_texto.value = evento.precio_texto || '';
+                            f.descripcion.value = evento.descripcion || '';
+                            f.url_entradas.value = evento.url_entradas || '';
+                            f.destacado.checked = evento.destacado;
+                        });
+                    }
+                }">
+
+                {{-- Formulario nuevo / editar --}}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h4 class="font-bold text-gray-700" x-text="editando ? '✏️ Editar evento' : '📅 Programar evento'"></h4>
+                            <p class="text-xs text-gray-400 mt-0.5">Conciertos, exposiciones, funciones, talleres y más.</p>
+                        </div>
+                        <button @click="abierto = !abierto; if (!abierto) resetForm()"
+                                class="px-4 py-2 bg-violet-600 text-white text-sm font-bold rounded-xl hover:opacity-90 transition"
+                                x-text="abierto ? 'Cerrar' : '+ Nuevo evento'"></button>
+                    </div>
+
+                    <div x-show="abierto" x-transition class="border-t border-gray-100 pt-5 mt-2">
+                        <form method="POST" action="{{ route('artista.eventos.guardar', $artista) }}" enctype="multipart/form-data" x-ref="form"
+                              @submit="enviando = true">
+                            @csrf
+                            <input type="hidden" name="item_id" :value="editando ? editando.id : ''">
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-bold text-gray-600 mb-1">Título del evento *</label>
+                                    <input type="text" name="titulo" required
+                                           value="{{ old('titulo') }}"
+                                           placeholder="Ej: Concierto acústico en el Cerro Alegre"
+                                           class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-violet-400">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1">Tipo de evento *</label>
+                                    <select name="tipo" class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-violet-400">
+                                        @foreach($tiposEvento as $slug => $info)
+                                            <option value="{{ $slug }}" @selected(old('tipo') === $slug)>
+                                                {{ $info['emoji'] }} {{ $info['label'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1">Fecha *</label>
+                                    <input type="date" name="fecha" required
+                                           value="{{ old('fecha') }}"
+                                           class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-violet-400">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1">Hora de inicio</label>
+                                    <input type="time" name="hora"
+                                           value="{{ old('hora') }}"
+                                           class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-violet-400">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1">Hora de término</label>
+                                    <input type="time" name="hora_fin"
+                                           value="{{ old('hora_fin') }}"
+                                           class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-violet-400">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1">Precio (0 = gratuito)</label>
+                                    <input type="number" name="precio" min="0" step="100"
+                                           value="{{ old('precio') }}"
+                                           placeholder="Ej: 5000"
+                                           class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-violet-400">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1">Texto de precio (reemplaza al número)</label>
+                                    <input type="text" name="precio_texto"
+                                           value="{{ old('precio_texto') }}"
+                                           placeholder="Ej: Desde $3.000 · Entrada liberada"
+                                           class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-violet-400">
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-bold text-gray-600 mb-1">Descripción</label>
+                                    <textarea name="descripcion" rows="6"
+                                              placeholder="Detalles del evento, invitados, duración..."
+                                              class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-violet-400 resize-none">{{ old('descripcion') }}</textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1">Link de compra de entradas</label>
+                                    <input type="url" name="url_entradas"
+                                           value="{{ old('url_entradas') }}"
+                                           placeholder="https://..."
+                                           class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-violet-400">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1">Imagen del evento (opcional)</label>
+                                    <input type="file" name="imagen" accept="image/*"
+                                           @change="previsualizar($event.target)"
+                                           class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100">
+                                    <p class="text-[11px] text-gray-400 mt-1">JPG, PNG o WEBP — máx. 20 MB</p>
+                                    <p x-show="imagenError" x-text="imagenError" class="text-xs text-red-500 font-semibold mt-1"></p>
+
+                                    <div class="flex items-center gap-4 mt-2" x-show="imagenActual || imagenPreview">
+                                        <div x-show="imagenActual" class="text-center">
+                                            <p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Actual</p>
+                                            <img :src="imagenActual" class="w-16 h-16 rounded-xl object-cover border border-gray-200">
+                                        </div>
+                                        <div x-show="imagenPreview" class="text-center">
+                                            <p class="text-[10px] font-bold text-violet-500 uppercase mb-1">Nueva</p>
+                                            <img :src="imagenPreview" class="w-16 h-16 rounded-xl object-cover border border-violet-200">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="md:col-span-2 flex items-center gap-3">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="destacado" value="1"
+                                               @checked(old('destacado'))
+                                               class="rounded border-gray-300 text-violet-600 focus:ring-violet-400">
+                                        <span class="text-sm text-gray-700 font-medium">Destacar este evento</span>
+                                    </label>
+                                    <span class="text-xs text-gray-400">(aparece primero en tu perfil público)</span>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end items-center mt-5 gap-3">
+                                <button type="button" @click="abierto = false; resetForm()"
+                                        :disabled="enviando"
+                                        class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">Cancelar</button>
+                                <button type="submit"
+                                        :disabled="enviando"
+                                        class="px-6 py-2 bg-violet-600 text-white text-sm font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                                    <svg x-show="enviando" x-cloak class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                                    </svg>
+                                    <span x-text="enviando ? 'Publicando…' : (editando ? 'Guardar cambios' : 'Publicar evento')"></span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {{-- Listado --}}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h4 class="font-bold text-gray-700 mb-4">Eventos programados</h4>
+
+                    @php
+                        $proximosEventos = $eventos->filter(fn($e) => $e->fecha && $e->fecha->greaterThanOrEqualTo(today()))->sortBy('fecha');
+                        $pasadosEventos  = $eventos->filter(fn($e) => $e->fecha && $e->fecha->lessThan(today()))->sortByDesc('fecha');
+                    @endphp
+
+                    @if($eventos->count())
+                        @if($proximosEventos->count())
+                        <div class="space-y-3 mb-6">
+                            <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Próximos</p>
+                            @foreach($proximosEventos as $evento)
+                            @php $tipoInfo = $evento->tipoEvento(); @endphp
+                            <div class="flex items-start gap-4 border border-gray-100 rounded-xl p-4
+                                {{ $evento->destacado ? 'border-violet-200 bg-violet-50/30' : '' }}">
+                                @if($evento->imagen)
+                                    <img src="{{ asset('storage/' . $evento->imagen) }}" alt="{{ $evento->titulo }}"
+                                         class="w-16 h-16 rounded-xl object-cover border border-gray-100 shrink-0">
+                                @else
+                                    <div class="w-16 h-16 rounded-xl bg-gray-50 flex items-center justify-center text-2xl shrink-0 border border-gray-100">
+                                        {{ $tipoInfo['emoji'] }}
+                                    </div>
+                                @endif
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <p class="font-semibold text-gray-800 text-sm">{{ $evento->titulo }}</p>
+                                        @if($evento->destacado)
+                                            <span class="text-[10px] font-black uppercase bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">Destacado</span>
+                                        @endif
+                                        <span class="text-[10px] font-black uppercase bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                                            {{ $tipoInfo['emoji'] }} {{ $tipoInfo['label'] }}
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        📅 {{ $evento->fecha->translatedFormat('l d \d\e F Y') }}
+                                        @if($evento->hora)· 🕐 {{ \Carbon\Carbon::parse($evento->hora)->format('H:i') }}@endif
+                                        @if($evento->hora_fin)– {{ \Carbon\Carbon::parse($evento->hora_fin)->format('H:i') }}@endif
+                                    </p>
+                                    <p class="text-xs font-bold text-violet-700 mt-0.5">{{ $evento->precioEvento() }}</p>
+                                </div>
+                                <div class="flex gap-2 shrink-0">
+                                    <button type="button"
+                                            @click="editar(@js([
+                                                'id'           => $evento->id,
+                                                'titulo'       => $evento->titulo,
+                                                'tipo'         => $evento->tipo,
+                                                'fecha'        => optional($evento->fecha)->format('Y-m-d'),
+                                                'hora'         => $evento->hora,
+                                                'hora_fin'     => $evento->hora_fin,
+                                                'precio'       => $evento->precio,
+                                                'precio_texto' => $evento->precio_texto,
+                                                'descripcion'  => $evento->descripcion,
+                                                'url_entradas' => $evento->url_entradas,
+                                                'destacado'    => (bool) $evento->destacado,
+                                                'imagen_url'   => $evento->imagen ? asset('storage/' . $evento->imagen) : null,
+                                            ])); window.scrollTo({ top: 0, behavior: 'smooth' })"
+                                            class="text-xs text-violet-600 font-bold hover:underline">Editar</button>
+                                    <form method="POST" action="{{ route('artista.eventos.eliminar', [$artista, $evento]) }}"
+                                          onsubmit="return confirm('¿Eliminar este evento?')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="text-xs text-red-500 font-bold hover:underline">Eliminar</button>
+                                    </form>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                        @endif
+
+                        @if($pasadosEventos->count())
+                        <details class="mt-4">
+                            <summary class="text-xs font-black uppercase tracking-widest text-gray-400 cursor-pointer hover:text-gray-600">
+                                Eventos pasados ({{ $pasadosEventos->count() }})
+                            </summary>
+                            <div class="space-y-2 mt-3">
+                                @foreach($pasadosEventos as $evento)
+                                <div class="flex items-center justify-between border border-gray-100 rounded-xl p-3 opacity-60">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-700">{{ $evento->titulo }}</p>
+                                        <p class="text-xs text-gray-400">{{ $evento->fecha->translatedFormat('d M Y') }}</p>
+                                    </div>
+                                    <form method="POST" action="{{ route('artista.eventos.eliminar', [$artista, $evento]) }}"
+                                          onsubmit="return confirm('¿Eliminar?')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="text-xs text-red-400 hover:text-red-600">Eliminar</button>
+                                    </form>
+                                </div>
+                                @endforeach
+                            </div>
+                        </details>
+                        @endif
+                    @else
+                        <p class="text-sm text-gray-400 italic text-center py-6">No tienes eventos programados. ¡Publica el primero!</p>
+                    @endif
+                </div>
+
             </div>
 
         </div>
