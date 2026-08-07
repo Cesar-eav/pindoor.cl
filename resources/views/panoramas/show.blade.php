@@ -9,10 +9,12 @@
                 . ($panorama->ubicacion ? ' en ' . $panorama->ubicacion : '')
                 . ', el ' . $fechaStr
                 . ($panorama->es_gratuito ? '. Entrada gratuita.' : '.');
-    // Panorama real (admin) tiene slug propio; evento de agenda de cliente usa su propia ruta.
+    // Panorama real (admin) tiene slug propio; evento de agenda de cliente o de artista usa su propia ruta.
     $panoramaUrl = $panorama->slug
                  ? route('panoramas.show', $panorama)
-                 : route('puntos.evento', ['slug' => $puntoRelacionado->slug, 'item' => $panorama->modulo_item_id]);
+                 : (($origenTipo ?? 'punto') === 'artista'
+                     ? route('artista.evento', ['slug' => $puntoRelacionado->slug, 'item' => $panorama->modulo_item_id])
+                     : route('puntos.evento', ['slug' => $puntoRelacionado->slug, 'item' => $panorama->modulo_item_id]));
 @endphp
 
 @extends('layouts.pindoor')
@@ -197,11 +199,11 @@
             </a>
             @endif
 
-            {{-- Agenda del negocio cliente --}}
+            {{-- Agenda del negocio cliente o del artista --}}
             @if($puntoRelacionado)
-            <a href="{{ route('puntos.show', $puntoRelacionado->slug) }}#agenda"
+            <a href="{{ ($origenTipo ?? 'punto') === 'artista' ? route('artista.show', $puntoRelacionado->slug) : route('puntos.show', $puntoRelacionado->slug) . '#agenda' }}"
                class="inline-flex items-center gap-2 w-full justify-center bg-gray-900 hover:bg-gray-800 text-white font-bold text-sm px-5 py-3 rounded-xl transition">
-                Ver agenda de {{ $puntoRelacionado->title }}
+                Ver agenda de {{ $puntoRelacionado->title ?? $puntoRelacionado->nombre }}
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>

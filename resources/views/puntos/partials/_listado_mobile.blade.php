@@ -42,7 +42,11 @@
          @click="stopped = true">
         <div class="flex">
         @foreach($proximosPanoramas as $p)
-        @php $hrefPanorama = $p->slug ? route('panoramas.show', $p) : route('puntos.evento', ['slug' => $p->punto_slug, 'item' => $p->modulo_item_id]); @endphp
+        @php $hrefPanorama = $p->slug
+            ? route('panoramas.show', $p)
+            : ($p->punto_slug
+                ? route('puntos.evento', ['slug' => $p->punto_slug, 'item' => $p->modulo_item_id])
+                : route('artista.evento', ['slug' => $p->artista_slug, 'item' => $p->modulo_item_id])); @endphp
         <a href="{{ $hrefPanorama }}"
            class="flex-none w-36 bg-white border border-gray-100 shadow-sm overflow-hidden">
             @if($p->imagen)

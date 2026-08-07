@@ -20,7 +20,11 @@ foreach ($jsonLdEventos as $i => $p) {
             'name'                => (string) $p->titulo,
             'startDate'           => $p->fecha instanceof \Carbon\Carbon ? $p->fecha->toDateString() : (string)$p->fecha,
             'location'            => ['@type' => 'Place', 'name' => $p->lugar ?: 'Valparaíso', 'address' => ['@type' => 'PostalAddress', 'addressLocality' => 'Valparaíso', 'addressCountry' => 'CL']],
-            'url'                 => $p->slug ? route('panoramas.show', $p) : route('puntos.evento', ['slug' => $p->punto_slug, 'item' => $p->modulo_item_id]),
+            'url'                 => $p->slug
+                                        ? route('panoramas.show', $p)
+                                        : ($p->punto_slug
+                                            ? route('puntos.evento', ['slug' => $p->punto_slug, 'item' => $p->modulo_item_id])
+                                            : route('artista.evento', ['slug' => $p->artista_slug, 'item' => $p->modulo_item_id])),
             'organizer'           => ['@type' => 'Organization', 'name' => 'Pindoor'],
             'eventStatus'         => 'https://schema.org/EventScheduled',
             'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
@@ -297,7 +301,11 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             @foreach($grupo as $panorama)
 
-            @php $cardHref = $panorama->slug ? route('panoramas.show', $panorama) : route('puntos.evento', ['slug' => $panorama->punto_slug, 'item' => $panorama->modulo_item_id]); @endphp
+            @php $cardHref = $panorama->slug
+                ? route('panoramas.show', $panorama)
+                : ($panorama->punto_slug
+                    ? route('puntos.evento', ['slug' => $panorama->punto_slug, 'item' => $panorama->modulo_item_id])
+                    : route('artista.evento', ['slug' => $panorama->artista_slug, 'item' => $panorama->modulo_item_id])); @endphp
             <div class="group bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer
                         {{ $meta['esHoy'] ? 'ring-1 ring-[#fc5648]/20' : '' }}"
                  onclick="window.location.href='{{ $cardHref }}'"
@@ -406,7 +414,11 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
                                 Agregar Calendario
                         </a>
                         @include('partials._share_panel', [
-                            'shareText' => $waTitulo . ' — ' . $waFechaHora . ' — ' . ($panorama->slug ? url('/panoramas/' . $panorama->slug) : url('/lugar/' . $panorama->punto_slug . '#agenda')),
+                            'shareText' => $waTitulo . ' — ' . $waFechaHora . ' — ' . ($panorama->slug
+                                ? url('/panoramas/' . $panorama->slug)
+                                : ($panorama->punto_slug
+                                    ? url('/lugar/' . $panorama->punto_slug . '#agenda')
+                                    : url('/artista/' . $panorama->artista_slug))),
                             'imageUrl' => $panorama->imagen ? asset('storage/' . $panorama->imagen) : null,
                         ])
                     </div>

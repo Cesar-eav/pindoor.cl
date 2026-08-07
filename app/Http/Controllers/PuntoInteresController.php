@@ -142,6 +142,14 @@ class PuntoInteresController extends Controller
             ->get()
             ->map(fn (ModuloItem $item) => $item->comoPanorama());
 
+        // Eventos de artistas → mismo tratamiento
+        $eventosArtista = \App\Models\ArtistaEvento::where('activo', true)
+            ->where('fecha', '>=', $hoy)
+            ->whereHas('artista', fn($q) => $q->where('activo', true))
+            ->with('artista')
+            ->get()
+            ->map(fn (\App\Models\ArtistaEvento $item) => $item->comoPanorama());
+
         $proximosPanoramas = Panorama::where('activo', true)
                     ->whereNull('dias_semana')
 
@@ -151,6 +159,7 @@ class PuntoInteresController extends Controller
             })
             ->get()
             ->concat($eventosCliente)
+            ->concat($eventosArtista)
             ->map(function ($p) use ($hoy) {
                 $p->fecha_proxima = $p->proximaOcurrencia($hoy);
                 return $p;
@@ -371,7 +380,16 @@ class PuntoInteresController extends Controller
             ->get()
             ->map(fn (ModuloItem $item) => $item->comoPanorama());
 
-        $panoramas = $panoramas->concat($eventosCliente)
+        // Eventos de artistas → mismo tratamiento
+        $eventosArtista = \App\Models\ArtistaEvento::where('activo', true)
+            ->whereNotNull('fecha')
+            ->whereBetween('fecha', [$hoy, $tope])
+            ->whereHas('artista', fn($q) => $q->where('activo', true))
+            ->with('artista')
+            ->get()
+            ->map(fn (\App\Models\ArtistaEvento $item) => $item->comoPanorama());
+
+        $panoramas = $panoramas->concat($eventosCliente)->concat($eventosArtista)
             ->sortBy(fn($p) => $p->fecha->format('Y-m-d') . ($p->hora ?? '99:99'))
             ->values();
 

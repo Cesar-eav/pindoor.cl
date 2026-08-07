@@ -111,6 +111,43 @@
                 </div>
             </div>
 
+            {{-- Próximos eventos --}}
+            @if($eventosProximos->isNotEmpty())
+            <div id="eventos" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h2 class="font-bold text-gray-800 mb-4">Próximos eventos</h2>
+                <div class="space-y-3">
+                    @foreach($eventosProximos as $evento)
+                    @php $tipoInfo = $evento->tipoEvento(); @endphp
+                    <a href="{{ route('artista.evento', [$artista->slug, $evento->id]) }}"
+                       class="flex items-start gap-4 border border-gray-100 rounded-xl p-4 hover:border-violet-200 hover:bg-violet-50/30 transition
+                              {{ $evento->destacado ? 'border-violet-200 bg-violet-50/30' : '' }}">
+                        @if($evento->imagen)
+                            <img src="{{ asset('storage/' . $evento->imagen) }}" alt="{{ $evento->titulo }}"
+                                 class="w-16 h-16 rounded-xl object-cover border border-gray-100 shrink-0">
+                        @else
+                            <div class="w-16 h-16 rounded-xl bg-gray-50 flex items-center justify-center text-2xl shrink-0 border border-gray-100">
+                                {{ $tipoInfo['emoji'] }}
+                            </div>
+                        @endif
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <p class="font-semibold text-gray-800 text-sm">{{ $evento->titulo }}</p>
+                                @if($evento->destacado)
+                                    <span class="text-[10px] font-black uppercase bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">Destacado</span>
+                                @endif
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">
+                                📅 {{ $evento->fecha->translatedFormat('l d \d\e F Y') }}
+                                @if($evento->hora)· 🕐 {{ \Carbon\Carbon::parse($evento->hora)->format('H:i') }}@endif
+                            </p>
+                            <p class="text-xs font-bold text-violet-700 mt-0.5">{{ $evento->precioEvento() }}</p>
+                        </div>
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
             {{-- Video en móvil (entre perfil y portafolio) --}}
             @if($videoId)
                 <div class="lg:hidden bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
