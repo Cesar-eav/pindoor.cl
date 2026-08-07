@@ -93,9 +93,7 @@
                 <div class="absolute inset-0 bg-linear-to-t from-black/85 via-black/25 to-transparent"></div>
                 <div class="absolute bottom-0 left-0 right-0 p-4">
                     <h3 class="text-sm font-bold text-white leading-snug line-clamp-3">{{ $post->titulo }}</h3>
-                    @if($post->resumen)
-                        <p class="text-[11px] text-white/70 mt-1 line-clamp-2">{{ $post->resumen }}</p>
-                    @endif
+
                 </div>
             </a>
             @endforeach
