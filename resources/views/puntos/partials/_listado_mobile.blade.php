@@ -104,7 +104,7 @@
     @endif
 
     {{-- Últimas experiencias --}}
-    @if(isset($ultimasExperiencias) && $ultimasExperiencias->isNotEmpty() && !request()->filled('category') && !request()->filled('search') && !request()->filled('lat'))
+    {{-- @if(isset($ultimasExperiencias) && $ultimasExperiencias->isNotEmpty() && !request()->filled('category') && !request()->filled('search') && !request()->filled('lat'))
     <div id="experiencias-mobile-section" class="mt-5">
         <div class="flex items-center gap-2 mb-3 px-3">
             <span class="w-1 h-4 rounded-full bg-[#fc5648] shrink-0"></span>
@@ -131,7 +131,7 @@
             @endforeach
         </div>
     </div>
-    @endif
+    @endif --}}
 
 {{-- Resultados --}}
 

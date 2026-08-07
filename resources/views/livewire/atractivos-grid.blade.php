@@ -89,7 +89,7 @@
         </div>
         @endif
 
-        @if(isset($ultimasExperiencias) && $ultimasExperiencias->isNotEmpty())
+        {{-- @if(isset($ultimasExperiencias) && $ultimasExperiencias->isNotEmpty())
         <div class="mb-8">
             <div class="flex items-center gap-3 mb-4">
                 <span class="w-1 h-5 rounded-full bg-[#fc5648] shrink-0"></span>
@@ -118,7 +118,7 @@
                 @endforeach
             </div>
         </div>
-        @endif
+        @endif --}}
 
         @if(isset($categoriasConPuntos) && $categoriasConPuntos->isNotEmpty())
         @foreach($categoriasConPuntos as $entry)
