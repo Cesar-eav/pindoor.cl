@@ -79,9 +79,7 @@
                     <div class="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent"></div>
                     <div class="relative z-10 h-full flex flex-col justify-end p-4">
                         <h3 class="text-sm font-extrabold text-white leading-snug line-clamp-3">{{ $post->titulo }}</h3>
-                        @if($post->resumen)
-                            <p class="text-xs text-white/70 mt-1 line-clamp-2">{{ $post->resumen }}</p>
-                        @endif
+
                     </div>
                 </a>
                 @endforeach
