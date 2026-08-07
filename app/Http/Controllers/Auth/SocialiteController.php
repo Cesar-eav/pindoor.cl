@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\AdminNewArtistaNotification;
 use App\Notifications\AdminNewOperadorNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -54,6 +55,9 @@ class SocialiteController extends Controller
             if ($user->type === 'operador') {
                 Notification::route('mail', ['cesar.eav@gmail.com', 'cesarandrade@pindoor.cl'])
                     ->notify(new AdminNewOperadorNotification($user));
+            } elseif ($user->type === 'artista') {
+                Notification::route('mail', ['cesar.eav@gmail.com', 'cesarandrade@pindoor.cl'])
+                    ->notify(new AdminNewArtistaNotification($user));
             }
         }
 
