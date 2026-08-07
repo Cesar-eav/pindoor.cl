@@ -17,10 +17,8 @@ class NuevoContacto extends Mailable
 
     public function envelope(): Envelope
     {
-        $tipo = $this->lead->tipo === 'artista' ? 'Artista' : 'Local/Negocio';
-
         return new Envelope(
-            subject: "[Pindoor] Nuevo contacto — {$tipo}: {$this->lead->nombre}",
+            subject: "[Pindoor] Nuevo contacto: {$this->lead->nombre}",
         );
     }
 
