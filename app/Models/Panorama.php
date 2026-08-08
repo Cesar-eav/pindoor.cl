@@ -25,6 +25,14 @@ class Panorama extends Model
         4 => 'Jue', 5 => 'Vie', 6 => 'Sáb', 7 => 'Dom',
     ];
 
+    const SEMANAS_MES = [
+        1  => 'Primer(a)',
+        2  => 'Segundo(a)',
+        3  => 'Tercer(a)',
+        4  => 'Cuarto(a)',
+        -1 => 'Último(a)',
+    ];
+
     protected $fillable = [
         'titulo',
         'slug',
@@ -33,6 +41,7 @@ class Panorama extends Model
         'fecha',
         'fecha_fin',
         'dias_semana',
+        'semana_del_mes',
         'hora',
         'categoria',
         'es_gratuito',
@@ -68,7 +77,8 @@ class Panorama extends Model
     protected $casts = [
         'fecha'       => 'date',
         'fecha_fin'   => 'date',
-        'dias_semana' => 'array',
+        'dias_semana'    => 'array',
+        'semana_del_mes' => 'integer',
         'activo'      => 'boolean',
         'es_gratuito' => 'boolean',
     ];
@@ -88,13 +98,32 @@ class Panorama extends Model
         $cursor = $desde->copy();
 
         while ($cursor->lte($fin)) {
-            if (in_array($cursor->isoWeekday(), $this->dias_semana)) {
+            if (in_array($cursor->isoWeekday(), $this->dias_semana) && $this->coincideSemanaDelMes($cursor)) {
                 return $cursor;
             }
             $cursor->addDay();
         }
 
         return null;
+    }
+
+    /**
+     * Si semana_del_mes está definido, filtra para que solo coincida esa semana del mes
+     * (1-4 = primera..cuarta ocurrencia de ese día de semana en el mes; -1 = la última).
+     * Null = sin filtro, coincide cualquier semana (comportamiento semanal normal).
+     */
+    private function coincideSemanaDelMes(Carbon $fecha): bool
+    {
+        if ($this->semana_del_mes === null) {
+            return true;
+        }
+
+        if ($this->semana_del_mes === -1) {
+            return $fecha->copy()->addDays(7)->month !== $fecha->month;
+        }
+
+        $ocurrencia = intdiv($fecha->day - 1, 7) + 1;
+        return $ocurrencia === $this->semana_del_mes;
     }
 
     public function scopeActivos($query, $limite = 15)
