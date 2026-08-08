@@ -166,6 +166,7 @@ class PanoramaController extends Controller
             'fecha_fin'      => 'nullable|date|after_or_equal:fecha',
             'dias_semana'    => 'nullable|array',
             'dias_semana.*'  => 'integer|between:1,7',
+            'semana_del_mes' => 'nullable|integer|in:1,2,3,4,-1',
             'hora'           => 'nullable|string|max:100',
             'enlace'         => 'nullable|url|max:500',
             'categoria'      => 'nullable|string|in:' . implode(',', \App\Models\CategoriaEvento::slugs()),
@@ -182,6 +183,9 @@ class PanoramaController extends Controller
         $data['fuente']      = 'manual';
         $data['dias_semana'] = $request->has('dias_semana')
             ? array_map('intval', $request->input('dias_semana'))
+            : null;
+        $data['semana_del_mes'] = ($request->has('dias_semana') && $request->filled('semana_del_mes'))
+            ? (int) $request->input('semana_del_mes')
             : null;
 
         if ($request->hasFile('imagen')) {
@@ -243,6 +247,7 @@ class PanoramaController extends Controller
             'fecha_fin'      => 'nullable|date|after_or_equal:fecha',
             'dias_semana'    => 'nullable|array',
             'dias_semana.*'  => 'integer|between:1,7',
+            'semana_del_mes' => 'nullable|integer|in:1,2,3,4,-1',
             'hora'           => 'nullable|string|max:100',
             'enlace'         => 'nullable|url|max:500',
             'categoria'      => 'nullable|string|in:' . implode(',', \App\Models\CategoriaEvento::slugs()),
@@ -258,6 +263,9 @@ class PanoramaController extends Controller
         $data['orden']       = $request->input('orden', 0);
         $data['dias_semana'] = $request->has('dias_semana')
             ? array_map('intval', $request->input('dias_semana'))
+            : null;
+        $data['semana_del_mes'] = ($request->has('dias_semana') && $request->filled('semana_del_mes'))
+            ? (int) $request->input('semana_del_mes')
             : null;
 
         if ($request->hasFile('imagen')) {

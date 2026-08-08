@@ -173,6 +173,22 @@ function ubicacionAC(inicial) {
             </label>
             @endforeach
         </div>
+
+        <div class="pt-2">
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Frecuencia</label>
+            @php $semanaGuardada = old('semana_del_mes', $panorama->semana_del_mes ?? ''); @endphp
+            <select name="semana_del_mes"
+                    class="w-full sm:w-auto px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none bg-white">
+                <option value="" {{ $semanaGuardada === '' || $semanaGuardada === null ? 'selected' : '' }}>Cada semana</option>
+                @foreach(\App\Models\Panorama::SEMANAS_MES as $num => $label)
+                    <option value="{{ $num }}" {{ (string) $semanaGuardada === (string) $num ? 'selected' : '' }}>
+                        Solo el {{ $label }} del mes
+                    </option>
+                @endforeach
+            </select>
+            <p class="text-xs text-gray-400 mt-1">Ej: "Primer(a)" + Domingo = se repite solo el primer domingo de cada mes.</p>
+        </div>
+
         <p class="text-xs text-gray-400">La <strong>Fecha inicio</strong> y <strong>Fecha fin</strong> definen el periodo del ciclo.</p>
     </div>
 </div>
@@ -182,6 +198,7 @@ document.getElementById('toggle-recurrencia').addEventListener('change', functio
     document.getElementById('dias-selector').classList.toggle('hidden', !this.checked);
     if (!this.checked) {
         document.querySelectorAll('[name="dias_semana[]"]').forEach(cb => cb.checked = false);
+        document.querySelector('[name="semana_del_mes"]').value = '';
     }
 });
 </script>
