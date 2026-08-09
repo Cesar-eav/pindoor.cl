@@ -33,7 +33,7 @@
     <div class="px-2.5 py-2">
         @if(isset($atractivo->distancia))
         <span class="inline-block mb-1 text-[9px] font-bold text-[#fc5648] bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded-lg">
-            {{ number_format($atractivo->distancia / 1000, 1) }} km
+            {{ number_format($atractivo->distancia, 0, ',', '.') }} m
         </span>
         @endif
         <h3 class="text-xs font-bold text-gray-900 leading-tight line-clamp-2">
