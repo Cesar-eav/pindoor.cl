@@ -102,20 +102,10 @@
      class="hidden fixed left-0 right-0 z-50 flex-wrap justify-center gap-3 px-4 md:hidden"
      style="bottom: calc(80px + var(--inset-bottom, 0px))">
 
-    {{-- GPS --}}
-    <form id="filterForm-mobile" action="{{ route('puntos.index') }}" method="GET">
+    {{-- Form con lat/lng ocultos: lo usa el botón GPS de la barra inferior --}}
+    <form id="filterForm-mobile" action="{{ route('puntos.index') }}" method="GET" class="hidden">
         <input type="hidden" id="lat-m" name="lat" value="{{ request('lat') }}">
         <input type="hidden" id="lng-m" name="lng" value="{{ request('lng') }}">
-        <button type="button" id="btn-gps-m" onclick="geolocateFab(this)"
-                class="flex flex-col items-center gap-1.5 bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-xl min-w-19">
-            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-            {{-- Mobile --}}
-            <span class="text-[10px] font-bold leading-none">{{ __('ui.fab.cerca') }}</span>
-        </button>
     </form>
 
     {{-- Experiencias --}}
@@ -261,27 +251,6 @@
     function toggleGpsOverlay(show) {
         document.getElementById('gps-locating-overlay')?.classList.toggle('hidden', !show);
     }
-    function geolocateFab(btn) {
-        if (!navigator.geolocation) { alert('Tu navegador no soporta geolocalización.'); return; }
-        const orig = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '⌛ Localizando…';
-        toggleGpsOverlay(true);
-        navigator.geolocation.getCurrentPosition(
-            pos => {
-                document.getElementById('lat-m').value = pos.coords.latitude;
-                document.getElementById('lng-m').value = pos.coords.longitude;
-                document.getElementById('filterForm-mobile').submit();
-            },
-            () => {
-                alert('No se pudo obtener tu ubicación.');
-                btn.disabled = false;
-                btn.innerHTML = orig;
-                toggleGpsOverlay(false);
-            },
-            { enableHighAccuracy: true, timeout: 8000 }
-        );
-    }
     function geolocateBottomNav(btn) {
         if (!navigator.geolocation) { alert('Tu navegador no soporta geolocalización.'); return; }
         const icon    = document.getElementById('gps-bottom-icon');
@@ -303,7 +272,7 @@
                 spinner?.classList.add('hidden');
                 toggleGpsOverlay(false);
             },
-            { enableHighAccuracy: true, timeout: 8000 }
+            { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
         );
     }
 </script>
