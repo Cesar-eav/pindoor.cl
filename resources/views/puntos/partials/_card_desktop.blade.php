@@ -30,7 +30,7 @@
     <div class="p-4 flex-grow">
         @if(isset($atractivo->distancia))
         <span class="inline-block mb-2 bg-orange-50 text-[#fc5648] text-xs font-bold px-2 py-1 rounded-lg border border-orange-100">
-            A {{ number_format($atractivo->distancia / 1000, 2) }} km
+            A {{ number_format($atractivo->distancia, 0, ',', '.') }} m
         </span>
         @endif
         <h3 class="text-base font-bold text-gray-900 mb-1 leading-tight">
