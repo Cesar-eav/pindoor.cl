@@ -10,6 +10,7 @@ use App\Models\Compartido;
 use App\Models\LeadContacto;
 use App\Models\Panorama;
 use App\Models\User;
+use App\Services\ImagenComprimida;
 use App\Services\PortaldiscImporter;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -140,7 +141,7 @@ class AdminController extends Controller
             'title'       => 'required|max:255',
             'categoria_id'=> 'required|exists:categorias,id',
             'description' => 'required',
-            'photos.*'    => 'image|mimes:jpeg,png,jpg|max:4096',
+            'photos.*'    => 'image|mimes:jpeg,png,jpg|max:25600',
         ]);
 
         $categoria = Categoria::find($request->categoria_id);
@@ -201,7 +202,7 @@ class AdminController extends Controller
         // Añadir nuevas imágenes
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $index => $file) {
-                $path = $file->store('puntos', 'public');
+                $path = ImagenComprimida::guardar($file, 'puntos');
                 $esPrincipal = ($request->input("metadata.{$index}.is_main") == 1);
                 $orden = $request->input("metadata.{$index}.orden", $index);
 
@@ -419,7 +420,7 @@ class AdminController extends Controller
             'categoria_id' => 'required|exists:categorias,id', // Validamos que el ID exista            'sector' => 'required',
             'description' => 'required',
             'photos'       => 'required|array',       // Debe venir al menos una foto
-            'photos.*'     => 'image|mimes:jpeg,png,jpg|max:4096', // Reglas por cada imagen
+            'photos.*'     => 'image|mimes:jpeg,png,jpg|max:25600', // Reglas por cada imagen
         ]);
 
         $categoria = Categoria::find($request->categoria_id);
@@ -452,9 +453,9 @@ class AdminController extends Controller
         // 3. Procesar y guardar las imágenes
     if ($request->hasFile('photos')) {
         foreach ($request->file('photos') as $index => $file) {
-            
-            // Guardar el archivo en storage/app/public/puntos
-            $path = $file->store('puntos', 'public');
+
+            // Comprime y guarda el archivo en storage/app/public/puntos
+            $path = ImagenComprimida::guardar($file, 'puntos');
 
             // Leer la metadata que envió Vue (is_main)
             $esPrincipal = $request->input("metadata.{$index}.is_main") == 1;

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ModuloItem;
 use App\Models\PuntoInteres;
+use App\Services\ImagenComprimida;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -88,7 +89,7 @@ class ClienteMuseoController extends Controller
                     Storage::disk('public')->delete($item->imagen);
                 }
             }
-            $rutaImagen = $request->file('imagen')->store('exposiciones', 'public');
+            $rutaImagen = ImagenComprimida::guardar($request->file('imagen'), 'exposiciones');
         }
 
         if ($request->filled('item_id')) {

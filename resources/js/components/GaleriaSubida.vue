@@ -157,7 +157,11 @@ export default {
                 }
             } catch (error) {
                 console.error(error);
-                alert("Error al guardar. Revisa que todos los campos obligatorios estén llenos.");
+                const data = error.response?.data;
+                const primerError = data?.errors ? Object.values(data.errors)[0]?.[0] : null;
+                const mensaje = primerError || data?.message
+                    || 'Error al guardar. Revisa que todos los campos obligatorios estén llenos.';
+                alert(mensaje);
             } finally {
                 this.isUploading = false;
             }

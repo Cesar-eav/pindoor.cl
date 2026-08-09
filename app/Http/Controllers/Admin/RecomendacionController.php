@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PuntoInteres;
 use App\Models\Recomendacion;
 use App\Models\RecomendacionImagen;
+use App\Services\ImagenComprimida;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -48,7 +49,7 @@ class RecomendacionController extends Controller
         $data['publicado_en'] = $data['publicado'] ? now() : null;
 
         if ($request->hasFile('imagen_portada')) {
-            $data['imagen_portada'] = $request->file('imagen_portada')->store('recomienda', 'public');
+            $data['imagen_portada'] = ImagenComprimida::guardar($request->file('imagen_portada'), 'recomienda');
         }
 
         $recomendacion = Recomendacion::create($data);
@@ -83,7 +84,7 @@ class RecomendacionController extends Controller
 
         if ($request->hasFile('imagen_portada')) {
             if ($recomendacion->imagen_portada) Storage::disk('public')->delete($recomendacion->imagen_portada);
-            $data['imagen_portada'] = $request->file('imagen_portada')->store('recomienda', 'public');
+            $data['imagen_portada'] = ImagenComprimida::guardar($request->file('imagen_portada'), 'recomienda');
         }
 
         $recomendacion->update($data);
@@ -143,7 +144,7 @@ class RecomendacionController extends Controller
     public function uploadImagen(Request $request)
     {
         $request->validate(['imagen' => 'required|image|max:6144']);
-        $path = $request->file('imagen')->store('recomienda/contenido', 'public');
+        $path = ImagenComprimida::guardar($request->file('imagen'), 'recomienda/contenido');
         return response()->json(['url' => asset('storage/' . $path)]);
     }
 
@@ -152,7 +153,7 @@ class RecomendacionController extends Controller
     {
         for ($s = 1; $s <= 20; $s++) {
             if (!$request->hasFile("imagen_nueva_{$s}")) continue;
-            $ruta = $request->file("imagen_nueva_{$s}")->store('recomienda', 'public');
+            $ruta = ImagenComprimida::guardar($request->file("imagen_nueva_{$s}"), 'recomienda');
             $recomendacion->imagenes()->create([
                 'ruta'     => $ruta,
                 'orden'    => $ordenBase + $s,

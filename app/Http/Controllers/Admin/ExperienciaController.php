@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Experiencia;
 use App\Models\ExperienciaImagen;
+use App\Services\ImagenComprimida;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -48,14 +49,14 @@ class ExperienciaController extends Controller
         $data = $this->procesarDias($request, $data);
 
         if ($request->hasFile('imagen')) {
-            $data['imagen'] = $request->file('imagen')->store('experiencias', 'public');
+            $data['imagen'] = ImagenComprimida::guardar($request->file('imagen'), 'experiencias');
         }
 
         $experiencia = Experiencia::create($data);
 
         if ($request->hasFile('imagenes')) {
             foreach ($request->file('imagenes') as $i => $file) {
-                $ruta = $file->store('experiencias', 'public');
+                $ruta = ImagenComprimida::guardar($file, 'experiencias');
                 $experiencia->imagenes()->create(['ruta' => $ruta, 'orden' => $i]);
             }
         }
@@ -77,7 +78,7 @@ class ExperienciaController extends Controller
 
         if ($request->hasFile('imagen')) {
             if ($experiencia->imagen) Storage::disk('public')->delete($experiencia->imagen);
-            $data['imagen'] = $request->file('imagen')->store('experiencias', 'public');
+            $data['imagen'] = ImagenComprimida::guardar($request->file('imagen'), 'experiencias');
         }
 
         $experiencia->update($data);
@@ -85,7 +86,7 @@ class ExperienciaController extends Controller
         if ($request->hasFile('imagenes')) {
             $offset = $experiencia->imagenes()->max('orden') + 1;
             foreach ($request->file('imagenes') as $i => $file) {
-                $ruta = $file->store('experiencias', 'public');
+                $ruta = ImagenComprimida::guardar($file, 'experiencias');
                 $experiencia->imagenes()->create(['ruta' => $ruta, 'orden' => $offset + $i]);
             }
         }

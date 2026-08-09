@@ -13,6 +13,7 @@ use App\Models\PuntoProducto;
 use App\Models\Artista;
 use App\Models\OperadorTuristico;
 use App\Mail\NuevaExperienciaPropuesta;
+use App\Services\ImagenComprimida;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -307,7 +308,7 @@ class PuntoInteresController extends Controller
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $file) {
                 // Guardar archivo físicamente
-                $path = $file->store('puntos', 'public');
+                $path = ImagenComprimida::guardar($file, 'puntos');
 
                 // Guardar en base de datos
                 $punto->imagenes()->create([
@@ -645,7 +646,7 @@ class PuntoInteresController extends Controller
         $data['orden']       = 99;
 
         if ($request->hasFile('imagen')) {
-            $data['imagen'] = $request->file('imagen')->store('experiencias', 'public');
+            $data['imagen'] = ImagenComprimida::guardar($request->file('imagen'), 'experiencias');
         }
 
         $experiencia = Experiencia::create($data);

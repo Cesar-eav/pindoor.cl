@@ -7,6 +7,7 @@ use App\Models\ArtistaEvento;
 use App\Models\ArtistaImagen;
 use App\Models\User;
 use App\Notifications\AdminNewArtistaNotification;
+use App\Services\ImagenComprimida;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -93,7 +94,7 @@ class ArtistaController extends Controller
         $data['slug']    = Artista::slugUnico($data['nombre']);
 
         if ($request->hasFile('imagen')) {
-            $data['imagen_perfil'] = $request->file('imagen')->store('artistas', 'public');
+            $data['imagen_perfil'] = ImagenComprimida::guardar($request->file('imagen'), 'artistas');
         }
 
         Artista::create($data);
@@ -142,7 +143,7 @@ class ArtistaController extends Controller
             if ($artista->imagen_perfil) {
                 Storage::disk('public')->delete($artista->imagen_perfil);
             }
-            $data['imagen_perfil'] = $request->file('imagen')->store('artistas', 'public');
+            $data['imagen_perfil'] = ImagenComprimida::guardar($request->file('imagen'), 'artistas');
         }
 
         $artista->update($data);
@@ -160,7 +161,7 @@ class ArtistaController extends Controller
         $offset  = $artista->imagenes()->max('orden') + 1;
 
         foreach ($request->file('imagenes') as $i => $file) {
-            $ruta = $file->store('artistas/portafolio', 'public');
+            $ruta = ImagenComprimida::guardar($file, 'artistas/portafolio');
             $artista->imagenes()->create(['ruta' => $ruta, 'orden' => $offset + $i]);
         }
 

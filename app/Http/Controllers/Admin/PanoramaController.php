@@ -7,6 +7,7 @@ use App\Models\Configuracion;
 use App\Models\ModuloItem;
 use App\Models\Panorama;
 use App\Models\PanoramaImagen;
+use App\Services\ImagenComprimida;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -197,7 +198,7 @@ class PanoramaController extends Controller
                 'disk_root'=> Storage::disk('public')->path(''),
             ]);
             try {
-                $data['imagen'] = $file->store('panoramas', 'public');
+                $data['imagen'] = ImagenComprimida::guardar($file, 'panoramas');
                 Log::info('[Panorama][store] portada guardada', ['ruta' => $data['imagen']]);
             } catch (\Throwable $e) {
                 Log::error('[Panorama][store] error al guardar portada', ['error' => $e->getMessage()]);
@@ -219,7 +220,7 @@ class PanoramaController extends Controller
                     'mime'     => $file->getMimeType(),
                 ]);
                 try {
-                    $ruta = $file->store('panoramas', 'public');
+                    $ruta = ImagenComprimida::guardar($file, 'panoramas');
                     $panorama->imagenes()->create(['ruta' => $ruta, 'orden' => $i]);
                     Log::info('[Panorama][store] adicional guardada', ['ruta' => $ruta]);
                 } catch (\Throwable $e) {
@@ -281,7 +282,7 @@ class PanoramaController extends Controller
                 if ($panorama->imagen) {
                     Storage::disk('public')->delete($panorama->imagen);
                 }
-                $data['imagen'] = $file->store('panoramas', 'public');
+                $data['imagen'] = ImagenComprimida::guardar($file, 'panoramas');
                 Log::info('[Panorama][update] portada guardada', ['ruta' => $data['imagen']]);
             } catch (\Throwable $e) {
                 Log::error('[Panorama][update] error al guardar portada', ['error' => $e->getMessage()]);
@@ -317,7 +318,7 @@ class PanoramaController extends Controller
                     'mime'        => $file->getMimeType(),
                 ]);
                 try {
-                    $ruta = $file->store('panoramas', 'public');
+                    $ruta = ImagenComprimida::guardar($file, 'panoramas');
                     $panorama->imagenes()->create(['ruta' => $ruta, 'orden' => $offset + $i]);
                     Log::info('[Panorama][update] adicional guardada', ['ruta' => $ruta]);
                 } catch (\Throwable $e) {
