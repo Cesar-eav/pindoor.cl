@@ -209,7 +209,8 @@ class ArtistaController extends Controller
         $panorama = $item->comoPanorama();
         $puntoRelacionado = $artista;
         $origenTipo = 'artista';
+        $panoramasRelacionados = \App\Models\Panorama::relacionados($panorama->categoria);
 
-        return view('panoramas.show', compact('panorama', 'puntoRelacionado', 'origenTipo'));
+        return view('panoramas.show', compact('panorama', 'puntoRelacionado', 'origenTipo', 'panoramasRelacionados'));
     }
 }

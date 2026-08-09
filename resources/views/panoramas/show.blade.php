@@ -213,5 +213,47 @@
         </div>
     </div>
 
+    {{-- Más panoramas de esta categoría --}}
+    @if(isset($panoramasRelacionados) && $panoramasRelacionados->isNotEmpty())
+    <div class="mt-6">
+        <div class="flex items-center gap-2 mb-3">
+            <span class="w-1 h-4 rounded-full bg-[#fc5648] shrink-0"></span>
+            <h2 class="text-sm font-bold text-gray-900 tracking-tight">
+                Más {{ $categLabel ? mb_strtolower($categLabel) : 'panoramas' }} en Valparaíso
+            </h2>
+        </div>
+        <div class="space-y-3">
+            @foreach($panoramasRelacionados as $rel)
+            <a href="{{ route('panoramas.show', $rel) }}"
+               class="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition p-3">
+                @if($rel->imagen)
+                    <img src="{{ asset('storage/' . $rel->imagen) }}" alt="{{ $rel->titulo }}"
+                         class="w-16 h-16 rounded-xl object-cover shrink-0">
+                @else
+                    <div class="w-16 h-16 rounded-xl bg-[#fff0ef] flex items-center justify-center text-2xl shrink-0">🗓</div>
+                @endif
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-gray-900 leading-snug line-clamp-2">{{ $rel->titulo }}</p>
+                    <p class="text-xs text-[#fc5648] font-semibold mt-1">
+                        {{ $rel->fecha_proxima->locale('es')->isoFormat('D MMM') }}
+                        @if($rel->hora) · {{ $rel->hora }} @endif
+                    </p>
+                    @if($rel->ubicacion)
+                    <p class="text-xs text-gray-400 truncate mt-0.5">📍 {{ $rel->ubicacion }}</p>
+                    @endif
+                </div>
+            </a>
+            @endforeach
+        </div>
+        <a href="{{ route('atractivos.panoramas', ['categoria' => $panorama->categoria]) }}"
+           class="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-[#fc5648] hover:underline">
+            Ver más eventos relacionados
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </a>
+    </div>
+    @endif
+
 </div>
 @endsection
