@@ -118,7 +118,7 @@ class RutaController extends Controller
     private function puntosDisponibles()
     {
         return PuntoInteres::where('eliminado', false)
-            ->with('categoria:id,nombre,icono')
+            ->with(['categoria:id,nombre,icono', 'imagenPrincipal:id,punto_interes_id,ruta'])
             ->get(['id', 'title', 'sector', 'categoria_id'])
             ->sortBy(fn ($p) => $p->title)->values();
     }

@@ -160,8 +160,7 @@
             Puntos de la ruta *
         </label>
         <p class="text-xs text-gray-400 mb-3">
-            Selecciona los lugares en el orden en que se recorren. El número indica la secuencia;
-            para reordenar, quita un punto y vuelve a agregarlo — se ubicará al final.
+            Selecciona los lugares y ordénalos con las flechas según el recorrido.
         </p>
 
         @php
@@ -172,6 +171,7 @@
                 'sector'    => $p->sector,
                 'categoria' => $p->categoria?->nombre,
                 'emoji'     => $p->categoria?->icono,
+                'imagen'    => $p->imagenPrincipal ? asset('storage/' . $p->imagenPrincipal->ruta) : null,
             ])->values();
             $categoriasDisponibles = $puntosData->pluck('categoria')->filter()->unique()->sort()->values();
         @endphp
@@ -193,17 +193,48 @@
                 agregar(id) { if (!this.seleccionados.includes(id)) this.seleccionados.push(id); },
                 quitar(id) { this.seleccionados = this.seleccionados.filter(x => x !== id); },
                 info(id) { return this.todos.find(p => p.id === id) || {}; },
+                subir(index) {
+                    if (index <= 0) return;
+                    const arr = this.seleccionados;
+                    [arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
+                },
+                bajar(index) {
+                    const arr = this.seleccionados;
+                    if (index >= arr.length - 1) return;
+                    [arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
+                },
              }">
 
             {{-- Seleccionados, en orden --}}
-            <div class="flex flex-wrap gap-2 mb-3" x-show="seleccionados.length">
+            <div class="space-y-2 mb-4" x-show="seleccionados.length">
                 <template x-for="(id, index) in seleccionados" :key="id">
-                    <span class="inline-flex items-center gap-1.5 bg-[#fff0ef] text-[#fc5648] text-xs font-bold pl-2 pr-1.5 py-1.5 rounded-full">
-                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#fc5648] text-white text-[10px]" x-text="index + 1"></span>
-                        <span x-text="info(id).title"></span>
-                        <button type="button" @click="quitar(id)"
-                                class="hover:bg-[#fc5648]/20 rounded-full w-4 h-4 flex items-center justify-center leading-none">×</button>
-                    </span>
+                    <div class="flex items-center gap-3 bg-[#fff0ef] border border-[#fc5648]/20 rounded-xl p-2">
+                        <span class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#fc5648] text-white text-xs font-black" x-text="index + 1"></span>
+                        <div class="shrink-0 w-11 h-11 rounded-lg overflow-hidden bg-gray-100 border border-white">
+                            <template x-if="info(id).imagen">
+                                <img :src="info(id).imagen" class="w-full h-full object-cover">
+                            </template>
+                            <template x-if="!info(id).imagen">
+                                <div class="w-full h-full flex items-center justify-center text-lg text-gray-300">📍</div>
+                            </template>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm font-bold text-gray-800 truncate" x-text="info(id).title"></p>
+                            <p class="text-[11px] text-gray-400 truncate" x-text="info(id).sector ?? ''"></p>
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button type="button" @click="subir(index)" :disabled="index === 0"
+                                    class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-500 hover:bg-white disabled:opacity-30 disabled:hover:bg-transparent transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/></svg>
+                            </button>
+                            <button type="button" @click="bajar(index)" :disabled="index === seleccionados.length - 1"
+                                    class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-500 hover:bg-white disabled:opacity-30 disabled:hover:bg-transparent transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <button type="button" @click="quitar(id)"
+                                    class="w-7 h-7 rounded-lg flex items-center justify-center text-[#fc5648] hover:bg-white transition">×</button>
+                        </div>
+                    </div>
                 </template>
             </div>
             <p x-show="!seleccionados.length" class="text-xs text-gray-300 italic mb-3">Ningún punto seleccionado todavía.</p>
@@ -228,8 +259,16 @@
             <div class="border border-gray-100 rounded-xl divide-y divide-gray-50 max-h-56 overflow-y-auto">
                 <template x-for="p in filtrados.slice(0, 50)" :key="p.id">
                     <button type="button" @click="agregar(p.id)"
-                            class="w-full text-left px-4 py-2.5 hover:bg-gray-50 flex items-center justify-between gap-2 text-sm transition">
-                        <span>
+                            class="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-3 text-sm transition">
+                        <div class="shrink-0 w-9 h-9 rounded-lg overflow-hidden bg-gray-100">
+                            <template x-if="p.imagen">
+                                <img :src="p.imagen" class="w-full h-full object-cover">
+                            </template>
+                            <template x-if="!p.imagen">
+                                <div class="w-full h-full flex items-center justify-center text-sm text-gray-300">📍</div>
+                            </template>
+                        </div>
+                        <span class="flex-1 min-w-0">
                             <span class="font-medium text-gray-800" x-text="p.title"></span>
                             <span class="text-gray-400" x-text="p.sector ? ' · ' + p.sector : ''"></span>
                         </span>
