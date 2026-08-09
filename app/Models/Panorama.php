@@ -126,6 +126,37 @@ class Panorama extends Model
         return $ocurrencia === $this->semana_del_mes;
     }
 
+    /**
+     * Próximos panoramas reales de la misma categoría, para la sección "relacionados"
+     * en la vista de detalle. $excluirId se pasa solo cuando el panorama actual es real
+     * (tiene id propio) — los eventos de agenda de cliente/artista no tienen id real acá.
+     */
+    public static function relacionados(?string $categoria, ?int $excluirId = null, int $limite = 20): \Illuminate\Support\Collection
+    {
+        if (!$categoria) {
+            return collect();
+        }
+
+        $hoy = Carbon::today();
+
+        return static::where('activo', true)
+            ->where('categoria', $categoria)
+            ->when($excluirId, fn($q) => $q->where('id', '!=', $excluirId))
+            ->where(function ($q) use ($hoy) {
+                $q->whereNull('fecha_fin')->where('fecha', '>=', $hoy)
+                  ->orWhere('fecha_fin', '>=', $hoy);
+            })
+            ->get()
+            ->map(function ($p) use ($hoy) {
+                $p->fecha_proxima = $p->proximaOcurrencia($hoy);
+                return $p;
+            })
+            ->filter(fn($p) => $p->fecha_proxima !== null)
+            ->sortBy('fecha_proxima')
+            ->take($limite)
+            ->values();
+    }
+
     public function scopeActivos($query, $limite = 15)
     {
         $hoy   = Carbon::today();

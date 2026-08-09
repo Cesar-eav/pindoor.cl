@@ -335,8 +335,9 @@ class PuntoInteresController extends Controller
         abort_if(!$panorama->activo, 404);
         $panorama->load('imagenes');
         $puntoRelacionado = null;
+        $panoramasRelacionados = \App\Models\Panorama::relacionados($panorama->categoria, $panorama->id);
 
-        return view('panoramas.show', compact('panorama', 'puntoRelacionado'));
+        return view('panoramas.show', compact('panorama', 'puntoRelacionado', 'panoramasRelacionados'));
     }
 
     /**
@@ -355,8 +356,9 @@ class PuntoInteresController extends Controller
         $item->setRelation('punto', $punto);
         $panorama = $item->comoPanorama();
         $puntoRelacionado = $punto;
+        $panoramasRelacionados = \App\Models\Panorama::relacionados($panorama->categoria);
 
-        return view('panoramas.show', compact('panorama', 'puntoRelacionado'));
+        return view('panoramas.show', compact('panorama', 'puntoRelacionado', 'panoramasRelacionados'));
     }
 
     public function panoramas(Request $request)
