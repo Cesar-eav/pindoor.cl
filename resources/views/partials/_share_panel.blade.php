@@ -1,10 +1,11 @@
-{{-- Uso: @include('partials._share_panel', ['shareText' => 'Título — https://...', 'imageUrl' => $urlImagen (opcional)]) --}}
+{{-- Uso: @include('partials._share_panel', ['shareText' => 'Título — https://...', 'imageUrl' => $urlImagen (opcional), 'url' => $urlCompartida (opcional, por defecto la URL actual)]) --}}
 {{-- Si el navegador soporta navigator.share, el botón lo dispara directo (con imagen si se pudo precargar).
      El panel con WhatsApp/Copiar enlace queda solo como fallback para navegadores sin soporte (desktop). --}}
 <div x-data="sharePanel()"
-     x-init="text = $el.dataset.text; image = $el.dataset.image; if (image) prefetchImage()"
+     x-init="text = $el.dataset.text; image = $el.dataset.image; url = $el.dataset.url; if (image) prefetchImage()"
      data-text="{{ e($shareText) }}"
      data-image="{{ $imageUrl ?? '' }}"
+     data-url="{{ $url ?? request()->fullUrl() }}"
      @click.outside="open = false"
      @click.stop
      class="relative">

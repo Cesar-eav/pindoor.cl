@@ -6,7 +6,8 @@ use App\Models\PuntoInteres;
 use App\Models\Artista;
 use App\Models\OperadorTuristico;
 use App\Models\Categoria;
-use App\Models\LeadPublicita;
+use App\Models\Compartido;
+use App\Models\LeadContacto;
 use App\Models\Panorama;
 use App\Models\User;
 use App\Services\PortaldiscImporter;
@@ -40,8 +41,12 @@ class AdminController extends Controller
                             ->take(5)
                             ->get();
 
-        $totalLeads = LeadPublicita::count();
-        $leadsNuevos = LeadPublicita::where('contactado', false)->count();
+        $totalLeads = LeadContacto::count();
+        $leadsNuevos = LeadContacto::where('contactado', false)->count();
+
+        $compartidosHoy = Compartido::whereDate('created_at', today())->count();
+        $compartidosSemana = Compartido::where('created_at', '>=', now()->startOfWeek())->count();
+        $compartidosMes = Compartido::where('created_at', '>=', now()->startOfMonth())->count();
 
         return view('admin.stats', compact(
             'totalPuntos',
@@ -50,17 +55,20 @@ class AdminController extends Controller
             'ultimosPuntos',
             'ultimosClientes',
             'totalLeads',
-            'leadsNuevos'
+            'leadsNuevos',
+            'compartidosHoy',
+            'compartidosSemana',
+            'compartidosMes'
         ));
     }
 
     public function leads()
     {
-        $leads = LeadPublicita::latest()->paginate(30);
+        $leads = LeadContacto::latest()->paginate(30);
         return view('admin.leads', compact('leads'));
     }
 
-    public function toggleLead(LeadPublicita $lead)
+    public function toggleLead(LeadContacto $lead)
     {
         $lead->update(['contactado' => !$lead->contactado]);
         return back();

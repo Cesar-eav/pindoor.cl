@@ -28,10 +28,12 @@
                 </div>
             </div>
 
-            {{-- Leads Publicita --}}
-            <div class="bg-white shadow-sm sm:rounded-2xl p-6 mb-8 flex items-center justify-between border-l-4 border-amber-400">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+
+            {{-- Leads Contacto --}}
+            <div class="bg-white shadow-sm sm:rounded-2xl p-6 flex items-center justify-between border-l-4 border-amber-400">
                 <div>
-                    <div class="text-sm font-medium text-gray-500 uppercase">Consultas de Publicita</div>
+                    <div class="text-sm font-medium text-gray-500 uppercase">Consultas de Contacto</div>
                     <div class="text-3xl font-bold text-gray-900">{{ $totalLeads }}</div>
                     @if($leadsNuevos > 0)
                         <div class="text-xs text-amber-600 font-bold mt-1">{{ $leadsNuevos }} sin contactar</div>
@@ -43,6 +45,33 @@
                    class="text-sm font-bold text-amber-600 hover:underline">
                     Ver consultas →
                 </a>
+            </div>
+
+            {{-- Compartidos --}}
+            <div class="bg-white shadow-sm sm:rounded-2xl p-6 flex items-center justify-between border-l-4 border-[#fc5648]">
+                <div>
+                    <div class="text-sm font-medium text-gray-500 uppercase">Compartidos</div>
+                    <div class="flex items-end gap-4 mt-1">
+                        <div>
+                            <div class="text-2xl font-bold text-gray-900">{{ $compartidosHoy }}</div>
+                            <div class="text-[10px] text-gray-400 uppercase font-bold">Hoy</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-gray-900">{{ $compartidosSemana }}</div>
+                            <div class="text-[10px] text-gray-400 uppercase font-bold">Semana</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-gray-900">{{ $compartidosMes }}</div>
+                            <div class="text-[10px] text-gray-400 uppercase font-bold">Mes</div>
+                        </div>
+                    </div>
+                </div>
+                <a href="{{ route('admin.compartidos.index') }}"
+                   class="text-sm font-bold text-[#fc5648] hover:underline shrink-0">
+                    Ver detalle →
+                </a>
+            </div>
+
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">

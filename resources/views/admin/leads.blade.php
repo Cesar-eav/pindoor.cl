@@ -1,7 +1,7 @@
 <x-admin-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Consultas de Publicita
+            Consultas de Contacto
         </h2>
     </x-slot>
 
@@ -14,7 +14,6 @@
                         <tr>
                             <th class="px-6 py-4">Nombre</th>
                             <th class="px-6 py-4">Email / Teléfono</th>
-                            <th class="px-6 py-4">Negocio</th>
                             <th class="px-6 py-4">Mensaje</th>
                             <th class="px-6 py-4">Fecha</th>
                             <th class="px-6 py-4 text-center">Estado</th>
@@ -31,7 +30,6 @@
                                     <div class="text-xs text-gray-400">{{ $lead->telefono }}</div>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 font-medium">{{ $lead->negocio }}</td>
                             <td class="px-6 py-4 text-gray-500 max-w-xs">
                                 <span class="line-clamp-2 text-xs">{{ $lead->mensaje ?? '—' }}</span>
                             </td>
@@ -57,7 +55,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-10 text-center text-gray-400 italic">
+                            <td colspan="6" class="px-6 py-10 text-center text-gray-400 italic">
                                 No hay consultas todavía.
                             </td>
                         </tr>

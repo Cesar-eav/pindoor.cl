@@ -414,12 +414,9 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
                                 Agregar Calendario
                         </a>
                         @include('partials._share_panel', [
-                            'shareText' => $waTitulo . ' — ' . $waFechaHora . ' — ' . ($panorama->slug
-                                ? url('/panoramas/' . $panorama->slug)
-                                : ($panorama->punto_slug
-                                    ? url('/lugar/' . $panorama->punto_slug . '#agenda')
-                                    : url('/artista/' . $panorama->artista_slug))),
+                            'shareText' => $waTitulo . ' — ' . $waFechaHora . ' — ' . $cardHref,
                             'imageUrl' => $panorama->imagen ? asset('storage/' . $panorama->imagen) : null,
+                            'url' => $cardHref,
                         ])
                     </div>
                 </div>

@@ -142,6 +142,7 @@
                     @include('partials._share_panel', [
                         'shareText' => $panorama->titulo . ' — ' . $waFechaHora . ' — ' . $panoramaUrl,
                         'imageUrl' => $panorama->imagen ? asset('storage/' . $panorama->imagen) : null,
+                        'url' => $panoramaUrl,
                     ])
                 </div>
             </div>

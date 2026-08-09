@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}" />
@@ -280,7 +281,7 @@
 <script>
 function sharePanel() {
     return {
-        open: false, copiado: false, text: '', image: '', file: null, fetchingFile: false,
+        open: false, copiado: false, text: '', image: '', url: '', file: null, fetchingFile: false,
         // Al hacer click en el ícono: si el navegador soporta compartir nativo, lo dispara
         // directo (el sheet del sistema ya prioriza las apps más usadas por la persona).
         // Si no lo soporta (desktop), abre el panel de fallback (WhatsApp / Copiar enlace).
@@ -303,18 +304,33 @@ function sharePanel() {
             }
             this.fetchingFile = false;
         },
+        // Registro de uso (fire-and-forget, no bloquea la acción de compartir).
+        registrar(canal) {
+            fetch('{{ route('compartir.store') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ url: this.url, canal }),
+            }).catch(() => {});
+        },
         nativo() {
             this.open = false;
-            if (this.file && navigator.canShare && navigator.canShare({ files: [this.file] })) {
-                navigator.share({ text: this.text, files: [this.file] })
-                    .catch(() => navigator.share({ text: this.text }).catch(() => {}));
-                return;
-            }
-            navigator.share({ text: this.text }).catch(() => {});
+            const conArchivo = this.file && navigator.canShare && navigator.canShare({ files: [this.file] });
+            const promesa = conArchivo
+                ? navigator.share({ text: this.text, files: [this.file] }).catch(() => navigator.share({ text: this.text }))
+                : navigator.share({ text: this.text });
+            promesa.then(() => this.registrar('nativo')).catch(() => {});
         },
-        wa() { window.location.href = 'whatsapp://send?text=' + encodeURIComponent(this.text); this.open = false; },
+        wa() {
+            this.registrar('whatsapp');
+            window.location.href = 'whatsapp://send?text=' + encodeURIComponent(this.text);
+            this.open = false;
+        },
         copiar() {
             navigator.clipboard?.writeText(this.text).then(() => {
+                this.registrar('copiar');
                 this.copiado = true;
                 setTimeout(() => { this.copiado = false; this.open = false; }, 1500);
             });
