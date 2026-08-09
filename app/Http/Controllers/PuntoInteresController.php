@@ -133,43 +133,51 @@ class PuntoInteresController extends Controller
 
         $hoy = Carbon::today();
 
-        // Eventos de agenda de clientes → convertir a instancias Panorama para incluirlos junto a los del admin
-        $eventosCliente = ModuloItem::where('modulo', 'eventos')
-            ->where('activo', true)
-            ->where('fecha', '>=', $hoy)
-            ->whereHas('punto', fn($q) => $q->publico())
-            ->with('punto')
-            ->get()
-            ->map(fn (ModuloItem $item) => $item->comoPanorama());
+        // La vista solo muestra estos bloques cuando no hay filtros activos (lat/category/search) —
+        // se evita calcularlos en ese caso (igual que ya hace App\Livewire\AtractivosGrid).
+        if ($sinFiltros) {
+            // Eventos de agenda de clientes → convertir a instancias Panorama para incluirlos junto a los del admin
+            $eventosCliente = ModuloItem::where('modulo', 'eventos')
+                ->where('activo', true)
+                ->where('fecha', '>=', $hoy)
+                ->whereHas('punto', fn($q) => $q->publico())
+                ->with('punto')
+                ->get()
+                ->map(fn (ModuloItem $item) => $item->comoPanorama());
 
-        // Eventos de artistas → mismo tratamiento
-        $eventosArtista = \App\Models\ArtistaEvento::where('activo', true)
-            ->where('fecha', '>=', $hoy)
-            ->whereHas('artista', fn($q) => $q->where('activo', true))
-            ->with('artista')
-            ->get()
-            ->map(fn (\App\Models\ArtistaEvento $item) => $item->comoPanorama());
+            // Eventos de artistas → mismo tratamiento
+            $eventosArtista = \App\Models\ArtistaEvento::where('activo', true)
+                ->where('fecha', '>=', $hoy)
+                ->whereHas('artista', fn($q) => $q->where('activo', true))
+                ->with('artista')
+                ->get()
+                ->map(fn (\App\Models\ArtistaEvento $item) => $item->comoPanorama());
 
-        $proximosPanoramas = Panorama::where('activo', true)
-                    ->whereNull('dias_semana')
+            $proximosPanoramas = Panorama::where('activo', true)
+                        ->whereNull('dias_semana')
 
-            ->where(function ($q) use ($hoy) {
-                $q->whereNull('fecha_fin')->where('fecha', '>=', $hoy)
-                  ->orWhere('fecha_fin', '>=', $hoy);
-            })
-            ->get()
-            ->concat($eventosCliente)
-            ->concat($eventosArtista)
-            ->map(function ($p) use ($hoy) {
-                $p->fecha_proxima = $p->proximaOcurrencia($hoy);
-                return $p;
-            })
-            ->filter(fn($p) => $p->fecha_proxima !== null)
-            ->sortBy('fecha_proxima')
-            ->take(30)
-            ->values();
+                ->where(function ($q) use ($hoy) {
+                    $q->whereNull('fecha_fin')->where('fecha', '>=', $hoy)
+                      ->orWhere('fecha_fin', '>=', $hoy);
+                })
+                ->get()
+                ->concat($eventosCliente)
+                ->concat($eventosArtista)
+                ->map(function ($p) use ($hoy) {
+                    $p->fecha_proxima = $p->proximaOcurrencia($hoy);
+                    return $p;
+                })
+                ->filter(fn($p) => $p->fecha_proxima !== null)
+                ->sortBy('fecha_proxima')
+                ->take(30)
+                ->values();
 
-        $ultimosPosts = Post::publicados()->take(10)->get();
+            $ultimosPosts = Post::publicados()->take(10)->get();
+        } else {
+            $proximosPanoramas = collect();
+            $ultimosPosts = collect();
+        }
+
         $ultimoPost = $ultimosPosts->first();
 
         $ultimasExperiencias = Experiencia::activas()->latest()->take(10)->get();
