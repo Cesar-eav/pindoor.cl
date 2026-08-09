@@ -18,6 +18,7 @@ use App\Http\Controllers\ArtistaController;
 use App\Http\Controllers\ArtistaEventosController;
 use App\Http\Controllers\OperadorController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CompartidoController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ExperienciaController;
@@ -93,6 +94,8 @@ Route::post('/publicita', [PublicitaController::class, 'store'])->name('publicit
 // Contacto clientes y artistas
 Route::get('/contacto', [ContactoController::class, 'index'])->name('contacto.index');
 Route::post('/contacto', [ContactoController::class, 'store'])->name('contacto.store');
+
+Route::post('/compartir', [CompartidoController::class, 'store'])->name('compartir.store')->middleware('throttle:30,1');
 
 // Registro artista
 Route::get('/registro-artista',  [ArtistaController::class, 'showRegister'])->name('artista.register');
@@ -185,6 +188,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::patch('/recomendaciones/{recomendacion}/toggle', [RecomendacionController::class, 'toggle'])->name('recomendaciones.toggle');
     Route::patch('/recomendaciones/{recomendacion}/publicar', [RecomendacionController::class, 'togglePublicado'])->name('recomendaciones.publicar');
     Route::delete('/recomendaciones/imagenes/{imagen}', [RecomendacionController::class, 'destroyImagen'])->name('recomendaciones.imagenes.destroy');
+
+    // Compartidos (estadística del botón compartir)
+    Route::get('/compartidos', [\App\Http\Controllers\Admin\CompartidosController::class, 'index'])->name('compartidos.index');
 
     // Artistas
     Route::get('/artistas', [\App\Http\Controllers\AdminController::class, 'artistas'])->name('artistas');
