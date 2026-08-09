@@ -33,9 +33,26 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Sincronizar al enviar + spinner
-    document.getElementById('blog-form').addEventListener('submit', function () {
+    document.getElementById('blog-form').addEventListener('submit', function (e) {
         const activoId = 'contenido_' + currentLang;
         document.getElementById(activoId).value = quill.root.innerHTML;
+
+        // Los botones se deshabilitan más abajo para evitar doble-click, pero un
+        // <button> disabled no envía su name/value — hay que guardar qué botón
+        // se usó (submitter) en un input oculto ANTES de deshabilitarlos.
+        const submitter = e.submitter;
+        if (submitter && submitter.name === 'accion') {
+            let accionInput = document.getElementById('accion-input');
+            if (!accionInput) {
+                accionInput = document.createElement('input');
+                accionInput.type = 'hidden';
+                accionInput.name = 'accion';
+                accionInput.id = 'accion-input';
+                this.appendChild(accionInput);
+            }
+            accionInput.value = submitter.value;
+        }
+
         const btn        = document.getElementById('guardar-btn');
         const btnSeguir  = document.getElementById('guardar-seguir-btn');
         const spinner    = document.getElementById('guardar-spinner');
