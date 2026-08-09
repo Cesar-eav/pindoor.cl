@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Categoria;
+use App\Services\ImagenComprimida;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -44,7 +45,7 @@ class CategoriaController extends Controller
         $data['disponible_para_operadores'] = $request->boolean('disponible_para_operadores');
 
         if ($request->hasFile('imagen_portada')) {
-            $data['imagen_portada'] = $request->file('imagen_portada')->store('categorias', 'public');
+            $data['imagen_portada'] = ImagenComprimida::guardar($request->file('imagen_portada'), 'categorias');
         }
 
         if (Categoria::where('slug', $data['slug'])->exists()) {
@@ -93,7 +94,7 @@ class CategoriaController extends Controller
             if ($categoria->imagen_portada) {
                 Storage::disk('public')->delete($categoria->imagen_portada);
             }
-            $data['imagen_portada'] = $request->file('imagen_portada')->store('categorias', 'public');
+            $data['imagen_portada'] = ImagenComprimida::guardar($request->file('imagen_portada'), 'categorias');
         }
 
         if (Categoria::where('slug', $data['slug'])->where('id', '!=', $categoria->id)->exists()) {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PuntoProducto;
+use App\Services\ImagenComprimida;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -27,7 +28,7 @@ class ClienteProductosController extends Controller
         ]);
 
         if ($request->hasFile('imagen')) {
-            $data['imagen'] = $request->file('imagen')->store('productos', 'public');
+            $data['imagen'] = ImagenComprimida::guardar($request->file('imagen'), 'productos');
         }
 
         $data['punto_interes_id'] = $punto->id;
@@ -51,7 +52,7 @@ class ClienteProductosController extends Controller
 
         if ($request->hasFile('imagen')) {
             if ($producto->imagen) Storage::disk('public')->delete($producto->imagen);
-            $data['imagen'] = $request->file('imagen')->store('productos', 'public');
+            $data['imagen'] = ImagenComprimida::guardar($request->file('imagen'), 'productos');
         }
 
         $producto->update($data);

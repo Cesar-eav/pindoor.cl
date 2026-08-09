@@ -7,6 +7,7 @@ use App\Models\OperadorTuristico;
 use App\Models\PuntoInteres;
 use App\Models\User;
 use App\Notifications\AdminNewOperadorNotification;
+use App\Services\ImagenComprimida;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -76,7 +77,7 @@ class OperadorController extends Controller
         $data['slug']    = OperadorTuristico::slugUnico($data['nombre']);
 
         if ($request->hasFile('imagen')) {
-            $data['imagen_perfil'] = $request->file('imagen')->store('operadores', 'public');
+            $data['imagen_perfil'] = ImagenComprimida::guardar($request->file('imagen'), 'operadores');
         }
 
         OperadorTuristico::create($data);
@@ -141,7 +142,7 @@ class OperadorController extends Controller
             if ($operador->imagen_perfil) {
                 Storage::disk('public')->delete($operador->imagen_perfil);
             }
-            $data['imagen_perfil'] = $request->file('imagen')->store('operadores', 'public');
+            $data['imagen_perfil'] = ImagenComprimida::guardar($request->file('imagen'), 'operadores');
         }
 
         $operador->update($data);

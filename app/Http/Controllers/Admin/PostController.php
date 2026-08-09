@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\PuntoInteres;
+use App\Services\ImagenComprimida;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -43,7 +44,7 @@ class PostController extends Controller
         $slug = Post::generarSlug($data['slug'] ?: $data['titulo_es']);
 
         if ($request->hasFile('imagen_portada')) {
-            $portada = $request->file('imagen_portada')->store('blog/portadas', 'public');
+            $portada = ImagenComprimida::guardar($request->file('imagen_portada'), 'blog/portadas');
         }
 
         $publicado = (bool) ($data['publicado'] ?? false);
@@ -102,7 +103,7 @@ class PostController extends Controller
 
         if ($request->hasFile('imagen_portada')) {
             if ($blog->imagen_portada) Storage::disk('public')->delete($blog->imagen_portada);
-            $blog->imagen_portada = $request->file('imagen_portada')->store('blog/portadas', 'public');
+            $blog->imagen_portada = ImagenComprimida::guardar($request->file('imagen_portada'), 'blog/portadas');
         }
 
         // Procesar imágenes existentes
@@ -162,7 +163,7 @@ class PostController extends Controller
     public function uploadImagen(Request $request)
     {
         $request->validate(['imagen' => 'required|image|max:6144']);
-        $path = $request->file('imagen')->store('blog/contenido', 'public');
+        $path = ImagenComprimida::guardar($request->file('imagen'), 'blog/contenido');
         return response()->json(['url' => asset('storage/' . $path)]);
     }
 
@@ -184,7 +185,7 @@ class PostController extends Controller
         for ($s = 1; $s <= 20; $s++) {
             if (count($result) >= 20) break;
             if ($request->hasFile("imagen_nueva_{$s}")) {
-                $ruta = $request->file("imagen_nueva_{$s}")->store('blog/galeria', 'public');
+                $ruta = ImagenComprimida::guardar($request->file("imagen_nueva_{$s}"), 'blog/galeria');
                 $pos  = $request->integer("posicion_nueva_{$s}") ?: null;
                 $result[] = ['ruta' => $ruta, 'posicion' => $pos];
             }

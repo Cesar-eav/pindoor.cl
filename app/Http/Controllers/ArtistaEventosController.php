@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Artista;
 use App\Models\ArtistaEvento;
+use App\Services\ImagenComprimida;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -57,7 +58,7 @@ class ArtistaEventosController extends Controller
                     Storage::disk('public')->delete($item->imagen);
                 }
             }
-            $datos['imagen'] = $request->file('imagen')->store('artista-eventos', 'public');
+            $datos['imagen'] = ImagenComprimida::guardar($request->file('imagen'), 'artista-eventos');
         }
 
         if ($request->filled('item_id')) {
