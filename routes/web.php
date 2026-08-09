@@ -18,6 +18,8 @@ use App\Http\Controllers\ArtistaController;
 use App\Http\Controllers\ArtistaEventosController;
 use App\Http\Controllers\OperadorController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\RutaController;
+use App\Http\Controllers\Admin\RutaController as AdminRutaController;
 use App\Http\Controllers\CompartidoController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\Admin\PostController;
@@ -86,6 +88,8 @@ Route::post('/experiencias/proponer', [PuntoInteresController::class, 'proponerS
 Route::get('/experiencias/{experiencia}', [PuntoInteresController::class, 'showExperiencia'])->name('experiencias.show');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+Route::get('/rutas', [RutaController::class, 'index'])->name('rutas.index');
+Route::get('/rutas/{slug}', [RutaController::class, 'show'])->name('rutas.show');
 Route::get('/recomienda/{slug}', [RecomiendaController::class, 'show'])->name('recomienda.show');
 
 Route::get('/registro', [PublicitaController::class, 'index'])->name('publicita.index');
@@ -156,6 +160,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('/blog/imagen', [PostController::class, 'uploadImagen'])->name('blog.imagen');
     Route::get('/blog/{blog}/preview', [PostController::class, 'preview'])->name('blog.preview');
     Route::resource('blog', PostController::class)->except(['show']);
+
+    // Rutas Pindoor
+    Route::get('/rutas/{ruta}/preview', [AdminRutaController::class, 'preview'])->name('rutas.preview');
+    Route::resource('rutas', AdminRutaController::class)->except(['show']);
 
     // Panoramas — La Brújula
     Route::get('/panoramas/ubicaciones', [PanoramaController::class, 'ubicaciones'])->name('panoramas.ubicaciones');

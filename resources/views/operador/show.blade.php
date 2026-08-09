@@ -120,5 +120,32 @@
     </div>
     @endif
 
+    {{-- Rutas que ofrece --}}
+    @php $rutasPublicadas = $operador->rutas->where('publicado', true); @endphp
+    @if($rutasPublicadas->isNotEmpty())
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h2 class="font-bold text-gray-800 mb-4">🗺️ Rutas que ofrece</h2>
+        <div class="grid sm:grid-cols-2 gap-3">
+            @foreach($rutasPublicadas as $ruta)
+            <a href="{{ route('rutas.show', $ruta->slug) }}"
+               class="flex items-center gap-3 bg-gray-50 hover:bg-teal-50 border border-gray-100 hover:border-teal-200 rounded-xl p-3 transition">
+                @if($ruta->imagen_portada_url)
+                    <img src="{{ $ruta->imagen_portada_url }}" alt="{{ $ruta->titulo }}"
+                         class="w-10 h-10 rounded-lg object-cover shrink-0">
+                @else
+                    <div class="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center text-lg shrink-0">
+                        🗺️
+                    </div>
+                @endif
+                <div class="min-w-0">
+                    <p class="font-semibold text-gray-900 text-sm truncate">{{ $ruta->titulo }}</p>
+                    <p class="text-xs text-gray-400">{{ $ruta->puntos->count() }} {{ $ruta->puntos->count() === 1 ? 'parada' : 'paradas' }}</p>
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
 </div>
 @endsection

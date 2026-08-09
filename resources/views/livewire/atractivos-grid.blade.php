@@ -91,6 +91,35 @@
         </div>
         @endif
 
+        @if(isset($ultimasRutas) && $ultimasRutas->isNotEmpty())
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="w-1 h-5 rounded-full bg-[#fc5648] shrink-0"></span>
+                <h2 class="text-lg font-extrabold text-gray-900 tracking-tight">{{ __('ui.home.rutas_titulo') }}</h2>
+                <span class="flex-1 h-px bg-gray-200"></span>
+                <a href="{{ route('rutas.index') }}" class="text-sm font-semibold text-[#fc5648] hover:underline shrink-0">{{ __('ui.home.ver_todos') }}</a>
+            </div>
+            <div class="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2" style="scrollbar-width:none">
+                @foreach($ultimasRutas as $ruta)
+                <a href="{{ route('rutas.show', $ruta->slug) }}"
+                   class="group relative shrink-0 w-72 rounded-2xl overflow-hidden shadow-sm h-52 snap-start">
+                    @if($ruta->imagen_portada)
+                        <img src="{{ asset('storage/' . $ruta->imagen_portada) }}" alt="{{ $ruta->titulo }}"
+                             class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    @else
+                        <div class="absolute inset-0 bg-gray-800 flex items-center justify-center text-4xl">🗺️</div>
+                    @endif
+                    <div class="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent"></div>
+                    <div class="relative z-10 h-full flex flex-col justify-end p-4">
+                        <p class="text-[11px] font-bold text-white/70 mb-1">{{ $ruta->puntos->count() }} {{ $ruta->puntos->count() === 1 ? 'parada' : 'paradas' }}</p>
+                        <h3 class="text-sm font-extrabold text-white leading-snug line-clamp-3">{{ $ruta->titulo }}</h3>
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         {{-- @if(isset($ultimasExperiencias) && $ultimasExperiencias->isNotEmpty())
         <div class="mb-8">
             <div class="flex items-center gap-3 mb-4">

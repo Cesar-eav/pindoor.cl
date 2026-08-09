@@ -31,6 +31,11 @@ class OperadorTuristico extends Model
         return $this->belongsToMany(PuntoInteres::class, 'operador_punto_interes', 'operador_turistico_id', 'punto_interes_id');
     }
 
+    public function rutas()
+    {
+        return $this->belongsToMany(Ruta::class, 'ruta_operador_turistico');
+    }
+
     public static function slugUnico(string $nombre): string
     {
         $base = Str::slug($nombre);
