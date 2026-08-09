@@ -204,7 +204,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Leads de Publicita
     Route::get('/leads', [AdminController::class, 'leads'])->name('leads');
-    Route::patch('/leads/{lead}/toggle', [AdminController::class, 'toggleLead'])->name('leads.toggle');
+    Route::patch('/leads/{lead}', [AdminController::class, 'updateLead'])->name('leads.update');
+    Route::delete('/leads/{lead}', [AdminController::class, 'destroyLead'])->name('leads.destroy');
 
     // Gestión de Clientes (negocios)
     Route::get('/clientes', [AdminController::class, 'clientes'])->name('clientes');

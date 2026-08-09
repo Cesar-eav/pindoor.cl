@@ -42,7 +42,7 @@ class AdminController extends Controller
                             ->get();
 
         $totalLeads = LeadContacto::count();
-        $leadsNuevos = LeadContacto::where('contactado', false)->count();
+        $leadsNuevos = LeadContacto::where('estado', 'pendiente')->count();
 
         $compartidosHoy = Compartido::whereDate('created_at', today())->count();
         $compartidosSemana = Compartido::where('created_at', '>=', now()->startOfWeek())->count();
@@ -62,16 +62,38 @@ class AdminController extends Controller
         ));
     }
 
-    public function leads()
+    public function leads(Request $request)
     {
-        $leads = LeadContacto::latest()->paginate(30);
-        return view('admin.leads', compact('leads'));
+        $filtro = $request->input('estado', 'pendiente');
+
+        $query = LeadContacto::latest();
+        if ($filtro !== 'todos') {
+            $query->where('estado', $filtro);
+        }
+
+        $leads = $query->paginate(30)->withQueryString();
+        $pendientesCount = LeadContacto::where('estado', 'pendiente')->count();
+
+        return view('admin.leads', compact('leads', 'filtro', 'pendientesCount'));
     }
 
-    public function toggleLead(LeadContacto $lead)
+    public function updateLead(Request $request, LeadContacto $lead)
     {
-        $lead->update(['contactado' => !$lead->contactado]);
-        return back();
+        $data = $request->validate([
+            'estado'        => 'required|string|in:' . implode(',', array_keys(LeadContacto::ESTADOS)),
+            'observaciones' => 'nullable|string|max:2000',
+        ]);
+
+        $lead->update($data);
+
+        return back()->with('success', 'Consulta actualizada.');
+    }
+
+    public function destroyLead(LeadContacto $lead)
+    {
+        $lead->delete();
+
+        return back()->with('success', 'Consulta eliminada.');
     }
 
     public function usuarios()
