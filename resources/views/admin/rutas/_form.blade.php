@@ -69,6 +69,11 @@
                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition">
             🇬🇧 English
         </button>
+        <button type="button" id="btn-autotraducir" onclick="autoTraducir()"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-blue-400 hover:text-blue-500 transition ml-2">
+            ✨ Auto-traducir ES→EN
+        </button>
+        <span id="traducir-estado" class="text-xs text-gray-400 hidden"></span>
         <span class="text-xs text-gray-400 ml-auto">Slug e imagen de portada son compartidos</span>
     </div>
 
@@ -358,6 +363,67 @@
             }
 
             currentLang = lang;
+        };
+
+        // ── Auto-traducir ES → EN ───────────────────────────────────────
+        window.autoTraducir = async function() {
+            const btn    = document.getElementById('btn-autotraducir');
+            const estado = document.getElementById('traducir-estado');
+
+            const tituloEs      = document.getElementById('titulo-es').value.trim();
+            const descripcionEs = document.getElementById('descripcion-es').value.trim();
+
+            if (!tituloEs && !descripcionEs) {
+                alert('Escribe primero el contenido en Español.');
+                return;
+            }
+
+            btn.disabled  = true;
+            btn.className = btn.className.replace('text-gray-500', 'text-blue-400');
+            estado.classList.remove('hidden');
+
+            async function traducirTexto(txt) {
+                if (!txt) return '';
+                // Dividir en oraciones de ~450 chars
+                const oraciones = txt.match(/[^.!?]+[.!?]+/g) || [txt];
+                const chunks = [];
+                let cur = '';
+                for (const o of oraciones) {
+                    if ((cur + o).length > 450) { if (cur) chunks.push(cur); cur = o; }
+                    else cur += (cur ? ' ' : '') + o;
+                }
+                if (cur) chunks.push(cur);
+
+                let resultado = '';
+                for (let i = 0; i < chunks.length; i++) {
+                    estado.textContent = `Traduciendo… ${i + 1}/${chunks.length}`;
+                    const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunks[i])}&langpair=es|en&de=cesar.eav@gmail.com`);
+                    const d = await r.json();
+                    resultado += (d.responseData?.translatedText || chunks[i]) + ' ';
+                    await new Promise(r => setTimeout(r, 600));
+                }
+                return resultado.trim();
+            }
+
+            try {
+                if (tituloEs) {
+                    estado.textContent = 'Traduciendo título…';
+                    document.getElementById('titulo-en').value = await traducirTexto(tituloEs);
+                }
+                if (descripcionEs) {
+                    estado.textContent = 'Traduciendo descripción…';
+                    document.getElementById('descripcion-en').value = await traducirTexto(descripcionEs);
+                }
+
+                setLang('en');
+                estado.textContent = '✓ Traducción completada';
+                setTimeout(() => { estado.classList.add('hidden'); estado.textContent = ''; }, 3000);
+            } catch(e) {
+                estado.textContent = 'Error al traducir. Inténtalo de nuevo.';
+            } finally {
+                btn.disabled  = false;
+                btn.className = btn.className.replace('text-blue-400', 'text-gray-500');
+            }
         };
 
         // ── Slug automático desde título ────────────────────────────────
