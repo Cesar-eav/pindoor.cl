@@ -110,6 +110,7 @@
                             <a href="{{ route('admin.artistas') }}" title="Artistas" class="sidebar-link {{ request()->routeIs('admin.artistas*') ? 'active' : '' }}">🎨 <span x-show="!collapsed" x-cloak>Artistas</span></a>
                             <a href="{{ route('admin.operadores') }}" title="Operadores" class="sidebar-link {{ request()->routeIs('admin.operadores*') ? 'active' : '' }}">🧭 <span x-show="!collapsed" x-cloak>Operadores</span></a>
                             <a href="{{ route('admin.blog.index') }}" title="Blog" class="sidebar-link {{ request()->routeIs('admin.blog*') ? 'active' : '' }}">📰 <span x-show="!collapsed" x-cloak>Blog</span></a>
+                            <a href="{{ route('admin.rutas.index') }}" title="Rutas" class="sidebar-link {{ request()->routeIs('admin.rutas*') ? 'active' : '' }}">🗺️ <span x-show="!collapsed" x-cloak>Rutas</span></a>
                             <a href="{{ route('admin.recomendaciones.index') }}" title="Recomienda" class="sidebar-link {{ request()->routeIs('admin.recomendaciones*') ? 'active' : '' }}">⭐ <span x-show="!collapsed" x-cloak>Recomienda</span></a>
                             <a href="{{ route('admin.compartidos.index') }}" title="Compartidos" class="sidebar-link {{ request()->routeIs('admin.compartidos*') ? 'active' : '' }}">📤 <span x-show="!collapsed" x-cloak>Compartidos</span></a>
                         </div>
@@ -171,6 +172,7 @@
                             <a href="{{ route('admin.artistas') }}" class="sidebar-link {{ request()->routeIs('admin.artistas*') ? 'active' : '' }}">🎨 Artistas</a>
                             <a href="{{ route('admin.operadores') }}" class="sidebar-link {{ request()->routeIs('admin.operadores*') ? 'active' : '' }}">🧭 Operadores</a>
                             <a href="{{ route('admin.blog.index') }}" class="sidebar-link {{ request()->routeIs('admin.blog*') ? 'active' : '' }}">📰 Blog</a>
+                            <a href="{{ route('admin.rutas.index') }}" class="sidebar-link {{ request()->routeIs('admin.rutas*') ? 'active' : '' }}">🗺️ Rutas</a>
                             <a href="{{ route('admin.recomendaciones.index') }}" class="sidebar-link {{ request()->routeIs('admin.recomendaciones*') ? 'active' : '' }}">⭐ Recomienda</a>
                             <a href="{{ route('admin.compartidos.index') }}" class="sidebar-link {{ request()->routeIs('admin.compartidos*') ? 'active' : '' }}">📤 Compartidos</a>
                         </div>

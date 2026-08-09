@@ -172,7 +172,7 @@ class OperadorController extends Controller
     public function show(string $slug)
     {
         $operador = OperadorTuristico::where('slug', $slug)->where('activo', true)->firstOrFail();
-        $operador->load('puntos.categoria', 'puntos.imagenPrincipal');
+        $operador->load('puntos.categoria', 'puntos.imagenPrincipal', 'rutas.puntos');
         return view('operador.show', compact('operador'));
     }
 }
