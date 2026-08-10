@@ -160,9 +160,15 @@ class PanoramaController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'titulo'      => 'required|string|max:255',
-            'descripcion' => 'nullable|string|max:2000',
-            'ubicacion'   => 'nullable|string|max:255',
+            'titulo_es'      => 'required|string|max:255',
+            'titulo_en'      => 'nullable|string|max:255',
+            'titulo_fr'      => 'nullable|string|max:255',
+            'descripcion_es' => 'nullable|string|max:2000',
+            'descripcion_en' => 'nullable|string|max:2000',
+            'descripcion_fr' => 'nullable|string|max:2000',
+            'ubicacion_es'   => 'nullable|string|max:255',
+            'ubicacion_en'   => 'nullable|string|max:255',
+            'ubicacion_fr'   => 'nullable|string|max:255',
             'fecha'          => 'required|date',
             'fecha_fin'      => 'nullable|date|after_or_equal:fecha',
             'dias_semana'    => 'nullable|array',
@@ -206,9 +212,26 @@ class PanoramaController extends Controller
             }
         }
 
-        $data['titulo']       = ['es' => $data['titulo']];
-        $data['ubicacion']    = ['es' => $data['ubicacion'] ?? ''];
-        $data['descripcion']  = ['es' => $data['descripcion'] ?? ''];
+        $data['titulo'] = [
+            'es' => $data['titulo_es'],
+            'en' => $data['titulo_en'] ?? '',
+            'fr' => $data['titulo_fr'] ?? '',
+        ];
+        $data['ubicacion'] = [
+            'es' => $data['ubicacion_es'] ?? '',
+            'en' => $data['ubicacion_en'] ?? '',
+            'fr' => $data['ubicacion_fr'] ?? '',
+        ];
+        $data['descripcion'] = [
+            'es' => $data['descripcion_es'] ?? '',
+            'en' => $data['descripcion_en'] ?? '',
+            'fr' => $data['descripcion_fr'] ?? '',
+        ];
+        unset(
+            $data['titulo_es'], $data['titulo_en'], $data['titulo_fr'],
+            $data['ubicacion_es'], $data['ubicacion_en'], $data['ubicacion_fr'],
+            $data['descripcion_es'], $data['descripcion_en'], $data['descripcion_fr'],
+        );
 
         $panorama = Panorama::create($data);
 
@@ -241,9 +264,15 @@ class PanoramaController extends Controller
     public function update(Request $request, Panorama $panorama)
     {
         $data = $request->validate([
-            'titulo'      => 'required|string|max:255',
-            'descripcion' => 'nullable|string|max:2000',
-            'ubicacion'   => 'nullable|string|max:255',
+            'titulo_es'      => 'required|string|max:255',
+            'titulo_en'      => 'nullable|string|max:255',
+            'titulo_fr'      => 'nullable|string|max:255',
+            'descripcion_es' => 'nullable|string|max:2000',
+            'descripcion_en' => 'nullable|string|max:2000',
+            'descripcion_fr' => 'nullable|string|max:2000',
+            'ubicacion_es'   => 'nullable|string|max:255',
+            'ubicacion_en'   => 'nullable|string|max:255',
+            'ubicacion_fr'   => 'nullable|string|max:255',
             'fecha'          => 'required|date',
             'fecha_fin'      => 'nullable|date|after_or_equal:fecha',
             'dias_semana'    => 'nullable|array',
@@ -290,22 +319,22 @@ class PanoramaController extends Controller
             }
         }
 
-        $titulo      = $data['titulo'];
-        $ubicacion   = $data['ubicacion'] ?? null;
-        $descripcion = $data['descripcion'] ?? null;
-        unset($data['titulo'], $data['ubicacion'], $data['descripcion']);
+        unset(
+            $data['titulo_es'], $data['titulo_en'], $data['titulo_fr'],
+            $data['ubicacion_es'], $data['ubicacion_en'], $data['ubicacion_fr'],
+            $data['descripcion_es'], $data['descripcion_en'], $data['descripcion_fr'],
+        );
 
         $panorama->fill($data);
-        $panorama->setTranslation('titulo', 'es', $titulo);
-        $panorama->setTranslation('titulo', 'en', '');
-        if ($ubicacion !== null) {
-            $panorama->setTranslation('ubicacion', 'es', $ubicacion);
-            $panorama->setTranslation('ubicacion', 'en', '');
-        }
-        if ($descripcion !== null) {
-            $panorama->setTranslation('descripcion', 'es', $descripcion);
-            $panorama->setTranslation('descripcion', 'en', '');
-        }
+        $panorama->setTranslation('titulo', 'es', $request->input('titulo_es'))
+                  ->setTranslation('titulo', 'en', $request->input('titulo_en') ?? '')
+                  ->setTranslation('titulo', 'fr', $request->input('titulo_fr') ?? '')
+                  ->setTranslation('ubicacion', 'es', $request->input('ubicacion_es') ?? '')
+                  ->setTranslation('ubicacion', 'en', $request->input('ubicacion_en') ?? '')
+                  ->setTranslation('ubicacion', 'fr', $request->input('ubicacion_fr') ?? '')
+                  ->setTranslation('descripcion', 'es', $request->input('descripcion_es') ?? '')
+                  ->setTranslation('descripcion', 'en', $request->input('descripcion_en') ?? '')
+                  ->setTranslation('descripcion', 'fr', $request->input('descripcion_fr') ?? '');
         $panorama->save();
 
         if ($request->hasFile('imagenes')) {

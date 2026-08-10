@@ -135,10 +135,14 @@ class ExperienciaController extends Controller
 
     private function validar(Request $request): array
     {
-        return $request->validate([
-            'titulo'       => 'required|string|max:255',
+        $data = $request->validate([
+            'titulo_es'      => 'required|string|max:255',
+            'titulo_en'      => 'nullable|string|max:255',
+            'titulo_fr'      => 'nullable|string|max:255',
             'proveedor'    => 'nullable|string|max:255',
-            'descripcion'  => 'nullable|string|max:2000',
+            'descripcion_es' => 'nullable|string|max:2000',
+            'descripcion_en' => 'nullable|string|max:2000',
+            'descripcion_fr' => 'nullable|string|max:2000',
             'ubicacion'    => 'nullable|string|max:255',
             'categoria'    => 'nullable|string|in:' . implode(',', array_keys(Experiencia::CATEGORIAS)),
             'es_gratuito'  => 'nullable|boolean',
@@ -158,6 +162,23 @@ class ExperienciaController extends Controller
             'imagen'       => 'nullable|image|max:4096',
             'imagenes.*'   => 'nullable|image|max:4096',
         ]);
+
+        $data['titulo'] = [
+            'es' => $data['titulo_es'],
+            'en' => $data['titulo_en'] ?? '',
+            'fr' => $data['titulo_fr'] ?? '',
+        ];
+        $data['descripcion'] = [
+            'es' => $data['descripcion_es'] ?? '',
+            'en' => $data['descripcion_en'] ?? '',
+            'fr' => $data['descripcion_fr'] ?? '',
+        ];
+        unset(
+            $data['titulo_es'], $data['titulo_en'], $data['titulo_fr'],
+            $data['descripcion_es'], $data['descripcion_en'], $data['descripcion_fr'],
+        );
+
+        return $data;
     }
 
     private function procesarBooleanos(Request $request, array $data): array

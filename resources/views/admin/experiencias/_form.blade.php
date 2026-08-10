@@ -1,15 +1,54 @@
+{{-- Tabs idioma --}}
+<div class="flex items-center gap-2 flex-wrap">
+    <button type="button" id="tab-es" onclick="setLang('es')"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-[#fc5648] bg-[#fc5648] text-white transition">
+        🇪🇸 Español
+    </button>
+    <button type="button" id="tab-en" onclick="setLang('en')"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition">
+        🇬🇧 English
+    </button>
+    <button type="button" id="tab-fr" onclick="setLang('fr')"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition">
+        🇫🇷 Français
+    </button>
+    <button type="button" id="btn-autotraducir-en" onclick="autoTraducir('en')"
+            class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border border-gray-200 bg-white text-gray-500 hover:border-blue-400 hover:text-blue-500 transition ml-2">
+        ✨ ES→EN
+    </button>
+    <button type="button" id="btn-autotraducir-fr" onclick="autoTraducir('fr')"
+            class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border border-gray-200 bg-white text-gray-500 hover:border-blue-400 hover:text-blue-500 transition">
+        ✨ ES→FR
+    </button>
+    <span id="traducir-estado" class="text-xs text-gray-400 hidden"></span>
+</div>
+
 {{-- Título + Proveedor --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">
-            Título <span class="text-red-500">*</span>
-        </label>
-        <input type="text" name="titulo"
-               value="{{ old('titulo', $experiencia->titulo ?? '') }}"
-               required
-               class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none
-                      {{ $errors->has('titulo') ? 'border-red-400' : 'border-gray-200' }}">
-        @error('titulo') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+        <div data-lang-field="es">
+            <label class="block text-sm font-semibold text-gray-700 mb-1">
+                Título <span class="text-[#fc5648]">ES</span> <span class="text-red-500">*</span>
+            </label>
+            <input id="titulo-es" type="text" name="titulo_es"
+                   value="{{ old('titulo_es', $experiencia?->getTranslation('titulo','es',false)) }}"
+                   required
+                   class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none
+                          {{ $errors->has('titulo_es') ? 'border-red-400' : 'border-gray-200' }}">
+            @error('titulo_es') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+        </div>
+        <div data-lang-field="en" style="display:none">
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Title <span class="text-blue-500">EN</span></label>
+            <input id="titulo-en" type="text" name="titulo_en"
+                   value="{{ old('titulo_en', $experiencia?->getTranslation('titulo','en',false)) }}"
+                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+        </div>
+        <div data-lang-field="fr" style="display:none">
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Titre <span class="text-indigo-500">FR</span></label>
+            <input id="titulo-fr" type="text" name="titulo_fr"
+                   value="{{ old('titulo_fr', $experiencia?->getTranslation('titulo','fr',false)) }}"
+                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
+        </div>
     </div>
     <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Proveedor / Instructor</label>
@@ -22,12 +61,22 @@
 </div>
 
 {{-- Descripción --}}
-<div>
-    <label class="block text-sm font-semibold text-gray-700 mb-1">Descripción</label>
-    <textarea name="descripcion" rows="3" maxlength="2000"
+<div data-lang-field="es">
+    <label class="block text-sm font-semibold text-gray-700 mb-1">Descripción <span class="text-[#fc5648]">ES</span></label>
+    <textarea id="descripcion-es" name="descripcion_es" rows="3" maxlength="2000"
               placeholder="¿De qué trata la experiencia? ¿Qué van a vivir los participantes?…"
-              class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none resize-none">{{ old('descripcion', $experiencia->descripcion ?? '') }}</textarea>
-    @error('descripcion') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+              class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none resize-none">{{ old('descripcion_es', $experiencia?->getTranslation('descripcion','es',false)) }}</textarea>
+    @error('descripcion_es') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+</div>
+<div data-lang-field="en" style="display:none">
+    <label class="block text-sm font-semibold text-gray-700 mb-1">Description <span class="text-blue-500">EN</span></label>
+    <textarea id="descripcion-en" name="descripcion_en" rows="3" maxlength="2000"
+              class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none resize-none">{{ old('descripcion_en', $experiencia?->getTranslation('descripcion','en',false)) }}</textarea>
+</div>
+<div data-lang-field="fr" style="display:none">
+    <label class="block text-sm font-semibold text-gray-700 mb-1">Description <span class="text-indigo-500">FR</span></label>
+    <textarea id="descripcion-fr" name="descripcion_fr" rows="3" maxlength="2000"
+              class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none resize-none">{{ old('descripcion_fr', $experiencia?->getTranslation('descripcion','fr',false)) }}</textarea>
 </div>
 
 {{-- Categoría + Gratuito/Precio --}}
@@ -333,3 +382,90 @@ function eliminarImagen(id, url, token) {
         <label for="activo" class="text-sm font-semibold text-gray-700">Visible en la web</label>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    let currentLang = 'es';
+
+    const TAB_ESTILOS = {
+        es: 'border-[#fc5648] bg-[#fc5648] text-white',
+        en: 'border-blue-500 bg-blue-500 text-white',
+        fr: 'border-indigo-500 bg-indigo-500 text-white',
+    };
+    const TAB_INACTIVO = 'border-gray-200 bg-white text-gray-500 hover:border-gray-400';
+
+    window.setLang = function(lang) {
+        document.querySelectorAll('[data-lang-field]').forEach(el => {
+            el.style.display = el.dataset.langField === lang ? '' : 'none';
+        });
+
+        Object.keys(TAB_ESTILOS).forEach(l => {
+            const tab = document.getElementById('tab-' + l);
+            if (!tab) return;
+            tab.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border transition '
+                + (l === lang ? TAB_ESTILOS[l] : TAB_INACTIVO);
+        });
+
+        currentLang = lang;
+    };
+
+    window.autoTraducir = async function(destino) {
+        const btn    = document.getElementById('btn-autotraducir-' + destino);
+        const estado = document.getElementById('traducir-estado');
+
+        const tituloEs      = document.getElementById('titulo-es').value.trim();
+        const descripcionEs = document.getElementById('descripcion-es').value.trim();
+
+        if (!tituloEs && !descripcionEs) {
+            alert('Escribe primero el contenido en Español.');
+            return;
+        }
+
+        btn.disabled  = true;
+        btn.className = btn.className.replace('text-gray-500', 'text-blue-400');
+        estado.classList.remove('hidden');
+
+        async function traducirTexto(txt) {
+            if (!txt) return '';
+            const oraciones = txt.match(/[^.!?]+[.!?]+/g) || [txt];
+            const chunks = [];
+            let cur = '';
+            for (const o of oraciones) {
+                if ((cur + o).length > 450) { if (cur) chunks.push(cur); cur = o; }
+                else cur += (cur ? ' ' : '') + o;
+            }
+            if (cur) chunks.push(cur);
+
+            let resultado = '';
+            for (let i = 0; i < chunks.length; i++) {
+                estado.textContent = `Traduciendo… ${i + 1}/${chunks.length}`;
+                const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunks[i])}&langpair=es|${destino}&de=cesar.eav@gmail.com`);
+                const d = await r.json();
+                resultado += (d.responseData?.translatedText || chunks[i]) + ' ';
+                await new Promise(r => setTimeout(r, 600));
+            }
+            return resultado.trim();
+        }
+
+        try {
+            if (tituloEs) {
+                estado.textContent = 'Traduciendo título…';
+                document.getElementById('titulo-' + destino).value = await traducirTexto(tituloEs);
+            }
+            if (descripcionEs) {
+                estado.textContent = 'Traduciendo descripción…';
+                document.getElementById('descripcion-' + destino).value = await traducirTexto(descripcionEs);
+            }
+
+            setLang(destino);
+            estado.textContent = '✓ Traducción completada';
+            setTimeout(() => { estado.classList.add('hidden'); estado.textContent = ''; }, 3000);
+        } catch(e) {
+            estado.textContent = 'Error al traducir. Inténtalo de nuevo.';
+        } finally {
+            btn.disabled  = false;
+            btn.className = btn.className.replace('text-blue-400', 'text-gray-500');
+        }
+    };
+});
+</script>

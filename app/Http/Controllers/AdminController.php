@@ -138,9 +138,13 @@ class AdminController extends Controller
     public function updatePunto(Request $request, PuntoInteres $punto)
     {
         $request->validate([
-            'title'       => 'required|max:255',
-            'categoria_id'=> 'required|exists:categorias,id',
-            'description' => 'required',
+            'title_es'       => 'required|max:255',
+            'title_en'       => 'nullable|max:255',
+            'title_fr'       => 'nullable|max:255',
+            'categoria_id'   => 'required|exists:categorias,id',
+            'description_es' => 'required',
+            'description_en' => 'nullable',
+            'description_fr' => 'nullable',
             'photos.*'    => 'image|mimes:jpeg,png,jpg|max:25600',
         ]);
 
@@ -159,9 +163,17 @@ class AdminController extends Controller
 
         $punto->update([
             'categoria_id' => $request->categoria_id,
-            'title'        => $request->title,
+            'title'        => [
+                'es' => $request->input('title_es'),
+                'en' => $request->input('title_en') ?? '',
+                'fr' => $request->input('title_fr') ?? '',
+            ],
             'sector'       => $request->sector,
-            'description'  => $request->description,
+            'description'  => [
+                'es' => $request->input('description_es'),
+                'en' => $request->input('description_en') ?? '',
+                'fr' => $request->input('description_fr') ?? '',
+            ],
             'tags'      => $request->tags ? array_map('trim', explode(',', $request->tags)) : [],
             'autor'     => $request->autor,
             'direccion' => $request->direccion,
@@ -416,9 +428,13 @@ class AdminController extends Controller
     public function storePunto(Request $request)
     {
         $request->validate([
-            'title' => 'required|max:255',
+            'title_es' => 'required|max:255',
+            'title_en' => 'nullable|max:255',
+            'title_fr' => 'nullable|max:255',
             'categoria_id' => 'required|exists:categorias,id', // Validamos que el ID exista            'sector' => 'required',
-            'description' => 'required',
+            'description_es' => 'required',
+            'description_en' => 'nullable',
+            'description_fr' => 'nullable',
             'photos'       => 'required|array',       // Debe venir al menos una foto
             'photos.*'     => 'image|mimes:jpeg,png,jpg|max:25600', // Reglas por cada imagen
         ]);
@@ -432,10 +448,18 @@ class AdminController extends Controller
         $punto = PuntoInteres::create([
             'user_id'      => $userId,
             'categoria_id' => $request->categoria_id,
-            'title'        => $request->title,
-            'slug' => Str::slug($request->title) . '-' . rand(100, 999),
+            'title'        => [
+                'es' => $request->input('title_es'),
+                'en' => $request->input('title_en') ?? '',
+                'fr' => $request->input('title_fr') ?? '',
+            ],
+            'slug' => Str::slug($request->input('title_es')) . '-' . rand(100, 999),
             'sector' => $request->sector,
-            'description' => $request->description,
+            'description' => [
+                'es' => $request->input('description_es'),
+                'en' => $request->input('description_en') ?? '',
+                'fr' => $request->input('description_fr') ?? '',
+            ],
             'tags'      => $request->tags ? array_map('trim', explode(',', $request->tags)) : [],
             'autor'     => $request->autor,
             'direccion' => $request->direccion,

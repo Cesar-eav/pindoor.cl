@@ -26,19 +26,37 @@ class CategoriaController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'nombre'                   => 'required|string|max:100|unique:categorias,nombre',
+            'nombre_es'                => 'required|string|max:100|unique:categorias,nombre',
+            'nombre_en'                => 'nullable|string|max:100',
+            'nombre_fr'                => 'nullable|string|max:100',
             'tipo'                     => 'nullable|string|max:50',
             'icono'                    => 'nullable|string|max:50',
             'imagen_portada'           => 'nullable|image|max:4096',
             'mostrar_nombre_en_imagen' => 'nullable|boolean',
-            'descripcion'              => 'nullable|string|max:500',
+            'descripcion_es'           => 'nullable|string|max:500',
+            'descripcion_en'           => 'nullable|string|max:500',
+            'descripcion_fr'           => 'nullable|string|max:500',
             'modulos_defecto'          => 'nullable|array',
             'modulos_defecto.*'        => 'string',
             'es_cliente'               => 'nullable|boolean',
             'disponible_para_operadores' => 'nullable|boolean',
         ]);
 
-        $data['slug']            = Str::slug($data['nombre']);
+        $data['slug']            = Str::slug($data['nombre_es']);
+        $data['nombre'] = [
+            'es' => $data['nombre_es'],
+            'en' => $data['nombre_en'] ?? '',
+            'fr' => $data['nombre_fr'] ?? '',
+        ];
+        $data['descripcion'] = [
+            'es' => $data['descripcion_es'] ?? '',
+            'en' => $data['descripcion_en'] ?? '',
+            'fr' => $data['descripcion_fr'] ?? '',
+        ];
+        unset(
+            $data['nombre_es'], $data['nombre_en'], $data['nombre_fr'],
+            $data['descripcion_es'], $data['descripcion_en'], $data['descripcion_fr'],
+        );
         $data['modulos_defecto'] = $request->input('modulos_defecto', []);
         $data['es_cliente']      = $request->boolean('es_cliente');
         $data['mostrar_nombre_en_imagen'] = $request->boolean('mostrar_nombre_en_imagen', true);
@@ -49,17 +67,17 @@ class CategoriaController extends Controller
         }
 
         if (Categoria::where('slug', $data['slug'])->exists()) {
-            return back()->withInput()->withErrors(['nombre' => 'Ya existe una categoría con un nombre muy similar (slug duplicado).']);
+            return back()->withInput()->withErrors(['nombre_es' => 'Ya existe una categoría con un nombre muy similar (slug duplicado).']);
         }
 
         try {
-            Categoria::create($data);
+            $categoria = Categoria::create($data);
         } catch (\Exception $e) {
             \Log::error('CategoriaController@store: ' . get_class($e) . ' — ' . $e->getMessage());
-            return back()->withInput()->withErrors(['nombre' => get_class($e) . ': ' . $e->getMessage()]);
+            return back()->withInput()->withErrors(['nombre_es' => get_class($e) . ': ' . $e->getMessage()]);
         }
 
-        return redirect()->route('admin.categorias.create')->with('success', '«' . $data['nombre'] . '» fue creada correctamente.');
+        return redirect()->route('admin.categorias.create')->with('success', '«' . $categoria->getTranslation('nombre', 'es', false) . '» fue creada correctamente.');
     }
 
     public function edit(Categoria $categoria)
@@ -72,19 +90,37 @@ class CategoriaController extends Controller
     public function update(Request $request, Categoria $categoria)
     {
         $data = $request->validate([
-            'nombre'                   => 'required|string|max:100|unique:categorias,nombre,' . $categoria->id,
+            'nombre_es'                => 'required|string|max:100|unique:categorias,nombre,' . $categoria->id,
+            'nombre_en'                => 'nullable|string|max:100',
+            'nombre_fr'                => 'nullable|string|max:100',
             'tipo'                     => 'nullable|string|max:50',
             'icono'                    => 'nullable|string|max:50',
             'imagen_portada'           => 'nullable|image|max:4096',
             'mostrar_nombre_en_imagen' => 'nullable|boolean',
-            'descripcion'              => 'nullable|string|max:500',
+            'descripcion_es'           => 'nullable|string|max:500',
+            'descripcion_en'           => 'nullable|string|max:500',
+            'descripcion_fr'           => 'nullable|string|max:500',
             'modulos_defecto'          => 'nullable|array',
             'modulos_defecto.*'        => 'string',
             'es_cliente'               => 'nullable|boolean',
             'disponible_para_operadores' => 'nullable|boolean',
         ]);
 
-        $data['slug']            = Str::slug($data['nombre']);
+        $data['slug']            = Str::slug($data['nombre_es']);
+        $data['nombre'] = [
+            'es' => $data['nombre_es'],
+            'en' => $data['nombre_en'] ?? '',
+            'fr' => $data['nombre_fr'] ?? '',
+        ];
+        $data['descripcion'] = [
+            'es' => $data['descripcion_es'] ?? '',
+            'en' => $data['descripcion_en'] ?? '',
+            'fr' => $data['descripcion_fr'] ?? '',
+        ];
+        unset(
+            $data['nombre_es'], $data['nombre_en'], $data['nombre_fr'],
+            $data['descripcion_es'], $data['descripcion_en'], $data['descripcion_fr'],
+        );
         $data['modulos_defecto'] = $request->input('modulos_defecto', []);
         $data['es_cliente']      = $request->boolean('es_cliente');
         $data['mostrar_nombre_en_imagen'] = $request->boolean('mostrar_nombre_en_imagen', true);
@@ -98,14 +134,14 @@ class CategoriaController extends Controller
         }
 
         if (Categoria::where('slug', $data['slug'])->where('id', '!=', $categoria->id)->exists()) {
-            return back()->withInput()->withErrors(['nombre' => 'Ya existe una categoría con un nombre muy similar (slug duplicado).']);
+            return back()->withInput()->withErrors(['nombre_es' => 'Ya existe una categoría con un nombre muy similar (slug duplicado).']);
         }
 
         try {
             $categoria->update($data);
         } catch (\Exception $e) {
             \Log::error('CategoriaController@update: ' . get_class($e) . ' — ' . $e->getMessage());
-            return back()->withInput()->withErrors(['nombre' => get_class($e) . ': ' . $e->getMessage()]);
+            return back()->withInput()->withErrors(['nombre_es' => get_class($e) . ': ' . $e->getMessage()]);
         }
 
         return redirect()->route('admin.categorias.index')->with('success', 'Categoría actualizada.');

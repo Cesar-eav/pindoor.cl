@@ -4,9 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Spatie\Translatable\HasTranslations;
 
 class OperadorTuristico extends Model
 {
+    use HasTranslations;
+
+    public array $translatable = ['nombre', 'descripcion'];
+
+    public function getFallbackLocale(?string $locale = null): ?string
+    {
+        return $locale !== 'es' ? 'es' : null;
+    }
+
     protected $table = 'operadores_turisticos';
 
     protected $fillable = [

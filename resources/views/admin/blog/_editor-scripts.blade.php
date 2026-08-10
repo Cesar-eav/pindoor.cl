@@ -96,6 +96,13 @@ document.addEventListener('DOMContentLoaded', function () {
     // ── Cambio de idioma ────────────────────────────────────────────
     let currentLang = 'es';
 
+    const TAB_ESTILOS = {
+        es: { activo: 'border-[#fc5648] bg-[#fc5648] text-white', color: '#fc5648' },
+        en: { activo: 'border-blue-500 bg-blue-500 text-white',   color: '#3b82f6' },
+        fr: { activo: 'border-indigo-500 bg-indigo-500 text-white', color: '#6366f1' },
+    };
+    const TAB_INACTIVO = 'border-gray-200 bg-white text-gray-500 hover:border-gray-400';
+
     window.setLang = function(lang) {
         // Guardar contenido del editor en el textarea del idioma actual
         document.getElementById('contenido_' + currentLang).value = quill.root.innerHTML;
@@ -116,27 +123,24 @@ document.addEventListener('DOMContentLoaded', function () {
         const label = document.getElementById('editor-lang-label');
         if (label) {
             label.textContent = lang.toUpperCase();
-            label.style.color = lang === 'es' ? '#fc5648' : '#3b82f6';
+            label.style.color = TAB_ESTILOS[lang].color;
         }
 
         // Estilos de los tabs
-        const tabEs = document.getElementById('tab-es');
-        const tabEn = document.getElementById('tab-en');
-        if (lang === 'es') {
-            tabEs.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-[#fc5648] bg-[#fc5648] text-white transition';
-            tabEn.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition';
-        } else {
-            tabEn.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-blue-500 bg-blue-500 text-white transition';
-            tabEs.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition';
-        }
+        Object.keys(TAB_ESTILOS).forEach(l => {
+            const tab = document.getElementById('tab-' + l);
+            if (!tab) return;
+            tab.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border transition '
+                + (l === lang ? TAB_ESTILOS[l].activo : TAB_INACTIVO);
+        });
 
         currentLang = lang;
         contarResumen();
     };
 
-    // ── Auto-traducir ES → EN ───────────────────────────────────────
-    window.autoTraducir = async function() {
-        const btn    = document.getElementById('btn-autotraducir');
+    // ── Auto-traducir ES → EN / FR ───────────────────────────────────
+    window.autoTraducir = async function(destino) {
+        const btn    = document.getElementById('btn-autotraducir-' + destino);
         const estado = document.getElementById('traducir-estado');
 
         // Guardar contenido ES actual
@@ -170,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let resultado = '';
             for (let i = 0; i < chunks.length; i++) {
                 estado.textContent = `Traduciendo… ${i + 1}/${chunks.length}`;
-                const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunks[i])}&langpair=es|en&de=cesar.eav@gmail.com`);
+                const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunks[i])}&langpair=es|${destino}&de=cesar.eav@gmail.com`);
                 const d = await r.json();
                 resultado += (d.responseData?.translatedText || chunks[i]) + ' ';
                 await new Promise(r => setTimeout(r, 600));
@@ -182,31 +186,31 @@ document.addEventListener('DOMContentLoaded', function () {
             // Traducir título
             if (tituloEs) {
                 estado.textContent = 'Traduciendo título…';
-                document.getElementById('titulo-en').value = await traducirTexto(tituloEs);
+                document.getElementById('titulo-' + destino).value = await traducirTexto(tituloEs);
             }
             // Traducir resumen
             if (resumenEs) {
                 estado.textContent = 'Traduciendo resumen…';
-                document.getElementById('resumen-en').value = await traducirTexto(resumenEs);
+                document.getElementById('resumen-' + destino).value = await traducirTexto(resumenEs);
             }
             // Traducir contenido → reconstruir como párrafos HTML
             if (textoEs) {
                 const traducido = await traducirTexto(textoEs);
                 const oraciones = traducido.match(/[^.!?]+[.!?]+/g) || [traducido];
-                let htmlEn = '';
+                let htmlDestino = '';
                 let buf = '';
                 oraciones.forEach((o, i) => {
                     buf += o + ' ';
                     if (buf.length > 350 || i === oraciones.length - 1) {
-                        htmlEn += '<p>' + buf.trim() + '</p>';
+                        htmlDestino += '<p>' + buf.trim() + '</p>';
                         buf = '';
                     }
                 });
-                document.getElementById('contenido_en').value = htmlEn;
+                document.getElementById('contenido_' + destino).value = htmlDestino;
             }
 
-            // Cambiar a tab EN para mostrar resultado
-            setLang('en');
+            // Cambiar al tab destino para mostrar resultado
+            setLang(destino);
             estado.textContent = '✓ Traducción completada';
             setTimeout(() => { estado.classList.add('hidden'); estado.textContent = ''; }, 3000);
         } catch(e) {
@@ -272,6 +276,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     document.getElementById('resumen-es').addEventListener('input', contarResumen);
     document.getElementById('resumen-en').addEventListener('input', contarResumen);
+    document.getElementById('resumen-fr').addEventListener('input', contarResumen);
     contarResumen();
 
     // ── Contador Contenido (Quill) ───────────────────────────────────

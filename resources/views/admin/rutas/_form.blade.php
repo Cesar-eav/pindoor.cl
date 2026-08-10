@@ -69,9 +69,17 @@
                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition">
             🇬🇧 English
         </button>
-        <button type="button" id="btn-autotraducir" onclick="autoTraducir()"
+        <button type="button" id="tab-fr" onclick="setLang('fr')"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition">
+            🇫🇷 Français
+        </button>
+        <button type="button" id="btn-autotraducir-en" onclick="autoTraducir('en')"
                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-blue-400 hover:text-blue-500 transition ml-2">
             ✨ Auto-traducir ES→EN
+        </button>
+        <button type="button" id="btn-autotraducir-fr" onclick="autoTraducir('fr')"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-blue-400 hover:text-blue-500 transition">
+            ✨ Auto-traducir ES→FR
         </button>
         <span id="traducir-estado" class="text-xs text-gray-400 hidden"></span>
         <span class="text-xs text-gray-400 ml-auto">Slug e imagen de portada son compartidos</span>
@@ -96,6 +104,13 @@
                            value="{{ old('titulo_en', $ruta?->getTranslation('titulo','en',false)) }}"
                            placeholder="Eg: The porteño art route"
                            class="w-full px-4 py-3 border border-gray-200 rounded-xl text-base font-semibold focus:ring-2 focus:ring-blue-400 outline-none">
+                </div>
+                <div data-lang-field="fr" style="display:none">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Titre <span class="text-indigo-500">FR</span></label>
+                    <input id="titulo-fr" type="text" name="titulo_fr"
+                           value="{{ old('titulo_fr', $ruta?->getTranslation('titulo','fr',false)) }}"
+                           placeholder="Ex : La route de l'art porteño"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl text-base font-semibold focus:ring-2 focus:ring-indigo-400 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">
@@ -129,6 +144,14 @@
                     <textarea id="descripcion-en" name="descripcion_en" rows="12" maxlength="2000"
                               placeholder="Introduce the route: what it covers and why it's worth it..."
                               class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none resize-none">{{ old('descripcion_en', $ruta?->getTranslation('descripcion','en',false)) }}</textarea>
+                </div>
+                <div data-lang-field="fr" style="display:none">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">
+                        Description <span class="text-indigo-500">FR</span>
+                    </label>
+                    <textarea id="descripcion-fr" name="descripcion_fr" rows="12" maxlength="2000"
+                              placeholder="Présentez l'itinéraire : ce qu'il traverse et pourquoi ça vaut le détour..."
+                              class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none resize-none">{{ old('descripcion_fr', $ruta?->getTranslation('descripcion','fr',false)) }}</textarea>
                 </div>
             </div>
 
@@ -347,27 +370,31 @@
         // ── Cambio de idioma ────────────────────────────────────────────
         let currentLang = 'es';
 
+        const TAB_ESTILOS = {
+            es: 'border-[#fc5648] bg-[#fc5648] text-white',
+            en: 'border-blue-500 bg-blue-500 text-white',
+            fr: 'border-indigo-500 bg-indigo-500 text-white',
+        };
+        const TAB_INACTIVO = 'border-gray-200 bg-white text-gray-500 hover:border-gray-400';
+
         window.setLang = function(lang) {
             document.querySelectorAll('[data-lang-field]').forEach(el => {
                 el.style.display = el.dataset.langField === lang ? '' : 'none';
             });
 
-            const tabEs = document.getElementById('tab-es');
-            const tabEn = document.getElementById('tab-en');
-            if (lang === 'es') {
-                tabEs.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-[#fc5648] bg-[#fc5648] text-white transition';
-                tabEn.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition';
-            } else {
-                tabEn.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-blue-500 bg-blue-500 text-white transition';
-                tabEs.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition';
-            }
+            Object.keys(TAB_ESTILOS).forEach(l => {
+                const tab = document.getElementById('tab-' + l);
+                if (!tab) return;
+                tab.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border transition '
+                    + (l === lang ? TAB_ESTILOS[l] : TAB_INACTIVO);
+            });
 
             currentLang = lang;
         };
 
-        // ── Auto-traducir ES → EN ───────────────────────────────────────
-        window.autoTraducir = async function() {
-            const btn    = document.getElementById('btn-autotraducir');
+        // ── Auto-traducir ES → EN / FR ───────────────────────────────────
+        window.autoTraducir = async function(destino) {
+            const btn    = document.getElementById('btn-autotraducir-' + destino);
             const estado = document.getElementById('traducir-estado');
 
             const tituloEs      = document.getElementById('titulo-es').value.trim();
@@ -397,7 +424,7 @@
                 let resultado = '';
                 for (let i = 0; i < chunks.length; i++) {
                     estado.textContent = `Traduciendo… ${i + 1}/${chunks.length}`;
-                    const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunks[i])}&langpair=es|en&de=cesar.eav@gmail.com`);
+                    const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunks[i])}&langpair=es|${destino}&de=cesar.eav@gmail.com`);
                     const d = await r.json();
                     resultado += (d.responseData?.translatedText || chunks[i]) + ' ';
                     await new Promise(r => setTimeout(r, 600));
@@ -408,14 +435,14 @@
             try {
                 if (tituloEs) {
                     estado.textContent = 'Traduciendo título…';
-                    document.getElementById('titulo-en').value = await traducirTexto(tituloEs);
+                    document.getElementById('titulo-' + destino).value = await traducirTexto(tituloEs);
                 }
                 if (descripcionEs) {
                     estado.textContent = 'Traduciendo descripción…';
-                    document.getElementById('descripcion-en').value = await traducirTexto(descripcionEs);
+                    document.getElementById('descripcion-' + destino).value = await traducirTexto(descripcionEs);
                 }
 
-                setLang('en');
+                setLang(destino);
                 estado.textContent = '✓ Traducción completada';
                 setTimeout(() => { estado.classList.add('hidden'); estado.textContent = ''; }, 3000);
             } catch(e) {

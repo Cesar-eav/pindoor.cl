@@ -3,9 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Translatable\HasTranslations;
 
 class ArtistaEvento extends Model
 {
+    use HasTranslations;
+
+    public array $translatable = ['titulo', 'descripcion'];
+
+    public function getFallbackLocale(?string $locale = null): ?string
+    {
+        return $locale !== 'es' ? 'es' : null;
+    }
+
     protected $fillable = [
         'artista_id',
         'titulo',

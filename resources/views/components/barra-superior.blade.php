@@ -131,6 +131,9 @@
                     <span class="text-gray-300">|</span>
                     <a href="{{ route('lang.switch', 'en') }}"
                        class="{{ app()->getLocale() === 'en' ? 'text-[#fc5648]' : 'text-gray-400 hover:text-gray-700' }} px-1 transition">🇬🇧</a>
+                    <span class="text-gray-300">|</span>
+                    <a href="{{ route('lang.switch', 'fr') }}"
+                       class="{{ app()->getLocale() === 'fr' ? 'text-[#fc5648]' : 'text-gray-400 hover:text-gray-700' }} px-1 transition">🇫🇷</a>
                 </div>
             </div>
         </div>

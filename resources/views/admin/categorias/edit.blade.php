@@ -117,7 +117,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         const MODULOS = @json(\App\Models\PuntoInteres::catalogoModulos());
 
-        const nombre  = document.querySelector('input[name="nombre"]');
+        const nombre  = document.querySelector('input[name="nombre_es"]');
         const tipo    = document.querySelector('input[name="tipo"]');
         const iconoEl = document.getElementById('icono-input');
         const checkboxes = document.querySelectorAll('input[name="modulos_defecto[]"]');

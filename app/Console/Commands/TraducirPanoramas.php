@@ -2,16 +2,16 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Post;
+use App\Models\Panorama;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 
-class TraducirBlog extends Command
+class TraducirPanoramas extends Command
 {
-    protected $signature   = 'blog:traducir {--id= : ID del post específico} {--force : Sobreescribir traducciones existentes} {--to=en : Idioma destino (en|fr)}';
-    protected $description = 'Traduce posts del blog de ES a EN/FR usando MyMemory API';
+    protected $signature   = 'panoramas:traducir {--id= : ID del panorama específico} {--force : Sobreescribir traducciones existentes} {--to=en : Idioma destino (en|fr)}';
+    protected $description = 'Traduce panoramas de ES a EN/FR usando MyMemory API';
 
-    private const API  = 'https://api.mymemory.translated.net/get';
+    private const API   = 'https://api.mymemory.translated.net/get';
     private const EMAIL = 'cesar.eav@gmail.com';
 
     public function handle(): int
@@ -22,76 +22,56 @@ class TraducirBlog extends Command
             return self::FAILURE;
         }
 
-        $query = Post::query();
+        $query = Panorama::query();
 
         if ($id = $this->option('id')) {
             $query->where('id', $id);
         }
 
-        $posts = $query->get();
+        $panoramas = $query->get();
 
-        foreach ($posts as $post) {
-            $tituloEs   = $post->getTranslation('titulo', 'es', false);
-            $resumenEs  = $post->getTranslation('resumen', 'es', false);
-            $contenidoEs = $post->getTranslation('contenido', 'es', false);
+        foreach ($panoramas as $panorama) {
+            $tituloEs    = $panorama->getTranslation('titulo', 'es', false);
+            $ubicacionEs = $panorama->getTranslation('ubicacion', 'es', false);
+            $descripcionEs = $panorama->getTranslation('descripcion', 'es', false);
 
-            $tituloDestino    = $post->getTranslation('titulo', $to, false);
-            $resumenDestino   = $post->getTranslation('resumen', $to, false);
-            $contenidoDestino = $post->getTranslation('contenido', $to, false);
+            $tituloDestino      = $panorama->getTranslation('titulo', $to, false);
+            $ubicacionDestino   = $panorama->getTranslation('ubicacion', $to, false);
+            $descripcionDestino = $panorama->getTranslation('descripcion', $to, false);
 
             $force = $this->option('force');
 
-            $this->info("Post #{$post->id}: {$tituloEs}");
+            $this->info("Panorama #{$panorama->id}: {$tituloEs}");
 
-            if (!$force && $tituloDestino && $contenidoDestino) {
+            if (!$force && $tituloDestino) {
                 $this->line("  → Ya tiene traducción {$to}. Usa --force para sobreescribir.");
                 continue;
             }
 
-            // Título
             if ($force || !$tituloDestino) {
                 $tituloDestino = $this->traducir($tituloEs, $to);
                 $this->line("  título: {$tituloDestino}");
             }
 
-            // Resumen
-            if ($force || !$resumenDestino) {
-                $resumenDestino = $this->traducirTextoLargo(strip_tags($resumenEs), $to);
-                $this->line('  resumen: OK');
+            if ($ubicacionEs && ($force || !$ubicacionDestino)) {
+                $ubicacionDestino = $this->traducir($ubicacionEs, $to);
+                $this->line("  ubicación: {$ubicacionDestino}");
             }
 
-            // Contenido (strip HTML, traducir, reconstruir como párrafos)
-            if ($force || !$contenidoDestino) {
-                $contenidoDestino = $this->traducirHtml($contenidoEs, $to);
-                $this->line('  contenido: OK');
+            if ($descripcionEs && ($force || !$descripcionDestino)) {
+                $descripcionDestino = $this->traducirTextoLargo($descripcionEs, $to);
+                $this->line('  descripción: OK');
             }
 
-            $post->setTranslation('titulo',    $to, $tituloDestino)
-                 ->setTranslation('resumen',   $to, $resumenDestino)
-                 ->setTranslation('contenido', $to, $contenidoDestino)
-                 ->save();
+            $panorama->setTranslation('titulo',      $to, $tituloDestino)
+                     ->setTranslation('ubicacion',   $to, $ubicacionDestino)
+                     ->setTranslation('descripcion', $to, $descripcionDestino)
+                     ->save();
 
             $this->info("  ✓ Guardado");
         }
 
         return self::SUCCESS;
-    }
-
-    private function traducirHtml(string $html, string $to): string
-    {
-        // Extraer párrafos/bloques de texto sin HTML
-        $texto = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $texto = preg_replace('/\s+/', ' ', trim($texto));
-
-        $traducido = $this->traducirTextoLargo($texto, $to);
-
-        // Reconstruir como párrafos HTML
-        $parrafos = array_filter(array_map('trim', explode("\n", $traducido)));
-        if (empty($parrafos)) {
-            return "<p>{$traducido}</p>";
-        }
-
-        return implode('', array_map(fn($p) => "<p>{$p}</p>", $parrafos));
     }
 
     private function traducirTextoLargo(string $texto, string $to): string

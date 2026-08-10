@@ -32,7 +32,7 @@ use Illuminate\Support\Facades\Route;
 
 /* --- IDIOMA --- */
 Route::get('/lang/{locale}', function (string $locale) {
-    if (in_array($locale, ['es', 'en'])) {
+    if (in_array($locale, ['es', 'en', 'fr'])) {
         session(['locale' => $locale]);
     }
     return redirect()->back();

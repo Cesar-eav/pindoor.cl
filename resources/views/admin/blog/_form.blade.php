@@ -69,9 +69,17 @@
                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition">
             🇬🇧 English
         </button>
-        <button type="button" id="btn-autotraducir" onclick="autoTraducir()"
+        <button type="button" id="tab-fr" onclick="setLang('fr')"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition">
+            🇫🇷 Français
+        </button>
+        <button type="button" id="btn-autotraducir-en" onclick="autoTraducir('en')"
                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-blue-400 hover:text-blue-500 transition ml-2">
             ✨ Auto-traducir ES→EN
+        </button>
+        <button type="button" id="btn-autotraducir-fr" onclick="autoTraducir('fr')"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-blue-400 hover:text-blue-500 transition">
+            ✨ Auto-traducir ES→FR
         </button>
         <span id="traducir-estado" class="text-xs text-gray-400 hidden"></span>
         <span class="text-xs text-gray-400 ml-auto">Slug e imágenes son compartidos</span>
@@ -96,6 +104,13 @@
                            value="{{ old('titulo_en', $post?->getTranslation('titulo','en',false)) }}"
                            placeholder="Eg: The best corners of Cerro Alegre"
                            class="w-full px-4 py-3 border border-gray-200 rounded-xl text-base font-semibold focus:ring-2 focus:ring-blue-400 outline-none">
+                </div>
+                <div data-lang-field="fr" style="display:none">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Titre <span class="text-indigo-500">FR</span></label>
+                    <input id="titulo-fr" type="text" name="titulo_fr"
+                           value="{{ old('titulo_fr', $post?->getTranslation('titulo','fr',false)) }}"
+                           placeholder="Ex: Les plus beaux recoins du cerro Alegre"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl text-base font-semibold focus:ring-2 focus:ring-indigo-400 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">
@@ -131,6 +146,15 @@
                     <textarea id="resumen-en" name="resumen_en" rows="12" maxlength="600"
                               placeholder="A brief intro that invites readers..."
                               class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none resize-none">{{ old('resumen_en', $post?->getTranslation('resumen','en',false)) }}</textarea>
+                </div>
+                <div data-lang-field="fr" style="display:none">
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">
+                        Résumé <span class="text-indigo-500">FR</span>
+                        <span class="normal-case font-normal text-gray-400 ml-1">— affiché sur les cartes</span>
+                    </label>
+                    <textarea id="resumen-fr" name="resumen_fr" rows="12" maxlength="600"
+                              placeholder="Une brève introduction qui donne envie de lire l'article..."
+                              class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none resize-none">{{ old('resumen_fr', $post?->getTranslation('resumen','fr',false)) }}</textarea>
                 </div>
                 <div class="flex justify-between mt-1.5 text-[11px] text-gray-400">
                     <span id="resumen-palabras">0 palabras</span>
@@ -262,6 +286,7 @@
                 </div>
                 <textarea id="contenido_es" name="contenido_es" class="hidden">{{ old('contenido_es', $post?->getTranslation('contenido','es',false)) }}</textarea>
                 <textarea id="contenido_en" name="contenido_en" class="hidden">{{ old('contenido_en', $post?->getTranslation('contenido','en',false)) }}</textarea>
+                <textarea id="contenido_fr" name="contenido_fr" class="hidden">{{ old('contenido_fr', $post?->getTranslation('contenido','fr',false)) }}</textarea>
             </div>
 
             {{-- ── Columna derecha: Preview posiciones ────────────────────── --}}
