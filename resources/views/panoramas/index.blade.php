@@ -185,8 +185,13 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
                 $iniciada = $exp->fecha->lte($hoyExp);
                 $hasta    = $exp->fecha_fin ?? $exp->fecha;
                 $diasRest = $hoyExp->diffInDays($hasta, false);
+                $expHref  = $exp->slug
+                    ? route('panoramas.show', $exp)
+                    : ($exp->punto_slug
+                        ? route('puntos.evento', ['slug' => $exp->punto_slug, 'item' => $exp->modulo_item_id])
+                        : route('artista.evento', ['slug' => $exp->artista_slug, 'item' => $exp->modulo_item_id]));
             @endphp
-            <a href="{{ route('panoramas.show', $exp) }}"
+            <a href="{{ $expHref }}"
                class="group relative block shrink-0" style="width:12rem;">
 
                 {{-- Imagen --}}
