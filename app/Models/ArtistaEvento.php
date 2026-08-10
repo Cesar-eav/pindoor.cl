@@ -9,7 +9,7 @@ class ArtistaEvento extends Model
 {
     use HasTranslations;
 
-    public array $translatable = ['titulo', 'descripcion'];
+    public array $translatable = ['titulo', 'descripcion', 'ubicacion'];
 
     public function getFallbackLocale(?string $locale = null): ?string
     {
@@ -21,6 +21,7 @@ class ArtistaEvento extends Model
         'titulo',
         'tipo',
         'descripcion',
+        'ubicacion',
         'fecha',
         'hora',
         'hora_fin',
@@ -85,7 +86,7 @@ class ArtistaEvento extends Model
         $fake->fill([
             'titulo'      => $this->titulo,
             'descripcion' => $this->descripcion ?? '',
-            'ubicacion'   => $this->artista?->nombre,
+            'ubicacion'   => $this->ubicacion ?: $this->artista?->nombre,
             'fecha'       => $this->fecha->format('Y-m-d'),
             'fecha_fin'   => null,
             'dias_semana' => null,
