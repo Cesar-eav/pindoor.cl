@@ -540,11 +540,21 @@
                         {{-- Texto --}}
                         <section class="space-y-6">
                             <div class="space-y-2">
-                                @if($punto->categoria)
-                                    <span class="inline-flex items-center gap-2 bg-pindoor-accent/10 text-pindoor-accent text-[11px] uppercase font-black px-4 py-1.5 rounded-full">
-                                        {{ $punto->categoria->nombre }}
-                                    </span>
-                                @endif
+                                <div class="flex items-start justify-between gap-2">
+                                    @if($punto->categoria)
+                                        <span class="inline-flex items-center gap-2 bg-pindoor-accent/10 text-pindoor-accent text-[11px] uppercase font-black px-4 py-1.5 rounded-full">
+                                            {{ $punto->categoria->nombre }}
+                                        </span>
+                                    @else
+                                        <span></span>
+                                    @endif
+
+                                    @include('partials._share_panel', [
+                                        'shareText' => $punto->title . ' — ' . $canonicalUrl,
+                                        'imageUrl' => $imagenUrl,
+                                        'url' => $canonicalUrl,
+                                    ])
+                                </div>
 
                                 <h1 class="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight leading-[1.1]">
                                     {{ $punto->title }}
