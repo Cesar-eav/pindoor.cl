@@ -31,12 +31,15 @@ class PostController extends Controller
         $data = $request->validate([
             'titulo_es'      => 'required|string|max:255',
             'titulo_en'      => 'nullable|string|max:255',
+            'titulo_fr'      => 'nullable|string|max:255',
             'slug'           => 'nullable|string|max:255',
             'dynamic_block_title' => 'nullable|string|max:255',
             'resumen_es'     => 'nullable|string|max:600',
             'resumen_en'     => 'nullable|string|max:600',
+            'resumen_fr'     => 'nullable|string|max:600',
             'contenido_es'   => 'nullable|string',
             'contenido_en'   => 'nullable|string',
+            'contenido_fr'   => 'nullable|string',
             'imagen_portada' => 'nullable|image|max:6144',
             'publicado'      => 'nullable|boolean',
         ]);
@@ -58,10 +61,13 @@ class PostController extends Controller
         $post->publicado_en   = $publicado ? now() : null;
         $post->setTranslation('titulo',    'es', $data['titulo_es'])
              ->setTranslation('titulo',    'en', $data['titulo_en'] ?? '')
+             ->setTranslation('titulo',    'fr', $data['titulo_fr'] ?? '')
              ->setTranslation('resumen',   'es', $data['resumen_es'] ?? '')
              ->setTranslation('resumen',   'en', $data['resumen_en'] ?? '')
+             ->setTranslation('resumen',   'fr', $data['resumen_fr'] ?? '')
              ->setTranslation('contenido', 'es', $data['contenido_es'] ?? '')
-             ->setTranslation('contenido', 'en', $data['contenido_en'] ?? '');
+             ->setTranslation('contenido', 'en', $data['contenido_en'] ?? '')
+             ->setTranslation('contenido', 'fr', $data['contenido_fr'] ?? '');
         $post->save();
 
         $this->sincronizarLugares($request, $post);
@@ -88,12 +94,15 @@ class PostController extends Controller
         $data = $request->validate([
             'titulo_es'      => 'required|string|max:255',
             'titulo_en'      => 'nullable|string|max:255',
+            'titulo_fr'      => 'nullable|string|max:255',
             'slug'           => 'nullable|string|max:255',
             'dynamic_block_title' => 'nullable|string|max:255',
             'resumen_es'     => 'nullable|string|max:600',
             'resumen_en'     => 'nullable|string|max:600',
+            'resumen_fr'     => 'nullable|string|max:600',
             'contenido_es'   => 'nullable|string',
             'contenido_en'   => 'nullable|string',
+            'contenido_fr'   => 'nullable|string',
             'imagen_portada' => 'nullable|image|max:6144',
             'publicado'      => 'nullable|boolean',
         ]);
@@ -133,10 +142,13 @@ class PostController extends Controller
 
         $blog->setTranslation('titulo',    'es', $data['titulo_es'])
              ->setTranslation('titulo',    'en', $data['titulo_en'] ?? '')
+             ->setTranslation('titulo',    'fr', $data['titulo_fr'] ?? '')
              ->setTranslation('resumen',   'es', $data['resumen_es'] ?? '')
              ->setTranslation('resumen',   'en', $data['resumen_en'] ?? '')
+             ->setTranslation('resumen',   'fr', $data['resumen_fr'] ?? '')
              ->setTranslation('contenido', 'es', $data['contenido_es'] ?? '')
-             ->setTranslation('contenido', 'en', $data['contenido_en'] ?? '');
+             ->setTranslation('contenido', 'en', $data['contenido_en'] ?? '')
+             ->setTranslation('contenido', 'fr', $data['contenido_fr'] ?? '');
         $blog->save();
 
         $this->sincronizarLugares($request, $blog);

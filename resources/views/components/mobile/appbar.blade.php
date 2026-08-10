@@ -49,6 +49,9 @@
             <span class="text-gray-300 text-[10px]">|</span>
             <a href="{{ route('lang.switch', 'en') }}"
                class="text-[10px] font-black transition {{ app()->getLocale() === 'en' ? 'text-[#fc5648]' : 'text-gray-400' }}">🇬🇧</a>
+            <span class="text-gray-300 text-[10px]">|</span>
+            <a href="{{ route('lang.switch', 'fr') }}"
+               class="text-[10px] font-black transition {{ app()->getLocale() === 'fr' ? 'text-[#fc5648]' : 'text-gray-400' }}">🇫🇷</a>
         </div>
     </nav>
 

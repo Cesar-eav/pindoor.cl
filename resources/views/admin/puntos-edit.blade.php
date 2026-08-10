@@ -19,13 +19,48 @@
                 <form id="main-form" onsubmit="return false;">
                     @csrf
 
+                    {{-- Tabs idioma --}}
+                    <div class="flex items-center gap-2 flex-wrap mb-6">
+                        <button type="button" id="tab-es" onclick="setLang('es')"
+                                class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-[#fc5648] bg-[#fc5648] text-white transition">
+                            🇪🇸 Español
+                        </button>
+                        <button type="button" id="tab-en" onclick="setLang('en')"
+                                class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition">
+                            🇬🇧 English
+                        </button>
+                        <button type="button" id="tab-fr" onclick="setLang('fr')"
+                                class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition">
+                            🇫🇷 Français
+                        </button>
+                        <button type="button" id="btn-autotraducir-en" onclick="autoTraducir('en')"
+                                class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border border-gray-200 bg-white text-gray-500 hover:border-blue-400 hover:text-blue-500 transition ml-2">
+                            ✨ ES→EN
+                        </button>
+                        <button type="button" id="btn-autotraducir-fr" onclick="autoTraducir('fr')"
+                                class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border border-gray-200 bg-white text-gray-500 hover:border-blue-400 hover:text-blue-500 transition">
+                            ✨ ES→FR
+                        </button>
+                        <span id="traducir-estado" class="text-xs text-gray-400 hidden"></span>
+                    </div>
+
                     {{-- Fila 1: Nombre + Categoría --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Nombre del Punto <span class="text-red-500">*</span>
-                            </label>
-                            <x-text-input id="title" name="title" class="block mt-1 w-full" required value="{{ $punto->title }}" />
+                            <div data-lang-field="es">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Nombre del Punto <span class="text-[#fc5648]">ES</span> <span class="text-red-500">*</span>
+                                </label>
+                                <x-text-input id="title-es" name="title_es" class="block mt-1 w-full" required value="{{ $punto->getTranslation('title','es',false) }}" />
+                            </div>
+                            <div data-lang-field="en" style="display:none">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-blue-500">EN</span></label>
+                                <x-text-input id="title-en" name="title_en" class="block mt-1 w-full" value="{{ $punto->getTranslation('title','en',false) }}" />
+                            </div>
+                            <div data-lang-field="fr" style="display:none">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nom <span class="text-indigo-500">FR</span></label>
+                                <x-text-input id="title-fr" name="title_fr" class="block mt-1 w-full" value="{{ $punto->getTranslation('title','fr',false) }}" />
+                            </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -94,12 +129,14 @@
                     {{-- Descripción --}}
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Reseña o descripción <span class="text-red-500">*</span>
+                            Reseña o descripción — <span id="editor-lang-label" class="text-[#fc5648]">ES</span> <span class="text-red-500">*</span>
                         </label>
-                        <textarea id="description-input" name="description" class="hidden">{{ $punto->description }}</textarea>
                         <div id="description-editor"
                              class="bg-white border border-gray-300 rounded-lg"
                              style="min-height: 180px;"></div>
+                        <textarea id="description_es" name="description_es" class="hidden">{{ $punto->getTranslation('description','es',false) }}</textarea>
+                        <textarea id="description_en" name="description_en" class="hidden">{{ $punto->getTranslation('description','en',false) }}</textarea>
+                        <textarea id="description_fr" name="description_fr" class="hidden">{{ $punto->getTranslation('description','fr',false) }}</textarea>
                     </div>
 
                     {{-- Perfil de búsqueda (admin) --}}
@@ -204,11 +241,125 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const hidden = document.getElementById('description-input');
-    if (hidden.value) quill.root.innerHTML = hidden.value;
+    let currentLang = 'es';
+    const hiddenEs = document.getElementById('description_es');
+    if (hiddenEs.value) quill.root.innerHTML = hiddenEs.value;
 
-    window.addEventListener('trigger-pindoor-submit', () => {
-        hidden.value = quill.root.innerHTML;
-    }, true);
+    function syncQuillActual() {
+        document.getElementById('description_' + currentLang).value = quill.root.innerHTML;
+    }
+
+    window.addEventListener('trigger-pindoor-submit', syncQuillActual, true);
+
+    const TAB_ESTILOS = {
+        es: 'border-[#fc5648] bg-[#fc5648] text-white',
+        en: 'border-blue-500 bg-blue-500 text-white',
+        fr: 'border-indigo-500 bg-indigo-500 text-white',
+    };
+    const TAB_INACTIVO = 'border-gray-200 bg-white text-gray-500 hover:border-gray-400';
+    const EDITOR_COLOR = { es: '#fc5648', en: '#3b82f6', fr: '#6366f1' };
+
+    window.setLang = function(lang) {
+        syncQuillActual();
+
+        document.querySelectorAll('[data-lang-field]').forEach(el => {
+            el.style.display = el.dataset.langField === lang ? '' : 'none';
+        });
+
+        quill.setContents([]);
+        const nuevoContenido = document.getElementById('description_' + lang).value;
+        if (nuevoContenido.trim()) {
+            quill.clipboard.dangerouslyPasteHTML(nuevoContenido);
+        }
+
+        const label = document.getElementById('editor-lang-label');
+        if (label) {
+            label.textContent = lang.toUpperCase();
+            label.style.color = EDITOR_COLOR[lang];
+        }
+
+        Object.keys(TAB_ESTILOS).forEach(l => {
+            const tab = document.getElementById('tab-' + l);
+            if (!tab) return;
+            tab.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border transition '
+                + (l === lang ? TAB_ESTILOS[l] : TAB_INACTIVO);
+        });
+
+        currentLang = lang;
+    };
+
+    window.autoTraducir = async function(destino) {
+        const btn    = document.getElementById('btn-autotraducir-' + destino);
+        const estado = document.getElementById('traducir-estado');
+
+        syncQuillActual();
+
+        const tituloEs = document.getElementById('title-es').value.trim();
+        const textoEs  = document.getElementById('description_es').value
+            ? new DOMParser().parseFromString(document.getElementById('description_es').value, 'text/html').body.textContent.trim()
+            : '';
+
+        if (!tituloEs && !textoEs) {
+            alert('Escribe primero el contenido en Español.');
+            return;
+        }
+
+        btn.disabled  = true;
+        btn.className = btn.className.replace('text-gray-500', 'text-blue-400');
+        estado.classList.remove('hidden');
+
+        async function traducirTexto(txt) {
+            if (!txt) return '';
+            const oraciones = txt.match(/[^.!?]+[.!?]+/g) || [txt];
+            const chunks = [];
+            let cur = '';
+            for (const o of oraciones) {
+                if ((cur + o).length > 450) { if (cur) chunks.push(cur); cur = o; }
+                else cur += (cur ? ' ' : '') + o;
+            }
+            if (cur) chunks.push(cur);
+
+            let resultado = '';
+            for (let i = 0; i < chunks.length; i++) {
+                estado.textContent = `Traduciendo… ${i + 1}/${chunks.length}`;
+                const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunks[i])}&langpair=es|${destino}&de=cesar.eav@gmail.com`);
+                const d = await r.json();
+                resultado += (d.responseData?.translatedText || chunks[i]) + ' ';
+                await new Promise(r => setTimeout(r, 600));
+            }
+            return resultado.trim();
+        }
+
+        try {
+            if (tituloEs) {
+                estado.textContent = 'Traduciendo nombre…';
+                document.getElementById('title-' + destino).value = await traducirTexto(tituloEs);
+            }
+            if (textoEs) {
+                estado.textContent = 'Traduciendo descripción…';
+                const traducido = await traducirTexto(textoEs);
+                const oraciones = traducido.match(/[^.!?]+[.!?]+/g) || [traducido];
+                let html = '';
+                let buf = '';
+                oraciones.forEach((o, i) => {
+                    buf += o + ' ';
+                    if (buf.length > 350 || i === oraciones.length - 1) {
+                        html += '<p>' + buf.trim() + '</p>';
+                        buf = '';
+                    }
+                });
+                document.getElementById('description_' + destino).value = html;
+            }
+
+            setLang(destino);
+            estado.textContent = '✓ Traducción completada';
+            setTimeout(() => { estado.classList.add('hidden'); estado.textContent = ''; }, 3000);
+        } catch(e) {
+            estado.textContent = 'Error al traducir. Inténtalo de nuevo.';
+        } finally {
+            btn.disabled  = false;
+            btn.className = btn.className.replace('text-blue-400', 'text-gray-500');
+        }
+    };
 });
 </script>

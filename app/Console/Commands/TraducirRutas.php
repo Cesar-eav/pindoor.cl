@@ -2,16 +2,16 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Post;
+use App\Models\Ruta;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 
-class TraducirBlog extends Command
+class TraducirRutas extends Command
 {
-    protected $signature   = 'blog:traducir {--id= : ID del post específico} {--force : Sobreescribir traducciones existentes} {--to=en : Idioma destino (en|fr)}';
-    protected $description = 'Traduce posts del blog de ES a EN/FR usando MyMemory API';
+    protected $signature   = 'rutas:traducir {--id= : ID de la ruta específica} {--force : Sobreescribir traducciones existentes} {--to=en : Idioma destino (en|fr)}';
+    protected $description = 'Traduce rutas Pindoor de ES a EN/FR usando MyMemory API';
 
-    private const API  = 'https://api.mymemory.translated.net/get';
+    private const API   = 'https://api.mymemory.translated.net/get';
     private const EMAIL = 'cesar.eav@gmail.com';
 
     public function handle(): int
@@ -22,28 +22,26 @@ class TraducirBlog extends Command
             return self::FAILURE;
         }
 
-        $query = Post::query();
+        $query = Ruta::query();
 
         if ($id = $this->option('id')) {
             $query->where('id', $id);
         }
 
-        $posts = $query->get();
+        $rutas = $query->get();
 
-        foreach ($posts as $post) {
-            $tituloEs   = $post->getTranslation('titulo', 'es', false);
-            $resumenEs  = $post->getTranslation('resumen', 'es', false);
-            $contenidoEs = $post->getTranslation('contenido', 'es', false);
+        foreach ($rutas as $ruta) {
+            $tituloEs      = $ruta->getTranslation('titulo', 'es', false);
+            $descripcionEs = $ruta->getTranslation('descripcion', 'es', false);
 
-            $tituloDestino    = $post->getTranslation('titulo', $to, false);
-            $resumenDestino   = $post->getTranslation('resumen', $to, false);
-            $contenidoDestino = $post->getTranslation('contenido', $to, false);
+            $tituloDestino      = $ruta->getTranslation('titulo', $to, false);
+            $descripcionDestino = $ruta->getTranslation('descripcion', $to, false);
 
             $force = $this->option('force');
 
-            $this->info("Post #{$post->id}: {$tituloEs}");
+            $this->info("Ruta #{$ruta->id}: {$tituloEs}");
 
-            if (!$force && $tituloDestino && $contenidoDestino) {
+            if (!$force && $tituloDestino) {
                 $this->line("  → Ya tiene traducción {$to}. Usa --force para sobreescribir.");
                 continue;
             }
@@ -54,44 +52,20 @@ class TraducirBlog extends Command
                 $this->line("  título: {$tituloDestino}");
             }
 
-            // Resumen
-            if ($force || !$resumenDestino) {
-                $resumenDestino = $this->traducirTextoLargo(strip_tags($resumenEs), $to);
-                $this->line('  resumen: OK');
+            // Descripción
+            if ($force || !$descripcionDestino) {
+                $descripcionDestino = $this->traducirTextoLargo($descripcionEs, $to);
+                $this->line('  descripción: OK');
             }
 
-            // Contenido (strip HTML, traducir, reconstruir como párrafos)
-            if ($force || !$contenidoDestino) {
-                $contenidoDestino = $this->traducirHtml($contenidoEs, $to);
-                $this->line('  contenido: OK');
-            }
-
-            $post->setTranslation('titulo',    $to, $tituloDestino)
-                 ->setTranslation('resumen',   $to, $resumenDestino)
-                 ->setTranslation('contenido', $to, $contenidoDestino)
+            $ruta->setTranslation('titulo',      $to, $tituloDestino)
+                 ->setTranslation('descripcion', $to, $descripcionDestino)
                  ->save();
 
             $this->info("  ✓ Guardado");
         }
 
         return self::SUCCESS;
-    }
-
-    private function traducirHtml(string $html, string $to): string
-    {
-        // Extraer párrafos/bloques de texto sin HTML
-        $texto = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $texto = preg_replace('/\s+/', ' ', trim($texto));
-
-        $traducido = $this->traducirTextoLargo($texto, $to);
-
-        // Reconstruir como párrafos HTML
-        $parrafos = array_filter(array_map('trim', explode("\n", $traducido)));
-        if (empty($parrafos)) {
-            return "<p>{$traducido}</p>";
-        }
-
-        return implode('', array_map(fn($p) => "<p>{$p}</p>", $parrafos));
     }
 
     private function traducirTextoLargo(string $texto, string $to): string

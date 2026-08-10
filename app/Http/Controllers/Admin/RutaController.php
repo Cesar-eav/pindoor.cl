@@ -45,8 +45,10 @@ class RutaController extends Controller
         $ruta->publicado_en    = $data['publicado_en'];
         $ruta->setTranslation('titulo', 'es', $data['titulo_es'])
              ->setTranslation('titulo', 'en', $data['titulo_en'] ?? '')
+             ->setTranslation('titulo', 'fr', $data['titulo_fr'] ?? '')
              ->setTranslation('descripcion', 'es', $data['descripcion_es'] ?? '')
-             ->setTranslation('descripcion', 'en', $data['descripcion_en'] ?? '');
+             ->setTranslation('descripcion', 'en', $data['descripcion_en'] ?? '')
+             ->setTranslation('descripcion', 'fr', $data['descripcion_fr'] ?? '');
         $ruta->save();
 
         $this->sincronizarPuntos($request, $ruta);
@@ -90,8 +92,10 @@ class RutaController extends Controller
         $ruta->publicado = $publicado;
         $ruta->setTranslation('titulo', 'es', $data['titulo_es'])
              ->setTranslation('titulo', 'en', $data['titulo_en'] ?? '')
+             ->setTranslation('titulo', 'fr', $data['titulo_fr'] ?? '')
              ->setTranslation('descripcion', 'es', $data['descripcion_es'] ?? '')
-             ->setTranslation('descripcion', 'en', $data['descripcion_en'] ?? '');
+             ->setTranslation('descripcion', 'en', $data['descripcion_en'] ?? '')
+             ->setTranslation('descripcion', 'fr', $data['descripcion_fr'] ?? '');
         $ruta->save();
 
         $this->sincronizarPuntos($request, $ruta);
@@ -128,8 +132,10 @@ class RutaController extends Controller
         return $request->validate([
             'titulo_es'      => 'required|string|max:255',
             'titulo_en'      => 'nullable|string|max:255',
+            'titulo_fr'      => 'nullable|string|max:255',
             'descripcion_es' => 'nullable|string|max:2000',
             'descripcion_en' => 'nullable|string|max:2000',
+            'descripcion_fr' => 'nullable|string|max:2000',
             'imagen_portada' => 'nullable|image|max:25600',
             'publicado'      => 'nullable|boolean',
         ]);

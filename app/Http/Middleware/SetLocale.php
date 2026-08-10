@@ -10,7 +10,7 @@ class SetLocale
 {
     public function handle(Request $request, Closure $next)
     {
-        $supported = ['es', 'en'];
+        $supported = ['es', 'en', 'fr'];
 
         // 1. Segmento de URL: /en/...
         $segment = $request->segment(1);
