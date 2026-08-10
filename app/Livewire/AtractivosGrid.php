@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Http\Controllers\PuntoInteresController;
 use App\Models\Artista;
 use App\Models\Categoria;
 use App\Models\Experiencia;
@@ -82,7 +83,7 @@ class AtractivosGrid extends Component
 
         $categoriasConPuntos = collect();
         if (!$hayFiltros) {
-            $porCategoria = 15;
+            $porCategoria = PuntoInteresController::PUNTOS_POR_CATEGORIA;
             $categoriasConPuntos = $categorias
                 ->map(fn($cat) => (object) [
                     'categoria' => $cat,
