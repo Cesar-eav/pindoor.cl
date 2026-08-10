@@ -194,7 +194,7 @@
                  }"
                  x-init="check()">
                 <div x-ref="scroller"
-                     class="overflow-x-auto pb-2"
+                     class="overflow-x-auto pb-0"
                      style="scrollbar-width:none;cursor:grab"
                      @scroll="check()"
                      @mousedown.prevent="dragging = true; startX = $event.pageX - $el.offsetLeft; scrollStart = $el.scrollLeft; $el.style.cursor = 'grabbing'"
@@ -203,7 +203,7 @@
                      @mousemove="if (dragging) { $el.scrollLeft = scrollStart - ($event.pageX - $el.offsetLeft - startX) * 1.5; check(); }">
                     <div class="flex gap-4">
                         @foreach($entry->puntos as $atractivo)
-                        <div class="shrink-0 w-56">
+                        <div class="shrink-0 w-68">
                             @include('puntos.partials._card_desktop')
                         </div>
                         @endforeach
