@@ -26,6 +26,7 @@ class ArtistaEventosController extends Controller
         $request->validate([
             'titulo'       => 'required|string|max:255',
             'descripcion'  => 'nullable|string',
+            'ubicacion'    => 'nullable|string|max:255',
             'tipo'         => 'required|string|in:' . implode(',', \App\Models\CategoriaEvento::slugs()),
             'fecha'        => 'required|date',
             'hora'         => 'nullable|date_format:H:i',
@@ -42,6 +43,7 @@ class ArtistaEventosController extends Controller
             'titulo'       => $request->titulo,
             'tipo'         => $request->tipo,
             'descripcion'  => $request->descripcion,
+            'ubicacion'    => $request->ubicacion,
             'fecha'        => $request->fecha,
             'hora'         => $request->hora,
             'hora_fin'     => $request->hora_fin,

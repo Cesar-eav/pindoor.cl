@@ -368,6 +368,7 @@
                             const f = this.$refs.form;
                             f.titulo.value = evento.titulo;
                             f.tipo.value = evento.tipo;
+                            f.ubicacion.value = evento.ubicacion || '';
                             f.fecha.value = evento.fecha;
                             f.hora.value = evento.hora || '';
                             f.hora_fin.value = evento.hora_fin || '';
@@ -417,6 +418,14 @@
                                             </option>
                                         @endforeach
                                     </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1">¿Dónde será?</label>
+                                    <input type="text" name="ubicacion"
+                                           value="{{ old('ubicacion') }}"
+                                           placeholder="Ej: Teatro Municipal, Casa Dunlok, Bar EntreTiempo"
+                                           class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-violet-400">
                                 </div>
 
                                 <div>
@@ -560,6 +569,9 @@
                                         @if($evento->hora)· 🕐 {{ \Carbon\Carbon::parse($evento->hora)->format('H:i') }}@endif
                                         @if($evento->hora_fin)– {{ \Carbon\Carbon::parse($evento->hora_fin)->format('H:i') }}@endif
                                     </p>
+                                    @if($evento->ubicacion)
+                                        <p class="text-xs text-gray-500 mt-0.5">📍 {{ $evento->ubicacion }}</p>
+                                    @endif
                                     <p class="text-xs font-bold text-violet-700 mt-0.5">{{ $evento->precioEvento() }}</p>
                                 </div>
                                 <div class="flex gap-2 shrink-0">
@@ -568,6 +580,7 @@
                                                 'id'           => $evento->id,
                                                 'titulo'       => $evento->titulo,
                                                 'tipo'         => $evento->tipo,
+                                                'ubicacion'    => $evento->ubicacion,
                                                 'fecha'        => optional($evento->fecha)->format('Y-m-d'),
                                                 'hora'         => $evento->hora,
                                                 'hora_fin'     => $evento->hora_fin,

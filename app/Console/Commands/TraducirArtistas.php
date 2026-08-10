@@ -59,8 +59,10 @@ class TraducirArtistas extends Command
             foreach ($artista->eventos as $evento) {
                 $tituloEs        = $evento->getTranslation('titulo', 'es', false);
                 $descEventoEs    = $evento->getTranslation('descripcion', 'es', false);
+                $ubicacionEs     = $evento->getTranslation('ubicacion', 'es', false);
                 $tituloDestino   = $evento->getTranslation('titulo', $to, false);
                 $descEventoDest  = $evento->getTranslation('descripcion', $to, false);
+                $ubicacionDest   = $evento->getTranslation('ubicacion', $to, false);
 
                 if (!$force && $tituloDestino) {
                     continue;
@@ -76,9 +78,14 @@ class TraducirArtistas extends Command
                     $descEventoDest = $this->traducir($descEventoEs, $to);
                     $this->line('    descripción: OK');
                 }
+                if ($ubicacionEs && ($force || !$ubicacionDest)) {
+                    $ubicacionDest = $this->traducir($ubicacionEs, $to);
+                    $this->line("    ubicación: {$ubicacionDest}");
+                }
 
                 $evento->setTranslation('titulo',      $to, $tituloDestino)
                        ->setTranslation('descripcion', $to, $descEventoDest)
+                       ->setTranslation('ubicacion',   $to, $ubicacionDest)
                        ->save();
             }
         }
