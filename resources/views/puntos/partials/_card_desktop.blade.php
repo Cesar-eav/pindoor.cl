@@ -4,9 +4,9 @@
             @if($atractivo->imagenPrincipal)
                 <img src="{{ asset('storage/' . $atractivo->imagenPrincipal->ruta) }}"
                      alt="{{ $atractivo->title }}"
-                     class="w-full h-80 object-cover hover:scale-105 transition-transform duration-500"/>
+                     class="w-full h-52 object-cover hover:scale-105 transition-transform duration-500"/>
             @else
-                <div class="w-full h-80 bg-gray-100 flex items-center justify-center text-4xl">📍</div>
+                <div class="w-full h-52 bg-gray-100 flex items-center justify-center text-4xl">📍</div>
             @endif
         </a>
 
@@ -57,8 +57,8 @@
         </div>
         @endif
 
-        <p class="text-gray-500 text-sm leading-relaxed">
-            {{ Str::limit(strip_tags($atractivo->description), 100) }}
-        </p>
+        {{-- <p class="text-gray-500 text-sm leading-relaxed">
+            {{ Str::limit(strip_tags($atractivo->description), 0) }}
+        </p> --}}
     </div>
 </article>
