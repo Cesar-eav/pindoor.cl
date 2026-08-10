@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Mail;
 
 class PuntoInteresController extends Controller
 {
+    const PUNTOS_POR_CATEGORIA = 30;
 
   public function index(Request $request)
 {
@@ -63,7 +64,7 @@ class PuntoInteresController extends Controller
 
         $categoriasConPuntos = collect();
         if ($sinFiltros) {
-            $porCategoria = 15;
+            $porCategoria = self::PUNTOS_POR_CATEGORIA;
             $categoriasConPuntos = $categorias
                 ->map(fn($cat) => (object) [
                     'categoria' => $cat,
