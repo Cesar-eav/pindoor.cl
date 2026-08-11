@@ -134,11 +134,11 @@
         </div>
 
         {{-- Operadores que ofrecen esta ruta --}}
-        @if($ruta->operadores->isNotEmpty())
         <div class="mt-14 pt-8 border-t border-gray-100">
             <h3 class="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
                 🧭 Disponible con
             </h3>
+            @if($ruta->operadores->isNotEmpty())
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 @foreach($ruta->operadores as $operador)
                 <a href="{{ route('operador.show', $operador->slug) }}"
@@ -160,8 +160,13 @@
                 </a>
                 @endforeach
             </div>
+            @else
+            <div class="flex items-center gap-3 bg-[#fff0ef] border border-[#fc5648]/20 rounded-2xl p-4">
+                <span class="text-2xl shrink-0">🧭</span>
+                <p class="text-sm text-gray-600">Pronto habrá una oferta de operadores turísticos para realizar esta ruta.</p>
+            </div>
+            @endif
         </div>
-        @endif
 
         {{-- Footer --}}
         <div class="mt-16 pt-8 border-t border-gray-100 flex items-center justify-between flex-wrap gap-4">
