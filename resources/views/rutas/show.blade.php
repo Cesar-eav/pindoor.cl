@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     delete L.Icon.Default.prototype._getIconUrl;
 
-    const mapa = L.map('mapa-ruta', { attributionControl: false, scrollWheelZoom: false });
+    const mapa = L.map('mapa-ruta', { attributionControl: false, scrollWheelZoom: false, dragging: false });
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         maxZoom: 19, subdomains: 'abcd',
