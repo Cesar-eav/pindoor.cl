@@ -25,7 +25,7 @@
                       enctype="multipart/form-data" class="space-y-5">
                     @csrf
 
-                    @include('admin.panoramas._form')
+                    @include('admin.panoramas._form', ['panorama' => null])
 
                     <div class="flex gap-3 pt-2">
                         <button type="submit"
