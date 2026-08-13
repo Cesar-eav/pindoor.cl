@@ -33,10 +33,18 @@
     </div>
 
     @php
+    // Estado real de los ascensores — se edita desde /admin/configuracion
+    $ascensores = \App\Models\PuntoInteres::publico()
+        ->whereHas('categoria', fn($q) => $q->where('slug', 'ascensores'))
+        ->orderBy('title')
+        ->get(['title', 'sector', 'fuera_de_servicio', 'fuera_de_servicio_motivo']);
+    $ascensoresOperativos = $ascensores->where('fuera_de_servicio', false)->values();
+    $ascensoresFuera      = $ascensores->where('fuera_de_servicio', true)->values();
+
     $cards = [
         ['id'=>'trolebus',        'emoji'=>'🚎', 'titulo'=>__('ui.info.trolebus.titulo'),        'sub'=>__('ui.info.trolebus.sub'),        'color'=>'#f59e0b', 'bg'=>'#fffbeb'],
         ['id'=>'metro',           'emoji'=>'🚆', 'titulo'=>__('ui.info.metro.titulo'),           'sub'=>__('ui.info.metro.sub'),           'color'=>'#3b82f6', 'bg'=>'#eff6ff'],
-        ['id'=>'ascensores',      'emoji'=>'🚡', 'titulo'=>__('ui.info.ascensores.titulo'),      'sub'=>__('ui.info.ascensores.sub'),      'color'=>'#0d9488', 'bg'=>'#f0fdfa'],
+        ['id'=>'ascensores',      'emoji'=>'🚡', 'titulo'=>__('ui.info.ascensores.titulo'),      'sub'=>__('ui.info.ascensores.sub', ['n' => $ascensoresOperativos->count()]), 'color'=>'#0d9488', 'bg'=>'#f0fdfa'],
         ['id'=>'terminal',        'emoji'=>'🚌', 'titulo'=>__('ui.info.terminal.titulo'),        'sub'=>__('ui.info.terminal.sub'),        'color'=>'#10b981', 'bg'=>'#f0fdf4'],
         ['id'=>'banos',           'emoji'=>'🚻', 'titulo'=>__('ui.info.banos.titulo'),           'sub'=>__('ui.info.banos.sub'),           'color'=>'#8b5cf6', 'bg'=>'#f5f3ff'],
         ['id'=>'cambio',          'emoji'=>'💱', 'titulo'=>__('ui.info.cambio.titulo'),          'sub'=>__('ui.info.cambio.sub'),          'color'=>'#fc5648', 'bg'=>'#fff5f5'],
@@ -58,11 +66,8 @@
         ->map(fn($r) => "• {$r[0]}" . ($r[1] ? " · {$r[1]}" : ''))
         ->implode($nl);
 
-    $ascList  = collect(__('ui.info.ascensores.list'))
-        ->map(fn($r) => "• {$r[0]} ({$r[1]}) — {$r[2]}")
-        ->implode($nl);
-    $ascFuera = collect(__('ui.info.ascensores.fuera_list'))
-        ->map(fn($r) => "• {$r[0]}: {$r[1]}")
+    $ascList  = $ascensoresOperativos
+        ->map(fn($a) => "• {$a->title}" . ($a->sector ? " ({$a->sector})" : ''))
         ->implode($nl);
 
     $termDests = collect(__('ui.info.terminal.dests'))
@@ -152,7 +157,7 @@
 
         'ascensores' => implode($nl, [
             "🚡 *Ascensores de Valparaíso · 2026*",
-            "Patrimonio UNESCO · 7 operativos",
+            "Patrimonio UNESCO · {$ascensoresOperativos->count()} operativos",
             "",
             "⚠️ No hay garantía al 100% de que funcionen el día de tu visita.",
             "",
@@ -168,9 +173,6 @@
             "",
             "✅ *Operativos:*",
             $ascList,
-            "",
-            "❌ *Fuera de servicio:*",
-            $ascFuera,
             "",
             __('ui.info.wa_intro') . " {$base}#ascensores",
         ]),
@@ -575,15 +577,19 @@
 
                 {{-- Lista operativos --}}
                 <div>
-                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">{{ __('ui.info.ascensores.operativos') }}</p>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
+                        {{ __('ui.info.ascensores.operativos', ['n' => $ascensoresOperativos->count()]) }}
+                    </p>
                     <div class="space-y-0">
-                        @foreach(__('ui.info.ascensores.list') as $row)
+                        @foreach($ascensoresOperativos as $ascensor)
                         <div class="flex items-center justify-between py-2 {{ !$loop->last?'border-b border-gray-50':'' }}">
                             <div>
-                                <p class="text-xs font-bold text-gray-900">{{ $row[0] }}</p>
-                                <p class="text-[10px] text-gray-400">{{ $row[1] }}</p>
+                                <p class="text-xs font-bold text-gray-900">{{ $ascensor->title }}</p>
+                                @if($ascensor->sector)
+                                <p class="text-[10px] text-gray-400">{{ $ascensor->sector }}</p>
+                                @endif
                             </div>
-                            <span class="text-xs font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full shrink-0">{{ $row[2] }}</span>
+                            <span class="text-xs font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full shrink-0">✅</span>
                         </div>
                         @endforeach
                     </div>
@@ -596,17 +602,19 @@
                 </div>
 
                 {{-- Fuera de servicio --}}
+                @if($ascensoresFuera->isNotEmpty())
                 <div>
                     <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">{{ __('ui.info.ascensores.fuera') }}</p>
                     <div class="flex flex-wrap gap-2">
-                        @foreach(__('ui.info.ascensores.fuera_list') as $row)
+                        @foreach($ascensoresFuera as $ascensor)
                         <div class="bg-red-50 rounded-xl px-3 py-1.5">
-                            <p class="text-xs font-semibold text-red-700">{{ $row[0] }}</p>
-                            <p class="text-[10px] text-red-400">{{ $row[1] }}</p>
+                            <p class="text-xs font-semibold text-red-700">{{ $ascensor->title }}</p>
+                            <p class="text-[10px] text-red-400">{{ $ascensor->fuera_de_servicio_motivo ?: 'Sin información adicional' }}</p>
                         </div>
                         @endforeach
                     </div>
                 </div>
+                @endif
 
             </div>
             @endif

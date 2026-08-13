@@ -268,9 +268,9 @@ return [
         ],
         'ascensores' => [
             'titulo'      => 'Funicular Elevators',
-            'sub'         => '7 running in 2026 · UNESCO Heritage',
+            'sub'         => ':n running in 2026 · UNESCO Heritage',
             'aviso'       => '⚠️ Even if listed as operational, there is <strong>no 100% guarantee</strong> an elevator will be running on the day you visit. Maintenance is irregular and closures happen without notice.',
-            'operativos'  => 'Currently running (7)',
+            'operativos'  => 'Currently running (:n)',
             'tarifa_gral' => 'General fare',
             'tarifa_bici' => 'Bicycle (Barón & Cordillera)',
             'tarifa_ext'  => 'Foreign tourist fare',
@@ -279,20 +279,6 @@ return [
             'exentos'     => 'Free of charge',
             'exentos_txt' => 'Under 14 · Students with valid ID · Over 60',
             'fuera'       => 'Out of service',
-            'list'        => [
-                ['Barón',         'Cerro Barón · Av. España', '$200'],
-                ['Concepción',    'Cerro Concepción',         '$300'],
-                ['Cordillera',    'Puerto district',          '$200'],
-                ['El Peral',      'Cerro Alegre',             '$200'],
-                ['Reina Victoria','Cerro Alegre',             '$200'],
-                ['Espíritu Santo','Cerro Bellavista',         '$200'],
-                ['San Agustín',   'Puerto district',          '$200'],
-            ],
-            'fuera_list'  => [
-                ['Polanco',    'Under restoration & redesign · 2026'],
-                ['Artillería', 'Heritage recovery works'],
-                ['Others',     '~12 historic elevators not in service'],
-            ],
         ],
         'cambio' => [
             'titulo'     => 'Currency Exchange',
