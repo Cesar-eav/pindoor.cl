@@ -269,9 +269,9 @@ return [
         ],
         'ascensores' => [
             'titulo'      => 'Ascensores',
-            'sub'         => '7 operativos en 2026 · Patrimonio UNESCO',
+            'sub'         => ':n operativos en 2026 · Patrimonio UNESCO',
             'aviso'       => '⚠️ Aunque figuren como operativos, <strong>no existe garantía al 100%</strong> de que funcionen el día de tu visita. El mantenimiento es irregular y pueden suspenderse sin aviso.',
-            'operativos'  => 'Operativos (7)',
+            'operativos'  => 'Operativos (:n)',
             'tarifa_gral' => 'Tarifa general',
             'tarifa_bici' => 'Bicicleta (Barón y Cordillera)',
             'tarifa_ext'  => 'Turista extranjero',
@@ -280,20 +280,6 @@ return [
             'exentos'     => 'Exentos de pago',
             'exentos_txt' => 'Menores de 14 años · Estudiantes con credencial · Mayores de 60 años',
             'fuera'       => 'Fuera de servicio',
-            'list'        => [
-                ['Barón',         'Cerro Barón · Av. España',   '$200'],
-                ['Concepción',    'Cerro Concepción',           '$300'],
-                ['Cordillera',    'Barrio Puerto',              '$200'],
-                ['El Peral',      'Cerro Alegre',               '$200'],
-                ['Reina Victoria','Cerro Alegre',               '$200'],
-                ['Espíritu Santo','Cerro Bellavista',           '$200'],
-                ['San Agustín',   'Barrio Puerto',              '$200'],
-            ],
-            'fuera_list'  => [
-                ['Polanco',    'En restauración y rediseño · 2026'],
-                ['Artillería', 'Detenido desde el 2021'],
-                ['Otros',      '~12 ascensores históricos sin operar'],
-            ],
         ],
         'cambio' => [
             'titulo'     => 'Cambio de Moneda',

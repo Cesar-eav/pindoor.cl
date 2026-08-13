@@ -268,9 +268,9 @@ return [
         ],
         'ascensores' => [
             'titulo'      => 'Ascenseurs funiculaires',
-            'sub'         => '7 en service en 2026 · Patrimoine UNESCO',
+            'sub'         => ':n en service en 2026 · Patrimoine UNESCO',
             'aviso'       => '⚠️ Même indiqué comme opérationnel, rien ne garantit <strong>à 100 %</strong> qu\'un ascenseur fonctionnera le jour de votre visite. L\'entretien est irrégulier et les fermetures surviennent sans préavis.',
-            'operativos'  => 'Actuellement en service (7)',
+            'operativos'  => 'Actuellement en service (:n)',
             'tarifa_gral' => 'Tarif général',
             'tarifa_bici' => 'Vélo (Barón et Cordillera)',
             'tarifa_ext'  => 'Tarif touriste étranger',
@@ -279,20 +279,6 @@ return [
             'exentos'     => 'Gratuit',
             'exentos_txt' => 'Moins de 14 ans · Étudiants avec carte valide · Plus de 60 ans',
             'fuera'       => 'Hors service',
-            'list'        => [
-                ['Barón',         'Cerro Barón · Av. España', '$200'],
-                ['Concepción',    'Cerro Concepción',         '$300'],
-                ['Cordillera',    'Quartier Puerto',          '$200'],
-                ['El Peral',      'Cerro Alegre',             '$200'],
-                ['Reina Victoria','Cerro Alegre',             '$200'],
-                ['Espíritu Santo','Cerro Bellavista',         '$200'],
-                ['San Agustín',   'Quartier Puerto',          '$200'],
-            ],
-            'fuera_list'  => [
-                ['Polanco',    'En cours de restauration et réaménagement · 2026'],
-                ['Artillería', 'Travaux de récupération du patrimoine'],
-                ['Autres',     '~12 ascenseurs historiques hors service'],
-            ],
         ],
         'cambio' => [
             'titulo'     => 'Bureau de change',
