@@ -108,13 +108,21 @@
             <span class="text-[#fc5648] truncate max-w-45">{{ $revival->titulo }}</span>
         </nav>
 
-        {{-- Meta fecha + autor --}}
-        <p class="text-xs font-black uppercase tracking-widest text-[#fc5648] mb-3">
-            🎬 {{ $revival->publicado_en?->translatedFormat('d \d\e F \d\e Y') }}
-            @if($revival->autor)
-            <span class="text-gray-400 normal-case font-semibold">· Por {{ $revival->autor }}</span>
-            @endif
-        </p>
+        {{-- Meta fecha + autor + compartir --}}
+        <div class="flex items-start justify-between gap-2 mb-3">
+            <p class="text-xs font-black uppercase tracking-widest text-[#fc5648]">
+                🎬 {{ $revival->publicado_en?->translatedFormat('d \d\e F \d\e Y') }}
+                @if($revival->autor)
+                <span class="text-gray-400 normal-case font-semibold">· Por {{ $revival->autor }}</span>
+                @endif
+            </p>
+
+            @include('partials._share_panel', [
+                'shareText' => $revival->titulo . ' — ' . $canonicalUrl,
+                'imageUrl'  => $revival->imagen_portada_url,
+                'url'       => $canonicalUrl,
+            ])
+        </div>
 
         {{-- Título --}}
         <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900
