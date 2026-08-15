@@ -1,10 +1,10 @@
 <x-admin-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Blog</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Guías</h2>
             <a href="{{ route('admin.blog.create') }}"
                class="bg-[#fc5648] text-white text-sm font-bold px-4 py-2 rounded-xl hover:bg-[#d94439] transition">
-                + Nuevo post
+                + Nueva guía
             </a>
         </div>
     </x-slot>
@@ -20,7 +20,7 @@
         @if($posts->isEmpty())
         <div class="bg-white rounded-2xl border border-gray-100 px-6 py-16 text-center text-gray-400">
             <div class="text-5xl mb-4">✍️</div>
-            <p class="font-semibold text-lg">Aún no hay posts.</p>
+            <p class="font-semibold text-lg">Aún no hay guías.</p>
             <p class="text-sm mt-1">Crea el primero con el botón de arriba.</p>
         </div>
         @else

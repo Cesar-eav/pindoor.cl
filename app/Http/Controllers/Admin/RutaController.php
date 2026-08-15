@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\OperadorTuristico;
+use App\Models\Post;
 use App\Models\PuntoInteres;
 use App\Models\Ruta;
 use App\Services\ImagenComprimida;
@@ -22,7 +23,8 @@ class RutaController extends Controller
     {
         $puntos = $this->puntosDisponibles();
         $operadores = OperadorTuristico::where('activo', true)->orderBy('nombre')->get();
-        return view('admin.rutas.create', compact('puntos', 'operadores'));
+        $guias = Post::all()->sortBy(fn ($p) => $p->titulo)->values();
+        return view('admin.rutas.create', compact('puntos', 'operadores', 'guias'));
     }
 
     public function store(Request $request)
@@ -53,6 +55,7 @@ class RutaController extends Controller
 
         $this->sincronizarPuntos($request, $ruta);
         $this->sincronizarOperadores($request, $ruta);
+        $this->sincronizarGuias($request, $ruta);
 
         if ($request->input('accion') === 'seguir') {
             return redirect()->route('admin.rutas.edit', $ruta)->with('success', 'Ruta creada correctamente.');
@@ -62,10 +65,11 @@ class RutaController extends Controller
 
     public function edit(Ruta $ruta)
     {
-        $ruta->load('puntos', 'operadores');
+        $ruta->load('puntos', 'operadores', 'guias');
         $puntos = $this->puntosDisponibles();
         $operadores = OperadorTuristico::where('activo', true)->orderBy('nombre')->get();
-        return view('admin.rutas.edit', compact('ruta', 'puntos', 'operadores'));
+        $guias = Post::all()->sortBy(fn ($p) => $p->titulo)->values();
+        return view('admin.rutas.edit', compact('ruta', 'puntos', 'operadores', 'guias'));
     }
 
     public function update(Request $request, Ruta $ruta)
@@ -100,6 +104,7 @@ class RutaController extends Controller
 
         $this->sincronizarPuntos($request, $ruta);
         $this->sincronizarOperadores($request, $ruta);
+        $this->sincronizarGuias($request, $ruta);
 
         if ($request->input('accion') === 'seguir') {
             return redirect()->route('admin.rutas.edit', $ruta)->with('success', 'Ruta actualizada correctamente.');
@@ -115,7 +120,7 @@ class RutaController extends Controller
 
     public function preview(Ruta $ruta)
     {
-        $ruta->load('puntos.categoria', 'puntos.imagenPrincipal', 'operadores');
+        $ruta->load('puntos.categoria', 'puntos.imagenPrincipal', 'operadores', 'guias');
         return view('rutas.show', compact('ruta'));
     }
 
@@ -156,5 +161,11 @@ class RutaController extends Controller
     {
         $ids = $request->input('operadores', []);
         $ruta->operadores()->sync(collect($ids)->filter()->values()->all());
+    }
+
+    private function sincronizarGuias(Request $request, Ruta $ruta): void
+    {
+        $ids = $request->input('guias', []);
+        $ruta->guias()->sync(collect($ids)->filter()->values()->all());
     }
 }

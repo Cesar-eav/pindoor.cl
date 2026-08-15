@@ -340,6 +340,33 @@
         @endif
     </div>
 
+    {{-- Guías relacionadas --}}
+    <div class="w-[90vw] mx-auto bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">
+            Guías relacionadas
+        </label>
+        <p class="text-xs text-gray-400 mb-3">
+            Vincula guías del blog que hablan de este recorrido. Aparecerán en la ficha pública de la ruta, y esta ruta aparecerá en la ficha de cada guía.
+        </p>
+
+        @php $guiasSeleccionadas = $ruta?->guias->pluck('id')->all() ?? []; @endphp
+
+        @if($guias->isEmpty())
+        <p class="text-xs text-gray-300 italic">No hay guías publicadas todavía.</p>
+        @else
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            @foreach($guias as $guia)
+            <label class="flex items-center gap-2.5 px-4 py-2.5 border border-gray-200 rounded-xl text-sm cursor-pointer hover:bg-gray-50 has-[:checked]:border-[#fc5648] has-[:checked]:bg-[#fff0ef] transition">
+                <input type="checkbox" name="guias[]" value="{{ $guia->id }}"
+                       {{ in_array($guia->id, old('guias', $guiasSeleccionadas)) ? 'checked' : '' }}
+                       class="rounded border-gray-300 text-[#fc5648] focus:ring-[#fc5648]">
+                <span class="font-medium text-gray-700 truncate">{{ $guia->titulo }}</span>
+            </label>
+            @endforeach
+        </div>
+        @endif
+    </div>
+
     <script>
     document.addEventListener('DOMContentLoaded', function () {
 

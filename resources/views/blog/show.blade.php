@@ -1,6 +1,6 @@
 @php
     use Illuminate\Support\Str;
-    $seoTitle = $post->titulo . ' · Blog Valparaíso | Pindoor';
+    $seoTitle = $post->titulo . ' · Guías Valparaíso | Pindoor';
     $seoDesc  = $post->resumen
         ? Str::limit($post->resumen, 155, '')
         : Str::limit(strip_tags($post->contenido), 155, '');
@@ -118,7 +118,7 @@
         <nav class="flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-8">
             <a href="{{ route('puntos.index') }}" class="hover:text-[#fc5648] transition">Pindoor</a>
             <span class="text-gray-300">/</span>
-            <a href="{{ route('blog.index') }}" class="hover:text-[#fc5648] transition">Blog</a>
+            <a href="{{ route('blog.index') }}" class="hover:text-[#fc5648] transition">Guías</a>
             <span class="text-gray-300">/</span>
             <span class="text-[#fc5648] truncate max-w-45">{{ $post->titulo }}</span>
         </nav>
@@ -345,6 +345,34 @@
         </div>
         @endif
 
+        {{-- Rutas relacionadas --}}
+        @if($post->rutas->isNotEmpty())
+        <div class="mt-14 pt-8 border-t border-gray-100">
+            <h3 class="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
+                🗺️ Rutas relacionadas
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                @foreach($post->rutas as $ruta)
+                <a href="{{ route('rutas.show', $ruta->slug) }}"
+                   class="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all p-3">
+                    <div class="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 shrink-0">
+                        @if($ruta->imagen_portada_url)
+                            <img src="{{ $ruta->imagen_portada_url }}" alt="{{ $ruta->titulo }}"
+                                 class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full flex items-center justify-center text-xl text-gray-300">🗺️</div>
+                        @endif
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-bold text-gray-800 text-sm truncate">{{ $ruta->titulo }}</p>
+                        <p class="text-xs text-gray-400 truncate">{{ $ruta->puntos_count }} {{ $ruta->puntos_count === 1 ? 'parada' : 'paradas' }}</p>
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         {{-- Footer del artículo --}}
         <div class="mt-16 pt-8 border-t border-gray-100 flex items-center justify-between flex-wrap gap-4">
             <a href="{{ route('blog.index') }}"
@@ -352,7 +380,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
                 </svg>
-                Volver al blog
+                Volver a guías
             </a>
             <a href="{{ route('puntos.index') }}"
                class="text-sm font-bold text-[#fc5648] hover:underline">
