@@ -122,6 +122,7 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
         @endif
     </div>
 </div>
+
     {{-- Filtro de categorías --}}
     @if($panoramas->isNotEmpty())
     <div class="relative mb-6">
@@ -559,4 +560,88 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
     }
 })();
 </script>
+
+{{-- Popup boletín de panoramas — sencillo, cerrable, no invasivo --}}
+<div x-data="{
+        visible: false, email: '', enviando: false, enviado: false, error: '',
+        init() {
+            if (localStorage.getItem('newsletter_panoramas_cerrado')) return;
+            setTimeout(() => { this.visible = true; }, 4000);
+        },
+        cerrar() {
+            this.visible = false;
+            localStorage.setItem('newsletter_panoramas_cerrado', '1');
+        },
+        enviar() {
+            if (this.enviando) return;
+            this.enviando = true; this.error = '';
+            fetch('{{ route('newsletter.store') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').content,
+                },
+                body: JSON.stringify({ email: this.email, origen: 'panoramas' }),
+            })
+            .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+            .then(() => { this.enviado = true; localStorage.setItem('newsletter_panoramas_cerrado', '1'); })
+            .catch(() => { this.error = 'No pudimos suscribirte. Revisa el correo e intenta de nuevo.'; })
+            .finally(() => { this.enviando = false; });
+        }
+     }"
+     x-show="visible"
+     @keydown.escape.window="cerrar()"
+     class="fixed inset-0 z-999 flex items-end sm:items-center justify-center p-4"
+     style="display:none">
+
+    <div x-show="visible"
+         x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         @click="cerrar()"
+         class="absolute inset-0 bg-black/30"></div>
+
+    <div x-show="visible"
+         x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-4 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+         class="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6">
+
+        <button @click="cerrar()" aria-label="Cerrar"
+                class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+
+        <template x-if="!enviado">
+            <div>
+                <p class="text-3xl mb-2">📬</p>
+                <p class="font-extrabold text-gray-900 text-lg leading-snug">No te pierdas los próximos panoramas</p>
+                <p class="text-sm text-gray-400 mt-1.5 leading-relaxed">
+                    Déjanos tu correo y te avisamos cuando publiquemos novedades.                </p>
+                <form @submit.prevent="enviar()" class="mt-4 space-y-2">
+                    <input type="email" x-model="email" required placeholder="tu@correo.com"
+                           class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                    <button type="submit" :disabled="enviando"
+                            class="w-full bg-[#fc5648] hover:bg-[#d94439] text-white text-sm font-bold px-5 py-2.5 rounded-xl transition disabled:opacity-50">
+                        <span x-show="!enviando">Avísame</span>
+                        <span x-show="enviando">Enviando…</span>
+                    </button>
+                </form>
+                <p x-show="error" x-text="error" class="text-xs text-red-500 mt-2"></p>
+                <button @click="cerrar()" class="w-full text-center text-xs text-gray-400 hover:text-gray-600 mt-3 transition">
+                    Ahora no
+                </button>
+            </div>
+        </template>
+        <template x-if="enviado">
+            <div class="text-center py-2">
+                <p class="text-3xl mb-2">✓</p>
+                <p class="font-extrabold text-gray-900">¡Listo!</p>
+                <p class="text-sm text-gray-400 mt-1">Te avisaremos por correo.</p>
+            </div>
+        </template>
+    </div>
+</div>
+
 @endsection

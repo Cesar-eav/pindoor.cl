@@ -113,6 +113,7 @@
                             <a href="{{ route('admin.rutas.index') }}" title="Rutas" class="sidebar-link {{ request()->routeIs('admin.rutas*') ? 'active' : '' }}">🗺️ <span x-show="!collapsed" x-cloak>Rutas</span></a>
                             <a href="{{ route('admin.recomendaciones.index') }}" title="Recomienda" class="sidebar-link {{ request()->routeIs('admin.recomendaciones*') ? 'active' : '' }}">⭐ <span x-show="!collapsed" x-cloak>Recomienda</span></a>
                             <a href="{{ route('admin.compartidos.index') }}" title="Compartidos" class="sidebar-link {{ request()->routeIs('admin.compartidos*') ? 'active' : '' }}">📤 <span x-show="!collapsed" x-cloak>Compartidos</span></a>
+                            <a href="{{ route('admin.newsletter.index') }}" title="Boletín" class="sidebar-link {{ request()->routeIs('admin.newsletter*') ? 'active' : '' }}">📧 <span x-show="!collapsed" x-cloak>Boletín</span></a>
                         </div>
                     </div>
                 </nav>
@@ -175,6 +176,7 @@
                             <a href="{{ route('admin.rutas.index') }}" class="sidebar-link {{ request()->routeIs('admin.rutas*') ? 'active' : '' }}">🗺️ Rutas</a>
                             <a href="{{ route('admin.recomendaciones.index') }}" class="sidebar-link {{ request()->routeIs('admin.recomendaciones*') ? 'active' : '' }}">⭐ Recomienda</a>
                             <a href="{{ route('admin.compartidos.index') }}" class="sidebar-link {{ request()->routeIs('admin.compartidos*') ? 'active' : '' }}">📤 Compartidos</a>
+                            <a href="{{ route('admin.newsletter.index') }}" class="sidebar-link {{ request()->routeIs('admin.newsletter*') ? 'active' : '' }}">📧 Boletín</a>
                         </div>
                     </div>
                     <div style="border-top: 1px solid rgba(255,255,255,0.08)" class="pt-3">
