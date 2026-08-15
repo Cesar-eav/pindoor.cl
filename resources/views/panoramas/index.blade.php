@@ -110,17 +110,23 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
 <div class="max-w-5xl mx-auto px-4 pt-3 pb-8">
 
     {{-- Header compacto --}}
-<div class="flex items-center justify-left mb-3">
-    <h1 class="text-2xl font-extrabold tracking-tight text-slate-950">
-        {{ __('ui.panoramas.titulo') }}
-    </h1>
-    <div class="flex items-center ml-5 gap-2 text-xs text-slate-500 font-medium">
-        <span><strong class="text-slate-900 font-extrabold text-sm">{{ $panoramas->where('categoria','!=','exposicion')->count() }}</strong> {{ __('ui.panoramas.eventos') }}</span>
-        @if($exposiciones->isNotEmpty())
-        <span class="text-slate-300">·</span>
-        <span><strong class="text-slate-900 font-extrabold text-sm">{{ $exposiciones->count() }}</strong> {{ __('ui.panoramas.en_cartelera') }}</span>
-        @endif
+<div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+    <div class="flex items-center">
+        <h1 class="text-2xl font-extrabold tracking-tight text-slate-950">
+            {{ __('ui.panoramas.titulo') }}
+        </h1>
+        <div class="flex items-center ml-5 gap-2 text-xs text-slate-500 font-medium">
+            <span><strong class="text-slate-900 font-extrabold text-sm">{{ $panoramas->where('categoria','!=','exposicion')->count() }}</strong> {{ __('ui.panoramas.eventos') }}</span>
+            @if($exposiciones->isNotEmpty())
+            <span class="text-slate-300">·</span>
+            <span><strong class="text-slate-900 font-extrabold text-sm">{{ $exposiciones->count() }}</strong> {{ __('ui.panoramas.en_cartelera') }}</span>
+            @endif
+        </div>
     </div>
+    <a href="{{ route('revival.index') }}"
+       class="inline-flex items-center gap-1.5 bg-white border border-gray-200 hover:border-[#fc5648] hover:text-[#fc5648] text-slate-600 text-xs font-bold px-4 py-2 rounded-full transition shrink-0">
+        🎬 Re-vival — revive los panoramas pasados
+    </a>
 </div>
 
     {{-- Filtro de categorías --}}
