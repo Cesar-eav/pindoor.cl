@@ -50,7 +50,7 @@
                             Artistas
                         </x-nav-link>
                         <x-nav-link :href="route('admin.blog.index')" :active="request()->routeIs('admin.blog*')">
-                            Blog
+                            Guías
                         </x-nav-link>
                         <x-nav-link :href="route('admin.recomendaciones.index')" :active="request()->routeIs('admin.recomendaciones*')">
                             Recomienda
@@ -147,7 +147,7 @@
                     Artistas
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.blog.index')" :active="request()->routeIs('admin.blog*')">
-                    Blog
+                    Guías
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.recomendaciones.index')" :active="request()->routeIs('admin.recomendaciones*')">
                     Recomienda

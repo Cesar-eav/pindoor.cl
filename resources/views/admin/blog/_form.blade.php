@@ -44,7 +44,7 @@
             </button>
             <button type="submit" name="accion" value="guardar" id="guardar-btn"
                     class="bg-gray-900 text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-black transition">
-                {{ $esEdicion ? 'Guardar cambios' : 'Crear post' }}
+                {{ $esEdicion ? 'Guardar cambios' : 'Crear guía' }}
             </button>
         </div>
     </div>
@@ -404,6 +404,33 @@
                 <input type="hidden" name="lugares[]" :value="id">
             </template>
         </div>
+    </div>
+
+    {{-- Rutas relacionadas --}}
+    <div class="w-[90vw] mx-auto bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">
+            Rutas relacionadas
+        </label>
+        <p class="text-xs text-gray-400 mb-3">
+            Vincula rutas que se relacionan con esta guía. Aparecerán en la ficha pública del post, y este post aparecerá en la ficha de cada ruta.
+        </p>
+
+        @php $rutasSeleccionadas = $post?->rutas->pluck('id')->all() ?? []; @endphp
+
+        @if($rutas->isEmpty())
+        <p class="text-xs text-gray-300 italic">No hay rutas publicadas todavía.</p>
+        @else
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            @foreach($rutas as $rutaOpcion)
+            <label class="flex items-center gap-2.5 px-4 py-2.5 border border-gray-200 rounded-xl text-sm cursor-pointer hover:bg-gray-50 has-[:checked]:border-[#fc5648] has-[:checked]:bg-[#fff0ef] transition">
+                <input type="checkbox" name="rutas[]" value="{{ $rutaOpcion->id }}"
+                       {{ in_array($rutaOpcion->id, old('rutas', $rutasSeleccionadas)) ? 'checked' : '' }}
+                       class="rounded border-gray-300 text-[#fc5648] focus:ring-[#fc5648]">
+                <span class="font-medium text-gray-700 truncate">{{ $rutaOpcion->titulo }}</span>
+            </label>
+            @endforeach
+        </div>
+        @endif
     </div>
 
     <script>

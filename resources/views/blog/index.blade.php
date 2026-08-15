@@ -1,6 +1,6 @@
 @extends('layouts.pindoor')
 
-@section('title', 'Blog · Historias y guías de Valparaíso | Pindoor')
+@section('title', 'Guías · Historias de Valparaíso | Pindoor')
 @section('canonical', route('blog.index'))
 @section('description', 'Historias, guías de viaje y rincones secretos de Valparaíso. Descubre los mejores cerros, cafés, murales y lugares únicos de la ciudad.')
 @section('bodyClass', 'bg-[#f9fafb] text-gray-900')
@@ -11,7 +11,7 @@
     {{-- Encabezado --}}
     <div class="mb-12">
         <p class="text-xs font-black uppercase tracking-[.25em] text-[#fc5648] mb-2">Pindoor</p>
-        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">Blog</h1>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">Guías</h1>
         <p class="mt-3 text-lg text-gray-500" style="font-family:'Lora',serif;">
             Historias, guías y rincones de Valparaíso.
         </p>

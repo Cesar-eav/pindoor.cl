@@ -48,6 +48,11 @@ class Post extends Model
             ->orderBy('post_punto_interes.orden');
     }
 
+    public function rutas()
+    {
+        return $this->belongsToMany(Ruta::class, 'post_ruta');
+    }
+
     public function getImagenPortadaUrlAttribute(): ?string
     {
         return $this->imagen_portada ? asset('storage/' . $this->imagen_portada) : null;

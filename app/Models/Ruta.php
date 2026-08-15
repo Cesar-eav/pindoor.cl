@@ -49,6 +49,11 @@ class Ruta extends Model
         return $this->belongsToMany(OperadorTuristico::class, 'ruta_operador_turistico');
     }
 
+    public function guias()
+    {
+        return $this->belongsToMany(Post::class, 'post_ruta');
+    }
+
     public function getImagenPortadaUrlAttribute(): ?string
     {
         return $this->imagen_portada ? asset('storage/' . $this->imagen_portada) : null;

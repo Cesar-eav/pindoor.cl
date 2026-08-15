@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\PuntoInteres;
+use App\Models\Ruta;
 use App\Services\ImagenComprimida;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -23,7 +24,8 @@ class PostController extends Controller
             ->with('categoria:id,nombre,icono')
             ->get(['id', 'title', 'sector', 'categoria_id'])
             ->sortBy(fn ($p) => $p->title)->values();
-        return view('admin.blog.create', compact('puntos'));
+        $rutas = Ruta::all()->sortBy(fn ($r) => $r->titulo)->values();
+        return view('admin.blog.create', compact('puntos', 'rutas'));
     }
 
     public function store(Request $request)
@@ -71,6 +73,7 @@ class PostController extends Controller
         $post->save();
 
         $this->sincronizarLugares($request, $post);
+        $this->sincronizarRutas($request, $post);
 
         if ($request->input('accion') === 'seguir') {
             return redirect()->route('admin.blog.edit', $post)->with('success', 'Post creado correctamente.');
@@ -81,12 +84,13 @@ class PostController extends Controller
 
     public function edit(Post $blog)
     {
-        $blog->load('lugares');
+        $blog->load('lugares', 'rutas');
         $puntos = PuntoInteres::where('eliminado', false)
             ->with('categoria:id,nombre,icono')
             ->get(['id', 'title', 'sector', 'categoria_id'])
             ->sortBy(fn ($p) => $p->title)->values();
-        return view('admin.blog.edit', ['post' => $blog, 'puntos' => $puntos]);
+        $rutas = Ruta::all()->sortBy(fn ($r) => $r->titulo)->values();
+        return view('admin.blog.edit', ['post' => $blog, 'puntos' => $puntos, 'rutas' => $rutas]);
     }
 
     public function update(Request $request, Post $blog)
@@ -152,6 +156,7 @@ class PostController extends Controller
         $blog->save();
 
         $this->sincronizarLugares($request, $blog);
+        $this->sincronizarRutas($request, $blog);
 
         if ($request->input('accion') === 'seguir') {
             return redirect()->route('admin.blog.edit', $blog)->with('success', 'Post actualizado.');
@@ -162,7 +167,7 @@ class PostController extends Controller
 
     public function preview(Post $blog)
     {
-        $blog->load('lugares');
+        $blog->load('lugares', 'rutas');
         return view('blog.show', ['post' => $blog]);
     }
 
@@ -188,6 +193,12 @@ class PostController extends Controller
                 ->mapWithKeys(fn ($id, $i) => [(int) $id => ['orden' => $i]])
                 ->all()
         );
+    }
+
+    private function sincronizarRutas(Request $request, Post $post): void
+    {
+        $ids = $request->input('rutas', []);
+        $post->rutas()->sync(collect($ids)->filter()->values()->all());
     }
 
     // Recoge slots imagen_nueva_1…20 con sus posiciones

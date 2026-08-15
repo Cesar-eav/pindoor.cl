@@ -168,6 +168,36 @@
             @endif
         </div>
 
+        {{-- Guías relacionadas --}}
+        @if($ruta->guias->isNotEmpty())
+        <div class="mt-14 pt-8 border-t border-gray-100">
+            <h3 class="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
+                📖 Guías para este recorrido
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                @foreach($ruta->guias as $guia)
+                <a href="{{ route('blog.show', $guia->slug) }}"
+                   class="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all p-3">
+                    <div class="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 shrink-0">
+                        @if($guia->imagen_portada_url)
+                            <img src="{{ $guia->imagen_portada_url }}" alt="{{ $guia->titulo }}"
+                                 class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full flex items-center justify-center text-xl text-gray-300">📝</div>
+                        @endif
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-bold text-gray-800 text-sm truncate">{{ $guia->titulo }}</p>
+                        @if($guia->resumen)
+                        <p class="text-xs text-gray-400 truncate">{{ $guia->resumen }}</p>
+                        @endif
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         {{-- Footer --}}
         <div class="mt-16 pt-8 border-t border-gray-100 flex items-center justify-between flex-wrap gap-4">
             <a href="{{ route('rutas.index') }}"
