@@ -106,6 +106,7 @@
                         <p class="sidebar-group-label" x-show="!collapsed" x-cloak>Contenido</p>
                         <div class="space-y-0.5">
                             <a href="{{ route('admin.panoramas.index') }}" title="Panoramas" class="sidebar-link {{ request()->routeIs('admin.panoramas.*') ? 'active' : '' }}">🌅 <span x-show="!collapsed" x-cloak>Panoramas</span></a>
+                            <a href="{{ route('admin.revival.index') }}" title="Re-vival" class="sidebar-link {{ request()->routeIs('admin.revival*') ? 'active' : '' }}" style="padding-left:1.75rem">🎬 <span x-show="!collapsed" x-cloak>Re-vival</span></a>
                             <a href="{{ route('admin.experiencias.index') }}" title="Experiencias" class="sidebar-link {{ request()->routeIs('admin.experiencias.*') ? 'active' : '' }}">✨ <span x-show="!collapsed" x-cloak>Experiencias</span></a>
                             <a href="{{ route('admin.artistas') }}" title="Artistas" class="sidebar-link {{ request()->routeIs('admin.artistas*') ? 'active' : '' }}">🎨 <span x-show="!collapsed" x-cloak>Artistas</span></a>
                             <a href="{{ route('admin.operadores') }}" title="Operadores" class="sidebar-link {{ request()->routeIs('admin.operadores*') ? 'active' : '' }}">🧭 <span x-show="!collapsed" x-cloak>Operadores</span></a>
@@ -169,6 +170,7 @@
                         <p class="sidebar-group-label">Contenido</p>
                         <div class="space-y-0.5">
                             <a href="{{ route('admin.panoramas.index') }}" class="sidebar-link {{ request()->routeIs('admin.panoramas.*') ? 'active' : '' }}">🌅 Panoramas</a>
+                            <a href="{{ route('admin.revival.index') }}" class="sidebar-link {{ request()->routeIs('admin.revival*') ? 'active' : '' }}" style="padding-left:1.75rem">🎬 Re-vival</a>
                             <a href="{{ route('admin.experiencias.index') }}" class="sidebar-link {{ request()->routeIs('admin.experiencias.*') ? 'active' : '' }}">✨ Experiencias</a>
                             <a href="{{ route('admin.artistas') }}" class="sidebar-link {{ request()->routeIs('admin.artistas*') ? 'active' : '' }}">🎨 Artistas</a>
                             <a href="{{ route('admin.operadores') }}" class="sidebar-link {{ request()->routeIs('admin.operadores*') ? 'active' : '' }}">🧭 Operadores</a>

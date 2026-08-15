@@ -19,7 +19,9 @@ use App\Http\Controllers\ArtistaEventosController;
 use App\Http\Controllers\OperadorController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\RutaController;
+use App\Http\Controllers\RevivalController;
 use App\Http\Controllers\Admin\RutaController as AdminRutaController;
+use App\Http\Controllers\Admin\RevivalController as AdminRevivalController;
 use App\Http\Controllers\CompartidoController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\ContactoController;
@@ -82,6 +84,8 @@ Route::post('/api/share', function () {
 })->name('api.share');
 Route::get('/api/distritos', [DistritoController::class, 'json'])->name('api.distritos');
 Route::get('/panoramas', [PuntoInteresController::class, 'panoramas'])->name('atractivos.panoramas');
+Route::get('/panoramas/revival', [RevivalController::class, 'index'])->name('revival.index');
+Route::get('/panoramas/revival/{slug}', [RevivalController::class, 'show'])->name('revival.show');
 Route::get('/panoramas/{panorama}', [PuntoInteresController::class, 'showPanorama'])->name('panoramas.show');
 Route::get('/experiencias', [PuntoInteresController::class, 'experiencias'])->name('experiencias.index');
 Route::get('/experiencias/proponer', [PuntoInteresController::class, 'proponerForm'])->name('experiencias.proponer');
@@ -174,6 +178,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::patch('/panoramas/{panorama}/categoria', [PanoramaController::class, 'actualizarCategoria'])->name('panoramas.categoria');
     Route::delete('/panoramas/imagenes/{imagen}', [PanoramaController::class, 'destroyImagen'])->name('panoramas.imagenes.destroy');
     Route::post('/panoramas/configuracion', [PanoramaController::class, 'configuracion'])->name('panoramas.configuracion');
+
+    // Re-vival (subsección de Panoramas)
+    Route::post('/revival/imagen', [AdminRevivalController::class, 'uploadImagen'])->name('revival.imagen');
+    Route::get('/revival/{revival}/preview', [AdminRevivalController::class, 'preview'])->name('revival.preview');
+    Route::resource('revival', AdminRevivalController::class)->except(['show']);
+
     Route::get('/passline', [AdminController::class, 'passline'])->name('passline');
     Route::post('/passline', [AdminController::class, 'passlineImportar'])->name('passline.importar');
     Route::get('/portaldisc', [AdminController::class, 'portaldisc'])->name('portaldisc');

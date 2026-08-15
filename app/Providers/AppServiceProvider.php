@@ -7,6 +7,7 @@ use App\Models\Experiencia;
 use App\Models\Panorama;
 use App\Models\Post;
 use App\Models\PuntoInteres;
+use App\Models\Revival;
 use App\Observers\TranslatableObserver;
 use App\View\Composers\GuestComposer;
 use Illuminate\Support\Facades\View;
@@ -25,5 +26,6 @@ class AppServiceProvider extends ServiceProvider
         Post::observe(TranslatableObserver::class);
         Experiencia::observe(TranslatableObserver::class);
         Categoria::observe(TranslatableObserver::class);
+        Revival::observe(TranslatableObserver::class);
     }
 }
