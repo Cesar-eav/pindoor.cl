@@ -116,9 +116,9 @@
 
         {{-- Breadcrumbs --}}
         <nav class="flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-8">
-            <a href="{{ route('puntos.index') }}" class="hover:text-[#fc5648] transition">Pindoor</a>
+            <a href="{{ route('puntos.index') }}" wire:navigate class="hover:text-[#fc5648] transition">Pindoor</a>
             <span class="text-gray-300">/</span>
-            <a href="{{ route('blog.index') }}" class="hover:text-[#fc5648] transition">Guías</a>
+            <a href="{{ route('blog.index') }}" wire:navigate class="hover:text-[#fc5648] transition">Guías</a>
             <span class="text-gray-300">/</span>
             <span class="text-[#fc5648] truncate max-w-45">{{ $post->titulo }}</span>
         </nav>
@@ -375,14 +375,14 @@
 
         {{-- Footer del artículo --}}
         <div class="mt-16 pt-8 border-t border-gray-100 flex items-center justify-between flex-wrap gap-4">
-            <a href="{{ route('blog.index') }}"
+            <a href="{{ route('blog.index') }}" wire:navigate
                class="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-[#fc5648] transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
                 </svg>
                 Volver a guías
             </a>
-            <a href="{{ route('puntos.index') }}"
+            <a href="{{ route('puntos.index') }}" wire:navigate
                class="text-sm font-bold text-[#fc5648] hover:underline">
                 Explorar Valparaíso →
             </a>

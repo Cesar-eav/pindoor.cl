@@ -110,7 +110,7 @@
     </form>
 
     {{-- Experiencias --}}
-    <a href="{{ route('experiencias.index') }}" onclick="closeFab()"
+    <a href="{{ route('experiencias.index') }}" onclick="closeFab()" wire:navigate
        class="flex flex-col items-center gap-1.5 bg-[#fc5648] text-white px-5 py-3.5 rounded-2xl shadow-xl min-w-19">
         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -120,7 +120,7 @@
     </a>
 
     {{-- Contacto --}}
-    <a href="{{ route('contacto.index') }}" onclick="closeFab()"
+    <a href="{{ route('contacto.index') }}" onclick="closeFab()" wire:navigate
        class="flex flex-col items-center gap-1.5 bg-white border border-gray-200 text-gray-700 px-5 py-3.5 rounded-2xl shadow-xl min-w-19">
         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -130,7 +130,7 @@
     </a>
 
     {{-- Artistas --}}
-    <a href="{{ route('artista.index') }}" onclick="closeFab()"
+    <a href="{{ route('artista.index') }}" onclick="closeFab()" wire:navigate
        class="flex flex-col items-center gap-1.5 bg-violet-600 text-white px-5 py-3.5 rounded-2xl shadow-xl min-w-19">
         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -151,7 +151,7 @@
     </a>
 
     {{-- Ingresar / Registrarme --}}
-    <a href="{{ route('publicita.index') }}" onclick="closeFab()"
+    <a href="{{ route('publicita.index') }}" onclick="closeFab()" wire:navigate
        class="flex flex-col items-center gap-1.5 bg-white border border-gray-200 text-gray-700 px-5 py-3.5 rounded-2xl shadow-xl min-w-19">
         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -163,11 +163,15 @@
 </div>
 
 {{-- Barra inferior --}}
+{{-- @persist evita que Livewire la destruya/recree en cada wire:navigate (causaba el parpadeo/desaparición).
+     Como queda fija en el DOM, el resaltado de activo no puede depender solo de clases renderizadas por el
+     servidor — bottomNavSync() la sincroniza por JS en cada navegación (ver <script> más abajo). --}}
+@persist('barra-inferior')
 <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#fc5648] shadow-[0_-2px_16px_rgba(252,86,72,0.35)]">
     <div class="flex items-center justify-around px-2 pt-2" style="padding-bottom: calc(12px + var(--inset-bottom, 0px))">
 
         {{-- Inicio --}}
-        <a href="{{ route('puntos.index') }}"
+        <a href="{{ route('puntos.index') }}" id="bottomnav-inicio" wire:navigate
            class="flex items-center justify-center px-2 py-2 rounded-xl text-white transition-colors
                   {{ request()->routeIs('puntos.index') && request('vista') !== 'mapa' ? 'bg-white/20' : '' }}" title="{{ __('ui.nav.inicio') }}">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -203,6 +207,7 @@
 
         {{-- Mapa --}}
         <button onclick="if(typeof setView==='function'){setView('mapa')}else{window.location='{{ route('puntos.index') }}?vista=mapa'}"
+                id="bottomnav-mapa"
                 class="flex items-center justify-center px-2 py-2 rounded-xl text-white transition-colors
                        {{ request()->routeIs('puntos.index') && request('vista') === 'mapa' ? 'bg-white/20' : '' }}" title="{{ __('ui.nav.mapa') }}">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -212,7 +217,7 @@
         </button>
 
         {{-- Información --}}
-        <a href="{{ route('puntos.info') }}"
+        <a href="{{ route('puntos.info') }}" id="bottomnav-info" wire:navigate
            class="flex items-center justify-center px-2 py-2 rounded-xl text-white transition-colors
                   {{ request()->routeIs('puntos.info') ? 'bg-white/20' : '' }}" title="{{ __('ui.nav.info') }}">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,6 +228,25 @@
 
     </div>
 </nav>
+@endpersist
+
+<script>
+    // La barra inferior queda persistida entre navegaciones (no se recrea en wire:navigate), así que
+    // su resaltado de botón activo no se re-renderiza solo con las clases del servidor: hay que
+    // resincronizarlo por JS.
+    function bottomNavSync() {
+        const path   = window.location.pathname;
+        const params = new URLSearchParams(window.location.search);
+        const esInicio = path === '{{ parse_url(route('puntos.index'), PHP_URL_PATH) ?: '/' }}';
+        const esInfo   = path === '{{ parse_url(route('puntos.info'), PHP_URL_PATH) }}';
+        const esMapa   = esInicio && params.get('vista') === 'mapa';
+
+        document.getElementById('bottomnav-inicio')?.classList.toggle('bg-white/20', esInicio && !esMapa);
+        document.getElementById('bottomnav-mapa')?.classList.toggle('bg-white/20', esMapa);
+        document.getElementById('bottomnav-info')?.classList.toggle('bg-white/20', esInfo);
+    }
+    document.addEventListener('livewire:navigated', bottomNavSync);
+</script>
 
 
 <script>
@@ -267,9 +291,16 @@
         toggleGpsOverlay(true);
         navigator.geolocation.getCurrentPosition(
             pos => {
-                document.getElementById('lat-m').value = pos.coords.latitude;
-                document.getElementById('lng-m').value = pos.coords.longitude;
-                document.getElementById('filterForm-mobile').submit();
+                const url = new URL('{{ route('puntos.index') }}');
+                url.searchParams.set('lat', pos.coords.latitude);
+                url.searchParams.set('lng', pos.coords.longitude);
+                // Livewire.navigate() en vez de form.submit(): así la barra inferior queda persistida
+                // y no se destruye — un submit nativo siempre recarga la página completa.
+                if (typeof Livewire !== 'undefined') {
+                    Livewire.navigate(url.toString());
+                } else {
+                    window.location.href = url.toString();
+                }
             },
             () => {
                 alert('No se pudo obtener tu ubicación.');

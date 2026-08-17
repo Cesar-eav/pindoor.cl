@@ -10,7 +10,7 @@
 
     {{-- Header --}}
     <div class="flex items-center gap-3 mb-4">
-        <a href="{{ route('puntos.index') }}"
+        <a href="{{ route('puntos.index') }}" wire:navigate
            class="flex items-center justify-center w-9 h-9 rounded-full bg-white border border-gray-200 shadow-sm text-gray-500 hover:text-gray-800 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>

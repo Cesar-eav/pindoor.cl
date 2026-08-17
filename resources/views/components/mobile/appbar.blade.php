@@ -19,7 +19,7 @@
         class="md:hidden sticky top-0 z-40 bg-white border-b border-gray-100 px-4 pb-3 flex items-center justify-between shadow-sm" style="padding-top: calc(12px + var(--inset-top, 0px))">
 
     <div class="flex items-center gap-1 min-w-0" x-show="!buscando">
-        <a href="{{ route('puntos.index') }}" class="text-lg font-bold tracking-tight shrink-0">
+        <a href="{{ route('puntos.index') }}" wire:navigate class="text-lg font-bold tracking-tight shrink-0">
             <span class="text-[#fc5648]">Pin</span>door
         </a>
         <button type="button"
@@ -33,24 +33,24 @@
     </div>
 
     <nav class="flex items-center gap-1" x-show="!buscando">
-        <a href="{{ route('puntos.explorar') }}"
+        <a href="{{ route('puntos.explorar') }}" wire:navigate
            class="px-3 py-1.5 text-xs font-bold transition-colors
                   {{ request()->routeIs('puntos.explorar') || request()->routeIs('puntos.buscar') ? 'bg-[#fc5648] text-white' : 'text-gray-500 hover:text-gray-800' }}">
             {{ __('ui.nav.explorar') }}
         </a>
-        <a href="{{ route('atractivos.panoramas') }}"
+        <a href="{{ route('atractivos.panoramas') }}" wire:navigate
            class="px-3 py-1.5 text-xs font-bold transition-colors
                   {{ request()->routeIs('atractivos.panoramas') ? 'bg-[#fc5648] text-white' : 'text-gray-500 hover:text-gray-800' }}">
             {{ __('ui.nav.panoramas') }}
         </a>
         <div class="flex items-center gap-0.5 ml-1 bg-gray-100 rounded-full px-2 py-1">
-            <a href="{{ route('lang.switch', 'es') }}"
+            <a href="{{ route('lang.switch', 'es') }}" wire:navigate
                class="text-[10px] font-black transition px-1 py-0.5 rounded-full {{ app()->getLocale() === 'es' ? 'bg-[#fabeb9] text-[#fc5648] shadow-sm' : 'text-gray-400' }}">🇪🇸</a>
             <span class="text-gray-300 text-[10px]">|</span>
-            <a href="{{ route('lang.switch', 'en') }}"
+            <a href="{{ route('lang.switch', 'en') }}" wire:navigate
                class="text-[10px] font-black transition px-1 py-0.5 rounded-full {{ app()->getLocale() === 'en' ? 'bg-[#fabeb9] text-[#fc5648] shadow-sm' : 'text-gray-400' }}">🇬🇧</a>
             <span class="text-gray-300 text-[10px]">|</span>
-            <a href="{{ route('lang.switch', 'fr') }}"
+            <a href="{{ route('lang.switch', 'fr') }}" wire:navigate
                class="text-[10px] font-black transition px-1 py-0.5 rounded-full {{ app()->getLocale() === 'fr' ? 'bg-[#fabeb9] text-[#fc5648] shadow-sm' : 'text-gray-400' }}">🇫🇷</a>
         </div>
     </nav>
