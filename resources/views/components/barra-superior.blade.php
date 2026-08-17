@@ -127,13 +127,13 @@
                 </div>
                 <div class="flex items-center gap-1 border-l border-gray-200 pl-3 text-xs font-bold">
                     <a href="{{ route('lang.switch', 'es') }}"
-                       class="{{ app()->getLocale() === 'es' ? 'text-[#fc5648]' : 'text-gray-400 hover:text-gray-700' }} px-1 transition">🇪🇸</a>
+                       class="{{ app()->getLocale() === 'es' ? 'bg-[#fabeb9] text-[#fc5648]' : 'text-gray-400 hover:text-gray-700' }} px-1.5 py-0.5 rounded-full transition">🇪🇸</a>
                     <span class="text-gray-300">|</span>
                     <a href="{{ route('lang.switch', 'en') }}"
-                       class="{{ app()->getLocale() === 'en' ? 'text-[#fc5648]' : 'text-gray-400 hover:text-gray-700' }} px-1 transition">🇬🇧</a>
+                       class="{{ app()->getLocale() === 'en' ? 'bg-[#fabeb9] text-[#fc5648]' : 'text-gray-400 hover:text-gray-700' }} px-1.5 py-0.5 rounded-full transition">🇬🇧</a>
                     <span class="text-gray-300">|</span>
                     <a href="{{ route('lang.switch', 'fr') }}"
-                       class="{{ app()->getLocale() === 'fr' ? 'text-[#fc5648]' : 'text-gray-400 hover:text-gray-700' }} px-1 transition">🇫🇷</a>
+                       class="{{ app()->getLocale() === 'fr' ? 'bg-[#fabeb9] text-[#fc5648]' : 'text-gray-400 hover:text-gray-700' }} px-1.5 py-0.5 rounded-full transition">🇫🇷</a>
                 </div>
             </div>
         </div>
