@@ -112,7 +112,7 @@ class Panorama extends Model
      * (1-4 = primera..cuarta ocurrencia de ese día de semana en el mes; -1 = la última).
      * Null = sin filtro, coincide cualquier semana (comportamiento semanal normal).
      */
-    private function coincideSemanaDelMes(Carbon $fecha): bool
+    public function coincideSemanaDelMes(Carbon $fecha): bool
     {
         if ($this->semana_del_mes === null) {
             return true;

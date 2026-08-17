@@ -98,6 +98,23 @@
                  class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center cursor-zoom-out"
                  style="display:none">
                 <img :src="images[current]" class="max-h-screen max-w-screen object-contain p-4">
+
+                @if($todasImagenes->count() > 1)
+                <button @click.stop="prev()"
+                        class="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <button @click.stop="next()"
+                        class="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+                <div class="absolute bottom-4 right-4 bg-black/50 text-white text-xs font-semibold px-2 py-0.5 rounded-full"
+                     x-text="(current + 1) + ' / ' + images.length"></div>
+                @endif
             </div>
 
             @if($todasImagenes->count() > 1)
