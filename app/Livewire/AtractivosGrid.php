@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Http\Controllers\PuntoInteresController;
 use App\Models\Artista;
 use App\Models\Categoria;
+use App\Models\Configuracion;
 use App\Models\Experiencia;
 use App\Models\ModuloItem;
 use App\Models\OperadorTuristico;
@@ -76,15 +77,16 @@ class AtractivosGrid extends Component
         $atractivos = $query->with(['categoria', 'imagenPrincipal'])->paginate(48);
 
         $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->publico()])
-            ->orderByDesc('puntos_interes_count')
+            ->orderBy('orden')
             ->get();
 
         $hayFiltros = (bool) ($this->search || $this->category || $this->grupo);
 
         $categoriasConPuntos = collect();
         if (!$hayFiltros) {
-            $porCategoria = PuntoInteresController::PUNTOS_POR_CATEGORIA;
+            $porCategoria = (int) Configuracion::get('home_puntos_por_categoria', PuntoInteresController::PUNTOS_POR_CATEGORIA_DEFAULT);
             $categoriasConPuntos = $categorias
+                ->where('activa_en_home', true)
                 ->map(fn($cat) => (object) [
                     'categoria' => $cat,
                     'puntos'    => PuntoInteres::publico()

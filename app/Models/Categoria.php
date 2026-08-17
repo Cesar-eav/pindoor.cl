@@ -23,6 +23,8 @@ class Categoria extends Model
         'es_cliente',
         'disponible_para_operadores',
         'grupo_id',
+        'orden',
+        'activa_en_home',
     ];
 
     protected $casts = [
@@ -30,6 +32,7 @@ class Categoria extends Model
         'es_cliente'                  => 'boolean',
         'mostrar_nombre_en_imagen'    => 'boolean',
         'disponible_para_operadores'  => 'boolean',
+        'activa_en_home'              => 'boolean',
     ];
 
     /**
