@@ -12,6 +12,7 @@ class ConfiguracionController extends Controller
     public function index()
     {
         $aprobacionActiva = (bool) Configuracion::get('aprobacion_negocios_activa', false);
+        $homePorCategoria = (int) Configuracion::get('home_puntos_por_categoria', \App\Http\Controllers\PuntoInteresController::PUNTOS_POR_CATEGORIA_DEFAULT);
 
         $idsExcluidos = PuntoInteres::idsExcluidos();
 
@@ -35,13 +36,24 @@ class ConfiguracionController extends Controller
             ->get(['id', 'title', 'sector', 'fuera_de_servicio', 'fuera_de_servicio_motivo']);
 
         return view('admin.configuracion.index', compact(
-            'aprobacionActiva', 'idsExcluidos', 'puntosData', 'categoriasDisponibles', 'ascensores'
+            'aprobacionActiva', 'homePorCategoria', 'idsExcluidos', 'puntosData', 'categoriasDisponibles', 'ascensores'
         ));
     }
 
     public function actualizar(Request $request)
     {
         Configuracion::set('aprobacion_negocios_activa', $request->boolean('aprobacion_negocios_activa') ? '1' : '0');
+
+        return back()->with('success', 'Configuración guardada.');
+    }
+
+    public function actualizarHomePorCategoria(Request $request)
+    {
+        $data = $request->validate([
+            'home_puntos_por_categoria' => 'required|integer|min:1|max:100',
+        ]);
+
+        Configuracion::set('home_puntos_por_categoria', (string) $data['home_puntos_por_categoria']);
 
         return back()->with('success', 'Configuración guardada.');
     }

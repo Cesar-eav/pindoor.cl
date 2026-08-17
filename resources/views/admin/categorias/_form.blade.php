@@ -127,11 +127,33 @@ document.getElementById('cat-imagen-input').addEventListener('change', function 
 });
 </script>
 
+<div class="grid grid-cols-2 gap-4">
+    <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo</label>
+        <input type="text" name="tipo" value="{{ old('tipo', $categoria->tipo ?? '') }}"
+               placeholder="gastronomia, cultura, naturaleza…"
+               class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+    </div>
+    <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Orden</label>
+        <input type="number" name="orden" min="0" value="{{ old('orden', $categoria->orden ?? 0) }}"
+               class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+        <p class="text-xs text-gray-400 mt-1">Define el orden en la home y en los filtros — menor número aparece primero.</p>
+    </div>
+</div>
+
 <div>
-    <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo</label>
-    <input type="text" name="tipo" value="{{ old('tipo', $categoria->tipo ?? '') }}"
-           placeholder="gastronomia, cultura, naturaleza…"
-           class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+    <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition
+                  {{ old('activa_en_home', $categoria->activa_en_home ?? true) ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-gray-50 hover:border-gray-300' }}">
+        <input type="hidden" name="activa_en_home" value="0">
+        <input type="checkbox" name="activa_en_home" value="1"
+               class="shrink-0 accent-green-600"
+               {{ old('activa_en_home', $categoria->activa_en_home ?? true) ? 'checked' : '' }}>
+        <div>
+            <span class="text-sm font-semibold text-gray-800">Mostrar en la home</span>
+            <p class="text-xs text-gray-400 mt-0.5">Si está desmarcado, esta categoría no aparece en el carrusel de la página de inicio (sigue disponible en búsqueda y filtros).</p>
+        </div>
+    </label>
 </div>
 
 <div data-lang-field="es">

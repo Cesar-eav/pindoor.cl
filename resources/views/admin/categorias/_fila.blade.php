@@ -1,5 +1,5 @@
 <tr class="hover:bg-gray-50/70 transition group">
-    <td class="px-5 py-4 text-xs text-gray-300 font-mono">{{ $cat->id }}</td>
+    <td class="px-5 py-4 text-center text-sm text-gray-500 font-mono">{{ $cat->orden }}</td>
 
     <td class="px-5 py-4">
         <div class="flex items-center gap-3">
@@ -49,6 +49,14 @@
             {{ ($cat->puntos_interes_count ?? 0) > 0 ? 'bg-gray-100 text-gray-700' : 'text-gray-300' }}">
             {{ $cat->puntos_interes_count ?? 0 }}
         </span>
+    </td>
+
+    <td class="px-5 py-4 text-center">
+        @if($cat->activa_en_home)
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-[11px] font-semibold">✓ Sí</span>
+        @else
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-400 text-[11px] font-semibold">Oculta</span>
+        @endif
     </td>
 
     <td class="px-5 py-4">

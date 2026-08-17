@@ -13,7 +13,7 @@ class CategoriaController extends Controller
 {
     public function index()
     {
-        $categorias = Categoria::withCount('puntosInteres')->orderBy('nombre')->get();
+        $categorias = Categoria::withCount('puntosInteres')->orderBy('orden')->orderBy('nombre')->get();
         return view('admin.categorias.index', compact('categorias'));
     }
 
@@ -40,6 +40,8 @@ class CategoriaController extends Controller
             'modulos_defecto.*'        => 'string',
             'es_cliente'               => 'nullable|boolean',
             'disponible_para_operadores' => 'nullable|boolean',
+            'orden'                    => 'nullable|integer|min:0',
+            'activa_en_home'           => 'nullable|boolean',
         ]);
 
         $data['slug']            = Str::slug($data['nombre_es']);
@@ -61,6 +63,8 @@ class CategoriaController extends Controller
         $data['es_cliente']      = $request->boolean('es_cliente');
         $data['mostrar_nombre_en_imagen'] = $request->boolean('mostrar_nombre_en_imagen', true);
         $data['disponible_para_operadores'] = $request->boolean('disponible_para_operadores');
+        $data['orden']           = $data['orden'] ?? 0;
+        $data['activa_en_home']  = $request->boolean('activa_en_home');
 
         if ($request->hasFile('imagen_portada')) {
             $data['imagen_portada'] = ImagenComprimida::guardar($request->file('imagen_portada'), 'categorias');
@@ -104,6 +108,8 @@ class CategoriaController extends Controller
             'modulos_defecto.*'        => 'string',
             'es_cliente'               => 'nullable|boolean',
             'disponible_para_operadores' => 'nullable|boolean',
+            'orden'                    => 'nullable|integer|min:0',
+            'activa_en_home'           => 'nullable|boolean',
         ]);
 
         $data['slug']            = Str::slug($data['nombre_es']);
@@ -125,6 +131,8 @@ class CategoriaController extends Controller
         $data['es_cliente']      = $request->boolean('es_cliente');
         $data['mostrar_nombre_en_imagen'] = $request->boolean('mostrar_nombre_en_imagen', true);
         $data['disponible_para_operadores'] = $request->boolean('disponible_para_operadores');
+        $data['orden']           = $data['orden'] ?? 0;
+        $data['activa_en_home']  = $request->boolean('activa_en_home');
 
         if ($request->hasFile('imagen_portada')) {
             if ($categoria->imagen_portada) {

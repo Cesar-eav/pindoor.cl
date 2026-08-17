@@ -38,6 +38,30 @@
                 </button>
             </form>
 
+            {{-- Atractivos por categoría en la home --}}
+            <form action="{{ route('admin.configuracion.home-por-categoria') }}" method="POST" class="mt-6">
+                @csrf
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <label for="home_puntos_por_categoria" class="font-bold text-gray-900 block">
+                        Atractivos por categoría en la home
+                    </label>
+                    <p class="text-xs text-gray-500 mt-1 mb-3">
+                        Cuántos puntos se muestran, como máximo, en cada carrusel de categoría de la página de inicio.
+                        Para elegir qué categorías aparecen y en qué orden, entra a
+                        <a href="{{ route('admin.categorias.index') }}" class="text-[#fc5648] underline">Categorías</a>.
+                    </p>
+                    <input type="number" id="home_puntos_por_categoria" name="home_puntos_por_categoria"
+                           min="1" max="100" value="{{ old('home_puntos_por_categoria', $homePorCategoria) }}"
+                           class="w-32 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                    @error('home_puntos_por_categoria') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <button type="submit"
+                        class="mt-5 bg-[#fc5648] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#d94439] transition">
+                    Guardar
+                </button>
+            </form>
+
             {{-- Puntos de ejemplo / demo --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
                 <p class="font-bold text-gray-900">Puntos de ejemplo (no son negocios reales)</p>

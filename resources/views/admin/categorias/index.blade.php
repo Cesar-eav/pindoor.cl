@@ -15,8 +15,8 @@
 
     @php
         $catalogo  = \App\Models\PuntoInteres::catalogoModulos();
-        $clientes  = $categorias->where('es_cliente', true)->sortBy('nombre');
-        $atractivos = $categorias->where('es_cliente', false)->sortBy('nombre');
+        $clientes  = $categorias->where('es_cliente', true)->sortBy('orden');
+        $atractivos = $categorias->where('es_cliente', false)->sortBy('orden');
     @endphp
 
     <div class="py-8">
@@ -52,11 +52,12 @@
                     <table class="w-full text-sm">
                         <thead class="bg-[#fff5f4] border-b border-red-100">
                             <tr>
-                                <th class="text-left px-5 py-3 text-xs font-bold text-[#fc5648] uppercase tracking-wide w-8">#</th>
+                                <th class="text-center px-5 py-3 text-xs font-bold text-[#fc5648] uppercase tracking-wide w-12">Orden</th>
                                 <th class="text-left px-5 py-3 text-xs font-bold text-[#fc5648] uppercase tracking-wide">Categoría</th>
                                 <th class="text-left px-5 py-3 text-xs font-bold text-[#fc5648] uppercase tracking-wide">Tipo</th>
                                 <th class="text-left px-5 py-3 text-xs font-bold text-[#fc5648] uppercase tracking-wide">Módulos por defecto</th>
                                 <th class="text-center px-5 py-3 text-xs font-bold text-[#fc5648] uppercase tracking-wide w-20">Puntos</th>
+                                <th class="text-center px-5 py-3 text-xs font-bold text-[#fc5648] uppercase tracking-wide w-20">En home</th>
                                 <th class="px-5 py-3 w-36"></th>
                             </tr>
                         </thead>
@@ -64,7 +65,7 @@
                             @forelse($clientes as $cat)
                             @include('admin.categorias._fila', ['cat' => $cat, 'catalogo' => $catalogo])
                             @empty
-                            <tr><td colspan="6" class="px-5 py-6 text-center text-gray-400 text-sm">Sin categorías de negocios.</td></tr>
+                            <tr><td colspan="7" class="px-5 py-6 text-center text-gray-400 text-sm">Sin categorías de negocios.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -89,11 +90,12 @@
                     <table class="w-full text-sm">
                         <thead class="bg-blue-50 border-b border-blue-100">
                             <tr>
-                                <th class="text-left px-5 py-3 text-xs font-bold text-blue-600 uppercase tracking-wide w-8">#</th>
+                                <th class="text-center px-5 py-3 text-xs font-bold text-blue-600 uppercase tracking-wide w-12">Orden</th>
                                 <th class="text-left px-5 py-3 text-xs font-bold text-blue-600 uppercase tracking-wide">Categoría</th>
                                 <th class="text-left px-5 py-3 text-xs font-bold text-blue-600 uppercase tracking-wide">Tipo</th>
                                 <th class="text-left px-5 py-3 text-xs font-bold text-blue-600 uppercase tracking-wide">Módulos por defecto</th>
                                 <th class="text-center px-5 py-3 text-xs font-bold text-blue-600 uppercase tracking-wide w-20">Puntos</th>
+                                <th class="text-center px-5 py-3 text-xs font-bold text-blue-600 uppercase tracking-wide w-20">En home</th>
                                 <th class="px-5 py-3 w-36"></th>
                             </tr>
                         </thead>
@@ -101,7 +103,7 @@
                             @forelse($atractivos as $cat)
                             @include('admin.categorias._fila', ['cat' => $cat, 'catalogo' => $catalogo])
                             @empty
-                            <tr><td colspan="6" class="px-5 py-6 text-center text-gray-400 text-sm">Sin categorías de atractivos.</td></tr>
+                            <tr><td colspan="7" class="px-5 py-6 text-center text-gray-400 text-sm">Sin categorías de atractivos.</td></tr>
                             @endforelse
                         </tbody>
                     </table>

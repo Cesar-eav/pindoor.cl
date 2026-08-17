@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Mail;
 
 class PuntoInteresController extends Controller
 {
-    const PUNTOS_POR_CATEGORIA = 30;
+    const PUNTOS_POR_CATEGORIA_DEFAULT = 30;
 
   public function index(Request $request)
 {
@@ -57,15 +57,16 @@ class PuntoInteresController extends Controller
             ->withQueryString();
 
         $categorias = Categoria::withCount(['puntosInteres' => fn($q) => $q->publico()])
-            ->orderByDesc('puntos_interes_count')
+            ->orderBy('orden')
             ->get();
 
         $sinFiltros = !$request->anyFilled(['category', 'search', 'lat']);
 
         $categoriasConPuntos = collect();
         if ($sinFiltros) {
-            $porCategoria = self::PUNTOS_POR_CATEGORIA;
+            $porCategoria = (int) Configuracion::get('home_puntos_por_categoria', self::PUNTOS_POR_CATEGORIA_DEFAULT);
             $categoriasConPuntos = $categorias
+                ->where('activa_en_home', true)
                 ->map(fn($cat) => (object) [
                     'categoria' => $cat,
                     'puntos'    => PuntoInteres::publico()
