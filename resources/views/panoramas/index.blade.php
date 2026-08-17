@@ -210,10 +210,10 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
                     @endif
 
                     {{-- Badge vigencia --}}
-                    <div class="absolute top-3 left-32 z-10">
-                        @if($diasRest <= 7 && $diasRest >= 0)
+                    <div class="absolute top-3 left-3 z-10">
+                        @if($iniciada && $diasRest <= 7 && $diasRest >= 0)
                             <span class="bg-[#fc5648] text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
-                                {{ $diasRest === 0 ? __('ui.panoramas.ultimos_dias') . ' ' . __('ui.panoramas.hoy') : __('ui.panoramas.ultimos_dias') . ' ' . $diasRest }}
+                                {{ $diasRest === 0 ? __('ui.panoramas.ultimo_dia') : __('ui.panoramas.ultimos_dias', ['n' => $diasRest]) }}
                             </span>
                         @elseif(!$iniciada)
                             <span class="bg-gray-800/80 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
