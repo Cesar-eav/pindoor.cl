@@ -45,13 +45,13 @@
         </a>
         <div class="flex items-center gap-0.5 ml-1 bg-gray-100 rounded-full px-2 py-1">
             <a href="{{ route('lang.switch', 'es') }}"
-               class="text-[10px] font-black transition {{ app()->getLocale() === 'es' ? 'text-[#fc5648]' : 'text-gray-400' }}">🇪🇸</a>
+               class="text-[10px] font-black transition px-1 py-0.5 rounded-full {{ app()->getLocale() === 'es' ? 'bg-[#fabeb9] text-[#fc5648] shadow-sm' : 'text-gray-400' }}">🇪🇸</a>
             <span class="text-gray-300 text-[10px]">|</span>
             <a href="{{ route('lang.switch', 'en') }}"
-               class="text-[10px] font-black transition {{ app()->getLocale() === 'en' ? 'text-[#fc5648]' : 'text-gray-400' }}">🇬🇧</a>
+               class="text-[10px] font-black transition px-1 py-0.5 rounded-full {{ app()->getLocale() === 'en' ? 'bg-[#fabeb9] text-[#fc5648] shadow-sm' : 'text-gray-400' }}">🇬🇧</a>
             <span class="text-gray-300 text-[10px]">|</span>
             <a href="{{ route('lang.switch', 'fr') }}"
-               class="text-[10px] font-black transition {{ app()->getLocale() === 'fr' ? 'text-[#fc5648]' : 'text-gray-400' }}">🇫🇷</a>
+               class="text-[10px] font-black transition px-1 py-0.5 rounded-full {{ app()->getLocale() === 'fr' ? 'bg-[#fabeb9] text-[#fc5648] shadow-sm' : 'text-gray-400' }}">🇫🇷</a>
         </div>
     </nav>
 
