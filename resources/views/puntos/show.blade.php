@@ -97,7 +97,8 @@
                 <a href="{{ route('puntos.index') }}" class="hover:text-pindoor-accent transition">Pindoor</a>
                 <span class="text-gray-300">/</span>
                 @if($punto->categoria)
-                    <span class="text-gray-500">{{ $punto->categoria->nombre }}</span>
+                    <a href="{{ route('atractivos.categoria', $punto->categoria->slug ?? $punto->categoria->id) }}"
+                       class="text-gray-500 hover:text-pindoor-accent transition">{{ $punto->categoria->nombre }}</a>
                     <span class="text-gray-300">/</span>
                 @endif
                 <span class="text-pindoor-accent">{{ $punto->title }}</span>
