@@ -97,7 +97,7 @@
     @endif
 
     {{-- Cuerpo del artículo --}}
-    <div class="max-w-2xl mx-auto px-4 py-10">
+    <div class="max-w-2xl mx-auto px-4 pb-10">
 
         {{-- Breadcrumbs --}}
         <nav class="flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-8">
@@ -147,7 +147,7 @@
         @endif
 
         {{-- Separador --}}
-        <hr class="border-gray-100 mb-10">
+        
 
         {{-- Contenido con imágenes intercaladas (mismo mecanismo que Guías) --}}
         @php
