@@ -188,10 +188,16 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
         <div class="flex gap-2 overflow-x-auto pb-2" style="scrollbar-width:none">
             @foreach($exposiciones as $exp)
             @php
-                $hoyExp   = \Carbon\Carbon::today();
-                $iniciada = $exp->fecha->lte($hoyExp);
-                $hasta    = $exp->fecha_fin ?? $exp->fecha;
-                $diasRest = $hoyExp->diffInDays($hasta, false);
+                $hoyExp       = \Carbon\Carbon::today();
+                $esRecurrente = !empty($exp->dias_semana);
+                if ($esRecurrente) {
+                    $proximaFecha     = $exp->proximaOcurrencia($hoyExp);
+                    $diasHastaProxima = $proximaFecha ? $hoyExp->diffInDays($proximaFecha, false) : null;
+                } else {
+                    $iniciada = $exp->fecha->lte($hoyExp);
+                    $hasta    = $exp->fecha_fin ?? $exp->fecha;
+                    $diasRest = $hoyExp->diffInDays($hasta, false);
+                }
                 $expHref  = $exp->slug
                     ? route('panoramas.show', $exp)
                     : ($exp->punto_slug
@@ -211,7 +217,14 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
 
                     {{-- Badge vigencia --}}
                     <div class="absolute top-3 left-3 z-10">
-                        @if($iniciada && $diasRest <= 7 && $diasRest >= 0)
+                        @if($esRecurrente)
+                            <span class="bg-[#fc5648] text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
+                                @if($diasHastaProxima === 0) {{ __('ui.panoramas.hoy') }}
+                                @elseif($diasHastaProxima === 1) {{ __('ui.panoramas.manana') }}
+                                @else {{ __('ui.panoramas.en_x_dias', ['n' => $diasHastaProxima]) }}
+                                @endif
+                            </span>
+                        @elseif($iniciada && $diasRest <= 7 && $diasRest >= 0)
                             <span class="bg-[#fc5648] text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
                                 {{ $diasRest === 0 ? __('ui.panoramas.ultimo_dia') : __('ui.panoramas.ultimos_dias', ['n' => $diasRest]) }}
                             </span>
@@ -233,7 +246,11 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
                 {{-- Info debajo de la imagen --}}
                 <div class="pt-2 px-0.5">
                     <p class="text-[10px] font-bold text-gray-400  tracking-widest mb-1">
-                        @if($iniciada)
+                        @if($esRecurrente)
+                            @if($proximaFecha)
+                                {{ __('ui.panoramas.proxima_fecha') }} {{ $proximaFecha->locale('es')->translatedFormat('j \d\e F') }}
+                            @endif
+                        @elseif($iniciada)
                             Hasta el {{ $hasta->locale('es')->translatedFormat('j \d\e F') }}
                         @else
                             Del {{ $exp->fecha->locale('es')->translatedFormat('j \d\e F') }} al {{ $hasta->locale('es')->translatedFormat('j \d\e F') }}

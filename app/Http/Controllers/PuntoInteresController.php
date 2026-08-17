@@ -408,8 +408,19 @@ class PuntoInteresController extends Controller
             ->sortBy(fn($p) => $p->fecha->format('Y-m-d') . ($p->hora ?? '99:99'))
             ->values();
 
-        // Exposiciones: sección propia, no en el calendario diario
-        $exposiciones = $panoramas->where('categoria', 'exposicion')->values();
+        // Exposiciones: sección propia, no en el calendario diario.
+        // Las recurrentes (dias_semana) solo entran cuando su próxima ocurrencia real
+        // está a 3 días o menos — mostrarlas todo el rango fecha→fecha_fin no tiene
+        // sentido para algo que ocurre, por ejemplo, un domingo al mes.
+        $exposiciones = $panoramas->where('categoria', 'exposicion')
+            ->filter(function ($exp) use ($hoy) {
+                if (empty($exp->dias_semana)) {
+                    return true;
+                }
+                $proxima = $exp->proximaOcurrencia($hoy);
+                return $proxima && $hoy->diffInDays($proxima, false) <= 3;
+            })
+            ->values();
 
         $coleccion = match(true) {
             $catActiva === 'gratuito'   => $panoramas->where('es_gratuito', true)->where('categoria', '!=', 'exposicion'),
@@ -429,6 +440,9 @@ class PuntoInteresController extends Controller
             $diasRecurrentes = !empty($p->dias_semana) ? $p->dias_semana : null;
             for ($dia = $desde->copy(); $dia->lte($fin); $dia->addDay()) {
                 if ($diasRecurrentes && !in_array($dia->isoWeekday(), $diasRecurrentes)) {
+                    continue;
+                }
+                if ($diasRecurrentes && !$p->coincideSemanaDelMes($dia)) {
                     continue;
                 }
                 $key = $dia->toDateString();
