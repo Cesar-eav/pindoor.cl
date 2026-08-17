@@ -50,7 +50,7 @@
 <div class="max-w-2xl mx-auto px-4 py-8">
 
     {{-- Volver --}}
-    <a href="{{ route('puntos.index') }}"
+    <a href="{{ route('puntos.index') }}" wire:navigate
        class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 mb-5 transition">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>

@@ -69,7 +69,7 @@
 
         {{-- Breadcrumbs --}}
         <nav class="flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-8 overflow-x-auto whitespace-nowrap">
-            <a href="{{ route('puntos.index') }}" class="hover:text-pindoor-accent transition">Pindoor</a>
+            <a href="{{ route('puntos.index') }}" wire:navigate class="hover:text-pindoor-accent transition">Pindoor</a>
             <span class="text-gray-300">/</span>
             <a href="{{ route('puntos.show', $punto->slug ?? $punto->id) }}" class="hover:text-pindoor-accent transition">{{ $punto->title }}</a>
             <span class="text-gray-300">/</span>

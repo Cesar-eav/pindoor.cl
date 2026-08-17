@@ -14,7 +14,7 @@
 
     {{-- Breadcrumbs --}}
     <nav class="flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-6">
-        <a href="{{ route('atractivos.panoramas') }}" class="hover:text-[#fc5648] transition">Panoramas</a>
+        <a href="{{ route('atractivos.panoramas') }}" wire:navigate class="hover:text-[#fc5648] transition">Panoramas</a>
         <span class="text-gray-300">/</span>
         <span class="text-[#fc5648]">Re-vival</span>
     </nav>

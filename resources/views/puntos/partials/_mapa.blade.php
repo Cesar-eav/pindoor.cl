@@ -20,6 +20,10 @@ let _smoothCos             = null;  // componente cos del heading filtrado
 function setView(vista) {
     const mobile = window.innerWidth < 768;
 
+    // Barra inferior móvil: resaltar Inicio/Mapa (la barra queda persistida entre navegaciones y no se re-renderiza sola)
+    document.getElementById('bottomnav-inicio')?.classList.toggle('bg-white/20', vista !== 'mapa');
+    document.getElementById('bottomnav-mapa')?.classList.toggle('bg-white/20', vista === 'mapa');
+
     const elListado  = document.getElementById('vista-listado');
     const elMapa     = document.getElementById('vista-mapa');
     const elListadoM = document.getElementById('vista-listado-mobile');

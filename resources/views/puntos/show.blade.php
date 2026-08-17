@@ -94,7 +94,7 @@
         >
             {{-- Breadcrumbs --}}
             <nav class="flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-8 overflow-x-auto whitespace-nowrap">
-                <a href="{{ route('puntos.index') }}" class="hover:text-pindoor-accent transition">Pindoor</a>
+                <a href="{{ route('puntos.index') }}" wire:navigate class="hover:text-pindoor-accent transition">Pindoor</a>
                 <span class="text-gray-300">/</span>
                 @if($punto->categoria)
                     <a href="{{ route('atractivos.categoria', $punto->categoria->slug ?? $punto->categoria->id) }}"
