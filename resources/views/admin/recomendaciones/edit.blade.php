@@ -8,8 +8,8 @@
                 </svg>
             </a>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Editar recomendación</h2>
-            <a href="{{ route('recomienda.show', $recomendacion->slug) }}" target="_blank"
-               class="ml-auto text-sm font-bold text-gray-400 hover:text-gray-700 transition">Previsualizar ↗</a>
+            <a href="{{ route('admin.recomendaciones.preview', $recomendacion) }}" target="_blank"
+               class="ml-auto text-sm font-bold text-gray-400 hover:text-gray-700 transition">Vista previa ↗</a>
         </div>
     </x-slot>
 

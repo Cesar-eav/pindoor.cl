@@ -75,17 +75,25 @@
 
         <div class="p-6 space-y-4">
 
-            {{-- Badges --}}
-            <div class="flex flex-wrap gap-2">
-                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#fff0ef] text-[#fc5648] text-xs font-bold">
-                    {{ $planInfo['emoji'] }} {{ $planInfo['label'] }}
-                </span>
-                {{-- @if($recomendacion->destacado_portada && (!$recomendacion->destacado_hasta || $recomendacion->destacado_hasta->isFuture()))
-                <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">🥇 Recomendado Pindoor</span>
-                @endif --}}
-                @if($recomendacion->rubro)
-                <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-bold">{{ $recomendacion->rubro }}</span>
-                @endif
+            {{-- Badges + compartir --}}
+            <div class="flex items-start justify-between gap-2">
+                <div class="flex flex-wrap gap-2">
+                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#fff0ef] text-[#fc5648] text-xs font-bold">
+                        {{ $planInfo['emoji'] }} {{ $planInfo['label'] }}
+                    </span>
+                    {{-- @if($recomendacion->destacado_portada && (!$recomendacion->destacado_hasta || $recomendacion->destacado_hasta->isFuture()))
+                    <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">🥇 Recomendado Pindoor</span>
+                    @endif --}}
+                    @if($recomendacion->rubro)
+                    <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-bold">{{ $recomendacion->rubro }}</span>
+                    @endif
+                </div>
+
+                @include('partials._share_panel', [
+                    'shareText' => $recomendacion->titulo . ' — ' . route('recomienda.show', $recomendacion->slug),
+                    'imageUrl'  => $recomendacion->imagen_portada ? asset('storage/' . $recomendacion->imagen_portada) : null,
+                    'url'       => route('recomienda.show', $recomendacion->slug),
+                ])
             </div>
 
             {{-- Título --}}
