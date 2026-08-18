@@ -126,8 +126,12 @@
                 $contenidoFinal = $recomendacion->contenido ?? '';
                 $imagenesGaleria = $recomendacion->imagenes;
                 // La galería final siempre muestra TODAS las fotos, se hayan intercalado
-                // en el texto o no — no solo las que sobraron.
+                // en el texto o no — no solo las que sobraron. Incluye también la portada,
+                // salvo que la cabecera esté mostrando el video en su lugar.
                 $imagenesAlFinal = $imagenesGaleria->pluck('ruta');
+                if ($recomendacion->imagen_portada && !($recomendacion->video_en_cabecera && $recomendacion->video_youtube_id)) {
+                    $imagenesAlFinal->prepend($recomendacion->imagen_portada);
+                }
 
                 if ($imagenesGaleria->isNotEmpty() && trim(strip_tags($contenidoFinal)) !== '') {
 
