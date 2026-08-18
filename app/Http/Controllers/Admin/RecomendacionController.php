@@ -190,7 +190,7 @@ class RecomendacionController extends Controller
             'publicado'         => 'nullable|boolean',
             'orden'             => 'nullable|integer|min:0',
             'activo'            => 'nullable|boolean',
-            'imagen_portada'    => 'nullable|image|max:4096',
+            'imagen_portada'    => 'nullable|image|max:25600',
         ]);
     }
 
