@@ -13,6 +13,7 @@ use App\Models\PuntoProducto;
 use App\Models\Artista;
 use App\Models\OperadorTuristico;
 use App\Models\Ruta;
+use App\Models\Recomendacion;
 use App\Mail\NuevaExperienciaPropuesta;
 use App\Services\ImagenComprimida;
 use Carbon\Carbon;
@@ -178,17 +179,19 @@ class PuntoInteresController extends Controller
 
             $ultimosPosts = Post::publicados()->take(10)->get();
             $ultimasRutas = Ruta::publicadas()->with('puntos')->take(10)->get();
+            $recomendaciones = Recomendacion::publicadas()->destacadasEnPortada()->orderBy('orden')->take(10)->get();
         } else {
             $proximosPanoramas = collect();
             $ultimosPosts = collect();
             $ultimasRutas = collect();
+            $recomendaciones = collect();
         }
 
         $ultimoPost = $ultimosPosts->first();
 
         $ultimasExperiencias = Experiencia::activas()->latest()->take(10)->get();
 
-        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'categoriasConPuntos', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts', 'ultimasRutas', 'ultimasExperiencias', 'artistas', 'operadores'));
+        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'categoriasConPuntos', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts', 'ultimasRutas', 'ultimasExperiencias', 'artistas', 'operadores', 'recomendaciones'));
 
     } catch (\Exception $e) {
         \Log::error('Error en index: ' . $e->getMessage());

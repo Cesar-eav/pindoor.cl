@@ -12,6 +12,7 @@ use App\Models\OperadorTuristico;
 use App\Models\Panorama;
 use App\Models\Post;
 use App\Models\PuntoInteres;
+use App\Models\Recomendacion;
 use App\Models\Ruta;
 use Carbon\Carbon;
 use Livewire\Attributes\On;
@@ -175,9 +176,11 @@ class AtractivosGrid extends Component
 
         $ultimasExperiencias = $hayFiltros ? collect() : Experiencia::activas()->take(10)->get();
 
+        $recomendaciones = $hayFiltros ? collect() : Recomendacion::publicadas()->destacadasEnPortada()->orderBy('orden')->take(10)->get();
+
         return view('livewire.atractivos-grid', compact(
             'atractivos', 'categorias', 'categoriasConPuntos', 'hayFiltros', 'panoramas',
-            'proximosPanoramas', 'ultimosPosts', 'ultimasRutas', 'ultimasExperiencias', 'artistas', 'operadores'
+            'proximosPanoramas', 'ultimosPosts', 'ultimasRutas', 'ultimasExperiencias', 'artistas', 'operadores', 'recomendaciones'
         ));
     }
 }
