@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const tituloEs  = document.getElementById('titulo-es').value.trim();
         const resumenEs = document.getElementById('resumen-es').value.trim();
         const textoEs   = quill.getText().trim();
+        const htmlEs    = document.getElementById('contenido_es').value;
 
         if (!tituloEs && !textoEs) {
             alert('Escribe primero el contenido en Español.');
@@ -116,6 +117,60 @@ document.addEventListener('DOMContentLoaded', function () {
             return resultado.trim();
         }
 
+        // Traduce un nodo hijo preservando formato inline (negrita, cursiva, enlaces…)
+        async function traducirNodoInline(nodo) {
+            if (nodo.nodeType === Node.TEXT_NODE) {
+                const texto = nodo.textContent;
+                if (!texto.trim()) return texto;
+                const lead  = texto.match(/^\s*/)[0];
+                const trail = texto.match(/\s*$/)[0];
+                return lead + await traducirTexto(texto.trim()) + trail;
+            }
+            if (nodo.nodeType === Node.ELEMENT_NODE) {
+                const texto = nodo.textContent;
+                if (!texto.trim()) return nodo.outerHTML;
+                const clone = nodo.cloneNode(false);
+                clone.textContent = await traducirTexto(texto.trim());
+                return clone.outerHTML;
+            }
+            return '';
+        }
+
+        async function traducirNodosInline(el) {
+            let out = '';
+            for (const nodo of el.childNodes) {
+                out += await traducirNodoInline(nodo);
+            }
+            return out;
+        }
+
+        // Traduce el contenido bloque por bloque (p, h2, h3, blockquote, listas…)
+        // conservando la etiqueta original y el formato inline — así no se pierden
+        // los títulos, la negrita/cursiva/enlaces ni el resto del formato.
+        async function traducirHtml(html) {
+            const contenedor = document.createElement('div');
+            contenedor.innerHTML = html;
+            const partes = [];
+
+            for (const el of contenedor.children) {
+                const tag = el.tagName.toLowerCase();
+
+                if (tag === 'ul' || tag === 'ol') {
+                    const items = [];
+                    for (const li of el.children) {
+                        items.push(li.textContent.trim() ? await traducirNodosInline(li) : '');
+                    }
+                    partes.push(`<${tag}>` + items.map(t => `<li>${t}</li>`).join('') + `</${tag}>`);
+                    continue;
+                }
+
+                if (!el.textContent.trim()) { partes.push(el.outerHTML); continue; }
+                partes.push(`<${tag}>` + await traducirNodosInline(el) + `</${tag}>`);
+            }
+
+            return partes.join('');
+        }
+
         try {
             if (tituloEs) {
                 estado.textContent = 'Traduciendo título…';
@@ -125,19 +180,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 estado.textContent = 'Traduciendo resumen…';
                 document.getElementById('resumen-' + destino).value = await traducirTexto(resumenEs);
             }
-            if (textoEs) {
-                const traducido = await traducirTexto(textoEs);
-                const oraciones = traducido.match(/[^.!?]+[.!?]+/g) || [traducido];
-                let htmlDestino = '';
-                let buf = '';
-                oraciones.forEach((o, i) => {
-                    buf += o + ' ';
-                    if (buf.length > 350 || i === oraciones.length - 1) {
-                        htmlDestino += '<p>' + buf.trim() + '</p>';
-                        buf = '';
-                    }
-                });
-                document.getElementById('contenido_' + destino).value = htmlDestino;
+            if (htmlEs && htmlEs.trim()) {
+                estado.textContent = 'Traduciendo contenido…';
+                document.getElementById('contenido_' + destino).value = await traducirHtml(htmlEs);
             }
 
             setLang(destino);
