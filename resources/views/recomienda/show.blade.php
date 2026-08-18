@@ -70,7 +70,94 @@
         Volver a Pindoor
     </a>
 
-    <div class="bg-white sm:rounded-2xl shadow-sm sm:border sm:border-gray-100 overflow-hidden">
+    @php
+        $contenidoFinal = $recomendacion->contenido ?? '';
+        $imagenesGaleria = $recomendacion->imagenes;
+        // La galería final siempre muestra TODAS las fotos, se hayan intercalado
+        // en el texto o no — no solo las que sobraron. Incluye también la portada,
+        // salvo que la cabecera esté mostrando el video en su lugar.
+        $imagenesAlFinal = $imagenesGaleria->pluck('ruta');
+        if ($recomendacion->imagen_portada && !($recomendacion->video_en_cabecera && $recomendacion->video_youtube_id)) {
+            $imagenesAlFinal->prepend($recomendacion->imagen_portada);
+        }
+
+        if ($imagenesGaleria->isNotEmpty() && trim(strip_tags($contenidoFinal)) !== '') {
+
+            $marcado = $contenidoFinal;
+            foreach (['</p>','</h2>','</h3>','</h4>','</blockquote>','</ul>','</ol>'] as $tag) {
+                $marcado = str_replace($tag, $tag . '¶', $marcado);
+            }
+            $bloques    = array_values(array_filter(
+                array_map('trim', explode('¶', $marcado)),
+                fn($b) => trim(strip_tags($b)) !== ''
+            ));
+            $numBloques = count($bloques);
+
+            $posicionadas = [];
+            $automaticas  = [];
+
+            foreach ($imagenesGaleria as $img) {
+                if ($img->posicion) {
+                    $posicionadas[$img->posicion][] = $img->ruta;
+                } else {
+                    $automaticas[] = $img->ruta;
+                }
+            }
+
+            $insertarEn = $posicionadas;
+            if (!empty($automaticas)) {
+                $n        = count($automaticas);
+                $interval = max(1, (int) floor($numBloques / ($n + 1)));
+                $autoIdx  = 0;
+                for ($p = $interval; $p <= $numBloques + 1 && $autoIdx < $n; $p++) {
+                    if (!isset($insertarEn[$p])) {
+                        $insertarEn[$p][] = $automaticas[$autoIdx++];
+                    }
+                }
+                while ($autoIdx < $n) {
+                    $insertarEn[$numBloques + 1][] = $automaticas[$autoIdx++];
+                }
+            }
+
+            // Índice de cada foto dentro de $imagenesAlFinal, para que el clic en la
+            // versión intercalada (o en la portada) abra el mismo lightbox/zoom en la
+            // posición correcta.
+            $indicePorRuta = $imagenesAlFinal->flip();
+
+            $figuraHtml = function (string $ruta) use ($indicePorRuta): string {
+                $url = asset('storage/' . $ruta);
+                $idx = $indicePorRuta[$ruta] ?? 0;
+                return '<figure class="resena-fig" @click="zoomIndex=' . $idx . ';zoom=true"><img src="' . e($url) . '" alt="" class="cursor-zoom-in"></figure>';
+            };
+
+            $out = '';
+            foreach ($bloques as $i => $bloque) {
+                $out .= $bloque;
+                $parNum = $i + 1;
+                foreach ($insertarEn[$parNum] ?? [] as $ruta) {
+                    $out .= $figuraHtml($ruta);
+                }
+            }
+            $contenidoFinal = $out;
+        }
+    @endphp
+
+    {{-- x-data en la card: así el zoom es compartido por la portada, las fotos intercaladas
+         y el carrusel de galería, cada uno con su propio índice de apertura. --}}
+    <div class="bg-white sm:rounded-2xl shadow-sm sm:border sm:border-gray-100 overflow-hidden"
+         @if($imagenesAlFinal->isNotEmpty())
+         x-data="{
+            images: {{ $imagenesAlFinal->map(fn($r) => asset('storage/' . $r))->values()->toJson() }},
+            current: 0,
+            zoomIndex: 0,
+            zoom: false,
+            prev() { this.current = (this.current - 1 + this.images.length) % this.images.length; },
+            next() { this.current = (this.current + 1) % this.images.length; },
+            zoomPrev() { this.zoomIndex = (this.zoomIndex - 1 + this.images.length) % this.images.length; },
+            zoomNext() { this.zoomIndex = (this.zoomIndex + 1) % this.images.length; },
+         }"
+         x-effect="document.body.classList.toggle('overflow-hidden', zoom)"
+         @endif>
 
         {{-- Cabecera: video si está activado puntualmente, si no la imagen de portada --}}
         @if($recomendacion->video_en_cabecera && $recomendacion->video_youtube_id)
@@ -81,7 +168,7 @@
         @elseif($recomendacion->imagen_portada)
         <div class="bg-gray-900">
             <img src="{{ asset('storage/' . $recomendacion->imagen_portada) }}" alt="{{ $recomendacion->titulo }}"
-                 class="w-full max-h-80 object-cover">
+                 @click="zoomIndex=0;zoom=true" class="w-full max-h-80 object-cover cursor-zoom-in">
         </div>
         @endif
 
@@ -134,156 +221,71 @@
             @endif
 
             {{-- Contenido con imágenes intercaladas --}}
-            @php
-                $contenidoFinal = $recomendacion->contenido ?? '';
-                $imagenesGaleria = $recomendacion->imagenes;
-                // La galería final siempre muestra TODAS las fotos, se hayan intercalado
-                // en el texto o no — no solo las que sobraron. Incluye también la portada,
-                // salvo que la cabecera esté mostrando el video en su lugar.
-                $imagenesAlFinal = $imagenesGaleria->pluck('ruta');
-                if ($recomendacion->imagen_portada && !($recomendacion->video_en_cabecera && $recomendacion->video_youtube_id)) {
-                    $imagenesAlFinal->prepend($recomendacion->imagen_portada);
-                }
-
-                if ($imagenesGaleria->isNotEmpty() && trim(strip_tags($contenidoFinal)) !== '') {
-
-                    $marcado = $contenidoFinal;
-                    foreach (['</p>','</h2>','</h3>','</h4>','</blockquote>','</ul>','</ol>'] as $tag) {
-                        $marcado = str_replace($tag, $tag . '¶', $marcado);
-                    }
-                    $bloques    = array_values(array_filter(
-                        array_map('trim', explode('¶', $marcado)),
-                        fn($b) => trim(strip_tags($b)) !== ''
-                    ));
-                    $numBloques = count($bloques);
-
-                    $posicionadas = [];
-                    $automaticas  = [];
-
-                    foreach ($imagenesGaleria as $img) {
-                        if ($img->posicion) {
-                            $posicionadas[$img->posicion][] = $img->ruta;
-                        } else {
-                            $automaticas[] = $img->ruta;
-                        }
-                    }
-
-                    $insertarEn = $posicionadas;
-                    if (!empty($automaticas)) {
-                        $n        = count($automaticas);
-                        $interval = max(1, (int) floor($numBloques / ($n + 1)));
-                        $autoIdx  = 0;
-                        for ($p = $interval; $p <= $numBloques + 1 && $autoIdx < $n; $p++) {
-                            if (!isset($insertarEn[$p])) {
-                                $insertarEn[$p][] = $automaticas[$autoIdx++];
-                            }
-                        }
-                        while ($autoIdx < $n) {
-                            $insertarEn[$numBloques + 1][] = $automaticas[$autoIdx++];
-                        }
-                    }
-
-                    // Índice de cada foto dentro de $imagenesAlFinal, para que el clic en la
-                    // versión intercalada abra el mismo lightbox/zoom en la posición correcta.
-                    $indicePorRuta = $imagenesAlFinal->flip();
-
-                    $figuraHtml = function (string $ruta) use ($indicePorRuta): string {
-                        $url = asset('storage/' . $ruta);
-                        $idx = $indicePorRuta[$ruta] ?? 0;
-                        return '<figure class="resena-fig" @click="current=' . $idx . ';zoom=true"><img src="' . e($url) . '" alt="" class="cursor-zoom-in"></figure>';
-                    };
-
-                    $out = '';
-                    foreach ($bloques as $i => $bloque) {
-                        $out .= $bloque;
-                        $parNum = $i + 1;
-                        foreach ($insertarEn[$parNum] ?? [] as $ruta) {
-                            $out .= $figuraHtml($ruta);
-                        }
-                    }
-                    $contenidoFinal = $out;
-                }
-            @endphp
-
-            @if($imagenesAlFinal->isNotEmpty())
-            {{-- x-data compartido: así el clic en una foto intercalada abre el mismo zoom que la galería --}}
-            <div x-data="{
-                    images: {{ $imagenesAlFinal->map(fn($r) => asset('storage/' . $r))->values()->toJson() }},
-                    current: 0,
-                    zoom: false,
-                    prev() { this.current = (this.current - 1 + this.images.length) % this.images.length; },
-                    next() { this.current = (this.current + 1) % this.images.length; },
-                 }">
-
-                @if($contenidoFinal)
-                <div class="resenatext">
-                    {!! $contenidoFinal !!}
-                </div>
-                @endif
-
-                <div class="relative bg-gray-900 rounded-2xl overflow-hidden h-72 sm:h-80">
-                    <template x-for="(src, i) in images" :key="i">
-                        <img :src="src" x-show="current === i" @click="zoom = true"
-                             class="w-full h-full object-cover cursor-zoom-in">
-                    </template>
-                    @if($imagenesAlFinal->count() > 1)
-                    <button @click="prev()"
-                            class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                    </button>
-                    <button @click="next()"
-                            class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </button>
-                    <div class="absolute bottom-2 right-3 bg-black/50 text-white text-xs font-semibold px-2 py-0.5 rounded-full"
-                         x-text="(current + 1) + ' / ' + images.length"></div>
-                    @endif
-                </div>
-
-                {{-- Zoom / lightbox --}}
-                <div x-show="zoom" x-cloak
-                     x-transition:enter="transition ease-out duration-200"
-                     x-transition:enter-start="opacity-0"
-                     x-transition:enter-end="opacity-100"
-                     x-transition:leave="transition ease-in duration-150"
-                     x-transition:leave-start="opacity-100"
-                     x-transition:leave-end="opacity-0"
-                     @click.self="zoom = false"
-                     @keydown.escape.window="zoom = false"
-                     class="fixed inset-0 z-999 bg-black/95 flex items-center justify-center p-4">
-                    <button @click="zoom = false"
-                            class="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                    <template x-for="(src, i) in images" :key="'zoom-' + i">
-                        <img :src="src" x-show="current === i" @click.stop
-                             class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl select-none">
-                    </template>
-                    @if($imagenesAlFinal->count() > 1)
-                    <button @click.stop="prev()"
-                            class="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                    </button>
-                    <button @click.stop="next()"
-                            class="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </button>
-                    @endif
-                </div>
-            </div>
-            @elseif($contenidoFinal)
+            @if($contenidoFinal)
             <div class="resenatext">
                 {!! $contenidoFinal !!}
+            </div>
+            @endif
+
+            @if($imagenesAlFinal->isNotEmpty())
+            <div class="relative bg-gray-900 rounded-2xl overflow-hidden h-72 sm:h-80">
+                <template x-for="(src, i) in images" :key="i">
+                    <img :src="src" x-show="current === i" @click="zoomIndex = current; zoom = true"
+                         class="w-full h-full object-cover cursor-zoom-in">
+                </template>
+                @if($imagenesAlFinal->count() > 1)
+                <button @click="prev()"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <button @click="next()"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+                <div class="absolute bottom-2 right-3 bg-black/50 text-white text-xs font-semibold px-2 py-0.5 rounded-full"
+                     x-text="(current + 1) + ' / ' + images.length"></div>
+                @endif
+            </div>
+
+            {{-- Zoom / lightbox --}}
+            <div x-show="zoom" x-cloak
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @click.self="zoom = false"
+                 @keydown.escape.window="zoom = false"
+                 class="fixed inset-0 z-999 bg-black/95 flex items-center justify-center p-4">
+                <button @click="zoom = false"
+                        class="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                <template x-for="(src, i) in images" :key="'zoom-' + i">
+                    <img :src="src" x-show="zoomIndex === i" @click.stop
+                         class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl select-none">
+                </template>
+                @if($imagenesAlFinal->count() > 1)
+                <button @click.stop="zoomPrev()"
+                        class="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <button @click.stop="zoomNext()"
+                        class="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+                @endif
             </div>
             @endif
 
