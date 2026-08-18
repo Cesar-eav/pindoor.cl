@@ -246,6 +246,7 @@
         document.getElementById('bottomnav-info')?.classList.toggle('bg-white/20', esInfo);
     }
     document.addEventListener('livewire:navigated', bottomNavSync);
+    document.addEventListener('livewire:navigated', () => document.body.classList.remove('overflow-hidden'));
 </script>
 
 
