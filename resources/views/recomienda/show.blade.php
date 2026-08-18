@@ -34,12 +34,24 @@
         font-style: italic;
         color: #6b7280;
     }
-    .resena-fig { margin: 1.5rem 0; }
+    .resena-fig {
+        margin: 1.5rem -1.5rem;
+        height: 18rem;
+        overflow: hidden;
+    }
     .resena-fig img {
         width: 100%;
-        border-radius: 1rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        height: 100%;
+        object-fit: cover;
         display: block;
+    }
+    @media (min-width: 640px) {
+        .resena-fig {
+            height: 20rem;
+            margin: 1.5rem 0;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
     }
     .resenatext .ql-align-center { text-align: center; }
     .resenatext .ql-align-right  { text-align: right; }
@@ -47,18 +59,18 @@
 @endsection
 
 @section('content')
-<div class="max-w-2xl mx-auto px-4 py-8">
+<div class="max-w-2xl mx-auto sm:px-4 py-8">
 
     {{-- Volver --}}
     <a href="{{ route('puntos.index') }}" wire:navigate
-       class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 mb-5 transition">
+       class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 mb-5 transition px-4 sm:px-0">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
         Volver a Pindoor
     </a>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-white sm:rounded-2xl shadow-sm sm:border sm:border-gray-100 overflow-hidden">
 
         {{-- Cabecera: video si está activado puntualmente, si no la imagen de portada --}}
         @if($recomendacion->video_en_cabecera && $recomendacion->video_youtube_id)
@@ -171,9 +183,14 @@
                         }
                     }
 
-                    $figuraHtml = function (string $ruta): string {
+                    // Índice de cada foto dentro de $imagenesAlFinal, para que el clic en la
+                    // versión intercalada abra el mismo lightbox/zoom en la posición correcta.
+                    $indicePorRuta = $imagenesAlFinal->flip();
+
+                    $figuraHtml = function (string $ruta) use ($indicePorRuta): string {
                         $url = asset('storage/' . $ruta);
-                        return '<figure class="resena-fig"><img src="' . e($url) . '" alt=""></figure>';
+                        $idx = $indicePorRuta[$ruta] ?? 0;
+                        return '<figure class="resena-fig" @click="current=' . $idx . ';zoom=true"><img src="' . e($url) . '" alt="" class="cursor-zoom-in"></figure>';
                     };
 
                     $out = '';
@@ -188,14 +205,8 @@
                 }
             @endphp
 
-            @if($contenidoFinal)
-            <div class="resenatext">
-                {!! $contenidoFinal !!}
-            </div>
-            @endif
-
-            {{-- Carrusel de imágenes restantes --}}
             @if($imagenesAlFinal->isNotEmpty())
+            {{-- x-data compartido: así el clic en una foto intercalada abre el mismo zoom que la galería --}}
             <div x-data="{
                     images: {{ $imagenesAlFinal->map(fn($r) => asset('storage/' . $r))->values()->toJson() }},
                     current: 0,
@@ -203,7 +214,12 @@
                     prev() { this.current = (this.current - 1 + this.images.length) % this.images.length; },
                     next() { this.current = (this.current + 1) % this.images.length; },
                  }">
-                <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2"></p>
+
+                @if($contenidoFinal)
+                <div class="resenatext">
+                    {!! $contenidoFinal !!}
+                </div>
+                @endif
 
                 <div class="relative bg-gray-900 rounded-2xl overflow-hidden h-72 sm:h-80">
                     <template x-for="(src, i) in images" :key="i">
@@ -264,6 +280,10 @@
                     </button>
                     @endif
                 </div>
+            </div>
+            @elseif($contenidoFinal)
+            <div class="resenatext">
+                {!! $contenidoFinal !!}
             </div>
             @endif
 
