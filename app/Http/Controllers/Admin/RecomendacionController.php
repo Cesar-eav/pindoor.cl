@@ -12,6 +12,12 @@ use Illuminate\Support\Facades\Storage;
 
 class RecomendacionController extends Controller
 {
+    private const CAMPOS_TRADUCIBLES = [
+        'titulo_es', 'titulo_en', 'titulo_fr',
+        'resumen_es', 'resumen_en', 'resumen_fr',
+        'contenido_es', 'contenido_en', 'contenido_fr',
+    ];
+
     public function index(Request $request)
     {
         $search = $request->input('search');
@@ -45,14 +51,19 @@ class RecomendacionController extends Controller
     {
         $data = $this->validar($request);
         $data = $this->procesarBooleanos($request, $data);
-        $data['slug'] = Recomendacion::generarSlug($data['titulo']);
+        $data['slug'] = Recomendacion::generarSlug($data['titulo_es']);
         $data['publicado_en'] = $data['publicado'] ? now() : null;
 
         if ($request->hasFile('imagen_portada')) {
             $data['imagen_portada'] = ImagenComprimida::guardar($request->file('imagen_portada'), 'recomienda');
         }
 
+        $traducciones = collect($data)->only(self::CAMPOS_TRADUCIBLES);
+        $data = collect($data)->except(self::CAMPOS_TRADUCIBLES)->all();
+
         $recomendacion = Recomendacion::create($data);
+        $this->aplicarTraducciones($recomendacion, $traducciones);
+        $recomendacion->save();
 
         $this->guardarImagenesNuevas($request, $recomendacion, 0);
 
@@ -74,7 +85,7 @@ class RecomendacionController extends Controller
     {
         $data = $this->validar($request);
         $data = $this->procesarBooleanos($request, $data);
-        $data['slug'] = Recomendacion::generarSlug($data['titulo'], $recomendacion->id);
+        $data['slug'] = Recomendacion::generarSlug($data['titulo_es'], $recomendacion->id);
 
         if ($data['publicado'] && !$recomendacion->publicado_en) {
             $data['publicado_en'] = now();
@@ -87,7 +98,12 @@ class RecomendacionController extends Controller
             $data['imagen_portada'] = ImagenComprimida::guardar($request->file('imagen_portada'), 'recomienda');
         }
 
+        $traducciones = collect($data)->only(self::CAMPOS_TRADUCIBLES);
+        $data = collect($data)->except(self::CAMPOS_TRADUCIBLES)->all();
+
         $recomendacion->update($data);
+        $this->aplicarTraducciones($recomendacion, $traducciones);
+        $recomendacion->save();
 
         $eliminar = $request->input('eliminar_imagen', []);
         foreach ($recomendacion->imagenes as $img) {
@@ -168,17 +184,36 @@ class RecomendacionController extends Controller
         }
     }
 
+    private function aplicarTraducciones(Recomendacion $recomendacion, \Illuminate\Support\Collection $t): void
+    {
+        $recomendacion->setTranslation('titulo',    'es', $t['titulo_es'])
+                      ->setTranslation('titulo',    'en', $t['titulo_en'] ?? '')
+                      ->setTranslation('titulo',    'fr', $t['titulo_fr'] ?? '')
+                      ->setTranslation('resumen',   'es', $t['resumen_es'] ?? '')
+                      ->setTranslation('resumen',   'en', $t['resumen_en'] ?? '')
+                      ->setTranslation('resumen',   'fr', $t['resumen_fr'] ?? '')
+                      ->setTranslation('contenido', 'es', $t['contenido_es'] ?? '')
+                      ->setTranslation('contenido', 'en', $t['contenido_en'] ?? '')
+                      ->setTranslation('contenido', 'fr', $t['contenido_fr'] ?? '');
+    }
+
     private function validar(Request $request): array
     {
         return $request->validate([
-            'titulo'            => 'required|string|max:255',
-            'resumen'           => 'nullable|string|max:600',
+            'titulo_es'         => 'required|string|max:255',
+            'titulo_en'         => 'nullable|string|max:255',
+            'titulo_fr'         => 'nullable|string|max:255',
+            'resumen_es'        => 'nullable|string|max:600',
+            'resumen_en'        => 'nullable|string|max:600',
+            'resumen_fr'        => 'nullable|string|max:600',
+            'contenido_es'      => 'nullable|string',
+            'contenido_en'      => 'nullable|string',
+            'contenido_fr'      => 'nullable|string',
             'punto_interes_id'  => 'nullable|exists:puntosinteres,id',
             'plan'              => 'required|string|in:' . implode(',', array_keys(Recomendacion::PLANES)),
             'negocio'           => 'required|string|max:255',
             'rubro'             => 'nullable|string|max:255',
             'direccion'         => 'nullable|string|max:255',
-            'contenido'         => 'nullable|string',
             'video_url'         => 'nullable|url|max:500',
             'video_youtube'     => 'nullable|url|max:500',
             'video_en_cabecera' => 'nullable|boolean',

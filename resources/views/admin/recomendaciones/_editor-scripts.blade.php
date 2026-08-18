@@ -25,14 +25,131 @@ document.addEventListener('DOMContentLoaded', function () {
         },
     });
 
-    const hiddenContenido = document.getElementById('contenido');
-    if (hiddenContenido.value.trim()) {
-        quill.clipboard.dangerouslyPasteHTML(hiddenContenido.value);
+    const hiddenEs = document.getElementById('contenido_es');
+    if (hiddenEs.value.trim()) {
+        quill.clipboard.dangerouslyPasteHTML(hiddenEs.value);
     }
 
     document.getElementById('recomendacion-form').addEventListener('submit', function () {
-        hiddenContenido.value = quill.root.innerHTML;
+        document.getElementById('contenido_' + currentLang).value = quill.root.innerHTML;
     });
+
+    // ── Cambio de idioma ────────────────────────────────────────────
+    let currentLang = 'es';
+
+    const TAB_ESTILOS = {
+        es: { activo: 'border-[#fc5648] bg-[#fc5648] text-white', color: '#fc5648' },
+        en: { activo: 'border-blue-500 bg-blue-500 text-white',   color: '#3b82f6' },
+        fr: { activo: 'border-indigo-500 bg-indigo-500 text-white', color: '#6366f1' },
+    };
+    const TAB_INACTIVO = 'border-gray-200 bg-white text-gray-500 hover:border-gray-400';
+
+    window.setLang = function(lang) {
+        document.getElementById('contenido_' + currentLang).value = quill.root.innerHTML;
+
+        document.querySelectorAll('[data-lang-field]').forEach(el => {
+            el.style.display = el.dataset.langField === lang ? '' : 'none';
+        });
+
+        const nuevoContenido = document.getElementById('contenido_' + lang).value;
+        quill.setContents([]);
+        if (nuevoContenido.trim()) {
+            quill.clipboard.dangerouslyPasteHTML(nuevoContenido);
+        }
+
+        const label = document.getElementById('editor-lang-label');
+        if (label) {
+            label.textContent = lang.toUpperCase();
+            label.style.color = TAB_ESTILOS[lang].color;
+        }
+
+        Object.keys(TAB_ESTILOS).forEach(l => {
+            const tab = document.getElementById('tab-' + l);
+            if (!tab) return;
+            tab.className = 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border transition '
+                + (l === lang ? TAB_ESTILOS[l].activo : TAB_INACTIVO);
+        });
+
+        currentLang = lang;
+        contarResumen();
+    };
+
+    // ── Auto-traducir ES → EN / FR ───────────────────────────────────
+    window.autoTraducir = async function(destino) {
+        const btn    = document.getElementById('btn-autotraducir-' + destino);
+        const estado = document.getElementById('traducir-estado');
+
+        document.getElementById('contenido_es').value = quill.root.innerHTML;
+
+        const tituloEs  = document.getElementById('titulo-es').value.trim();
+        const resumenEs = document.getElementById('resumen-es').value.trim();
+        const textoEs   = quill.getText().trim();
+
+        if (!tituloEs && !textoEs) {
+            alert('Escribe primero el contenido en Español.');
+            return;
+        }
+
+        btn.disabled  = true;
+        btn.className = btn.className.replace('text-gray-500', 'text-blue-400');
+        estado.classList.remove('hidden');
+
+        async function traducirTexto(txt) {
+            if (!txt) return '';
+            const oraciones = txt.match(/[^.!?]+[.!?]+/g) || [txt];
+            const chunks = [];
+            let cur = '';
+            for (const o of oraciones) {
+                if ((cur + o).length > 450) { if (cur) chunks.push(cur); cur = o; }
+                else cur += (cur ? ' ' : '') + o;
+            }
+            if (cur) chunks.push(cur);
+
+            let resultado = '';
+            for (let i = 0; i < chunks.length; i++) {
+                estado.textContent = `Traduciendo… ${i + 1}/${chunks.length}`;
+                const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunks[i])}&langpair=es|${destino}&de=cesar.eav@gmail.com`);
+                const d = await r.json();
+                resultado += (d.responseData?.translatedText || chunks[i]) + ' ';
+                await new Promise(r => setTimeout(r, 600));
+            }
+            return resultado.trim();
+        }
+
+        try {
+            if (tituloEs) {
+                estado.textContent = 'Traduciendo título…';
+                document.getElementById('titulo-' + destino).value = await traducirTexto(tituloEs);
+            }
+            if (resumenEs) {
+                estado.textContent = 'Traduciendo resumen…';
+                document.getElementById('resumen-' + destino).value = await traducirTexto(resumenEs);
+            }
+            if (textoEs) {
+                const traducido = await traducirTexto(textoEs);
+                const oraciones = traducido.match(/[^.!?]+[.!?]+/g) || [traducido];
+                let htmlDestino = '';
+                let buf = '';
+                oraciones.forEach((o, i) => {
+                    buf += o + ' ';
+                    if (buf.length > 350 || i === oraciones.length - 1) {
+                        htmlDestino += '<p>' + buf.trim() + '</p>';
+                        buf = '';
+                    }
+                });
+                document.getElementById('contenido_' + destino).value = htmlDestino;
+            }
+
+            setLang(destino);
+            estado.textContent = '✓ Traducción completada';
+            setTimeout(() => { estado.classList.add('hidden'); estado.textContent = ''; }, 3000);
+        } catch(e) {
+            estado.textContent = 'Error al traducir. Inténtalo de nuevo.';
+        } finally {
+            btn.disabled  = false;
+            btn.className = btn.className.replace('text-blue-400', 'text-gray-500');
+        }
+    };
 
     // ── Subida de imagen al servidor (imagen incrustada en el editor) ──
     function imageHandler() {
@@ -86,6 +203,28 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     quill.on('text-change', contarContenido);
     contarContenido();
+
+    // ── Contador Resumen ─────────────────────────────────────────────
+    const RESUMEN_MAX  = 600;
+    const resumenChars = document.getElementById('resumen-chars');
+    const resumenPalab = document.getElementById('resumen-palabras');
+
+    function contarResumen() {
+        const el = document.getElementById('resumen-' + currentLang);
+        if (!el) return;
+        const txt    = el.value;
+        const chars  = txt.length;
+        const words  = txt.trim() === '' ? 0 : txt.trim().split(/\s+/).length;
+        const quedan = RESUMEN_MAX - chars;
+        resumenPalab.textContent = words + (words === 1 ? ' palabra' : ' palabras');
+        resumenChars.textContent = chars + ' / ' + RESUMEN_MAX;
+        resumenChars.classList.toggle('text-red-500', quedan <= 50);
+        resumenChars.classList.toggle('text-gray-400', quedan > 50);
+    }
+    document.getElementById('resumen-es').addEventListener('input', contarResumen);
+    document.getElementById('resumen-en').addEventListener('input', contarResumen);
+    document.getElementById('resumen-fr').addEventListener('input', contarResumen);
+    contarResumen();
 
     // ── Galería: eliminar existentes (marcar/desmarcar) ──────────────
     window.toggleEliminar = function(id) {

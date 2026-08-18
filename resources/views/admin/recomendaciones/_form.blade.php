@@ -1,3 +1,28 @@
+{{-- Tabs idioma --}}
+<div class="w-[90vw] mx-auto flex items-center gap-2 flex-wrap">
+    <button type="button" id="tab-es" onclick="setLang('es')"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-[#fc5648] bg-[#fc5648] text-white transition">
+        🇪🇸 Español
+    </button>
+    <button type="button" id="tab-en" onclick="setLang('en')"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition">
+        🇬🇧 English
+    </button>
+    <button type="button" id="tab-fr" onclick="setLang('fr')"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-gray-400 transition">
+        🇫🇷 Français
+    </button>
+    <button type="button" id="btn-autotraducir-en" onclick="autoTraducir('en')"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-blue-400 hover:text-blue-500 transition ml-2">
+        ✨ Auto-traducir ES→EN
+    </button>
+    <button type="button" id="btn-autotraducir-fr" onclick="autoTraducir('fr')"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-gray-200 bg-white text-gray-500 hover:border-blue-400 hover:text-blue-500 transition">
+        ✨ Auto-traducir ES→FR
+    </button>
+    <span id="traducir-estado" class="text-xs text-gray-400 hidden"></span>
+</div>
+
 {{-- Plan --}}
 <div class="w-[90vw] mx-auto">
     <label class="block text-sm font-semibold text-gray-700 mb-2">Plan contratado <span class="text-red-500">*</span></label>
@@ -37,16 +62,32 @@
 {{-- Título + Negocio --}}
 <div class="w-[90vw] mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">
-            Título de la nota <span class="text-red-500">*</span>
-        </label>
-        <input type="text" name="titulo"
-               value="{{ old('titulo', $recomendacion->titulo ?? '') }}"
-               placeholder="Ej: Café Fahrenheit: el rincón perfecto del cerro Alegre"
-               required
-               class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none
-                      {{ $errors->has('titulo') ? 'border-red-400' : 'border-gray-200' }}">
-        @error('titulo') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+        <div data-lang-field="es">
+            <label class="block text-sm font-semibold text-gray-700 mb-1">
+                Título de la nota <span class="text-[#fc5648]">ES</span> <span class="text-red-500">*</span>
+            </label>
+            <input id="titulo-es" type="text" name="titulo_es"
+                   value="{{ old('titulo_es', $recomendacion?->getTranslation('titulo','es',false)) }}"
+                   placeholder="Ej: Café Fahrenheit: el rincón perfecto del cerro Alegre"
+                   required
+                   class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none
+                          {{ $errors->has('titulo_es') ? 'border-red-400' : 'border-gray-200' }}">
+            @error('titulo_es') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+        </div>
+        <div data-lang-field="en" style="display:none">
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Title <span class="text-blue-500">EN</span></label>
+            <input id="titulo-en" type="text" name="titulo_en"
+                   value="{{ old('titulo_en', $recomendacion?->getTranslation('titulo','en',false)) }}"
+                   placeholder="Eg: Café Fahrenheit: the perfect corner of Cerro Alegre"
+                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+        </div>
+        <div data-lang-field="fr" style="display:none">
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Titre <span class="text-indigo-500">FR</span></label>
+            <input id="titulo-fr" type="text" name="titulo_fr"
+                   value="{{ old('titulo_fr', $recomendacion?->getTranslation('titulo','fr',false)) }}"
+                   placeholder="Ex: Café Fahrenheit : le coin parfait du cerro Alegre"
+                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
+        </div>
     </div>
     <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre del negocio <span class="text-red-500">*</span></label>
@@ -71,33 +112,23 @@
             <span id="resumen-chars" class="font-semibold">0 / 600</span>
         </div>
     </div>
-    <textarea id="resumen" name="resumen" rows="5" maxlength="600"
-              placeholder="Una breve introducción que invite a leer la nota completa..."
-              class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none resize-none">{{ old('resumen', $recomendacion->resumen ?? '') }}</textarea>
-    @error('resumen') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+    <div data-lang-field="es">
+        <textarea id="resumen-es" name="resumen_es" rows="5" maxlength="600"
+                  placeholder="Una breve introducción que invite a leer la nota completa..."
+                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none resize-none">{{ old('resumen_es', $recomendacion?->getTranslation('resumen','es',false)) }}</textarea>
+        @error('resumen_es') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+    </div>
+    <div data-lang-field="en" style="display:none">
+        <textarea id="resumen-en" name="resumen_en" rows="5" maxlength="600"
+                  placeholder="A brief intro that invites readers to read the full note..."
+                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none resize-none">{{ old('resumen_en', $recomendacion?->getTranslation('resumen','en',false)) }}</textarea>
+    </div>
+    <div data-lang-field="fr" style="display:none">
+        <textarea id="resumen-fr" name="resumen_fr" rows="5" maxlength="600"
+                  placeholder="Une brève introduction qui donne envie de lire la note complète..."
+                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none resize-none">{{ old('resumen_fr', $recomendacion?->getTranslation('resumen','fr',false)) }}</textarea>
+    </div>
 </div>
-
-<script>
-(function () {
-    const RESUMEN_MAX  = 600;
-    const resumenEl     = document.getElementById('resumen');
-    const resumenChars  = document.getElementById('resumen-chars');
-    const resumenPalab  = document.getElementById('resumen-palabras');
-
-    function contarResumen() {
-        const txt    = resumenEl.value;
-        const chars  = txt.length;
-        const words  = txt.trim() === '' ? 0 : txt.trim().split(/\s+/).length;
-        const quedan = RESUMEN_MAX - chars;
-        resumenPalab.textContent = words + (words === 1 ? ' palabra' : ' palabras');
-        resumenChars.textContent = chars + ' / ' + RESUMEN_MAX;
-        resumenChars.classList.toggle('text-red-500', quedan <= 50);
-        resumenChars.classList.toggle('text-gray-400', quedan > 50);
-    }
-    resumenEl.addEventListener('input', contarResumen);
-    contarResumen();
-})();
-</script>
 
 {{-- Rubro + Dirección --}}
 <div class="w-[90vw] mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -201,7 +232,9 @@
         {{-- ── Columna central: Editor ────────────────────────────────── --}}
         <div>
             <div class="flex items-center justify-between mb-3">
-                <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Contenido de la nota</label>
+                <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    Contenido — <span id="editor-lang-label" class="text-[#fc5648]">ES</span>
+                </label>
                 <div class="flex items-center gap-3 text-[11px] text-gray-400">
                     <span id="contenido-palabras">0 palabras</span>
                     <span id="contenido-chars" class="font-semibold">0 / 10 000</span>
@@ -211,7 +244,9 @@
             <div id="contenido-limite-aviso" class="hidden mt-2 text-xs text-red-500 font-semibold">
                 Límite de 10 000 caracteres alcanzado.
             </div>
-            <textarea id="contenido" name="contenido" class="hidden">{{ old('contenido', $recomendacion->contenido ?? '') }}</textarea>
+            <textarea id="contenido_es" name="contenido_es" class="hidden">{{ old('contenido_es', $recomendacion?->getTranslation('contenido','es',false)) }}</textarea>
+            <textarea id="contenido_en" name="contenido_en" class="hidden">{{ old('contenido_en', $recomendacion?->getTranslation('contenido','en',false)) }}</textarea>
+            <textarea id="contenido_fr" name="contenido_fr" class="hidden">{{ old('contenido_fr', $recomendacion?->getTranslation('contenido','fr',false)) }}</textarea>
         </div>
 
         {{-- ── Columna derecha: Preview posiciones ────────────────────── --}}
