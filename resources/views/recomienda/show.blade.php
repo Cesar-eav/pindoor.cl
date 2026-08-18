@@ -125,7 +125,9 @@
             @php
                 $contenidoFinal = $recomendacion->contenido ?? '';
                 $imagenesGaleria = $recomendacion->imagenes;
-                $imagenesAlFinal = collect();
+                // La galería final siempre muestra TODAS las fotos, se hayan intercalado
+                // en el texto o no — no solo las que sobraron.
+                $imagenesAlFinal = $imagenesGaleria->pluck('ruta');
 
                 if ($imagenesGaleria->isNotEmpty() && trim(strip_tags($contenidoFinal)) !== '') {
 
@@ -178,16 +180,7 @@
                             $out .= $figuraHtml($ruta);
                         }
                     }
-                    foreach ($insertarEn as $p => $rutas) {
-                        if ($p > $numBloques) {
-                            foreach ($rutas as $ruta) $imagenesAlFinal->push($ruta);
-                        }
-                    }
-
                     $contenidoFinal = $out;
-                } elseif ($imagenesGaleria->isNotEmpty()) {
-                    // Sin texto: todas las fotos de galería van al carrusel final
-                    $imagenesAlFinal = $imagenesGaleria->pluck('ruta');
                 }
             @endphp
 
@@ -206,7 +199,7 @@
                     prev() { this.current = (this.current - 1 + this.images.length) % this.images.length; },
                     next() { this.current = (this.current + 1) % this.images.length; },
                  }">
-                <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">📷 Galería</p>
+                <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2"></p>
 
                 <div class="relative bg-gray-900 rounded-2xl overflow-hidden h-72 sm:h-80">
                     <template x-for="(src, i) in images" :key="i">

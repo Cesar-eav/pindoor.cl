@@ -341,7 +341,7 @@
                   file:text-sm file:font-bold
                   file:bg-[#fff0ef] file:text-[#fc5648]
                   hover:file:bg-[#ffe0dd] cursor-pointer">
-    <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP — máx. 4 MB</p>
+    <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP — máx. 25 MB</p>
     <div id="preview-portada" class="mt-3 hidden">
         <img id="preview-portada-img" src="" alt="Preview"
              class="h-40 w-auto rounded-xl border border-[#fc5648]/40 object-cover">
