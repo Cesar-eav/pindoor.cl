@@ -25,18 +25,18 @@
 
 <div data-lang-field="es">
     <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre <span class="text-[#fc5648]">ES</span> <span class="text-red-500">*</span></label>
-    <input id="nombre-es" type="text" name="nombre_es" value="{{ old('nombre_es', $categoria?->getTranslation('nombre','es',false)) }}" required
+    <input id="nombre-es" type="text" name="nombre_es" value="{{ old('nombre_es', $categoria?->getTranslation('nombre','es',false)) }}" required maxlength="100"
            class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none {{ $errors->has('nombre_es') ? 'border-red-400' : 'border-gray-200' }}">
     @error('nombre_es') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
 </div>
 <div data-lang-field="en" style="display:none">
     <label class="block text-sm font-semibold text-gray-700 mb-1">Name <span class="text-blue-500">EN</span></label>
-    <input id="nombre-en" type="text" name="nombre_en" value="{{ old('nombre_en', $categoria?->getTranslation('nombre','en',false)) }}"
+    <input id="nombre-en" type="text" name="nombre_en" value="{{ old('nombre_en', $categoria?->getTranslation('nombre','en',false)) }}" maxlength="100"
            class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
 </div>
 <div data-lang-field="fr" style="display:none">
     <label class="block text-sm font-semibold text-gray-700 mb-1">Nom <span class="text-indigo-500">FR</span></label>
-    <input id="nombre-fr" type="text" name="nombre_fr" value="{{ old('nombre_fr', $categoria?->getTranslation('nombre','fr',false)) }}"
+    <input id="nombre-fr" type="text" name="nombre_fr" value="{{ old('nombre_fr', $categoria?->getTranslation('nombre','fr',false)) }}" maxlength="100"
            class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
 </div>
 
@@ -131,7 +131,7 @@ document.getElementById('cat-imagen-input').addEventListener('change', function 
     <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo</label>
         <input type="text" name="tipo" value="{{ old('tipo', $categoria->tipo ?? '') }}"
-               placeholder="gastronomia, cultura, naturaleza…"
+               placeholder="gastronomia, cultura, naturaleza…" maxlength="50"
                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
     </div>
     <div>
@@ -158,17 +158,17 @@ document.getElementById('cat-imagen-input').addEventListener('change', function 
 
 <div data-lang-field="es">
     <label class="block text-sm font-semibold text-gray-700 mb-1">Descripción <span class="text-[#fc5648]">ES</span></label>
-    <textarea id="descripcion-es" name="descripcion_es" rows="3"
+    <textarea id="descripcion-es" name="descripcion_es" rows="3" maxlength="500"
               class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none resize-none">{{ old('descripcion_es', $categoria?->getTranslation('descripcion','es',false)) }}</textarea>
 </div>
 <div data-lang-field="en" style="display:none">
     <label class="block text-sm font-semibold text-gray-700 mb-1">Description <span class="text-blue-500">EN</span></label>
-    <textarea id="descripcion-en" name="descripcion_en" rows="3"
+    <textarea id="descripcion-en" name="descripcion_en" rows="3" maxlength="500"
               class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none resize-none">{{ old('descripcion_en', $categoria?->getTranslation('descripcion','en',false)) }}</textarea>
 </div>
 <div data-lang-field="fr" style="display:none">
     <label class="block text-sm font-semibold text-gray-700 mb-1">Description <span class="text-indigo-500">FR</span></label>
-    <textarea id="descripcion-fr" name="descripcion_fr" rows="3"
+    <textarea id="descripcion-fr" name="descripcion_fr" rows="3" maxlength="500"
               class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none resize-none">{{ old('descripcion_fr', $categoria?->getTranslation('descripcion','fr',false)) }}</textarea>
 </div>
 
