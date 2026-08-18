@@ -202,6 +202,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Pindoor Recomienda
     Route::post('/recomendaciones/imagen', [RecomendacionController::class, 'uploadImagen'])->name('recomendaciones.imagen');
+    Route::get('/recomendaciones/{recomendacion}/preview', [RecomendacionController::class, 'preview'])->name('recomendaciones.preview');
     Route::resource('recomendaciones', RecomendacionController::class)
         ->except(['show'])
         ->parameters(['recomendaciones' => 'recomendacion']);

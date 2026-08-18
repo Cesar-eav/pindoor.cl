@@ -108,6 +108,12 @@ class RecomendacionController extends Controller
         return redirect()->route('admin.recomendaciones.index')->with('success', 'Recomendación actualizada correctamente.');
     }
 
+    public function preview(Recomendacion $recomendacion)
+    {
+        $recomendacion->load('imagenes');
+        return view('recomienda.show', compact('recomendacion'));
+    }
+
     public function destroy(Recomendacion $recomendacion)
     {
         $recomendacion->delete();
