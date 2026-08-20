@@ -73,23 +73,32 @@
                             <th class="px-5 py-3 text-right">🟢 WhatsApp</th>
                             <th class="px-5 py-3 text-right">📤 Nativo</th>
                             <th class="px-5 py-3 text-right">🔗 Copiado</th>
+                            <th class="px-5 py-3 text-right">📅 Calendario</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse($compartidos as $fila)
                         <tr class="hover:bg-gray-50">
                             <td class="px-5 py-3">
-                                <a href="{{ $fila->url }}" target="_blank" rel="noopener"
-                                   class="text-[#fc5648] hover:underline break-all">{{ $fila->url }}</a>
+                                <a href="{{ $fila->url }}" target="_blank" rel="noopener" title="{{ $fila->url }}"
+                                   class="inline-flex items-center gap-2 hover:underline">
+                                    <span class="shrink-0 px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold whitespace-nowrap">
+                                        {{ $fila->seccion['emoji'] }} {{ $fila->seccion['label'] }}
+                                    </span>
+                                    @if($fila->seccion['detalle'])
+                                    <span class="text-[#fc5648] truncate max-w-70">{{ $fila->seccion['detalle'] }}</span>
+                                    @endif
+                                </a>
                             </td>
                             <td class="px-5 py-3 text-right font-bold text-gray-900">{{ $fila->total }}</td>
                             <td class="px-5 py-3 text-right text-gray-500">{{ $fila->por_canal['whatsapp'] ?? 0 }}</td>
                             <td class="px-5 py-3 text-right text-gray-500">{{ $fila->por_canal['nativo'] ?? 0 }}</td>
                             <td class="px-5 py-3 text-right text-gray-500">{{ $fila->por_canal['copiar'] ?? 0 }}</td>
+                            <td class="px-5 py-3 text-right text-gray-500">{{ $fila->por_canal['calendario'] ?? 0 }}</td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-5 py-10 text-center text-gray-400 italic">
+                            <td colspan="6" class="px-5 py-10 text-center text-gray-400 italic">
                                 Todavía no se ha compartido nada en este rango.
                             </td>
                         </tr>
@@ -115,9 +124,10 @@
                     <tbody class="divide-y divide-gray-100">
                         @php
                             $canalInfo = [
-                                'whatsapp' => ['emoji' => '🟢', 'label' => 'WhatsApp'],
-                                'nativo'   => ['emoji' => '📤', 'label' => 'Nativo'],
-                                'copiar'   => ['emoji' => '🔗', 'label' => 'Copiado'],
+                                'whatsapp'   => ['emoji' => '🟢', 'label' => 'WhatsApp'],
+                                'nativo'     => ['emoji' => '📤', 'label' => 'Nativo'],
+                                'copiar'     => ['emoji' => '🔗', 'label' => 'Copiado'],
+                                'calendario' => ['emoji' => '📅', 'label' => 'Calendario'],
                             ];
                         @endphp
                         @forelse($recientes as $item)
