@@ -438,7 +438,7 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
                     <div class="mt-3 flex items-center gap-3 flex-wrap">
 
                         <a href="{{ $gcUrl }}" target="_blank" rel="noopener noreferrer"
-                           onclick="event.stopPropagation()"
+                           onclick="event.stopPropagation(); registrarCompartido('{{ $cardHref }}', 'calendario')"
                            class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-blue-600 transition">
                                 Agregar Calendario
                         </a>

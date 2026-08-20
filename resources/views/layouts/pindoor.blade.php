@@ -316,6 +316,20 @@
 </script>
 
 <script>
+// Registro de uso de compartir/calendario (fire-and-forget, no bloquea la acción).
+// Global para poder llamarse tanto desde sharePanel() como desde links sueltos
+// (ej. "Agregar calendario") que no viven dentro de ese componente Alpine.
+function registrarCompartido(url, canal) {
+    fetch('{{ route('compartir.store') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        body: JSON.stringify({ url, canal }),
+    }).catch(() => {});
+}
+
 function sharePanel() {
     return {
         open: false, copiado: false, text: '', image: '', url: '', file: null, fetchingFile: false,
@@ -341,17 +355,7 @@ function sharePanel() {
             }
             this.fetchingFile = false;
         },
-        // Registro de uso (fire-and-forget, no bloquea la acción de compartir).
-        registrar(canal) {
-            fetch('{{ route('compartir.store') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                },
-                body: JSON.stringify({ url: this.url, canal }),
-            }).catch(() => {});
-        },
+        registrar(canal) { registrarCompartido(this.url, canal); },
         nativo() {
             this.open = false;
             const conArchivo = this.file && navigator.canShare && navigator.canShare({ files: [this.file] });
