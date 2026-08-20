@@ -118,6 +118,7 @@ Route::get('/la-escena', [ArtistaController::class, 'directorio'])->name('artist
 Route::get('/registro-operador',  [OperadorController::class, 'showRegister'])->name('operador.register');
 Route::post('/registro-operador', [OperadorController::class, 'register'])->name('operador.register.store');
 
+Route::get('/admin/recomendaciones/{recomendacion}/preview', [RecomendacionController::class, 'preview'])->name('admin.recomendaciones.preview');
 
 
 /* --- RUTAS PROTEGIDAS (BREEZE) --- */
@@ -202,7 +203,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Pindoor Recomienda
     Route::post('/recomendaciones/imagen', [RecomendacionController::class, 'uploadImagen'])->name('recomendaciones.imagen');
-    Route::get('/recomendaciones/{recomendacion}/preview', [RecomendacionController::class, 'preview'])->name('recomendaciones.preview');
     Route::resource('recomendaciones', RecomendacionController::class)
         ->except(['show'])
         ->parameters(['recomendaciones' => 'recomendacion']);
