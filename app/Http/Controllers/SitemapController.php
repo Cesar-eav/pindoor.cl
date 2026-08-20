@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;
+use App\Models\Post;
 use App\Models\PuntoInteres;
+use App\Models\Recomendacion;
+use App\Models\Ruta;
 
 class SitemapController extends Controller
 {
@@ -18,8 +21,14 @@ class SitemapController extends Controller
             ->having('puntos_interes_count', '>', 0)
             ->get(['slug']);
 
+        $posts = Post::publicados()->whereNotNull('slug')->get(['slug', 'publicado_en']);
+
+        $rutas = Ruta::publicadas()->whereNotNull('slug')->get(['slug', 'publicado_en']);
+
+        $recomendaciones = Recomendacion::publicadas()->whereNotNull('slug')->get(['slug', 'publicado_en']);
+
         return response()
-            ->view('sitemap', compact('puntos', 'categorias'))
+            ->view('sitemap', compact('puntos', 'categorias', 'posts', 'rutas', 'recomendaciones'))
             ->header('Content-Type', 'application/xml');
     }
 }
