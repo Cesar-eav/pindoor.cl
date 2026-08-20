@@ -132,7 +132,7 @@
                     @else
                         <div class="absolute inset-0 bg-gray-800"></div>
                     @endif
-                    <div class="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent"></div>
+                    <div class="absolute inset-0 bg-linear-to-t from-black/95 via-black/20 to-transparent"></div>
                     <div class="relative z-10 h-full flex flex-col justify-end p-4">
                         <h3 class="text-sm font-extrabold text-white leading-snug line-clamp-3">{{ $post->titulo }}</h3>
 
