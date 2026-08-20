@@ -287,12 +287,36 @@
         <p class="text-xs text-gray-400 mt-1">Entrevista / reportaje. Normalmente se incrusta en el cuerpo de la nota (Plan Premium).</p>
         @error('video_youtube') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
 
+        <label class="block text-sm font-semibold text-gray-700 mb-1 mt-4">Video propio (subido al servidor)</label>
+
+        @if(isset($recomendacion->video_local) && $recomendacion->video_local)
+        <div class="mb-2">
+            <video src="{{ $recomendacion->video_local_url }}" controls class="w-full max-h-52 rounded-xl border border-gray-200 bg-black"></video>
+            <label class="flex items-center gap-2 mt-1.5 cursor-pointer">
+                <input type="checkbox" name="eliminar_video_local" value="1"
+                       class="w-4 h-4 accent-red-500 rounded">
+                <span class="text-xs font-semibold text-red-500">Eliminar este video al guardar</span>
+            </label>
+        </div>
+        @endif
+
+        <input type="file" name="video_local" accept="video/mp4,video/quicktime,video/webm"
+               class="block w-full text-sm text-gray-500
+                      file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0
+                      file:text-sm file:font-bold file:bg-[#fff0ef] file:text-[#fc5648]
+                      hover:file:bg-[#ffe0dd] cursor-pointer">
+        <p class="text-xs text-gray-400 mt-1">
+            MP4, MOV o WEBM — máx. 50 MB. Sin marca de YouTube ni controles ajenos.
+            Comprime el video antes de subirlo (para 1 minuto, apunta a ~15-20 MB).
+        </p>
+        @error('video_local') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+
         <label class="flex items-center gap-2 mt-2 cursor-pointer">
             <input type="hidden" name="video_en_cabecera" value="0">
             <input type="checkbox" name="video_en_cabecera" value="1" id="video_en_cabecera"
                    {{ old('video_en_cabecera', $recomendacion->video_en_cabecera ?? false) ? 'checked' : '' }}
                    class="w-4 h-4 accent-[#fc5648] rounded">
-            <span class="text-xs font-semibold text-gray-600">Mostrar este video en la cabecera (reemplaza la portada)</span>
+            <span class="text-xs font-semibold text-gray-600">Mostrar video en la cabecera (reemplaza la portada) — prioriza el video propio si hay ambos</span>
         </label>
         <p class="text-[11px] text-amber-700 mt-0.5">Uso puntual para promociones — no es parte permanente de ningún plan.</p>
     </div>

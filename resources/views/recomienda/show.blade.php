@@ -77,7 +77,8 @@
         // en el texto o no — no solo las que sobraron. Incluye también la portada,
         // salvo que la cabecera esté mostrando el video en su lugar.
         $imagenesAlFinal = $imagenesGaleria->pluck('ruta');
-        if ($recomendacion->imagen_portada && !($recomendacion->video_en_cabecera && $recomendacion->video_youtube_id)) {
+        $videoEnCabecera = $recomendacion->video_en_cabecera && ($recomendacion->video_local || $recomendacion->video_youtube_id);
+        if ($recomendacion->imagen_portada && !$videoEnCabecera) {
             $imagenesAlFinal->prepend($recomendacion->imagen_portada);
         }
 
@@ -159,8 +160,12 @@
          x-effect="document.body.classList.toggle('overflow-hidden', zoom)"
          @endif>
 
-        {{-- Cabecera: video si está activado puntualmente, si no la imagen de portada --}}
-        @if($recomendacion->video_en_cabecera && $recomendacion->video_youtube_id)
+        {{-- Cabecera: video si está activado puntualmente (propio > YouTube), si no la imagen de portada --}}
+        @if($recomendacion->video_en_cabecera && $recomendacion->video_local)
+        <div class="bg-gray-900 aspect-video">
+            <video src="{{ $recomendacion->video_local_url }}" controls playsinline class="w-full h-full"></video>
+        </div>
+        @elseif($recomendacion->video_en_cabecera && $recomendacion->video_youtube_id)
         <div class="bg-gray-900 aspect-video">
             <iframe src="https://www.youtube.com/embed/{{ $recomendacion->video_youtube_id }}?rel=0&modestbranding=1&iv_load_policy=3&fs=0"
                     class="w-full h-full" loading="lazy"></iframe>
@@ -303,8 +308,15 @@
             </div>
             @endif
 
-            {{-- Entrevista / reportaje en video (Plan Premium, salvo que ya se muestre en la cabecera) --}}
-            @if($recomendacion->plan === 'premium' && $recomendacion->video_youtube_id && !$recomendacion->video_en_cabecera)
+            {{-- Entrevista / reportaje en video (Plan Premium, salvo que ya se muestre en la cabecera; propio > YouTube) --}}
+            @if($recomendacion->plan === 'premium' && !$videoEnCabecera && $recomendacion->video_local)
+            <div class="pt-2">
+                <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">🎥 Entrevista / reportaje</p>
+                <div class="aspect-video rounded-2xl overflow-hidden shadow-lg bg-black">
+                    <video src="{{ $recomendacion->video_local_url }}" controls playsinline class="w-full h-full"></video>
+                </div>
+            </div>
+            @elseif($recomendacion->plan === 'premium' && !$videoEnCabecera && $recomendacion->video_youtube_id)
             <div class="pt-2">
                 <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">🎥 Entrevista / reportaje</p>
                 <div class="aspect-video rounded-2xl overflow-hidden shadow-lg">
