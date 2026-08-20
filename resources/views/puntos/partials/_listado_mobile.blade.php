@@ -96,7 +96,6 @@
                 <span class="absolute top-1.5 right-1.5 text-base leading-none">{{ $r->plan_info['emoji'] }}</span>
             </div>
             <div class="px-2.5 py-2">
-                <p class="text-[9px] font-black uppercase tracking-widest text-[#fc5648]">Pindoor Recomienda</p>
                 <p class="text-[11px] font-bold text-gray-900 leading-tight line-clamp-2 mt-0.5">{{ $r->titulo }}</p>
             </div>
         </a>
