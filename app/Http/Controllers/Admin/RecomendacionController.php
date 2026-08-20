@@ -58,6 +58,10 @@ class RecomendacionController extends Controller
             $data['imagen_portada'] = ImagenComprimida::guardar($request->file('imagen_portada'), 'recomienda');
         }
 
+        if ($request->hasFile('video_local')) {
+            $data['video_local'] = $request->file('video_local')->store('recomienda/videos', 'public');
+        }
+
         $traducciones = collect($data)->only(self::CAMPOS_TRADUCIBLES);
         $data = collect($data)->except(self::CAMPOS_TRADUCIBLES)->all();
 
@@ -96,6 +100,14 @@ class RecomendacionController extends Controller
         if ($request->hasFile('imagen_portada')) {
             if ($recomendacion->imagen_portada) Storage::disk('public')->delete($recomendacion->imagen_portada);
             $data['imagen_portada'] = ImagenComprimida::guardar($request->file('imagen_portada'), 'recomienda');
+        }
+
+        if ($request->hasFile('video_local')) {
+            if ($recomendacion->video_local) Storage::disk('public')->delete($recomendacion->video_local);
+            $data['video_local'] = $request->file('video_local')->store('recomienda/videos', 'public');
+        } elseif ($request->boolean('eliminar_video_local') && $recomendacion->video_local) {
+            Storage::disk('public')->delete($recomendacion->video_local);
+            $data['video_local'] = null;
         }
 
         $traducciones = collect($data)->only(self::CAMPOS_TRADUCIBLES);
@@ -216,6 +228,7 @@ class RecomendacionController extends Controller
             'direccion'         => 'nullable|string|max:255',
             'video_url'         => 'nullable|url|max:500',
             'video_youtube'     => 'nullable|url|max:500',
+            'video_local'       => 'nullable|mimes:mp4,mov,webm|max:50000',
             'video_en_cabecera' => 'nullable|boolean',
             'whatsapp'          => 'nullable|string|max:30',
             'enlace'            => 'nullable|url|max:500',

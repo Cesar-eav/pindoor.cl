@@ -38,6 +38,7 @@ class Recomendacion extends Model
         'contenido',
         'video_url',
         'video_youtube',
+        'video_local',
         'video_en_cabecera',
         'whatsapp',
         'enlace',
@@ -95,6 +96,11 @@ class Recomendacion extends Model
         return null;
     }
 
+    public function getVideoLocalUrlAttribute(): ?string
+    {
+        return $this->video_local ? asset('storage/' . $this->video_local) : null;
+    }
+
     public function getWhatsappUrlAttribute(): ?string
     {
         if (!$this->whatsapp) return null;
@@ -124,6 +130,9 @@ class Recomendacion extends Model
         static::deleting(function (self $recomendacion) {
             if ($recomendacion->imagen_portada) {
                 Storage::disk('public')->delete($recomendacion->imagen_portada);
+            }
+            if ($recomendacion->video_local) {
+                Storage::disk('public')->delete($recomendacion->video_local);
             }
             foreach ($recomendacion->imagenes as $img) {
                 Storage::disk('public')->delete($img->ruta);
