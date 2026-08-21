@@ -60,6 +60,47 @@
                 @endif
             </div>
 
+            {{-- Por categoría y canal --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-5 py-3 border-b border-gray-100 text-sm font-medium text-gray-500 uppercase">
+                    Desde dónde se comparte
+                </div>
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+                        <tr>
+                            <th class="px-5 py-3 text-left">Categoría</th>
+                            <th class="px-5 py-3 text-right">Total</th>
+                            <th class="px-5 py-3 text-right">🟢 WhatsApp</th>
+                            <th class="px-5 py-3 text-right">📤 Nativo</th>
+                            <th class="px-5 py-3 text-right">🔗 Copiado</th>
+                            <th class="px-5 py-3 text-right">📅 Calendario</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse($porCategoria as $fila)
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-5 py-3">
+                                <span class="inline-flex items-center gap-2 font-bold text-gray-800">
+                                    {{ $fila->emoji }} {{ $fila->label }}
+                                </span>
+                            </td>
+                            <td class="px-5 py-3 text-right font-bold text-gray-900">{{ $fila->total }}</td>
+                            <td class="px-5 py-3 text-right text-gray-500">{{ $fila->por_canal['whatsapp'] ?? 0 }}</td>
+                            <td class="px-5 py-3 text-right text-gray-500">{{ $fila->por_canal['nativo'] ?? 0 }}</td>
+                            <td class="px-5 py-3 text-right text-gray-500">{{ $fila->por_canal['copiar'] ?? 0 }}</td>
+                            <td class="px-5 py-3 text-right text-gray-500">{{ $fila->por_canal['calendario'] ?? 0 }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="px-5 py-10 text-center text-gray-400 italic">
+                                Todavía no se ha compartido nada en este rango.
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
             {{-- Por página y canal --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="px-5 py-3 border-b border-gray-100 text-sm font-medium text-gray-500 uppercase">
