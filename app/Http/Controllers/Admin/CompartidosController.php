@@ -50,6 +50,28 @@ class CompartidosController extends Controller
 
         $totalGeneral = $compartidos->sum('total');
 
+        // Mismo dato que $compartidos pero agrupado por categoría (Rutas, Blog, Atractivo...)
+        // en vez de por página individual — para ver de un vistazo desde dónde se comparte más.
+        $porCategoria = $compartidos
+            ->groupBy(fn ($fila) => $fila->seccion['label'])
+            ->map(function ($filas, $label) {
+                $porCanal = collect();
+                foreach ($filas as $fila) {
+                    foreach ($fila->por_canal as $canal => $cantidad) {
+                        $porCanal[$canal] = ($porCanal[$canal] ?? 0) + $cantidad;
+                    }
+                }
+
+                return (object) [
+                    'emoji'     => $filas->first()->seccion['emoji'],
+                    'label'     => $label,
+                    'total'     => $filas->sum('total'),
+                    'por_canal' => $porCanal,
+                ];
+            })
+            ->sortByDesc('total')
+            ->values();
+
         $porDiaRaw = (clone $base)
             ->selectRaw('DATE(created_at) as fecha, count(*) as total')
             ->groupBy('fecha')
@@ -72,7 +94,7 @@ class CompartidosController extends Controller
             ->get();
 
         return view('admin.compartidos.index', compact(
-            'compartidos', 'totalGeneral', 'dias', 'maxDia', 'recientes', 'desde', 'hasta'
+            'compartidos', 'porCategoria', 'totalGeneral', 'dias', 'maxDia', 'recientes', 'desde', 'hasta'
         ));
     }
 
