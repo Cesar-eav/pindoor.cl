@@ -123,10 +123,18 @@
             <span class="text-[#fc5648] truncate max-w-45">{{ $post->titulo }}</span>
         </nav>
 
-        {{-- Meta fecha --}}
-        <p class="text-xs font-black uppercase tracking-widest text-[#fc5648] mb-3">
-            {{ $post->publicado_en?->translatedFormat('d \d\e F \d\e Y') }}
-        </p>
+        {{-- Meta fecha + compartir --}}
+        <div class="flex items-start justify-between gap-2 mb-3">
+            <p class="text-xs font-black uppercase tracking-widest text-[#fc5648]">
+                {{ $post->publicado_en?->translatedFormat('d \d\e F \d\e Y') }}
+            </p>
+
+            @include('partials._share_panel', [
+                'shareText' => $post->titulo . ' — ' . $canonicalUrl,
+                'imageUrl'  => $post->imagen_portada_url,
+                'url'       => $canonicalUrl,
+            ])
+        </div>
 
         {{-- Título --}}
         <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900

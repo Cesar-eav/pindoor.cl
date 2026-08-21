@@ -74,10 +74,18 @@
             <span class="text-[#fc5648] truncate max-w-45">{{ $ruta->titulo }}</span>
         </nav>
 
-        {{-- Meta --}}
-        <p class="text-xs font-black uppercase tracking-widest text-[#fc5648] mb-3">
-            🗺️ Ruta Pindoor · {{ $ruta->puntos->count() }} {{ $ruta->puntos->count() === 1 ? 'parada' : 'paradas' }}
-        </p>
+        {{-- Meta + compartir --}}
+        <div class="flex items-start justify-between gap-2 mb-3">
+            <p class="text-xs font-black uppercase tracking-widest text-[#fc5648]">
+                🗺️ Ruta Pindoor · {{ $ruta->puntos->count() }} {{ $ruta->puntos->count() === 1 ? 'parada' : 'paradas' }}
+            </p>
+
+            @include('partials._share_panel', [
+                'shareText' => $ruta->titulo . ' — ' . $canonicalUrl,
+                'imageUrl'  => $ruta->imagen_portada_url,
+                'url'       => $canonicalUrl,
+            ])
+        </div>
 
         {{-- Título --}}
         <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900
