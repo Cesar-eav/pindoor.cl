@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;
-use App\Models\CategoriaEvento;
 use App\Models\Configuracion;
 use App\Models\ImagenPunto;
 use App\Models\ModuloDato;
@@ -367,16 +366,15 @@ class ClienteController extends Controller
         $categorias      = Categoria::where('es_cliente', true)->orderBy('nombre')->get();
 
         // Contenido de los módulos "avanzados" (antes vivían en páginas aparte:
-        // /museo, /eventos, /productos). Se muestran embebidos en el dashboard.
+        // /museo, /productos). Se muestran embebidos en el dashboard.
+        // Eventos (agenda cultural) ahora vive en su propia página, ver ClienteEventosController.
         $entradas     = $punto->items('entradas');
         $exposiciones = $punto->items('exposiciones');
-        $eventos      = $punto->moduloItems->where('modulo', 'eventos')->values();
-        $tiposEvento  = CategoriaEvento::catalogo();
         $productos    = $punto->productos;
 
         return view('cliente.perfil', compact(
             'punto', 'modulos', 'datoCarta', 'datoAlojamiento', 'categorias',
-            'entradas', 'exposiciones', 'eventos', 'tiposEvento', 'productos'
+            'entradas', 'exposiciones', 'productos'
         ));
     }
 
