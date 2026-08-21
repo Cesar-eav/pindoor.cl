@@ -22,6 +22,16 @@ class CompartidosController extends Controller
         'operador'     => ['emoji' => '🧳', 'label' => 'Operador'],
     ];
 
+    // Orden y color fijos de los canales para los gráficos — WhatsApp usa su verde
+    // de marca (ya usado en el ícono del botón compartir); el resto toma colores
+    // categóricos separados y validados contra confusión por daltonismo.
+    public const CANALES = [
+        'whatsapp'   => ['emoji' => '🟢', 'label' => 'WhatsApp',   'color' => '#25D366'],
+        'nativo'     => ['emoji' => '📤', 'label' => 'Nativo',     'color' => '#2a78d6'],
+        'copiar'     => ['emoji' => '🔗', 'label' => 'Copiado',    'color' => '#4a3aa7'],
+        'calendario' => ['emoji' => '📅', 'label' => 'Calendario', 'color' => '#eb6834'],
+    ];
+
     public function index(Request $request)
     {
         $desde = $request->filled('desde')
@@ -71,22 +81,32 @@ class CompartidosController extends Controller
             })
             ->sortByDesc('total')
             ->values();
+        $maxCategoria = $porCategoria->max('total') ?: 1;
 
-        $porDiaRaw = (clone $base)
-            ->selectRaw('DATE(created_at) as fecha, count(*) as total')
-            ->groupBy('fecha')
+        $porDiaCanalRaw = (clone $base)
+            ->selectRaw('DATE(created_at) as fecha, canal, count(*) as total')
+            ->groupBy('fecha', 'canal')
             ->get()
-            ->keyBy('fecha');
+            ->groupBy('fecha');
 
         $dias = collect();
         for ($d = $desde->copy(); $d->lte($hasta); $d->addDay()) {
             $key = $d->format('Y-m-d');
+            $porCanalDia = ($porDiaCanalRaw->get($key) ?? collect())->pluck('total', 'canal');
             $dias->push((object) [
-                'fecha' => $key,
-                'total' => (int) ($porDiaRaw->get($key)->total ?? 0),
+                'fecha'     => $key,
+                'total'     => (int) $porCanalDia->sum(),
+                'por_canal' => $porCanalDia,
             ]);
         }
         $maxDia = $dias->max('total') ?: 1;
+
+        // Totales por canal en todo el rango, para el gráfico de barras horizontales.
+        $porCanalTotal = (clone $base)
+            ->selectRaw('canal, count(*) as total')
+            ->groupBy('canal')
+            ->pluck('total', 'canal');
+        $maxCanal = $porCanalTotal->max() ?: 1;
 
         $recientes = (clone $base)
             ->latest('created_at')
@@ -94,7 +114,8 @@ class CompartidosController extends Controller
             ->get();
 
         return view('admin.compartidos.index', compact(
-            'compartidos', 'porCategoria', 'totalGeneral', 'dias', 'maxDia', 'recientes', 'desde', 'hasta'
+            'compartidos', 'porCategoria', 'maxCategoria', 'totalGeneral',
+            'dias', 'maxDia', 'porCanalTotal', 'maxCanal', 'recientes', 'desde', 'hasta'
         ));
     }
 

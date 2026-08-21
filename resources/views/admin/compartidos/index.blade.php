@@ -3,6 +3,8 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Estadística de "Compartir"</h2>
     </x-slot>
 
+    @php $CANALES = \App\Http\Controllers\Admin\CompartidosController::CANALES; @endphp
+
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
@@ -36,24 +38,118 @@
                 </div>
             </div>
 
+            {{-- Por canal --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div class="text-sm font-medium text-gray-500 uppercase mb-4">Por canal</div>
+                @if($totalGeneral > 0)
+                <div class="space-y-3">
+                    @foreach($CANALES as $canalKey => $info)
+                    @php
+                        $valorCanal = (int) ($porCanalTotal[$canalKey] ?? 0);
+                        $anchoPct   = $valorCanal > 0 ? max(2, round($valorCanal / $maxCanal * 100)) : 0;
+                        $pctTotal   = $totalGeneral > 0 ? round($valorCanal / $totalGeneral * 100) : 0;
+                    @endphp
+                    <div>
+                        <div class="flex items-center justify-between text-xs font-bold text-gray-600 mb-1">
+                            <span>{{ $info['emoji'] }} {{ $info['label'] }}</span>
+                            <span class="text-gray-400 font-semibold">{{ $valorCanal }} · {{ $pctTotal }}%</span>
+                        </div>
+                        <div class="h-3 rounded-full bg-gray-50 overflow-hidden">
+                            <div class="h-full rounded-full transition-all" style="width:{{ $anchoPct }}%; background:{{ $info['color'] }}"></div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                @else
+                <p class="text-sm text-gray-300 italic py-6 text-center">Sin datos en este rango de fechas.</p>
+                @endif
+            </div>
+
             {{-- Compartidos por día --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <div class="text-sm font-medium text-gray-500 uppercase mb-4">Compartidos por día</div>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="text-sm font-medium text-gray-500 uppercase">Compartidos por día</div>
+                    @if($totalGeneral > 0)
+                    <div class="flex items-center gap-3 flex-wrap justify-end">
+                        @foreach($CANALES as $canalKey => $info)
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-gray-500">
+                            <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:{{ $info['color'] }}"></span>
+                            {{ $info['label'] }}
+                        </span>
+                        @endforeach
+                    </div>
+                    @endif
+                </div>
                 @if($totalGeneral > 0)
                 <div class="overflow-x-auto pb-1" style="scrollbar-width:none;">
                     <div class="flex items-end gap-1.5" style="min-width:{{ max($dias->count() * 28, 100) }}px; height:140px;">
                         @foreach($dias as $dia)
-                        @php $alturaPct = $dia->total > 0 ? max(4, round($dia->total / $maxDia * 100)) : 0; @endphp
-                        <div class="flex-1 flex flex-col items-center justify-end h-full group relative" style="min-width:20px;">
-                            <div class="absolute -top-6 left-1/2 -translate-x-1/2 hidden group-hover:block bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded-lg whitespace-nowrap z-10">
-                                {{ $dia->total }} · {{ \Carbon\Carbon::parse($dia->fecha)->locale('es')->isoFormat('D MMM') }}
+                        @php
+                            // Respaldo nativo: el tooltip de abajo puede recortarse dentro del
+                            // contenedor overflow-x-auto (que fuerza overflow-y:auto también),
+                            // así que el dato queda siempre accesible vía el title del navegador.
+                            $tituloDia = $dia->total . ' compartidos · ' . \Carbon\Carbon::parse($dia->fecha)->locale('es')->isoFormat('D MMM');
+                            foreach ($CANALES as $canalKey => $info) {
+                                $valorTitulo = (int) ($dia->por_canal[$canalKey] ?? 0);
+                                if ($valorTitulo > 0) {
+                                    $tituloDia .= "\n" . $info['label'] . ': ' . $valorTitulo;
+                                }
+                            }
+                        @endphp
+                        <div class="flex-1 flex flex-col items-center justify-end h-full group relative" style="min-width:20px;" title="{{ $tituloDia }}">
+                            <div class="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full hidden group-hover:block bg-gray-900 text-white text-[10px] px-2.5 py-2 rounded-lg whitespace-nowrap z-10 space-y-1">
+                                <p class="font-black">{{ $dia->total }} · {{ \Carbon\Carbon::parse($dia->fecha)->locale('es')->isoFormat('D MMM') }}</p>
+                                @foreach($CANALES as $canalKey => $info)
+                                @php $valorDiaCanal = (int) ($dia->por_canal[$canalKey] ?? 0); @endphp
+                                @if($valorDiaCanal > 0)
+                                <p class="flex items-center gap-1.5 font-semibold text-white/80">
+                                    <span class="w-2 h-2 rounded-full shrink-0" style="background:{{ $info['color'] }}"></span>
+                                    {{ $info['label'] }}: {{ $valorDiaCanal }}
+                                </p>
+                                @endif
+                                @endforeach
                             </div>
-                            <div class="w-full rounded-t-md transition-all {{ $dia->total > 0 ? 'bg-[#fc5648] group-hover:bg-gray-900' : 'bg-gray-100' }}"
-                                 style="height:{{ $alturaPct }}%; min-height:2px;"></div>
+                            <div class="w-full flex flex-col-reverse gap-0.5" style="height:110px">
+                                @if($dia->total === 0)
+                                <div class="w-full rounded-t-sm bg-gray-100" style="height:2px"></div>
+                                @else
+                                @foreach($CANALES as $canalKey => $info)
+                                @php $valorDiaCanal = (int) ($dia->por_canal[$canalKey] ?? 0); @endphp
+                                @if($valorDiaCanal > 0)
+                                @php $segPx = max(2, round($valorDiaCanal / $maxDia * 110)); @endphp
+                                <div class="w-full rounded-t-xs transition-all group-hover:brightness-90"
+                                     style="height:{{ $segPx }}px; background:{{ $info['color'] }}"></div>
+                                @endif
+                                @endforeach
+                                @endif
+                            </div>
                             <span class="text-[9px] text-gray-400 mt-1 whitespace-nowrap">{{ \Carbon\Carbon::parse($dia->fecha)->format('d/m') }}</span>
                         </div>
                         @endforeach
                     </div>
+                </div>
+                @else
+                <p class="text-sm text-gray-300 italic py-6 text-center">Sin datos en este rango de fechas.</p>
+                @endif
+            </div>
+
+            {{-- Top categorías --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div class="text-sm font-medium text-gray-500 uppercase mb-4">Top categorías compartidas</div>
+                @if($porCategoria->isNotEmpty())
+                <div class="space-y-3">
+                    @foreach($porCategoria as $fila)
+                    @php $anchoPct = max(2, round($fila->total / $maxCategoria * 100)); @endphp
+                    <div>
+                        <div class="flex items-center justify-between text-xs font-bold text-gray-600 mb-1">
+                            <span>{{ $fila->emoji }} {{ $fila->label }}</span>
+                            <span class="text-gray-400 font-semibold">{{ $fila->total }}</span>
+                        </div>
+                        <div class="h-3 rounded-full bg-gray-50 overflow-hidden">
+                            <div class="h-full rounded-full transition-all" style="width:{{ $anchoPct }}%; background:#2a78d6"></div>
+                        </div>
+                    </div>
+                    @endforeach
                 </div>
                 @else
                 <p class="text-sm text-gray-300 italic py-6 text-center">Sin datos en este rango de fechas.</p>
@@ -163,16 +259,8 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        @php
-                            $canalInfo = [
-                                'whatsapp'   => ['emoji' => '🟢', 'label' => 'WhatsApp'],
-                                'nativo'     => ['emoji' => '📤', 'label' => 'Nativo'],
-                                'copiar'     => ['emoji' => '🔗', 'label' => 'Copiado'],
-                                'calendario' => ['emoji' => '📅', 'label' => 'Calendario'],
-                            ];
-                        @endphp
                         @forelse($recientes as $item)
-                        @php $canal = $canalInfo[$item->canal] ?? ['emoji' => '❔', 'label' => $item->canal]; @endphp
+                        @php $canal = $CANALES[$item->canal] ?? ['emoji' => '❔', 'label' => $item->canal]; @endphp
                         <tr class="hover:bg-gray-50">
                             <td class="px-5 py-3 text-gray-500 whitespace-nowrap">
                                 {{ $item->created_at->locale('es')->isoFormat('D MMM, HH:mm') }}
