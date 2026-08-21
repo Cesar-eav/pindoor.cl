@@ -13,7 +13,9 @@ class ClienteEventosController extends Controller
     {
         abort_if((int) $punto->user_id !== Auth::id(), 403);
 
-        return view('cliente.eventos', compact('punto'));
+        $modulos = $punto->modulos_habilitados ?? [];
+
+        return view('cliente.eventos', compact('punto', 'modulos'));
     }
 
     /** Vista de pantalla completa con los próximos eventos en scroll automático, pensada para grabar un reel. */

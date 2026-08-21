@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :punto="$punto" :modulos="$modulos">
 
 <div class="flex bg-white" style="min-height: calc(100vh - 3.5rem)">
 

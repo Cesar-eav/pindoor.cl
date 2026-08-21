@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :punto="$punto" :modulos="$modulos">
 
 @php
     $punto->loadMissing('imagenes');
