@@ -165,7 +165,7 @@
                 <a href="#museo" class="sidebar-link">🎟️ Museo</a>
                 @endif
                 @if(in_array('agenda', $modulos))
-                <a href="#eventos" class="sidebar-link">📅 Eventos</a>
+                <a href="{{ route('cliente.eventos.index', $punto) }}" class="sidebar-link {{ request()->routeIs('cliente.eventos.index') ? 'active' : '' }}">📅 Eventos</a>
                 @endif
                 @if(in_array($punto->categoria_id, [13, 14]))
                 <a href="#catalogo" class="sidebar-link">🛍️ Catálogo</a>

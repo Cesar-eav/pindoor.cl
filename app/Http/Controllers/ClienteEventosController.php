@@ -4,106 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Models\ModuloItem;
 use App\Models\PuntoInteres;
-use App\Services\ImagenComprimida;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class ClienteEventosController extends Controller
 {
-    private function verificarPunto(PuntoInteres $punto): bool
+    /** Página de agenda cultural del negocio — el CRUD lo maneja el componente Livewire. */
+    public function index(PuntoInteres $punto)
     {
-        return !$punto->eliminado && $punto->user_id === Auth::id();
+        abort_if((int) $punto->user_id !== Auth::id(), 403);
+
+        return view('cliente.eventos', compact('punto'));
     }
 
-    /** Crea o actualiza un evento en la agenda. */
-    public function guardarEvento(Request $request, PuntoInteres $punto)
+    /** Vista de pantalla completa con los próximos eventos en scroll automático, pensada para grabar un reel. */
+    public function reel(PuntoInteres $punto)
     {
-        if (!$this->verificarPunto($punto)) {
-            return redirect()->route('cliente.perfil');
-        }
+        abort_if((int) $punto->user_id !== Auth::id(), 403);
 
-        $request->validate([
-            'titulo'             => 'required|string|max:255',
-            'descripcion'        => 'nullable|string',
-            'tipo'               => 'required|string|in:' . implode(',', \App\Models\CategoriaEvento::slugs()),
-            'fecha'              => 'required|date',
-            'hora'               => 'nullable|date_format:H:i',
-            'hora_fin'           => 'nullable|date_format:H:i',
-            'precio'             => 'nullable|numeric|min:0',
-            'precio_texto'       => 'nullable|string|max:100',
-            'url_entradas'       => 'nullable|url|max:255',
-            'destacado'          => 'boolean',
-            'imagen'             => 'nullable|image|mimes:jpeg,png,jpg,webp|max:20480',
-            'item_id'            => 'nullable|integer|exists:punto_modulo_items,id',
-        ]);
+        $eventos = ModuloItem::where('punto_interes_id', $punto->id)
+            ->where('modulo', 'eventos')
+            ->whereDate('fecha', '>=', today())
+            ->orderByDesc('destacado')
+            ->orderBy('fecha')
+            ->get();
 
-        $datos = [
-            'titulo'       => $request->titulo,
-            'descripcion'  => $request->descripcion,
-            'tipo'         => $request->tipo,
-            'hora'         => $request->hora,
-            'hora_fin'     => $request->hora_fin,
-            'precio'       => $request->precio,
-            'precio_texto' => $request->precio_texto,
-            'url_entradas' => $request->url_entradas,
-        ];
-
-        $rutaImagen = null;
-
-        if ($request->hasFile('imagen')) {
-            if ($request->filled('item_id')) {
-                $item = ModuloItem::find($request->item_id);
-                if ($item && $item->imagen) {
-                    Storage::disk('public')->delete($item->imagen);
-                }
-            }
-            $rutaImagen = ImagenComprimida::guardar($request->file('imagen'), 'eventos');
-        }
-
-        if ($request->filled('item_id')) {
-            $item = ModuloItem::where('id', $request->item_id)
-                ->where('punto_interes_id', $punto->id)
-                ->where('modulo', 'eventos')
-                ->firstOrFail();
-
-            $item->datos     = $datos;
-            $item->fecha     = $request->fecha;
-            $item->destacado = $request->boolean('destacado');
-            if ($rutaImagen) {
-                $item->imagen = $rutaImagen;
-            }
-            $item->save();
-        } else {
-            ModuloItem::create([
-                'punto_interes_id' => $punto->id,
-                'modulo'           => 'eventos',
-                'datos'            => $datos,
-                'imagen'           => $rutaImagen,
-                'activo'           => true,
-                'destacado'        => $request->boolean('destacado'),
-                'fecha'            => $request->fecha,
-            ]);
-        }
-
-        return redirect()->route('cliente.perfil.ver', $punto)
-            ->with('success', 'Evento guardado en la agenda.');
-    }
-
-    /** Elimina un evento. */
-    public function eliminarEvento(PuntoInteres $punto, ModuloItem $evento)
-    {
-        if (!$this->verificarPunto($punto) || $evento->punto_interes_id !== $punto->id || $evento->modulo !== 'eventos') {
-            abort(403);
-        }
-
-        if ($evento->imagen) {
-            Storage::disk('public')->delete($evento->imagen);
-        }
-
-        $evento->delete();
-
-        return redirect()->route('cliente.perfil.ver', $punto)
-            ->with('success', 'Evento eliminado.');
+        return view('cliente.eventos-reel', compact('punto', 'eventos'));
     }
 }

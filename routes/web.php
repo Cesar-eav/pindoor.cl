@@ -282,9 +282,9 @@ Route::middleware(['auth', 'verified', 'role:cliente'])->prefix('cliente')->name
     Route::post('/museo/{punto}/exposicion', [ClienteMuseoController::class, 'guardarExposicion'])->name('museo.exposicion.guardar');
     Route::delete('/museo/{punto}/exposicion/{exposicion}', [ClienteMuseoController::class, 'eliminarExposicion'])->name('museo.exposicion.eliminar');
 
-    // Módulo agenda cultural (categoría 5) — embebido en el dashboard (cliente.perfil.ver#eventos)
-    Route::post('/eventos/{punto}/guardar', [ClienteEventosController::class, 'guardarEvento'])->name('eventos.guardar');
-    Route::delete('/eventos/{punto}/{evento}', [ClienteEventosController::class, 'eliminarEvento'])->name('eventos.eliminar');
+    // Módulo agenda cultural (categoría 5) — página propia, CRUD reactivo vía Livewire
+    Route::get('/perfil/{punto}/eventos', [ClienteEventosController::class, 'index'])->name('eventos.index');
+    Route::get('/perfil/{punto}/eventos/reel', [ClienteEventosController::class, 'reel'])->name('eventos.reel');
 
     // Catálogo de productos (tiendas / artesanía) — embebido en el dashboard (cliente.perfil.ver#catalogo)
     Route::post('/productos',                       [ClienteProductosController::class, 'store'])->name('productos.store');
