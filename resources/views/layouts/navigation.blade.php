@@ -160,6 +160,9 @@
                         $_tieneActividadMob = count(array_intersect(['oferta_del_dia','menu_del_dia','avisos','promociones'], $modulos)) > 0;
                         $_tieneContenidoMob = in_array('carta', $modulos) || in_array('entradas', $modulos) || in_array('exposiciones', $modulos) || in_array('agenda', $modulos) || in_array($punto->categoria_id, [13,14]);
                         $_tieneAlojMob      = count(array_intersect(['habitaciones','servicios','politicas'], $modulos)) > 0;
+                        // Los anchors (#galeria, #museo, etc.) solo existen en la página de perfil,
+                        // así que siempre apuntan ahí — funciona también estando ya en esa página.
+                        $_perfilUrlMob = route('cliente.perfil.ver', $punto);
                     @endphp
 
                     <div class="px-4 pt-3 pb-1 flex items-center justify-between">
@@ -173,47 +176,47 @@
                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Actividad de hoy</p>
                     </div>
                     @if(in_array('oferta_del_dia', $modulos))
-                    <x-responsive-nav-link href="#oferta" onclick="toggleMobileMenu()">🏷️ Oferta del día</x-responsive-nav-link>
+                    <x-responsive-nav-link href="{{ $_perfilUrlMob }}#oferta" onclick="toggleMobileMenu()">🏷️ Oferta del día</x-responsive-nav-link>
                     @endif
                     @if(in_array('menu_del_dia', $modulos))
-                    <x-responsive-nav-link href="#menu" onclick="toggleMobileMenu()">🥘 Menú del día</x-responsive-nav-link>
+                    <x-responsive-nav-link href="{{ $_perfilUrlMob }}#menu" onclick="toggleMobileMenu()">🥘 Menú del día</x-responsive-nav-link>
                     @endif
                     @if(in_array('avisos', $modulos))
-                    <x-responsive-nav-link href="#avisos" onclick="toggleMobileMenu()">📢 Avisos</x-responsive-nav-link>
+                    <x-responsive-nav-link href="{{ $_perfilUrlMob }}#avisos" onclick="toggleMobileMenu()">📢 Avisos</x-responsive-nav-link>
                     @endif
                     @if(in_array('promociones', $modulos))
-                    <x-responsive-nav-link href="#promociones" onclick="toggleMobileMenu()">🎁 Promociones</x-responsive-nav-link>
+                    <x-responsive-nav-link href="{{ $_perfilUrlMob }}#promociones" onclick="toggleMobileMenu()">🎁 Promociones</x-responsive-nav-link>
                     @endif
                     @endif
 
                     <div class="px-4 pt-3 pb-0.5">
                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Tu perfil</p>
                     </div>
-                    <x-responsive-nav-link href="#galeria"       onclick="toggleMobileMenu()">🖼️ Galería</x-responsive-nav-link>
-                    <x-responsive-nav-link href="#imagen-perfil" onclick="toggleMobileMenu()">🏷️ Logo / imagen</x-responsive-nav-link>
-                    <x-responsive-nav-link href="#descripcion"   onclick="toggleMobileMenu()">📝 Descripción</x-responsive-nav-link>
-                    <x-responsive-nav-link href="#ubicacion"     onclick="toggleMobileMenu()">📍 Ubicación</x-responsive-nav-link>
-                    <x-responsive-nav-link href="#contacto"      onclick="toggleMobileMenu()">🔗 Contacto</x-responsive-nav-link>
-                    <x-responsive-nav-link href="#busqueda"      onclick="toggleMobileMenu()">🔍 Búsqueda SEO</x-responsive-nav-link>
+                    <x-responsive-nav-link href="{{ $_perfilUrlMob }}#galeria"       onclick="toggleMobileMenu()">🖼️ Galería</x-responsive-nav-link>
+                    <x-responsive-nav-link href="{{ $_perfilUrlMob }}#imagen-perfil" onclick="toggleMobileMenu()">🏷️ Logo / imagen</x-responsive-nav-link>
+                    <x-responsive-nav-link href="{{ $_perfilUrlMob }}#descripcion"   onclick="toggleMobileMenu()">📝 Descripción</x-responsive-nav-link>
+                    <x-responsive-nav-link href="{{ $_perfilUrlMob }}#ubicacion"     onclick="toggleMobileMenu()">📍 Ubicación</x-responsive-nav-link>
+                    <x-responsive-nav-link href="{{ $_perfilUrlMob }}#contacto"      onclick="toggleMobileMenu()">🔗 Contacto</x-responsive-nav-link>
+                    <x-responsive-nav-link href="{{ $_perfilUrlMob }}#busqueda"      onclick="toggleMobileMenu()">🔍 Búsqueda SEO</x-responsive-nav-link>
 
                     @if($_tieneContenidoMob || $_tieneAlojMob)
                     <div class="px-4 pt-3 pb-0.5">
                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Contenido</p>
                     </div>
                     @if(in_array('carta', $modulos))
-                    <x-responsive-nav-link href="#carta" onclick="toggleMobileMenu()">🍽️ Carta / Menú</x-responsive-nav-link>
+                    <x-responsive-nav-link href="{{ $_perfilUrlMob }}#carta" onclick="toggleMobileMenu()">🍽️ Carta / Menú</x-responsive-nav-link>
                     @endif
                     @if($_tieneAlojMob)
-                    <x-responsive-nav-link href="#alojamiento" onclick="toggleMobileMenu()">🛏️ Alojamiento</x-responsive-nav-link>
+                    <x-responsive-nav-link href="{{ $_perfilUrlMob }}#alojamiento" onclick="toggleMobileMenu()">🛏️ Alojamiento</x-responsive-nav-link>
                     @endif
                     @if(in_array('entradas', $modulos) || in_array('exposiciones', $modulos))
-                    <x-responsive-nav-link href="#museo" onclick="toggleMobileMenu()">🎟️ Museo</x-responsive-nav-link>
+                    <x-responsive-nav-link href="{{ $_perfilUrlMob }}#museo" onclick="toggleMobileMenu()">🎟️ Museo</x-responsive-nav-link>
                     @endif
                     @if(in_array('agenda', $modulos))
-                    <x-responsive-nav-link href="#eventos" onclick="toggleMobileMenu()">📅 Eventos</x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('cliente.eventos.index', $punto)" :active="request()->routeIs('cliente.eventos.index')">📅 Eventos</x-responsive-nav-link>
                     @endif
                     @if(in_array($punto->categoria_id, [13,14]))
-                    <x-responsive-nav-link href="#catalogo" onclick="toggleMobileMenu()">🛍️ Catálogo</x-responsive-nav-link>
+                    <x-responsive-nav-link href="{{ $_perfilUrlMob }}#catalogo" onclick="toggleMobileMenu()">🛍️ Catálogo</x-responsive-nav-link>
                     @endif
                     @endif
 

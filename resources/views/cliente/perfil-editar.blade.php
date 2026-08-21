@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :punto="$punto" :modulos="$modulos">
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
