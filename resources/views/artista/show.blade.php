@@ -95,10 +95,10 @@
                     @if($artista->email_contacto || $artista->telefono)
                         <div class="mt-5 pt-5 border-t border-gray-100 flex flex-wrap gap-3">
                             @if($artista->email_contacto)
-                                <a href="mailto:{{ $artista->email_contacto }}"
+                                <p 
                                    class="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-bold px-4 py-2 rounded-xl transition">
-                                    ✉️ Contactar por email
-                                </a>
+                                    ✉️ {{$artista->email_contacto }}
+                                </p>
                             @endif
                             @if($artista->telefono)
                                 <a href="https://wa.me/{{ preg_replace('/\D/', '', $artista->telefono) }}" target="_blank" rel="noopener"
