@@ -82,6 +82,12 @@
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
+                        @if(auth()->user()->type !== 'artista' && auth()->user()->artistas()->exists())
+                            <x-dropdown-link :href="route('artista.perfil')">
+                                🎸 Mi banda
+                            </x-dropdown-link>
+                        @endif
+
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <x-dropdown-link :href="route('logout')"
@@ -241,6 +247,12 @@
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
+
+                @if(auth()->user()->type !== 'artista' && auth()->user()->artistas()->exists())
+                    <x-responsive-nav-link :href="route('artista.perfil')">
+                        🎸 Mi banda
+                    </x-responsive-nav-link>
+                @endif
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf

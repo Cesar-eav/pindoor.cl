@@ -74,7 +74,7 @@ class ArtistaController extends Controller
 
     public function onboarding()
     {
-        if (auth()->user()->artista) {
+        if (auth()->user()->artistas()->exists()) {
             return redirect()->route('artista.perfil');
         }
         return view('artista.onboarding');
@@ -97,16 +97,29 @@ class ArtistaController extends Controller
             $data['imagen_perfil'] = ImagenComprimida::guardar($request->file('imagen'), 'artistas');
         }
 
-        Artista::create($data);
+        $artista = Artista::create($data);
+        $artista->miembros()->attach(auth()->id());
+        session(['artista_activo_id' => $artista->id]);
 
         return redirect()->route('artista.perfil')->with('success', 'Perfil creado. ¡Ahora complétalo con tus redes y portafolio!');
+    }
+
+    // ── Cambio de banda activa (multi-membresía) ────────────────────────────
+
+    public function cambiarActivo(Artista $artista)
+    {
+        abort_unless(auth()->user()->artistas->contains($artista->id), 403);
+
+        session(['artista_activo_id' => $artista->id]);
+
+        return redirect()->route('artista.perfil');
     }
 
     // ── Perfil (dashboard) ───────────────────────────────────────────────────
 
     public function perfil()
     {
-        $artista = auth()->user()->artista;
+        $artista = auth()->user()->artistaActivo();
 
         if (!$artista) {
             return redirect()->route('artista.nuevo');
@@ -115,13 +128,16 @@ class ArtistaController extends Controller
         $artista->load('imagenes');
         $eventos = $artista->eventos()->orderBy('fecha')->orderBy('hora')->get();
         $tiposEvento = \App\Models\CategoriaEvento::catalogo();
+        $miembros = $artista->miembros;
+        $invitaciones = $artista->invitaciones()->whereNull('aceptada_at')->where('expires_at', '>', now())->get();
+        $misBandas = auth()->user()->artistas;
 
-        return view('artista.perfil', compact('artista', 'eventos', 'tiposEvento'));
+        return view('artista.perfil', compact('artista', 'eventos', 'tiposEvento', 'miembros', 'invitaciones', 'misBandas'));
     }
 
     public function actualizarPerfil(Request $request)
     {
-        $artista = auth()->user()->artista;
+        $artista = auth()->user()->artistaActivo();
 
         $data = $request->validate([
             'nombre'            => 'required|string|max:255',
@@ -157,7 +173,7 @@ class ArtistaController extends Controller
     {
         $request->validate(['imagenes.*' => 'required|image|max:4096']);
 
-        $artista = auth()->user()->artista;
+        $artista = auth()->user()->artistaActivo();
         $offset  = $artista->imagenes()->max('orden') + 1;
 
         foreach ($request->file('imagenes') as $i => $file) {
@@ -170,7 +186,7 @@ class ArtistaController extends Controller
 
     public function eliminarImagen(ArtistaImagen $imagen)
     {
-        abort_if($imagen->artista->user_id !== auth()->id(), 403);
+        abort_if(!$imagen->artista->miembros->contains(auth()->id()), 403);
         Storage::disk('public')->delete($imagen->ruta);
         $imagen->delete();
 

@@ -56,9 +56,18 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(PuntoInteres::class);
     }
 
-    public function artista()
+    public function artistas()
     {
-        return $this->hasOne(Artista::class);
+        return $this->belongsToMany(Artista::class, 'artista_miembros')->withTimestamps();
+    }
+
+    public function artistaActivo(): ?Artista
+    {
+        $id = session('artista_activo_id');
+        if ($id && ($activo = $this->artistas->firstWhere('id', $id))) {
+            return $activo;
+        }
+        return $this->artistas->first();
     }
 
     public function esArtista(): bool

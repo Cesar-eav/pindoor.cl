@@ -49,6 +49,16 @@ class Artista extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function miembros()
+    {
+        return $this->belongsToMany(User::class, 'artista_miembros')->withTimestamps();
+    }
+
+    public function invitaciones()
+    {
+        return $this->hasMany(ArtistaInvitacion::class);
+    }
+
     public function imagenes()
     {
         return $this->hasMany(ArtistaImagen::class)->orderBy('orden');
