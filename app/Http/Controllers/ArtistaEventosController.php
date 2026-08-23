@@ -13,7 +13,7 @@ class ArtistaEventosController extends Controller
 {
     private function verificarArtista(Artista $artista): bool
     {
-        return $artista->user_id === Auth::id();
+        return $artista->miembros()->where('user_id', Auth::id())->exists();
     }
 
     /** Crea o actualiza un evento del artista. */

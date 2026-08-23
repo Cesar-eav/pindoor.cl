@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\ConfiguracionController;
 use App\Http\Controllers\Admin\PanoramaController;
 use App\Http\Controllers\ArtistaController;
 use App\Http\Controllers\ArtistaEventosController;
+use App\Http\Controllers\ArtistaInvitacionController;
 use App\Http\Controllers\OperadorController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\RutaController;
@@ -132,6 +133,7 @@ Route::get('/dashboard', function () {
     if ($type === 'cliente')  return redirect()->route('cliente.perfil');
     if ($type === 'artista')  return redirect()->route('artista.perfil');
     if ($type === 'operador') return redirect()->route('operador.perfil');
+    if (auth()->user()->artistas()->exists()) return redirect()->route('artista.perfil');
     return redirect()->route('puntos.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -304,19 +306,28 @@ Route::middleware(['auth', 'verified', 'role:cliente'])->prefix('cliente')->name
 });
 
 /* --- RUTAS ARTISTAS --- */
-Route::middleware(['auth', 'verified', 'role:artista'])->prefix('artista')->name('artista.')->group(function () {
+Route::middleware(['auth', 'verified', 'artista'])->prefix('artista')->name('artista.')->group(function () {
     Route::get('/nuevo',  [ArtistaController::class, 'onboarding'])->name('nuevo');
     Route::post('/nuevo', [ArtistaController::class, 'crearPerfil'])->name('crear');
 
     Route::get('/perfil',              [ArtistaController::class, 'perfil'])->name('perfil');
     Route::put('/perfil/actualizar',   [ArtistaController::class, 'actualizarPerfil'])->name('perfil.actualizar');
+    Route::post('/cambiar/{artista}',  [ArtistaController::class, 'cambiarActivo'])->name('cambiar');
 
     Route::post('/perfil/imagenes',           [ArtistaController::class, 'subirImagen'])->name('imagen.subir');
     Route::delete('/perfil/imagenes/{imagen}', [ArtistaController::class, 'eliminarImagen'])->name('imagen.eliminar');
 
     Route::post('/eventos/{artista}/guardar',    [ArtistaEventosController::class, 'guardarEvento'])->name('eventos.guardar');
     Route::delete('/eventos/{artista}/{evento}', [ArtistaEventosController::class, 'eliminarEvento'])->name('eventos.eliminar');
+
+    Route::post('/miembros/invitar',        [ArtistaInvitacionController::class, 'store'])->name('miembros.invitar');
+    Route::delete('/miembros/{artista}/{user}', [ArtistaInvitacionController::class, 'destroyMiembro'])->name('miembros.eliminar');
+    Route::delete('/invitaciones/{invitacion}', [ArtistaInvitacionController::class, 'destroy'])->name('invitaciones.cancelar');
 });
+
+// Aceptar invitación — pública, funciona con o sin sesión iniciada
+Route::get('/artista/invitacion/{token}',  [ArtistaInvitacionController::class, 'aceptar'])->name('artista.invitacion.aceptar');
+Route::post('/artista/invitacion/{token}', [ArtistaInvitacionController::class, 'storeAceptarNuevo'])->name('artista.invitacion.crear-cuenta');
 
 // Perfil público artista — debe ir DESPUÉS del grupo protegido para que /artista/nuevo no sea capturado como slug
 Route::get('/artista/{slug}', [ArtistaController::class, 'show'])->name('artista.show');

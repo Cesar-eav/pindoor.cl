@@ -1,14 +1,27 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-4">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Mi perfil de artista / agrupación</h2>
-            <a href="{{ route('artista.show', $artista->slug) }}" target="_blank"
-               class="text-xs font-bold text-violet-600 hover:underline flex items-center gap-1">
-                Ver perfil público
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                </svg>
-            </a>
+            <div class="flex items-center gap-3">
+                @if($misBandas->count() > 1)
+                    <form method="POST" action="{{ url('/artista/cambiar') }}/__id__" onsubmit="this.action = this.action.replace('__id__', this.banda.value)">
+                        @csrf
+                        <select name="banda" onchange="this.form.requestSubmit()"
+                                class="text-xs font-bold border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-violet-500 outline-none bg-white">
+                            @foreach($misBandas as $banda)
+                                <option value="{{ $banda->id }}" @selected($banda->id === $artista->id)>{{ $banda->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                @endif
+                <a href="{{ route('artista.show', $artista->slug) }}" target="_blank"
+                   class="text-xs font-bold text-violet-600 hover:underline flex items-center gap-1">
+                    Ver perfil público
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                </a>
+            </div>
         </div>
     </x-slot>
 
@@ -70,6 +83,22 @@
                         <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
                               :class="tab === 'eventos' ? 'bg-white/20 text-white' : 'bg-violet-100 text-violet-600'">
                             {{ $eventos->count() }}
+                        </span>
+                    @endif
+                </button>
+                <button type="button" @click="tab = 'miembros'"
+                        :class="tab === 'miembros'
+                            ? 'bg-violet-600 text-white shadow-sm'
+                            : 'text-gray-500 hover:text-gray-800'"
+                        class="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4zm6 0a4 4 0 10-4-4"/>
+                    </svg>
+                    Miembros
+                    @if($miembros->isNotEmpty())
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                              :class="tab === 'miembros' ? 'bg-white/20 text-white' : 'bg-violet-100 text-violet-600'">
+                            {{ $miembros->count() }}
                         </span>
                     @endif
                 </button>
@@ -630,6 +659,68 @@
                     @endif
                 </div>
 
+            </div>
+
+            {{-- Pestaña: Miembros --}}
+            <div x-show="tab === 'miembros'" x-transition:enter="transition ease-out duration-150"
+                 x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+                 style="display:none">
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                    <h4 class="font-bold text-gray-700 mb-1">Invitar a alguien más</h4>
+                    <p class="text-xs text-gray-400 mb-4">Recibirá un correo con un link para unirse y administrar este perfil junto a ti.</p>
+                    <form method="POST" action="{{ route('artista.miembros.invitar') }}" class="flex flex-col sm:flex-row gap-3">
+                        @csrf
+                        <input type="email" name="email" required placeholder="correo@ejemplo.com"
+                               class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 outline-none">
+                        <button type="submit"
+                                class="shrink-0 bg-violet-600 hover:bg-violet-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition">
+                            Enviar invitación
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                    <h4 class="font-bold text-gray-700 mb-4">Miembros actuales</h4>
+                    <div class="space-y-2">
+                        @foreach($miembros as $miembro)
+                            <div class="flex items-center justify-between border border-gray-100 rounded-xl p-3">
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-800">{{ $miembro->name }}</p>
+                                    <p class="text-xs text-gray-400">{{ $miembro->email }}</p>
+                                </div>
+                                @if($miembros->count() > 1)
+                                    <form method="POST" action="{{ route('artista.miembros.eliminar', [$artista, $miembro]) }}"
+                                          onsubmit="return confirm('¿Quitar a {{ $miembro->name }} de este perfil?')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="text-xs text-red-500 font-bold hover:underline">Quitar</button>
+                                    </form>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                @if($invitaciones->isNotEmpty())
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <h4 class="font-bold text-gray-700 mb-4">Invitaciones pendientes</h4>
+                        <div class="space-y-2">
+                            @foreach($invitaciones as $invitacion)
+                                <div class="flex items-center justify-between border border-gray-100 rounded-xl p-3">
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-800">{{ $invitacion->email }}</p>
+                                        <p class="text-xs text-gray-400">Enviada el {{ $invitacion->created_at->format('d/m/Y') }} · vence el {{ $invitacion->expires_at->format('d/m/Y') }}</p>
+                                    </div>
+                                    <form method="POST" action="{{ route('artista.invitaciones.cancelar', $invitacion) }}"
+                                          onsubmit="return confirm('¿Cancelar esta invitación?')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="text-xs text-red-500 font-bold hover:underline">Cancelar</button>
+                                    </form>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
 
         </div>
