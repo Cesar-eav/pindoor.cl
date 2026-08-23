@@ -103,11 +103,11 @@
                     <div class="flex">
                         @foreach($recomendaciones as $r)
                         <a href="{{ route('recomienda.show', $r->slug) }}"
-                           class="bg-[#fff0ef] hover:bg-[#ffe0dd] transition group shrink-0 w-44 border-r border-[#fc5648]/20">
+                           class="bg-[#fff0ef] hover:bg-[#ffe0dd] transition group shrink-0 w-72 border-r border-[#fc5648]/20">
                             <div class="relative">
                                 @if($r->imagen_portada)
                                     <img src="{{ asset('storage/' . $r->imagen_portada) }}" alt="{{ $r->titulo }}"
-                                         class="w-full h-32 object-cover group-hover:scale-105 transition duration-300">
+                                         class="w-full h-36 object-cover group-hover:scale-105 transition duration-300">
                                 @else
                                     <div class="w-full h-32 bg-[#ffe0dd] flex items-center justify-center text-3xl">{{ $r->plan_info['emoji'] }}</div>
                                 @endif
