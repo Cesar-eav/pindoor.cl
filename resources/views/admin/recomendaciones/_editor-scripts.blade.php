@@ -445,5 +445,66 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.target.type === 'number') actualizarPreview();
     });
     actualizarPreview();
+
+    // ── Galería: reordenar arrastrando las miniaturas — el orden final se
+    //    manda en orden[] según la posición de cada tarjeta en el DOM ──────
+    (function() {
+        var grid = document.getElementById('galeria-grid');
+        if (!grid) return;
+        var dragged = null;
+
+        grid.addEventListener('dragstart', function(e) {
+            var tile = e.target.closest('[data-tile]');
+            if (!tile) return;
+            dragged = tile;
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(function() { tile.classList.add('opacity-30'); }, 0);
+        });
+
+        grid.addEventListener('dragend', function() {
+            if (dragged) dragged.classList.remove('opacity-30');
+            dragged = null;
+        });
+
+        grid.addEventListener('dragover', function(e) {
+            e.preventDefault();
+        });
+
+        grid.addEventListener('drop', function(e) {
+            e.preventDefault();
+            var target = e.target.closest('[data-tile]');
+            if (!target || !dragged || target === dragged) return;
+            var tiles = Array.prototype.slice.call(grid.children);
+            var draggedIdx = tiles.indexOf(dragged);
+            var targetIdx  = tiles.indexOf(target);
+            if (draggedIdx < targetIdx) {
+                target.after(dragged);
+            } else {
+                target.before(dragged);
+            }
+            actualizarPreview();
+        });
+    })();
+
+    // Subir varias fotos a la vez: reparte los archivos elegidos en los slots
+    // vacíos, en orden, y dispara el mismo preview que si se hubieran elegido
+    // uno por uno — no toca el backend, cada foto sigue siendo su propio slot.
+    document.getElementById('galeria-multi-input')?.addEventListener('change', function(e) {
+        var files = Array.prototype.slice.call(e.target.files);
+        if (!files.length) return;
+        var libres = Array.prototype.slice.call(document.querySelectorAll('[id^="slot-input-"]'))
+            .filter(function(input) { return !input.files || input.files.length === 0; });
+        if (files.length > libres.length) {
+            alert('Solo hay espacio para ' + libres.length + ' foto(s) más. Se cargarán las primeras ' + libres.length + '.');
+        }
+        files.slice(0, libres.length).forEach(function(file, i) {
+            var input = libres[i];
+            var dt = new DataTransfer();
+            dt.items.add(file);
+            input.files = dt.files;
+            previewSlot(input.id.replace('slot-input-', ''), input);
+        });
+        e.target.value = '';
+    });
 });
 </script>

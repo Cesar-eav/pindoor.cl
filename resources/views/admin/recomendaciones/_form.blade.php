@@ -165,16 +165,26 @@
                 <span id="galeria-contador" class="text-[10px] font-bold text-gray-400">{{ $imagenesExistentes->count() }}/20</span>
             </div>
             <p class="text-[10px] text-gray-400 mb-3 leading-snug">
-                Hasta 20 fotos (Plan 2 y 3). El nº indica tras qué párrafo aparece, o vacío para automático.
+                Hasta 20 fotos (Plan 2 y 3). Arrastra para ordenar la galería — el nº indica tras qué párrafo aparece además, o vacío para automático.
             </p>
+
+            <label class="mb-3 flex items-center justify-center gap-1.5 py-2 rounded-xl border-2 border-dashed border-gray-200 text-[11px] font-bold text-gray-500 hover:border-[#fc5648] hover:text-[#fc5648] hover:bg-[#fff8f7] transition cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Agregar varias fotos a la vez
+                <input type="file" id="galeria-multi-input" accept="image/*" multiple class="hidden">
+            </label>
 
             <div class="grid grid-cols-2 gap-2" id="galeria-grid">
 
                 {{-- Imágenes existentes --}}
                 @foreach($imagenesExistentes as $img)
-                <div id="existente-{{ $img->id }}">
+                <div id="existente-{{ $img->id }}" data-tile draggable="true" class="cursor-move">
+                    <input type="hidden" name="galeria_orden[]" value="existente:{{ $img->id }}">
                     <div class="relative aspect-square rounded-xl overflow-hidden border-2 border-gray-100 bg-gray-50">
-                        <img src="{{ asset('storage/' . $img->ruta) }}" alt="" class="w-full h-full object-cover">
+                        <img src="{{ asset('storage/' . $img->ruta) }}" alt="" draggable="false" class="w-full h-full object-cover pointer-events-none">
+                        <span class="absolute top-1 left-1 bg-black/40 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow z-10">⠿</span>
                         <button type="button" onclick="toggleEliminar({{ $img->id }})"
                                 id="btn-eliminar-{{ $img->id }}"
                                 class="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-[10px] font-bold shadow transition z-10">✕</button>
@@ -201,14 +211,16 @@
 
                 {{-- Slots nuevas imágenes --}}
                 @for($s = 1; $s <= $slotsNuevos; $s++)
-                <div id="slot-{{ $s }}">
+                <div id="slot-{{ $s }}" data-tile draggable="true" class="cursor-move">
+                    <input type="hidden" name="galeria_orden[]" value="nueva:{{ $s }}">
                     <label class="relative aspect-square rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 hover:border-[#fc5648] hover:bg-[#fff8f7] transition cursor-pointer overflow-hidden block">
-                        <img id="preview-{{ $s }}" src="" alt="" class="w-full h-full object-cover absolute inset-0 hidden">
+                        <img id="preview-{{ $s }}" src="" alt="" draggable="false" class="w-full h-full object-cover absolute inset-0 hidden pointer-events-none">
                         <div id="placeholder-{{ $s }}" class="w-full h-full flex flex-col items-center justify-center gap-1">
                             <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
                         </div>
+                        <span class="absolute top-1 left-1 bg-black/30 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow z-10">⠿</span>
                         <button type="button" id="btn-limpiar-{{ $s }}"
                                 onclick="limpiarSlot(event, {{ $s }})"
                                 class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 items-center justify-center text-[9px] font-bold shadow z-10 hidden">✕</button>

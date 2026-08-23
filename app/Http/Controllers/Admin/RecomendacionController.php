@@ -69,7 +69,7 @@ class RecomendacionController extends Controller
         $this->aplicarTraducciones($recomendacion, $traducciones);
         $recomendacion->save();
 
-        $this->guardarImagenesNuevas($request, $recomendacion, 0);
+        $this->guardarGaleria($request, $recomendacion, []);
 
         if ($request->input('accion') === 'seguir') {
             return redirect()->route('admin.recomendaciones.edit', $recomendacion)->with('success', 'Recomendación creada correctamente.');
@@ -117,18 +117,20 @@ class RecomendacionController extends Controller
         $this->aplicarTraducciones($recomendacion, $traducciones);
         $recomendacion->save();
 
-        $eliminar = $request->input('eliminar_imagen', []);
+        // Elimina las marcadas; el resto queda disponible para guardarGaleria(),
+        // que decide el orden final según el drag-and-drop del form.
+        $eliminar = array_map('strval', $request->input('eliminar_imagen', []));
+        $existentesPorId = [];
         foreach ($recomendacion->imagenes as $img) {
-            if (in_array((string) $img->id, array_map('strval', $eliminar))) {
+            if (in_array((string) $img->id, $eliminar)) {
                 Storage::disk('public')->delete($img->ruta);
                 $img->delete();
                 continue;
             }
-            $img->update(['posicion' => $request->integer("posicion_existente_{$img->id}") ?: null]);
+            $existentesPorId[$img->id] = $img;
         }
 
-        $offset = (int) $recomendacion->imagenes()->max('orden');
-        $this->guardarImagenesNuevas($request, $recomendacion, $offset);
+        $this->guardarGaleria($request, $recomendacion, $existentesPorId);
 
         if ($request->input('accion') === 'seguir') {
             return redirect()->route('admin.recomendaciones.edit', $recomendacion)->with('success', 'Recomendación actualizada correctamente.');
@@ -182,17 +184,51 @@ class RecomendacionController extends Controller
         return response()->json(['url' => asset('storage/' . $path)]);
     }
 
-    // Recoge slots imagen_nueva_1…20 con su posición (párrafo tras el que se inserta)
-    private function guardarImagenesNuevas(Request $request, Recomendacion $recomendacion, int $ordenBase): void
+    /**
+     * Sube las imágenes nuevas (slots imagen_nueva_1…20) y fija el orden final
+     * de TODA la galería (existentes conservadas + nuevas) según el arrastre
+     * hecho en el form — el campo orden[] trae la secuencia final de tokens
+     * "existente:{id}" / "nueva:{slot}".
+     *
+     * @param array<int, \App\Models\RecomendacionImagen> $existentesPorId Id real => modelo, ya sin las marcadas para eliminar.
+     */
+    private function guardarGaleria(Request $request, Recomendacion $recomendacion, array $existentesPorId): void
     {
+        $nuevasPorSlot = [];
         for ($s = 1; $s <= 20; $s++) {
-            if (!$request->hasFile("imagen_nueva_{$s}")) continue;
-            $ruta = ImagenComprimida::guardar($request->file("imagen_nueva_{$s}"), 'recomienda');
-            $recomendacion->imagenes()->create([
-                'ruta'     => $ruta,
-                'orden'    => $ordenBase + $s,
-                'posicion' => $request->integer("posicion_nueva_{$s}") ?: null,
-            ]);
+            if ($request->hasFile("imagen_nueva_{$s}")) {
+                $ruta = ImagenComprimida::guardar($request->file("imagen_nueva_{$s}"), 'recomienda');
+                $pos  = $request->integer("posicion_nueva_{$s}") ?: null;
+                $nuevasPorSlot[$s] = ['ruta' => $ruta, 'posicion' => $pos];
+            }
+        }
+
+        $orden = 0;
+        foreach ($request->input('galeria_orden', []) as $token) {
+            [$tipo, $key] = array_pad(explode(':', $token, 2), 2, null);
+            $key = (int) $key;
+            if ($tipo === 'existente' && isset($existentesPorId[$key])) {
+                $existentesPorId[$key]->update([
+                    'orden'    => $orden++,
+                    'posicion' => $request->integer("posicion_existente_{$key}") ?: null,
+                ]);
+                unset($existentesPorId[$key]);
+            } elseif ($tipo === 'nueva' && isset($nuevasPorSlot[$key])) {
+                $recomendacion->imagenes()->create([
+                    'ruta'     => $nuevasPorSlot[$key]['ruta'],
+                    'posicion' => $nuevasPorSlot[$key]['posicion'],
+                    'orden'    => $orden++,
+                ]);
+                unset($nuevasPorSlot[$key]);
+            }
+        }
+
+        // Respaldo por si orden[] no llegó (JS deshabilitado).
+        foreach ($existentesPorId as $key => $img) {
+            $img->update(['orden' => $orden++, 'posicion' => $request->integer("posicion_existente_{$key}") ?: null]);
+        }
+        foreach ($nuevasPorSlot as $img) {
+            $recomendacion->imagenes()->create(['ruta' => $img['ruta'], 'posicion' => $img['posicion'], 'orden' => $orden++]);
         }
     }
 

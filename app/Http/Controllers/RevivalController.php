@@ -16,6 +16,7 @@ class RevivalController extends Controller
     {
         $revival = Revival::where('slug', $slug)
                     ->where('publicado', true)
+                    ->with('imagenes')
                     ->firstOrFail();
 
         return view('revival.show', compact('revival'));

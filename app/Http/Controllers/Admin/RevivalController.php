@@ -38,7 +38,6 @@ class RevivalController extends Controller
         $revival->autor         = $data['autor'] ?? null;
         $revival->video_url     = $data['video_url'] ?? null;
         $revival->imagen_portada = $portada ?? null;
-        $revival->imagenes      = $this->recogerImagenesNuevas($request, []);
         $revival->publicado     = $publicado;
         $revival->publicado_en  = $publicado ? now() : null;
         $revival->setTranslation('titulo',    'es', $data['titulo_es'])
@@ -49,6 +48,8 @@ class RevivalController extends Controller
                  ->setTranslation('contenido', 'fr', $data['contenido_fr'] ?? '');
         $revival->save();
 
+        $this->guardarGaleria($request, $revival, []);
+
         if ($request->input('accion') === 'seguir') {
             return redirect()->route('admin.revival.edit', $revival)->with('success', 'Re-vival creado correctamente.');
         }
@@ -58,6 +59,7 @@ class RevivalController extends Controller
 
     public function edit(Revival $revival)
     {
+        $revival->load('imagenes');
         return view('admin.revival.edit', compact('revival'));
     }
 
@@ -74,22 +76,20 @@ class RevivalController extends Controller
             $revival->imagen_portada = ImagenComprimida::guardar($request->file('imagen_portada'), 'revival/portadas');
         }
 
-        // Procesar imágenes existentes
-        $existentes   = $revival->imagenes ?? [];
-        $eliminar     = $request->input('eliminar_imagen', []);
-        $existentesOk = [];
-
-        foreach ($existentes as $idx => $img) {
-            $ruta = is_array($img) ? $img['ruta'] : $img;
-            if (in_array((string) $idx, array_map('strval', $eliminar))) {
-                Storage::disk('public')->delete($ruta);
+        // Elimina las marcadas; el resto queda disponible para guardarGaleria(),
+        // que decide el orden final según el drag-and-drop del form.
+        $eliminar = array_map('strval', $request->input('eliminar_imagen', []));
+        $existentesPorId = [];
+        foreach ($revival->imagenes as $img) {
+            if (in_array((string) $img->id, $eliminar)) {
+                Storage::disk('public')->delete($img->ruta);
+                $img->delete();
                 continue;
             }
-            $pos = $request->integer("posicion_existente_{$idx}") ?: null;
-            $existentesOk[] = ['ruta' => $ruta, 'posicion' => $pos];
+            $existentesPorId[$img->id] = $img;
         }
 
-        $revival->imagenes = $this->recogerImagenesNuevas($request, $existentesOk);
+        $this->guardarGaleria($request, $revival, $existentesPorId);
 
         $publicado = (bool) ($data['publicado'] ?? false);
         $revival->publicado = $publicado;
@@ -116,6 +116,7 @@ class RevivalController extends Controller
 
     public function preview(Revival $revival)
     {
+        $revival->load('imagenes');
         return view('revival.show', compact('revival'));
     }
 
@@ -149,18 +150,51 @@ class RevivalController extends Controller
         ]);
     }
 
-    // Recoge slots imagen_nueva_1…20 con sus posiciones
-    private function recogerImagenesNuevas(Request $request, array $base): ?array
+    /**
+     * Sube las imágenes nuevas (slots imagen_nueva_1…20) y fija el orden final
+     * de TODA la galería (existentes conservadas + nuevas) según el arrastre
+     * hecho en el form — el campo orden[] trae la secuencia final de tokens
+     * "existente:{id}" / "nueva:{slot}".
+     *
+     * @param array<int, \App\Models\RevivalImagen> $existentesPorId Id real => modelo, ya sin las marcadas para eliminar.
+     */
+    private function guardarGaleria(Request $request, Revival $revival, array $existentesPorId): void
     {
-        $result = $base;
+        $nuevasPorSlot = [];
         for ($s = 1; $s <= 20; $s++) {
-            if (count($result) >= 20) break;
             if ($request->hasFile("imagen_nueva_{$s}")) {
                 $ruta = ImagenComprimida::guardar($request->file("imagen_nueva_{$s}"), 'revival/galeria');
                 $pos  = $request->integer("posicion_nueva_{$s}") ?: null;
-                $result[] = ['ruta' => $ruta, 'posicion' => $pos];
+                $nuevasPorSlot[$s] = ['ruta' => $ruta, 'posicion' => $pos];
             }
         }
-        return $result ?: null;
+
+        $orden = 0;
+        foreach ($request->input('galeria_orden', []) as $token) {
+            [$tipo, $key] = array_pad(explode(':', $token, 2), 2, null);
+            $key = (int) $key;
+            if ($tipo === 'existente' && isset($existentesPorId[$key])) {
+                $existentesPorId[$key]->update([
+                    'orden'    => $orden++,
+                    'posicion' => $request->integer("posicion_existente_{$key}") ?: null,
+                ]);
+                unset($existentesPorId[$key]);
+            } elseif ($tipo === 'nueva' && isset($nuevasPorSlot[$key])) {
+                $revival->imagenes()->create([
+                    'ruta'     => $nuevasPorSlot[$key]['ruta'],
+                    'posicion' => $nuevasPorSlot[$key]['posicion'],
+                    'orden'    => $orden++,
+                ]);
+                unset($nuevasPorSlot[$key]);
+            }
+        }
+
+        // Respaldo por si orden[] no llegó (JS deshabilitado).
+        foreach ($existentesPorId as $key => $img) {
+            $img->update(['orden' => $orden++, 'posicion' => $request->integer("posicion_existente_{$key}") ?: null]);
+        }
+        foreach ($nuevasPorSlot as $img) {
+            $revival->imagenes()->create(['ruta' => $img['ruta'], 'posicion' => $img['posicion'], 'orden' => $orden++]);
+        }
     }
 }

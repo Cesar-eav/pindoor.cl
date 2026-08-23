@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PreviewController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PuntoInteresController;
 use App\Http\Controllers\AdminController;
@@ -97,6 +98,12 @@ Route::get('/rutas', [RutaController::class, 'index'])->name('rutas.index');
 Route::get('/rutas/{slug}', [RutaController::class, 'show'])->name('rutas.show');
 Route::get('/recomienda/{slug}', [RecomiendaController::class, 'show'])->name('recomienda.show');
 
+// Vista previa compartible por token (Revival / Guías / Recomienda) — sin sesión de
+// admin. Muere sola cuando el registro pasa a estar en vivo (ver HasPreviewToken).
+Route::get('/preview/{tipo}/{token}', [PreviewController::class, 'show'])
+    ->where('tipo', 'revival|blog|recomienda')
+    ->name('preview.show');
+
 Route::get('/registro', [PublicitaController::class, 'index'])->name('publicita.index');
 Route::post('/publicita', [PublicitaController::class, 'store'])->name('publicita.store');
 
@@ -117,9 +124,6 @@ Route::get('/la-escena', [ArtistaController::class, 'directorio'])->name('artist
 // Registro operador turístico
 Route::get('/registro-operador',  [OperadorController::class, 'showRegister'])->name('operador.register');
 Route::post('/registro-operador', [OperadorController::class, 'register'])->name('operador.register.store');
-
-Route::get('/admin/recomendaciones/{recomendacion}/preview', [RecomendacionController::class, 'preview'])->name('admin.recomendaciones.preview');
-
 
 /* --- RUTAS PROTEGIDAS (BREEZE) --- */
 Route::get('/dashboard', function () {
@@ -203,12 +207,19 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Pindoor Recomienda
     Route::post('/recomendaciones/imagen', [RecomendacionController::class, 'uploadImagen'])->name('recomendaciones.imagen');
+    Route::get('/recomendaciones/{recomendacion}/preview', [RecomendacionController::class, 'preview'])->name('recomendaciones.preview');
     Route::resource('recomendaciones', RecomendacionController::class)
         ->except(['show'])
         ->parameters(['recomendaciones' => 'recomendacion']);
     Route::patch('/recomendaciones/{recomendacion}/toggle', [RecomendacionController::class, 'toggle'])->name('recomendaciones.toggle');
     Route::patch('/recomendaciones/{recomendacion}/publicar', [RecomendacionController::class, 'togglePublicado'])->name('recomendaciones.publicar');
     Route::delete('/recomendaciones/imagenes/{imagen}', [RecomendacionController::class, 'destroyImagen'])->name('recomendaciones.imagenes.destroy');
+
+    // Link de vista previa compartible (Revival / Guías / Recomienda) — regenerar
+    // mata el link viejo que se haya compartido y deja uno nuevo.
+    Route::post('/preview-token/{tipo}/{id}/regenerar', [\App\Http\Controllers\Admin\PreviewTokenController::class, 'regenerar'])
+        ->where('tipo', 'revival|blog|recomienda')
+        ->name('preview-token.regenerar');
 
     // Compartidos (estadística del botón compartir)
     Route::get('/compartidos', [\App\Http\Controllers\Admin\CompartidosController::class, 'index'])->name('compartidos.index');

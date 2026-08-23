@@ -58,7 +58,6 @@ class PostController extends Controller
         $post->slug                 = $slug;
         $post->dynamic_block_title  = $data['dynamic_block_title'] ?? null;
         $post->imagen_portada = $portada ?? null;
-        $post->imagenes       = $this->recogerImagenesNuevas($request, []);
         $post->publicado      = $publicado;
         $post->publicado_en   = $publicado ? now() : null;
         $post->setTranslation('titulo',    'es', $data['titulo_es'])
@@ -72,6 +71,7 @@ class PostController extends Controller
              ->setTranslation('contenido', 'fr', $data['contenido_fr'] ?? '');
         $post->save();
 
+        $this->guardarGaleria($request, $post, []);
         $this->sincronizarLugares($request, $post);
         $this->sincronizarRutas($request, $post);
 
@@ -84,7 +84,7 @@ class PostController extends Controller
 
     public function edit(Post $blog)
     {
-        $blog->load('lugares', 'rutas');
+        $blog->load('lugares', 'rutas', 'imagenes');
         $puntos = PuntoInteres::where('eliminado', false)
             ->with('categoria:id,nombre,icono')
             ->get(['id', 'title', 'sector', 'categoria_id'])
@@ -119,22 +119,20 @@ class PostController extends Controller
             $blog->imagen_portada = ImagenComprimida::guardar($request->file('imagen_portada'), 'blog/portadas');
         }
 
-        // Procesar imágenes existentes
-        $existentes   = $blog->imagenes ?? [];
-        $eliminar     = $request->input('eliminar_imagen', []);
-        $existentesOk = [];
-
-        foreach ($existentes as $idx => $img) {
-            $ruta = is_array($img) ? $img['ruta'] : $img;
-            if (in_array((string) $idx, array_map('strval', $eliminar))) {
-                Storage::disk('public')->delete($ruta);
+        // Elimina las marcadas; el resto queda disponible para guardarGaleria(),
+        // que decide el orden final según el drag-and-drop del form.
+        $eliminar = array_map('strval', $request->input('eliminar_imagen', []));
+        $existentesPorId = [];
+        foreach ($blog->imagenes as $img) {
+            if (in_array((string) $img->id, $eliminar)) {
+                Storage::disk('public')->delete($img->ruta);
+                $img->delete();
                 continue;
             }
-            $pos = $request->integer("posicion_existente_{$idx}") ?: null;
-            $existentesOk[] = ['ruta' => $ruta, 'posicion' => $pos];
+            $existentesPorId[$img->id] = $img;
         }
 
-        $blog->imagenes = $this->recogerImagenesNuevas($request, $existentesOk);
+        $this->guardarGaleria($request, $blog, $existentesPorId);
 
         $publicado = (bool) ($data['publicado'] ?? false);
         $blog->publicado = $publicado;
@@ -167,7 +165,7 @@ class PostController extends Controller
 
     public function preview(Post $blog)
     {
-        $blog->load('lugares', 'rutas');
+        $blog->load('lugares', 'rutas', 'imagenes');
         return view('blog.show', ['post' => $blog]);
     }
 
@@ -201,18 +199,51 @@ class PostController extends Controller
         $post->rutas()->sync(collect($ids)->filter()->values()->all());
     }
 
-    // Recoge slots imagen_nueva_1…20 con sus posiciones
-    private function recogerImagenesNuevas(Request $request, array $base): ?array
+    /**
+     * Sube las imágenes nuevas (slots imagen_nueva_1…20) y fija el orden final
+     * de TODA la galería (existentes conservadas + nuevas) según el arrastre
+     * hecho en el form — el campo orden[] trae la secuencia final de tokens
+     * "existente:{id}" / "nueva:{slot}".
+     *
+     * @param array<int, \App\Models\PostImagen> $existentesPorId Id real => modelo, ya sin las marcadas para eliminar.
+     */
+    private function guardarGaleria(Request $request, Post $post, array $existentesPorId): void
     {
-        $result = $base;
+        $nuevasPorSlot = [];
         for ($s = 1; $s <= 20; $s++) {
-            if (count($result) >= 20) break;
             if ($request->hasFile("imagen_nueva_{$s}")) {
                 $ruta = ImagenComprimida::guardar($request->file("imagen_nueva_{$s}"), 'blog/galeria');
                 $pos  = $request->integer("posicion_nueva_{$s}") ?: null;
-                $result[] = ['ruta' => $ruta, 'posicion' => $pos];
+                $nuevasPorSlot[$s] = ['ruta' => $ruta, 'posicion' => $pos];
             }
         }
-        return $result ?: null;
+
+        $orden = 0;
+        foreach ($request->input('galeria_orden', []) as $token) {
+            [$tipo, $key] = array_pad(explode(':', $token, 2), 2, null);
+            $key = (int) $key;
+            if ($tipo === 'existente' && isset($existentesPorId[$key])) {
+                $existentesPorId[$key]->update([
+                    'orden'    => $orden++,
+                    'posicion' => $request->integer("posicion_existente_{$key}") ?: null,
+                ]);
+                unset($existentesPorId[$key]);
+            } elseif ($tipo === 'nueva' && isset($nuevasPorSlot[$key])) {
+                $post->imagenes()->create([
+                    'ruta'     => $nuevasPorSlot[$key]['ruta'],
+                    'posicion' => $nuevasPorSlot[$key]['posicion'],
+                    'orden'    => $orden++,
+                ]);
+                unset($nuevasPorSlot[$key]);
+            }
+        }
+
+        // Respaldo por si orden[] no llegó (JS deshabilitado).
+        foreach ($existentesPorId as $key => $img) {
+            $img->update(['orden' => $orden++, 'posicion' => $request->integer("posicion_existente_{$key}") ?: null]);
+        }
+        foreach ($nuevasPorSlot as $img) {
+            $post->imagenes()->create(['ruta' => $img['ruta'], 'posicion' => $img['posicion'], 'orden' => $orden++]);
+        }
     }
 }

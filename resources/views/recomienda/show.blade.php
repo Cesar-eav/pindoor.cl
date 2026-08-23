@@ -34,19 +34,19 @@
         font-style: italic;
         color: #6b7280;
     }
-    .resena-fig {
+    .editorial-fig {
         margin: 1.5rem -1.5rem;
         height: 18rem;
         overflow: hidden;
     }
-    .resena-fig img {
+    .editorial-fig img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         display: block;
     }
     @media (min-width: 640px) {
-        .resena-fig {
+        .editorial-fig {
             height: 20rem;
             margin: 1.5rem 0;
             border-radius: 1rem;
@@ -128,7 +128,7 @@
             $figuraHtml = function (string $ruta) use ($indicePorRuta): string {
                 $url = asset('storage/' . $ruta);
                 $idx = $indicePorRuta[$ruta] ?? 0;
-                return '<figure class="resena-fig" @click="zoomIndex=' . $idx . ';zoom=true"><img src="' . e($url) . '" alt="" class="cursor-zoom-in"></figure>';
+                return '<figure class="editorial-fig" @click="zoomIndex=' . $idx . ';zoom=true"><img src="' . e($url) . '" alt="" class="cursor-zoom-in"></figure>';
             };
 
             $out = '';

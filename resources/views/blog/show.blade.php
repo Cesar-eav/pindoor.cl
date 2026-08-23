@@ -84,10 +84,10 @@
             display: block;
             box-shadow: 0 4px 24px rgba(0,0,0,0.08);
         }
-        .blog-fig {
+        .editorial-fig {
             margin: 2.5rem 0;
         }
-        .blog-fig img {
+        .editorial-fig img {
             width: 100%;
             border-radius: 1.25rem;
             box-shadow: 0 8px 32px rgba(0,0,0,0.10);
@@ -155,11 +155,9 @@
 
         {{-- Contenido con imágenes intercaladas --}}
         @php
-            // Normalizar formato: soporta strings antiguos y objetos {ruta, posicion}
-            $imagenesFmt = collect($post->imagenes ?? [])->map(function($img) {
-                if (is_string($img)) return ['ruta' => $img, 'posicion' => null];
-                return ['ruta' => $img['ruta'] ?? '', 'posicion' => $img['posicion'] ?? null];
-            })->filter(fn($i) => !empty($i['ruta']))->values()->toArray();
+            $imagenesFmt = $post->imagenes
+                ->map(fn($img) => ['ruta' => $img->ruta, 'posicion' => $img->posicion])
+                ->filter(fn($i) => !empty($i['ruta']))->values()->toArray();
 
             $contenidoFinal = $post->contenido ?? '';
             $imagenesAlFinal = collect();
@@ -210,7 +208,7 @@
                 // Renderizar
                 $figuraHtml = function(string $ruta): string {
                     $url = asset('storage/' . $ruta);
-                    return '<figure class="blog-fig"><img src="' . e($url) . '" alt=""></figure>';
+                    return '<figure class="editorial-fig"><img src="' . e($url) . '" alt=""></figure>';
                 };
 
                 $out = '';

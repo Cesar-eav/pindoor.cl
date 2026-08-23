@@ -16,7 +16,7 @@ class BlogController extends Controller
     {
         $post = Post::where('slug', $slug)
                     ->where('publicado', true)
-                    ->with(['lugares', 'rutas' => fn ($q) => $q->where('publicado', true)->withCount('puntos')])
+                    ->with(['lugares', 'imagenes', 'rutas' => fn ($q) => $q->where('publicado', true)->withCount('puntos')])
                     ->firstOrFail();
 
         return view('blog.show', compact('post'));

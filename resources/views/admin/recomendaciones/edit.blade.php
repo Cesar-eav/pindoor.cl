@@ -15,6 +15,8 @@
 
     <div class="py-8 space-y-6">
 
+            @include('admin.partials._preview-link', ['modelo' => $recomendacion, 'tipo' => 'recomienda'])
+
             @if($errors->any())
             <div class="w-[90vw] mx-auto bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
                 <ul class="list-disc list-inside space-y-1">

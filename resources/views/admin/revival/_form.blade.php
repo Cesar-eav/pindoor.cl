@@ -49,6 +49,10 @@
         </div>
     </div>
 
+    @if($esEdicion)
+    @include('admin.partials._preview-link', ['modelo' => $revival, 'tipo' => 'revival'])
+    @endif
+
     @if($errors->any())
     <div class="w-[90vw] mx-auto bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
         <ul class="list-disc list-inside space-y-1">
@@ -194,36 +198,45 @@
                     <span id="galeria-contador" class="text-[10px] font-bold text-gray-400">{{ count($imagenesExistentes) }}/20</span>
                 </div>
                 <p class="text-[10px] text-gray-400 mb-3 leading-snug">
-                    Hasta 20 fotos. El nº indica tras qué párrafo aparece, o vacío para automático.
+                    Hasta 20 fotos. Arrastra para ordenar la galería — el nº indica tras qué párrafo aparece además, o vacío para automático.
                 </p>
+
+                <label class="mb-3 flex items-center justify-center gap-1.5 py-2 rounded-xl border-2 border-dashed border-gray-200 text-[11px] font-bold text-gray-500 hover:border-[#fc5648] hover:text-[#fc5648] hover:bg-[#fff8f7] transition cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Agregar varias fotos a la vez
+                    <input type="file" id="galeria-multi-input" accept="image/*" multiple class="hidden">
+                </label>
 
                 <div class="grid grid-cols-2 gap-2" id="galeria-grid">
 
                     {{-- Imágenes existentes --}}
-                    @foreach($imagenesExistentes as $idx => $img)
-                    @php $ruta = is_array($img) ? $img['ruta'] : $img; $pos = is_array($img) ? ($img['posicion'] ?? '') : ''; @endphp
-                    <div id="existente-{{ $idx }}">
+                    @foreach($imagenesExistentes as $img)
+                    <div id="existente-{{ $img->id }}" data-tile draggable="true" class="cursor-move">
+                        <input type="hidden" name="galeria_orden[]" value="existente:{{ $img->id }}">
                         <div class="relative aspect-square rounded-xl overflow-hidden border-2 border-gray-100 bg-gray-50">
-                            <img src="{{ asset('storage/' . $ruta) }}" alt="" class="w-full h-full object-cover">
-                            <button type="button" onclick="toggleEliminar({{ $idx }})"
-                                    id="btn-eliminar-{{ $idx }}"
+                            <img src="{{ asset('storage/' . $img->ruta) }}" alt="" draggable="false" class="w-full h-full object-cover pointer-events-none">
+                            <span class="absolute top-1 left-1 bg-black/40 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow z-10">⠿</span>
+                            <button type="button" onclick="toggleEliminar({{ $img->id }})"
+                                    id="btn-eliminar-{{ $img->id }}"
                                     class="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-[10px] font-bold shadow transition z-10">✕</button>
-                            <div id="overlay-eliminar-{{ $idx }}"
+                            <div id="overlay-eliminar-{{ $img->id }}"
                                  class="absolute inset-0 bg-red-500/75 hidden flex-col items-center justify-center gap-0.5 cursor-pointer"
-                                 onclick="toggleEliminar({{ $idx }})">
+                                 onclick="toggleEliminar({{ $img->id }})">
                                 <span class="text-white font-black text-[10px]">Se borrará</span>
                                 <span class="text-white/80 text-[9px]">al guardar · clic p/deshacer</span>
                             </div>
-                            <input type="hidden" id="hidden-eliminar-{{ $idx }}" name="eliminar_imagen[]" value="{{ $idx }}" disabled>
+                            <input type="hidden" id="hidden-eliminar-{{ $img->id }}" name="eliminar_imagen[]" value="{{ $img->id }}" disabled>
                         </div>
-                        <div id="pos-existente-{{ $idx }}" class="mt-1">
+                        <div id="pos-existente-{{ $img->id }}" class="mt-1">
                             <input type="number" min="1" max="99"
-                                   name="posicion_existente_{{ $idx }}"
-                                   value="{{ old('posicion_existente_' . $idx, $pos) }}"
+                                   name="posicion_existente_{{ $img->id }}"
+                                   value="{{ old('posicion_existente_' . $img->id, $img->posicion) }}"
                                    placeholder="párrafo (auto)"
                                    class="w-full px-1.5 py-1 text-[10px] border border-gray-200 rounded-lg focus:ring-1 focus:ring-[#fc5648] outline-none text-center">
                         </div>
-                        <div id="label-eliminar-{{ $idx }}" class="mt-1 text-center hidden">
+                        <div id="label-eliminar-{{ $img->id }}" class="mt-1 text-center hidden">
                             <span class="text-[9px] text-red-400 font-semibold">Se eliminará</span>
                         </div>
                     </div>
@@ -231,14 +244,16 @@
 
                     {{-- Slots nuevas imágenes --}}
                     @for($s = 1; $s <= $slotsNuevos; $s++)
-                    <div id="slot-{{ $s }}">
+                    <div id="slot-{{ $s }}" data-tile draggable="true" class="cursor-move">
+                        <input type="hidden" name="galeria_orden[]" value="nueva:{{ $s }}">
                         <label class="relative aspect-square rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 hover:border-[#fc5648] hover:bg-[#fff8f7] transition cursor-pointer overflow-hidden block">
-                            <img id="preview-{{ $s }}" src="" alt="" class="w-full h-full object-cover absolute inset-0 hidden">
+                            <img id="preview-{{ $s }}" src="" alt="" draggable="false" class="w-full h-full object-cover absolute inset-0 hidden pointer-events-none">
                             <div id="placeholder-{{ $s }}" class="w-full h-full flex flex-col items-center justify-center gap-1">
                                 <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
                             </div>
+                            <span class="absolute top-1 left-1 bg-black/30 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow z-10">⠿</span>
                             <button type="button" id="btn-limpiar-{{ $s }}"
                                     onclick="limpiarSlot(event, {{ $s }})"
                                     class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 items-center justify-center text-[9px] font-bold shadow z-10 hidden">✕</button>
@@ -347,6 +362,66 @@
         document.getElementById('pos-nueva-' + slot).classList.add('hidden');
         document.getElementById('pos-nueva-' + slot).querySelector('input').value = '';
     }
+
+    // Reordenar la galería arrastrando las miniaturas — el orden final se manda
+    // en orden[] según la posición de cada tarjeta en el DOM al enviar el form.
+    (function() {
+        var grid = document.getElementById('galeria-grid');
+        if (!grid) return;
+        var dragged = null;
+
+        grid.addEventListener('dragstart', function(e) {
+            var tile = e.target.closest('[data-tile]');
+            if (!tile) return;
+            dragged = tile;
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(function() { tile.classList.add('opacity-30'); }, 0);
+        });
+
+        grid.addEventListener('dragend', function() {
+            if (dragged) dragged.classList.remove('opacity-30');
+            dragged = null;
+        });
+
+        grid.addEventListener('dragover', function(e) {
+            e.preventDefault();
+        });
+
+        grid.addEventListener('drop', function(e) {
+            e.preventDefault();
+            var target = e.target.closest('[data-tile]');
+            if (!target || !dragged || target === dragged) return;
+            var tiles = Array.prototype.slice.call(grid.children);
+            var draggedIdx = tiles.indexOf(dragged);
+            var targetIdx  = tiles.indexOf(target);
+            if (draggedIdx < targetIdx) {
+                target.after(dragged);
+            } else {
+                target.before(dragged);
+            }
+        });
+    })();
+
+    // Subir varias fotos a la vez: reparte los archivos elegidos en los slots
+    // vacíos, en orden, y dispara el mismo preview que si se hubieran elegido
+    // uno por uno — no toca el backend, cada foto sigue siendo su propio slot.
+    document.getElementById('galeria-multi-input')?.addEventListener('change', function(e) {
+        var files = Array.prototype.slice.call(e.target.files);
+        if (!files.length) return;
+        var libres = Array.prototype.slice.call(document.querySelectorAll('[id^="slot-input-"]'))
+            .filter(function(input) { return !input.files || input.files.length === 0; });
+        if (files.length > libres.length) {
+            alert('Solo hay espacio para ' + libres.length + ' foto(s) más. Se cargarán las primeras ' + libres.length + '.');
+        }
+        files.slice(0, libres.length).forEach(function(file, i) {
+            var input = libres[i];
+            var dt = new DataTransfer();
+            dt.items.add(file);
+            input.files = dt.files;
+            previewSlot(input.id.replace('slot-input-', ''), input);
+        });
+        e.target.value = '';
+    });
     </script>
 
 </form>

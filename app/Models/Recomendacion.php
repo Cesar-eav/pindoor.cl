@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasPreviewToken;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -9,7 +10,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Recomendacion extends Model
 {
-    use HasTranslations;
+    use HasTranslations, HasPreviewToken;
 
     public array $translatable = ['titulo', 'resumen', 'contenido'];
 
@@ -74,6 +75,19 @@ class Recomendacion extends Model
     public function scopePublicadas($query)
     {
         return $query->where('publicado', true)->where('activo', true);
+    }
+
+    // La ruta pública real (RecomiendaController::show) filtra solo por "activo"
+    // — el preview debe morir cuando esa condición se cumple, no cuando se
+    // marca "publicado" (ese flag no controla la visibilidad en /recomienda/{slug}).
+    public function previewEstaVivo(): bool
+    {
+        return ! $this->activo;
+    }
+
+    public function previewTipo(): string
+    {
+        return 'recomienda';
     }
 
     public function scopeDestacadasEnPortada($query)
