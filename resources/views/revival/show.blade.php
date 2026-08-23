@@ -71,8 +71,8 @@
             display: block;
             box-shadow: 0 4px 24px rgba(0,0,0,0.08);
         }
-        .blog-fig { margin: 2.5rem 0; }
-        .blog-fig img {
+        .editorial-fig { margin: 2.5rem 0; }
+        .editorial-fig img {
             width: 100%;
             border-radius: 1.25rem;
             box-shadow: 0 8px 32px rgba(0,0,0,0.10);
@@ -151,15 +151,19 @@
 
         {{-- Contenido con imágenes intercaladas (mismo mecanismo que Guías) --}}
         @php
-            $imagenesFmt = collect($revival->imagenes ?? [])->map(function($img) {
-                if (is_string($img)) return ['ruta' => $img, 'posicion' => null];
-                return ['ruta' => $img['ruta'] ?? '', 'posicion' => $img['posicion'] ?? null];
-            })->filter(fn($i) => !empty($i['ruta']))->values()->toArray();
+            $imagenesFmt = $revival->imagenes
+                ->map(fn($img) => ['ruta' => $img->ruta, 'posicion' => $img->posicion])
+                ->filter(fn($i) => !empty($i['ruta']))->values();
+
+            // Todas las imágenes, en el orden elegido en el admin. Alimentan tanto
+            // los clicks de zoom sobre las fotos intercaladas en el texto como la
+            // galería completa al final del artículo — todas aparecen en ambos lados.
+            $todasImagenes = $imagenesFmt->pluck('ruta')->values();
+            $indicePorRuta = $todasImagenes->flip();
 
             $contenidoFinal = $revival->contenido ?? '';
-            $imagenesAlFinal = collect();
 
-            if (!empty($imagenesFmt) && !empty(trim(strip_tags($contenidoFinal)))) {
+            if ($imagenesFmt->isNotEmpty() && !empty(trim(strip_tags($contenidoFinal)))) {
 
                 $marcado = $contenidoFinal;
                 foreach (['</p>','</h2>','</h3>','</h4>','</blockquote>','</ul>','</ol>'] as $tag) {
@@ -198,9 +202,11 @@
                     }
                 }
 
-                $figuraHtml = function(string $ruta): string {
+                $figuraHtml = function(string $ruta) use ($indicePorRuta): string {
                     $url = asset('storage/' . $ruta);
-                    return '<figure class="blog-fig"><img src="' . e($url) . '" alt=""></figure>';
+                    $idx = $indicePorRuta[$ruta] ?? 0;
+                    return '<figure class="editorial-fig" @click="zoom = true; current = ' . $idx . '">'
+                         . '<img src="' . e($url) . '" alt="" class="cursor-zoom-in"></figure>';
                 };
 
                 $out = '';
@@ -211,57 +217,54 @@
                         $out .= $figuraHtml($ruta);
                     }
                 }
-                foreach ($insertarEn as $p => $rutas) {
-                    if ($p > $numBloques) {
-                        foreach ($rutas as $ruta) $imagenesAlFinal->push($ruta);
-                    }
-                }
 
                 $contenidoFinal = $out;
-            } elseif (!empty($imagenesFmt)) {
-                $imagenesAlFinal = collect($imagenesFmt)->pluck('ruta');
             }
         @endphp
 
-        <div class="blogtext">
-            {!! $contenidoFinal !!}
-        </div>
-
-        {{-- Carrusel de imágenes restantes --}}
-        @if($imagenesAlFinal->isNotEmpty())
-        <div class="mt-10" x-data="{
-                images: {{ $imagenesAlFinal->map(fn($r) => asset('storage/' . $r))->values()->toJson() }},
+        <div x-data="{
+                images: {{ $todasImagenes->map(fn($r) => asset('storage/' . $r))->values()->toJson() }},
                 current: 0,
                 zoom: false,
                 prev() { this.current = (this.current - 1 + this.images.length) % this.images.length; },
                 next() { this.current = (this.current + 1) % this.images.length; },
              }">
-            <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">📷 Galería</p>
 
-            <div class="relative bg-gray-900 rounded-2xl overflow-hidden h-72 sm:h-96">
-                <template x-for="(src, i) in images" :key="i">
-                    <img :src="src" x-show="current === i" @click="zoom = true"
-                         class="w-full h-full object-cover cursor-zoom-in">
-                </template>
-                @if($imagenesAlFinal->count() > 1)
-                <button @click="prev()"
-                        class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                    </svg>
-                </button>
-                <button @click="next()"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </button>
-                <div class="absolute bottom-2 right-3 bg-black/50 text-white text-xs font-semibold px-2 py-0.5 rounded-full"
-                     x-text="(current + 1) + ' / ' + images.length"></div>
-                @endif
+            <div class="blogtext">
+                {!! $contenidoFinal !!}
             </div>
 
-            {{-- Zoom / lightbox --}}
+            {{-- Galería con todas las imágenes del re-vival, en el orden elegido en el admin --}}
+            @if($todasImagenes->isNotEmpty())
+            <div class="mt-10">
+                <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">📷 Galería</p>
+
+                <div class="relative bg-gray-900 rounded-2xl overflow-hidden h-72 sm:h-96">
+                    <template x-for="(src, i) in images" :key="i">
+                        <img :src="src" x-show="current === i" @click="zoom = true"
+                             class="w-full h-full object-cover cursor-zoom-in">
+                    </template>
+                    @if($todasImagenes->count() > 1)
+                    <button @click="prev()"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <button @click="next()"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                    <div class="absolute bottom-2 right-3 bg-black/50 text-white text-xs font-semibold px-2 py-0.5 rounded-full"
+                         x-text="(current + 1) + ' / ' + images.length"></div>
+                    @endif
+                </div>
+            </div>
+            @endif
+
+            {{-- Zoom / lightbox — cubre tanto la galería como las fotos intercaladas en el texto --}}
             <div x-show="zoom" x-cloak
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0"
@@ -282,7 +285,7 @@
                     <img :src="src" x-show="current === i" @click.stop
                          class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl select-none">
                 </template>
-                @if($imagenesAlFinal->count() > 1)
+                @if($todasImagenes->count() > 1)
                 <button @click.stop="prev()"
                         class="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -298,7 +301,6 @@
                 @endif
             </div>
         </div>
-        @endif
 
         {{-- Footer del artículo --}}
         <div class="mt-16 pt-8 border-t border-gray-100 flex items-center justify-between flex-wrap gap-4">

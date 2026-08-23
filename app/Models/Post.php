@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasPreviewToken;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -9,7 +10,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Post extends Model
 {
-    use HasTranslations;
+    use HasTranslations, HasPreviewToken;
 
     public array $translatable = ['titulo', 'resumen', 'contenido'];
 
@@ -25,7 +26,6 @@ class Post extends Model
         'resumen',
         'contenido',
         'imagen_portada',
-        'imagenes',
         'publicado',
         'publicado_en',
     ];
@@ -33,12 +33,26 @@ class Post extends Model
     protected $casts = [
         'publicado'    => 'boolean',
         'publicado_en' => 'datetime',
-        'imagenes'     => 'array',
     ];
+
+    public function imagenes()
+    {
+        return $this->hasMany(PostImagen::class)->orderBy('orden');
+    }
 
     public function scopePublicados($query)
     {
         return $query->where('publicado', true)->orderByDesc('publicado_en');
+    }
+
+    public function previewEstaVivo(): bool
+    {
+        return ! $this->publicado;
+    }
+
+    public function previewTipo(): string
+    {
+        return 'blog';
     }
 
     public function lugares()
@@ -80,6 +94,9 @@ class Post extends Model
         static::deleting(function (self $post) {
             if ($post->imagen_portada) {
                 Storage::disk('public')->delete($post->imagen_portada);
+            }
+            foreach ($post->imagenes as $img) {
+                Storage::disk('public')->delete($img->ruta);
             }
         });
     }
