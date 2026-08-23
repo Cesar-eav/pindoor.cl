@@ -84,19 +84,19 @@
         <div class="flex gap-2">
         @foreach($recomendaciones as $r)
         <a href="{{ route('recomienda.show', $r->slug) }}"
-           class="flex-none w-36 bg-[#fff0ef] border border-[#fc5648]/20 rounded-2xl shadow-sm overflow-hidden">
+           class="flex-none w-56 bg-[#fff0ef] border border-[#fc5648]/20 rounded-2xl shadow-sm overflow-hidden">
             <div class="relative">
                 @if($r->imagen_portada)
                     <img src="{{ asset('storage/' . $r->imagen_portada) }}"
                          alt="{{ $r->titulo }}"
-                         class="w-full h-24 object-cover">
+                         class="w-full h-36 object-cover">
                 @else
                     <div class="w-full h-24 bg-[#ffe0dd] flex items-center justify-center text-3xl">{{ $r->plan_info['emoji'] }}</div>
                 @endif
                 <span class="absolute top-1.5 right-1.5 text-base leading-none">{{ $r->plan_info['emoji'] }}</span>
             </div>
             <div class="px-2.5 py-2">
-                <p class="text-[11px] font-bold text-gray-900 leading-tight line-clamp-2 mt-0.5">{{ $r->titulo }}</p>
+                <p class="text-[14px] font-bold text-gray-900 leading-tight line-clamp-2 mt-0.5">{{ $r->titulo }}</p>
             </div>
         </a>
         @endforeach
