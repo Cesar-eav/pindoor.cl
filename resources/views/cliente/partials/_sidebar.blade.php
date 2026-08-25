@@ -26,6 +26,18 @@
         $checks['carta'] = !empty($datoCarta['url'] ?? '') || !empty($datoCarta['texto'] ?? '');
     }
     $pendientesCount = collect($checks)->reject(fn($ok) => $ok)->count();
+    $tieneRecomienda = $punto->recomendaciones()->exists();
+
+    // Las anclas (#galeria, #museo, etc.) solo existen en cliente.perfil.ver —
+    // se arma la URL absoluta para que estos enlaces también funcionen desde
+    // otras páginas del panel (ej. /eventos) que comparten este sidebar.
+    $perfilUrl = route('cliente.perfil.ver', $punto);
+
+    // Cuando este partial se incluye desde cliente/perfil.blade.php (único
+    // lugar con el x-data="perfilTabs(...)" que expone goTo()), los enlaces
+    // ancla cambian de pestaña sin recargar. Desde cualquier otra página
+    // (ej. cliente/eventos.blade.php) se dejan como navegación normal.
+    $inPerfilTabs = $inPerfilTabs ?? false;
 @endphp
 
 <style>
@@ -109,17 +121,26 @@
             <p class="sidebar-group-label" style="color: #fc5648">Actividad de hoy</p>
             <div class="space-y-0.5">
                 @if(in_array('oferta_del_dia', $modulos))
-                <a href="#oferta" class="sidebar-link">🏷️ Oferta del día</a>
+                <a href="{{ $perfilUrl }}#oferta" class="sidebar-link" @if($inPerfilTabs) @click.prevent="goTo('actividad', 'oferta')" @endif>🏷️ Oferta del día</a>
                 @endif
                 @if(in_array('menu_del_dia', $modulos))
-                <a href="#menu" class="sidebar-link">🥘 Menú del día</a>
+                <a href="{{ $perfilUrl }}#menu" class="sidebar-link" @if($inPerfilTabs) @click.prevent="goTo('actividad', 'menu')" @endif>🥘 Menú del día</a>
                 @endif
                 @if(in_array('avisos', $modulos))
-                <a href="#avisos" class="sidebar-link">📢 Avisos</a>
+                <a href="{{ $perfilUrl }}#avisos" class="sidebar-link" @if($inPerfilTabs) @click.prevent="goTo('actividad', 'avisos')" @endif>📢 Avisos</a>
                 @endif
                 @if(in_array('promociones', $modulos))
-                <a href="#promociones" class="sidebar-link">🎁 Promociones</a>
+                <a href="{{ $perfilUrl }}#promociones" class="sidebar-link" @if($inPerfilTabs) @click.prevent="goTo('actividad', 'promociones')" @endif>🎁 Promociones</a>
                 @endif
+            </div>
+        </div>
+        @endif
+
+        @if($tieneRecomienda)
+        <div>
+            <p class="sidebar-group-label" style="color: #a855f7">Pindoor Recomienda</p>
+            <div class="space-y-0.5">
+                <a href="{{ $perfilUrl }}#recomienda" class="sidebar-link" @if($inPerfilTabs) @click.prevent="goTo('recomienda', 'recomienda')" @endif>📰 Mi(s) publicación(es)</a>
             </div>
         </div>
         @endif
@@ -127,24 +148,24 @@
         <div>
             <p class="sidebar-group-label" style="color: #60a5fa">Tu perfil</p>
             <div class="space-y-0.5">
-                <a href="#galeria" class="sidebar-link justify-between">
+                <a href="{{ $perfilUrl }}#galeria" class="sidebar-link justify-between" @if($inPerfilTabs) @click.prevent="goTo('perfil', 'galeria')" @endif>
                     <span>🖼️ Galería</span>
                     @if(!$checks['galeria'])<span class="sidebar-dot"></span>@endif
                 </a>
-                <a href="#imagen-perfil" class="sidebar-link justify-between">
+                <a href="{{ $perfilUrl }}#imagen-perfil" class="sidebar-link justify-between" @if($inPerfilTabs) @click.prevent="goTo('perfil', 'imagen-perfil')" @endif>
                     <span>🏷️ Logo / imagen</span>
                     @if(!$checks['imagen_perfil'])<span class="sidebar-dot"></span>@endif
                 </a>
-                <a href="#descripcion" class="sidebar-link justify-between">
+                <a href="{{ $perfilUrl }}#descripcion" class="sidebar-link justify-between" @if($inPerfilTabs) @click.prevent="goTo('perfil', 'descripcion')" @endif>
                     <span>📝 Descripción</span>
                     @if(!$checks['description'])<span class="sidebar-dot"></span>@endif
                 </a>
-                <a href="#ubicacion" class="sidebar-link justify-between">
+                <a href="{{ $perfilUrl }}#ubicacion" class="sidebar-link justify-between" @if($inPerfilTabs) @click.prevent="goTo('perfil', 'ubicacion')" @endif>
                     <span>📍 Ubicación</span>
                     @if(!$checks['horario'] || !$checks['direccion'] || !$checks['sector'])<span class="sidebar-dot"></span>@endif
                 </a>
-                <a href="#contacto" class="sidebar-link">🔗 Contacto y redes</a>
-                <a href="#busqueda" class="sidebar-link">🔍 Búsqueda SEO</a>
+                <a href="{{ $perfilUrl }}#contacto" class="sidebar-link" @if($inPerfilTabs) @click.prevent="goTo('perfil', 'contacto')" @endif>🔗 Contacto y redes</a>
+                <a href="{{ $perfilUrl }}#busqueda" class="sidebar-link" @if($inPerfilTabs) @click.prevent="goTo('perfil', 'busqueda')" @endif>🔍 Búsqueda SEO</a>
             </div>
         </div>
 
@@ -153,22 +174,22 @@
             <p class="sidebar-group-label" style="color: #34d399">Contenido</p>
             <div class="space-y-0.5">
                 @if(in_array('carta', $modulos))
-                <a href="#carta" class="sidebar-link justify-between">
+                <a href="{{ $perfilUrl }}#carta" class="sidebar-link justify-between" @if($inPerfilTabs) @click.prevent="goTo('contenido', 'carta')" @endif>
                     <span>🍽️ Carta / Menú</span>
                     @if(isset($checks['carta']) && !$checks['carta'])<span class="sidebar-dot"></span>@endif
                 </a>
                 @endif
                 @if($tieneModuloAlojamiento)
-                <a href="#alojamiento" class="sidebar-link">🛏️ Alojamiento</a>
+                <a href="{{ $perfilUrl }}#alojamiento" class="sidebar-link" @if($inPerfilTabs) @click.prevent="goTo('contenido', 'alojamiento')" @endif>🛏️ Alojamiento</a>
                 @endif
                 @if(in_array('entradas', $modulos) || in_array('exposiciones', $modulos))
-                <a href="#museo" class="sidebar-link">🎟️ Museo</a>
+                <a href="{{ $perfilUrl }}#museo" class="sidebar-link" @if($inPerfilTabs) @click.prevent="goTo('contenido', 'museo')" @endif>🎟️ Museo</a>
                 @endif
                 @if(in_array('agenda', $modulos))
                 <a href="{{ route('cliente.eventos.index', $punto) }}" class="sidebar-link {{ request()->routeIs('cliente.eventos.index') ? 'active' : '' }}">📅 Eventos</a>
                 @endif
                 @if(in_array($punto->categoria_id, [13, 14]))
-                <a href="#catalogo" class="sidebar-link">🛍️ Catálogo</a>
+                <a href="{{ $perfilUrl }}#catalogo" class="sidebar-link" @if($inPerfilTabs) @click.prevent="goTo('contenido', 'catalogo')" @endif>🛍️ Catálogo</a>
                 @endif
             </div>
         </div>
