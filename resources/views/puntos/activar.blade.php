@@ -30,18 +30,16 @@
         </div>
     @endif
 
-    <form action="{{ route('contacto.store') }}" method="POST" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
+    <form action="{{ route('puntos.activar.store', $punto->slug) }}" method="POST" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
         @csrf
-        <input type="hidden" name="tipo" value="cliente">
-        <input type="hidden" name="nombre_local" value="{{ $punto->title }}">
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="sm:col-span-2">
                 <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Tu nombre *</label>
-                <input type="text" name="nombre" value="{{ old('nombre') }}"
+                <input type="text" name="name" value="{{ old('name') }}"
                        placeholder="Juan Pérez"
-                       class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#fc5648] focus:border-transparent transition @error('nombre') border-red-400 bg-red-50 @enderror">
-                @error('nombre') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                       class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#fc5648] focus:border-transparent transition @error('name') border-red-400 bg-red-50 @enderror">
+                @error('name') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
             </div>
 
             <div>
@@ -53,39 +51,10 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Teléfono</label>
-                <input type="tel" name="telefono" value="{{ old('telefono') }}"
+                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">WhatsApp</label>
+                <input type="tel" name="whatsapp" value="{{ old('whatsapp') }}"
                        placeholder="+56 9 1234 5678"
                        class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#fc5648] focus:border-transparent transition">
-            </div>
-
-            <div class="sm:col-span-2">
-                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Tipo de negocio *</label>
-                <select name="tipo_local"
-                        class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#fc5648] focus:border-transparent transition @error('tipo_local') border-red-400 bg-red-50 @enderror">
-                    <option value="">Seleccionar…</option>
-                    @foreach([
-                        'hostal'      => 'Hostal / Hotel',
-                        'cafeteria'   => 'Cafetería',
-                        'restaurante' => 'Restaurante',
-                        'bar'         => 'Bar / Pub',
-                        'museo'       => 'Museo / Centro Cultural',
-                        'galeria'     => 'Galería de Arte',
-                        'tienda'      => 'Tienda / Boutique',
-                        'spa'         => 'Spa / Bienestar',
-                        'tour'        => 'Agencia de Tours',
-                        'otro'        => 'Otro',
-                    ] as $val => $label)
-                    <option value="{{ $val }}" {{ old('tipo_local') === $val ? 'selected' : '' }}>{{ $label }}</option>
-                    @endforeach
-                </select>
-                @error('tipo_local') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-            </div>
-
-            <div class="sm:col-span-2">
-                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Mensaje</label>
-                <textarea name="mensaje" rows="3"
-                          class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#fc5648] focus:border-transparent transition resize-none">{{ old('mensaje', 'Quiero activar el perfil de ' . $punto->title . ' (' . route('puntos.show', $punto->slug) . ').') }}</textarea>
             </div>
         </div>
 

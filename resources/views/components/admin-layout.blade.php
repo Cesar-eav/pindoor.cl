@@ -86,6 +86,7 @@
                         <p class="sidebar-group-label" x-show="!collapsed" x-cloak>Negocios</p>
                         <div class="space-y-0.5">
                             <a href="{{ route('admin.clientes') }}" title="Clientes" class="sidebar-link {{ request()->routeIs('admin.clientes') ? 'active' : '' }}">🏪 <span x-show="!collapsed" x-cloak>Clientes</span></a>
+                            <a href="{{ route('admin.reclamos.index') }}" title="Reclamos" class="sidebar-link {{ request()->routeIs('admin.reclamos*') ? 'active' : '' }}">📝 <span x-show="!collapsed" x-cloak>Reclamos</span></a>
                             {{-- <a href="{{ route('admin.leads') }}" class="sidebar-link {{ request()->routeIs('admin.leads') ? 'active' : '' }}">📋 Leads</a> --}}
                             <a href="{{ route('admin.usuarios') }}" title="Usuarios" class="sidebar-link {{ request()->routeIs('admin.usuarios') ? 'active' : '' }}">👤 <span x-show="!collapsed" x-cloak>Usuarios</span></a>
                             <a href="{{ route('admin.puntos.create') }}" title="Nuevo Punto" class="sidebar-link {{ request()->routeIs('admin.puntos.create') ? 'active' : '' }}">➕ <span x-show="!collapsed" x-cloak>Nuevo Punto</span></a>
@@ -152,6 +153,7 @@
                         <p class="sidebar-group-label">Negocios</p>
                         <div class="space-y-0.5">
                             <a href="{{ route('admin.clientes') }}" class="sidebar-link {{ request()->routeIs('admin.clientes') ? 'active' : '' }}">🏪 Clientes</a>
+                            <a href="{{ route('admin.reclamos.index') }}" class="sidebar-link {{ request()->routeIs('admin.reclamos*') ? 'active' : '' }}">📝 Reclamos</a>
                             <a href="{{ route('admin.leads') }}" class="sidebar-link {{ request()->routeIs('admin.leads') ? 'active' : '' }}">📋 Leads</a>
                             <a href="{{ route('admin.usuarios') }}" class="sidebar-link {{ request()->routeIs('admin.usuarios') ? 'active' : '' }}">👤 Usuarios</a>
                             <a href="{{ route('admin.puntos.create') }}" class="sidebar-link {{ request()->routeIs('admin.puntos.create') ? 'active' : '' }}">➕ Nuevo Punto</a>

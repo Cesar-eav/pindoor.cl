@@ -14,13 +14,16 @@ use App\Models\Artista;
 use App\Models\OperadorTuristico;
 use App\Models\Ruta;
 use App\Models\Recomendacion;
+use App\Models\ReclamoNegocio;
 use App\Mail\NuevaExperienciaPropuesta;
+use App\Notifications\NuevoReclamoNotification;
 use App\Services\ImagenComprimida;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 
 class PuntoInteresController extends Controller
 {
@@ -575,6 +578,34 @@ class PuntoInteresController extends Controller
         abort_unless($punto->esBasico(), 404);
 
         return view('puntos.activar', compact('punto'));
+    }
+
+    public function activarStore(Request $request, string $slug)
+    {
+        $punto = PuntoInteres::publico()
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        abort_unless($punto->esBasico(), 404);
+
+        $data = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|max:255',
+            'whatsapp' => 'nullable|string|max:25',
+        ]);
+
+        $reclamo = ReclamoNegocio::create([
+            'punto_id' => $punto->id,
+            'name'     => $data['name'],
+            'email'    => $data['email'],
+            'whatsapp' => $data['whatsapp'] ?? null,
+            'status'   => 'pending',
+        ]);
+
+        Notification::route('mail', ['soporte@pindoor.cl', 'cesar.eav@gmail.com'])
+            ->notify(new NuevoReclamoNotification($reclamo));
+
+        return back()->with('success', 'Tu solicitud fue enviada. Te avisaremos por correo cuando sea aprobada.');
     }
 
     public function experiencias(Request $request)

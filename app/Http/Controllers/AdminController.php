@@ -14,7 +14,6 @@ use App\Services\ImagenComprimida;
 use App\Services\PortaldiscImporter;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -270,50 +269,24 @@ class AdminController extends Controller
 
     public function activarCliente(Request $request, PuntoInteres $punto)
     {
-        // Vincular usuario existente
-        if ($request->filled('user_id_existente')) {
-            $request->validate(['user_id_existente' => 'required|exists:users,id']);
+        $request->validate(['user_id_existente' => 'required|exists:users,id']);
 
-            $user = User::findOrFail($request->user_id_existente);
-            $user->update(['type' => 'cliente']);
+        $user = User::findOrFail($request->user_id_existente);
+        $user->update(['type' => 'cliente']);
 
-            $puntoData = [
-                'user_id'             => $user->id,
-                'es_cliente'          => true,
-                'modulos_habilitados' => PuntoInteres::modulosDefault($punto->categoria_id),
-            ];
-            if ($user->imagen_logo && !$punto->imagen_perfil) {
-                $puntoData['imagen_perfil'] = $user->imagen_logo;
-            }
-
-            $punto->update($puntoData);
-
-            return redirect()->route('admin.clientes')
-                ->with('success', "Punto \"{$punto->title}\" vinculado a {$user->email}.");
+        $puntoData = [
+            'user_id'             => $user->id,
+            'es_cliente'          => true,
+            'modulos_habilitados' => PuntoInteres::modulosDefault($punto->categoria_id),
+        ];
+        if ($user->imagen_logo && !$punto->imagen_perfil) {
+            $puntoData['imagen_perfil'] = $user->imagen_logo;
         }
 
-        // Crear usuario nuevo
-        $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'type'     => 'cliente',
-        ]);
-
-        $punto->update([
-            'user_id'           => $user->id,
-            'es_cliente'        => true,
-            'modulos_habilitados' => PuntoInteres::modulosDefault($punto->categoria_id),
-        ]);
+        $punto->update($puntoData);
 
         return redirect()->route('admin.clientes')
-            ->with('success', "Cliente \"{$punto->title}\" activado. Credenciales creadas para {$user->email}.");
+            ->with('success', "Punto \"{$punto->title}\" vinculado a {$user->email}.");
     }
 
     public function editarModulos(PuntoInteres $punto)
