@@ -54,8 +54,17 @@
                             <td class="px-6 py-4 text-right">
                                 @if($user->type !== 'admin' && !$user->es_sistema)
                                     <form method="POST" action="{{ route('admin.usuarios.destroy', $user) }}"
-                                          onsubmit="return confirm('¿Eliminar a {{ addslashes($user->name) }}? Esto borrará también su negocio, perfil de artista u operador (si tiene) junto con sus imágenes. Esta acción no se puede deshacer.')">
+                                          class="flex flex-col items-end gap-1"
+                                          onsubmit="return confirm(this.eliminar_negocio.checked
+                                              ? '¿Eliminar a {{ addslashes($user->name) }}? Esto eliminará también su negocio (además de su perfil de artista u operador, si tiene, junto con sus imágenes). Esta acción no se puede deshacer.'
+                                              : '¿Eliminar a {{ addslashes($user->name) }}? Su negocio NO se eliminará: quedará disponible para que alguien vuelva a reclamarlo. Esta acción no se puede deshacer.')">
                                         @csrf @method('DELETE')
+                                        @if($user->punto_interes_count > 0)
+                                            <label class="flex items-center gap-1 text-[11px] text-gray-500">
+                                                <input type="checkbox" name="eliminar_negocio" value="1" class="rounded border-gray-300 text-red-500 focus:ring-red-400">
+                                                Eliminar también el negocio
+                                            </label>
+                                        @endif
                                         <button type="submit" class="text-xs text-red-400 hover:text-red-600 font-medium">
                                             Eliminar
                                         </button>

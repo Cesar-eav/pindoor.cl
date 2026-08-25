@@ -98,11 +98,11 @@ class AdminController extends Controller
 
     public function usuarios()
     {
-        $usuarios = User::latest()->paginate(10);
+        $usuarios = User::withCount('puntoInteres')->latest()->paginate(10);
         return view('admin.usuarios', compact('usuarios'));
     }
 
-    public function destroyUser(User $usuario)
+    public function destroyUser(Request $request, User $usuario)
     {
         if ($usuario->type === 'admin') {
             return back()->with('error', 'No se pueden eliminar cuentas de administrador.');
@@ -116,12 +116,20 @@ class AdminController extends Controller
             \Storage::disk('public')->delete($usuario->imagen_logo);
         }
 
-        foreach ($usuario->puntoInteres as $punto) {
-            if ($punto->imagen_perfil) {
-                \Storage::disk('public')->delete($punto->imagen_perfil);
+        $eliminarNegocio = $request->boolean('eliminar_negocio');
+        $tienePuntos = $usuario->puntoInteres->isNotEmpty();
+
+        if ($tienePuntos) {
+            $sistemaId = User::where('es_sistema', true)->value('id');
+
+            if (!$sistemaId) {
+                return back()->with('error', 'No existe el usuario sistema (php artisan usuario:crear-sistema). No se puede reasignar su negocio.');
             }
-            foreach ($punto->imagenes as $img) {
-                \Storage::disk('public')->delete($img->ruta);
+
+            foreach ($usuario->puntoInteres as $punto) {
+                $eliminarNegocio
+                    ? $punto->update(['user_id' => $sistemaId, 'eliminado' => true, 'activo' => false])
+                    : $punto->update(['user_id' => $sistemaId]);
             }
         }
 
@@ -141,7 +149,14 @@ class AdminController extends Controller
         $nombre = $usuario->name;
         $usuario->delete();
 
-        return back()->with('success', "Usuario \"{$nombre}\" eliminado.");
+        $mensaje = "Usuario \"{$nombre}\" eliminado.";
+        if ($tienePuntos) {
+            $mensaje .= $eliminarNegocio
+                ? ' Su negocio fue eliminado.'
+                : ' Su negocio quedó disponible para ser reclamado nuevamente.';
+        }
+
+        return back()->with('success', $mensaje);
     }
 
     public function createPunto(Request $request)
