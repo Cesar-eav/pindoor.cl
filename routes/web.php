@@ -31,6 +31,8 @@ use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ExperienciaController;
 use App\Http\Controllers\Admin\DistritoController;
 use App\Http\Controllers\Admin\RecomendacionController;
+use App\Http\Controllers\Admin\ReclamoController;
+use App\Http\Controllers\ReclamoActivacionController;
 use App\Http\Controllers\RecomiendaController;
 use Illuminate\Support\Facades\Route;
 
@@ -66,6 +68,7 @@ Route::get('/lugar/{slug}/producto/{producto}', [PuntoInteresController::class, 
 Route::get('/lugar/{slug}/exposicion/{item}', [PuntoInteresController::class, 'showExposicion'])->name('puntos.exposicion');
 Route::get('/lugar/{slug}/evento/{item}', [PuntoInteresController::class, 'showEvento'])->name('puntos.evento');
 Route::get('/lugar/{slug}/activar', [PuntoInteresController::class, 'activar'])->name('puntos.activar');
+Route::post('/lugar/{slug}/activar', [PuntoInteresController::class, 'activarStore'])->name('puntos.activar.store');
 
 
 Route::get('/labrujula', fn() => redirect('/', 301));
@@ -255,6 +258,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/puntos/{punto}/modulos', [AdminController::class, 'editarModulos'])->name('clientes.modulos.form');
     Route::put('/puntos/{punto}/modulos', [AdminController::class, 'actualizarModulos'])->name('clientes.modulos');
 
+    // Reclamos de perfil
+    Route::get('/reclamos', [ReclamoController::class, 'index'])->name('reclamos.index');
+    Route::patch('/reclamos/{reclamo}/aprobar', [ReclamoController::class, 'aprobar'])->name('reclamos.aprobar');
+    Route::patch('/reclamos/{reclamo}/rechazar', [ReclamoController::class, 'rechazar'])->name('reclamos.rechazar');
+
     // Configuración general
     Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion.index');
     Route::post('/configuracion', [ConfiguracionController::class, 'actualizar'])->name('configuracion.actualizar');
@@ -328,6 +336,10 @@ Route::middleware(['auth', 'verified', 'artista'])->prefix('artista')->name('art
 // Aceptar invitación — pública, funciona con o sin sesión iniciada
 Route::get('/artista/invitacion/{token}',  [ArtistaInvitacionController::class, 'aceptar'])->name('artista.invitacion.aceptar');
 Route::post('/artista/invitacion/{token}', [ArtistaInvitacionController::class, 'storeAceptarNuevo'])->name('artista.invitacion.crear-cuenta');
+
+// Activar perfil reclamado — pública, funciona con o sin sesión iniciada
+Route::get('/activar-perfil/{token}',  [ReclamoActivacionController::class, 'activar'])->name('reclamo.activar');
+Route::post('/activar-perfil/{token}', [ReclamoActivacionController::class, 'store'])->name('reclamo.activar.store');
 
 // Perfil público artista — debe ir DESPUÉS del grupo protegido para que /artista/nuevo no sea capturado como slug
 Route::get('/artista/{slug}', [ArtistaController::class, 'show'])->name('artista.show');

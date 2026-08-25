@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\ReclamoNegocio;
 use App\Models\User;
 use App\Notifications\AdminNewArtistaNotification;
 use App\Notifications\AdminNewOperadorNotification;
@@ -17,6 +18,10 @@ class SocialiteController extends Controller
     {
         $tipo = in_array($request->query('tipo'), ['operador', 'artista']) ? $request->query('tipo') : 'cliente';
         session(['registro_tipo' => $tipo]);
+
+        if ($request->filled('reclamo_token')) {
+            session(['reclamo_token' => $request->query('reclamo_token')]);
+        }
 
         return Socialite::driver('google')->redirect();
     }
@@ -62,6 +67,23 @@ class SocialiteController extends Controller
         }
 
         Auth::login($user, remember: true);
+
+        $reclamoToken = session()->pull('reclamo_token');
+        if ($reclamoToken) {
+            $reclamo = ReclamoNegocio::where('activation_token', $reclamoToken)->first();
+
+            if ($reclamo && $reclamo->vigente()) {
+                if ($user->email === $reclamo->email) {
+                    $reclamo->completar($user);
+
+                    return redirect()->route('cliente.perfil.editar', $reclamo->punto)
+                        ->with('success', '¡Tu perfil fue activado! Ya puedes editarlo.');
+                }
+
+                return redirect()->route('reclamo.activar', $reclamoToken)
+                    ->withErrors(['email' => 'Tu cuenta de Google no coincide con el email de la invitación.']);
+            }
+        }
 
         return redirect()->intended(route('dashboard'));
     }
