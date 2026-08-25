@@ -7,6 +7,17 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            @if(session('success'))
+                <div class="mb-5 flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
+                    <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    {{ session('success') }}
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="mb-5 flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                    {{ session('error') }}
+                </div>
+            @endif
             <div class="bg-white shadow-sm sm:rounded-2xl overflow-hidden border border-gray-100">
                 <table class="w-full text-left">
                     <thead class="bg-gray-50 text-gray-500 uppercase text-xs font-bold">
@@ -15,6 +26,7 @@
                             <th class="px-6 py-4">Email</th>
                             <th class="px-6 py-4">Tipo</th>
                             <th class="px-6 py-4">Registro</th>
+                            <th class="px-6 py-4 text-right">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 text-sm">
@@ -39,6 +51,19 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-gray-500">{{ $user->created_at->format('d/m/Y') }}</td>
+                            <td class="px-6 py-4 text-right">
+                                @if($user->type !== 'admin' && !$user->es_sistema)
+                                    <form method="POST" action="{{ route('admin.usuarios.destroy', $user) }}"
+                                          onsubmit="return confirm('¿Eliminar a {{ addslashes($user->name) }}? Esto borrará también su negocio, perfil de artista u operador (si tiene) junto con sus imágenes. Esta acción no se puede deshacer.')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="text-xs text-red-400 hover:text-red-600 font-medium">
+                                            Eliminar
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="text-xs text-gray-300">—</span>
+                                @endif
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
