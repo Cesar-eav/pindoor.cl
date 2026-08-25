@@ -31,11 +31,33 @@
     $textoMenu      = $punto->dato('menu_del_dia')['texto'] ?? '';
     $textoAviso     = $punto->dato('avisos')['texto'] ?? '';
     $textoPromocion = $punto->dato('promociones')['texto'] ?? '';
+
+    // ── Pestañas del panel: una sola fuente de verdad para el mapeo
+    //    sección→pestaña, reutilizada por el hash inicial, el popup de
+    //    pendientes y el restauro post-guardado (ver <script> más abajo).
+    $tabDeSeccion = [
+        'oferta' => 'actividad', 'menu' => 'actividad', 'avisos' => 'actividad', 'promociones' => 'actividad',
+        'recomienda' => 'recomienda',
+        'galeria' => 'perfil', 'imagen-perfil' => 'perfil', 'descripcion' => 'perfil', 'ubicacion' => 'perfil', 'contacto' => 'perfil', 'busqueda' => 'perfil',
+        'carta' => 'contenido', 'alojamiento' => 'contenido', 'museo' => 'contenido', 'catalogo' => 'contenido',
+    ];
+
+    // Si la redirección viene de un error de validación (back()->withErrors),
+    // no hay hash disponible — forzar la pestaña del primer campo con error.
+    $campoTab = [
+        'description' => 'perfil', 'horario' => 'perfil', 'enlace' => 'perfil', 'video_url' => 'perfil',
+        'tags' => 'perfil', 'descripcion_busqueda' => 'perfil', 'imagen_perfil' => 'perfil', 'categoria_id' => 'perfil',
+        'carta' => 'contenido', 'carta_pdf' => 'contenido',
+        'precio_desde' => 'contenido', 'check_in' => 'contenido', 'check_out' => 'contenido',
+        'habitaciones' => 'contenido', 'servicios_incluidos' => 'contenido', 'politicas' => 'contenido',
+    ];
+    $tabConError = collect($errors->keys())->map(fn ($k) => $campoTab[$k] ?? null)->filter()->first();
 @endphp
 
-<div class="flex bg-white" style="min-height: calc(100vh - 3.5rem)">
+<div class="flex bg-white" id="perfil-tabs-root" style="min-height: calc(100vh - 3.5rem)"
+     x-data="perfilTabs(@js($tabDeSeccion), @js($tabConError))">
 
-    @include('cliente.partials._sidebar', ['punto' => $punto])
+    @include('cliente.partials._sidebar', ['punto' => $punto, 'inPerfilTabs' => true])
 
     {{-- ══════════════════════════════════════════════════════════════
          CONTENIDO PRINCIPAL
@@ -69,7 +91,8 @@
                     </div>
                     <div class="flex flex-wrap gap-2">
                         @foreach($pendientes as $check)
-                        <a href="{{ $check['href'] }}" @click="open = false"
+                        @php $checkId = ltrim($check['href'], '#'); $checkTab = $tabDeSeccion[$checkId] ?? 'perfil'; @endphp
+                        <a href="{{ $check['href'] }}" @click.prevent="open = false; goTo('{{ $checkTab }}', '{{ $checkId }}')"
                            class="text-xs font-semibold px-3 py-1.5 rounded-full transition hover:opacity-80"
                            style="background: #fff0ef; color: #fc5648">
                             {{ $check['label'] }} →
@@ -84,7 +107,7 @@
                  GRUPO: ACTIVIDAD DE HOY (módulos dinámicos, cada uno su form)
                  ────────────────────────────────────────────────────────────── --}}
             @if($tieneActividadDiaria)
-            <div>
+            <div x-show="activeTab === 'actividad'">
                 <div class="group-header" style="--group-color: #fc5648">
                     <span class="group-header-label" style="color: #fc5648">Actividad de hoy</span>
                     <div class="group-header-line" style="background: linear-gradient(to right, rgba(252,86,72,0.4), transparent)"></div>
@@ -224,9 +247,67 @@
             @endif
 
             {{-- ──────────────────────────────────────────────────────────────
+                 GRUPO: PINDOOR RECOMIENDA (solo si el negocio compró alguna nota)
+                 ────────────────────────────────────────────────────────────── --}}
+            @if($recomendaciones->isNotEmpty())
+            <div id="recomienda" class="scroll-mt-20" x-show="activeTab === 'recomienda'">
+                <div class="group-header">
+                    <span class="group-header-label" style="color: #a855f7">Pindoor Recomienda</span>
+                    <div class="group-header-line" style="background: linear-gradient(to right, rgba(168,85,247,0.4), transparent)"></div>
+                </div>
+                <div class="space-y-5">
+                    @foreach($recomendaciones as $recomendacion)
+                    <div id="recomienda-{{ $recomendacion->id }}" class="section-card section-card-amber scroll-mt-20">
+                        <div class="section-card-head flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <h3 class="section-title truncate">{{ $recomendacion->plan_info['emoji'] }} {{ $recomendacion->titulo }}</h3>
+                                <p class="section-sub">Plan {{ $recomendacion->plan_info['label'] }}</p>
+                            </div>
+                            @if($recomendacion->publicado)
+                            <span class="shrink-0 text-[11px] font-bold bg-green-50 text-green-700 px-2.5 py-1 rounded-full">● Publicada</span>
+                            @else
+                            <span class="shrink-0 text-[11px] font-bold bg-gray-100 text-gray-400 px-2.5 py-1 rounded-full">○ En preparación</span>
+                            @endif
+                        </div>
+                        <div class="section-card-body">
+                            @if($recomendacion->vigente_hasta)
+                                @if($recomendacion->estaVencida())
+                                <div class="text-xs font-bold text-red-600 bg-red-50 rounded-xl px-3 py-2 mb-3">
+                                    🔴 Venció el {{ $recomendacion->vigente_hasta->translatedFormat('d \d\e F, Y') }} — contacta a Pindoor para renovarla
+                                </div>
+                                @else
+                                <div class="text-xs font-bold text-green-700 bg-green-50 rounded-xl px-3 py-2 mb-3">
+                                    🟢 Vigente hasta el {{ $recomendacion->vigente_hasta->translatedFormat('d \d\e F, Y') }} ({{ $recomendacion->vigente_hasta->diffForHumans() }})
+                                </div>
+                                @endif
+                            @else
+                            <div class="text-xs text-gray-400 bg-gray-50 rounded-xl px-3 py-2 mb-3">Sin fecha de vencimiento</div>
+                            @endif
+
+                            @if($recomendacion->destacado_portada)
+                            <div class="text-xs font-bold text-amber-700 bg-amber-50 rounded-xl px-3 py-2 mb-3">
+                                🥇 Destacada en portada{{ $recomendacion->destacado_hasta ? ' hasta el ' . $recomendacion->destacado_hasta->translatedFormat('d \d\e F, Y') : '' }}
+                            </div>
+                            @endif
+
+                            @if($recomendacion->activo)
+                            <a href="{{ route('recomienda.show', $recomendacion->slug) }}" target="_blank"
+                               class="inline-flex items-center gap-1 text-xs font-bold text-[#fc5648] hover:underline">
+                                Ver nota publicada
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            </a>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            {{-- ──────────────────────────────────────────────────────────────
                  GRUPO: TU PERFIL
                  ────────────────────────────────────────────────────────────── --}}
-            <div>
+            <div x-show="activeTab === 'perfil'">
                 <div class="group-header">
                     <span class="group-header-label" style="color: #3b82f6">Tu perfil</span>
                     <div class="group-header-line" style="background: linear-gradient(to right, rgba(59,130,246,0.4), transparent)"></div>
@@ -511,7 +592,7 @@
                  GRUPO: CONTENIDO (formularios del perfil estático continuado)
                  ────────────────────────────────────────────────────────────── --}}
             @if($tieneContenido || $tieneModuloAlojamiento)
-            <div>
+            <div x-show="activeTab === 'contenido'">
                 <div class="group-header">
                     <span class="group-header-label" style="color: #10b981">Contenido</span>
                     <div class="group-header-line" style="background: linear-gradient(to right, rgba(16,185,129,0.4), transparent)"></div>
@@ -1078,6 +1159,48 @@
 </style>
 
 <script>
+// ── Pestañas del panel de cliente ────────────────────────────────────
+// Registrado vía 'alpine:init' (no en DOMContentLoaded) para garantizar que
+// Alpine.data('perfilTabs', ...) exista antes de que Alpine evalúe el
+// x-data="perfilTabs(...)" del contenedor, sin depender del orden en que
+// se cargan los scripts.
+document.addEventListener('alpine:init', () => {
+    Alpine.data('perfilTabs', (idToTab, erroredTab) => ({
+        activeTab: 'perfil',
+        idToTab: idToTab || {},
+
+        tabForId(id) {
+            if (!id) return null;
+            if (this.idToTab[id]) return this.idToTab[id];
+            if (id.startsWith('recomienda-')) return 'recomienda';
+            return null;
+        },
+
+        init() {
+            if (erroredTab) {
+                this.activeTab = erroredTab;
+                return;
+            }
+            const hashId = window.location.hash.replace('#', '');
+            const tab = this.tabForId(hashId);
+            if (tab) {
+                this.activeTab = tab;
+                this.$nextTick(() => {
+                    document.getElementById(hashId)?.scrollIntoView({ behavior: 'auto', block: 'start' });
+                });
+            }
+        },
+
+        goTo(tab, id) {
+            this.activeTab = tab;
+            history.replaceState(null, '', '#' + id);
+            this.$nextTick(() => {
+                document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        },
+    }));
+});
+
 document.addEventListener('DOMContentLoaded', function () {
 
     // ── Quill editors ───────────────────────────────────────────────
@@ -1283,15 +1406,19 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ── Sidebar active highlight on scroll ──────────────────────────
-    const sections = document.querySelectorAll('[id]');
-    const sidebarLinks = document.querySelectorAll('.sidebar-link[href^="#"]');
+    // Solo landmarks reales de sección (todas llevan scroll-mt-20) — antes
+    // se usaba '[id]' a secas, que también capturaba inputs/imágenes/etc.
+    const sections = document.querySelectorAll('.scroll-mt-20[id]');
+    // Los href del sidebar ahora son URLs completas (no empiezan con '#') —
+    // se compara solo el sufijo tras el hash.
+    const sidebarLinks = document.querySelectorAll('.sidebar-link[href*="#"]');
 
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 sidebarLinks.forEach(link => {
                     link.classList.remove('active');
-                    if (link.getAttribute('href') === '#' + entry.target.id) {
+                    if (link.getAttribute('href').split('#')[1] === entry.target.id) {
                         link.classList.add('active');
                     }
                 });
@@ -1323,6 +1450,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const _sec = sessionStorage.getItem('_pindoor_section');
     if (_sec) {
         sessionStorage.removeItem('_pindoor_section');
+        // Este reload viene de un redirect()->route(...) sin hash — la única
+        // señal de a qué pestaña volver es este sessionStorage.
+        const _root = document.getElementById('perfil-tabs-root');
+        const _tabsData = _root ? Alpine.$data(_root) : null;
+        if (_tabsData) {
+            const _tab = _tabsData.tabForId(_sec);
+            if (_tab) _tabsData.activeTab = _tab;
+        }
         requestAnimationFrame(() => {
             document.getElementById(_sec)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });

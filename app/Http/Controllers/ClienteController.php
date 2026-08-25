@@ -371,10 +371,11 @@ class ClienteController extends Controller
         $entradas     = $punto->items('entradas');
         $exposiciones = $punto->items('exposiciones');
         $productos    = $punto->productos;
+        $recomendaciones = $punto->recomendaciones()->orderByDesc('created_at')->get();
 
         return view('cliente.perfil', compact(
             'punto', 'modulos', 'datoCarta', 'datoAlojamiento', 'categorias',
-            'entradas', 'exposiciones', 'productos'
+            'entradas', 'exposiciones', 'productos', 'recomendaciones'
         ));
     }
 

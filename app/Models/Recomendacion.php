@@ -33,6 +33,7 @@ class Recomendacion extends Model
         'slug',
         'punto_interes_id',
         'plan',
+        'vigente_hasta',
         'negocio',
         'rubro',
         'direccion',
@@ -56,6 +57,7 @@ class Recomendacion extends Model
     protected $casts = [
         'destacado_portada' => 'boolean',
         'destacado_hasta'   => 'date',
+        'vigente_hasta'     => 'date',
         'publicado'         => 'boolean',
         'publicado_en'      => 'datetime',
         'activo'            => 'boolean',
@@ -99,6 +101,11 @@ class Recomendacion extends Model
     public function getPlanInfoAttribute(): array
     {
         return self::PLANES[$this->plan] ?? ['label' => $this->plan, 'emoji' => '📰'];
+    }
+
+    public function estaVencida(): bool
+    {
+        return $this->vigente_hasta !== null && $this->vigente_hasta->isPast();
     }
 
     public function getVideoYoutubeIdAttribute(): ?string

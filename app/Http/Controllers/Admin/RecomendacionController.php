@@ -259,6 +259,7 @@ class RecomendacionController extends Controller
             'contenido_fr'      => 'nullable|string',
             'punto_interes_id'  => 'nullable|exists:puntosinteres,id',
             'plan'              => 'required|string|in:' . implode(',', array_keys(Recomendacion::PLANES)),
+            'vigente_hasta'     => 'nullable|date',
             'negocio'           => 'required|string|max:255',
             'rubro'             => 'nullable|string|max:255',
             'direccion'         => 'nullable|string|max:255',
