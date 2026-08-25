@@ -259,9 +259,20 @@
                     @foreach($recomendaciones as $recomendacion)
                     <div id="recomienda-{{ $recomendacion->id }}" class="section-card section-card-amber scroll-mt-20">
                         <div class="section-card-head flex items-start justify-between gap-3">
-                            <div class="min-w-0">
-                                <h3 class="section-title truncate">{{ $recomendacion->plan_info['emoji'] }} {{ $recomendacion->titulo }}</h3>
-                                <p class="section-sub">Plan {{ $recomendacion->plan_info['label'] }}</p>
+                            <div class="flex items-start gap-3 min-w-0">
+                                @if($recomendacion->imagen_portada)
+                                    <img src="{{ asset('storage/' . $recomendacion->imagen_portada) }}" alt="{{ $recomendacion->titulo }}"
+                                         class="w-16 h-16 rounded-xl object-cover border border-gray-100 shrink-0">
+                                @else
+                                    <div class="w-16 h-16 rounded-xl bg-gray-50 flex items-center justify-center text-2xl shrink-0 border border-gray-100">🖼️</div>
+                                @endif
+                                <div class="min-w-0">
+                                    <h3 class="section-title truncate">{{ $recomendacion->plan_info['emoji'] }} {{ $recomendacion->titulo }}</h3>
+                                    <p class="section-sub">Plan {{ $recomendacion->plan_info['label'] }}</p>
+                                    @if($recomendacion->publicado_en)
+                                    <p class="text-[11px] text-gray-400 mt-0.5">Publicada el {{ $recomendacion->publicado_en->translatedFormat('d \d\e F, Y') }}</p>
+                                    @endif
+                                </div>
                             </div>
                             @if($recomendacion->publicado)
                             <span class="shrink-0 text-[11px] font-bold bg-green-50 text-green-700 px-2.5 py-1 rounded-full">● Publicada</span>
@@ -270,20 +281,6 @@
                             @endif
                         </div>
                         <div class="section-card-body">
-                            @if($recomendacion->vigente_hasta)
-                                @if($recomendacion->estaVencida())
-                                <div class="text-xs font-bold text-red-600 bg-red-50 rounded-xl px-3 py-2 mb-3">
-                                    🔴 Venció el {{ $recomendacion->vigente_hasta->translatedFormat('d \d\e F, Y') }} — contacta a Pindoor para renovarla
-                                </div>
-                                @else
-                                <div class="text-xs font-bold text-green-700 bg-green-50 rounded-xl px-3 py-2 mb-3">
-                                    🟢 Vigente hasta el {{ $recomendacion->vigente_hasta->translatedFormat('d \d\e F, Y') }} ({{ $recomendacion->vigente_hasta->diffForHumans() }})
-                                </div>
-                                @endif
-                            @else
-                            <div class="text-xs text-gray-400 bg-gray-50 rounded-xl px-3 py-2 mb-3">Sin fecha de vencimiento</div>
-                            @endif
-
                             @if($recomendacion->destacado_portada)
                             <div class="text-xs font-bold text-amber-700 bg-amber-50 rounded-xl px-3 py-2 mb-3">
                                 🥇 Destacada en portada{{ $recomendacion->destacado_hasta ? ' hasta el ' . $recomendacion->destacado_hasta->translatedFormat('d \d\e F, Y') : '' }}
