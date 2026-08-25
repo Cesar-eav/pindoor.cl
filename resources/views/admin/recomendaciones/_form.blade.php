@@ -40,15 +40,6 @@
         @endforeach
     </div>
     @error('plan') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
-
-    <div class="mt-3">
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Vigente hasta (vencimiento de la compra)</label>
-        <input type="date" name="vigente_hasta"
-               value="{{ old('vigente_hasta', isset($recomendacion->vigente_hasta) ? $recomendacion->vigente_hasta?->format('Y-m-d') : '') }}"
-               class="w-full sm:w-56 px-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
-        <p class="text-xs text-gray-400 mt-1">Fecha en que vence el plan contratado por el cliente. Se muestra en su panel. Vacío = sin vencimiento.</p>
-        @error('vigente_hasta') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
-    </div>
 </div>
 
 {{-- Vincular a ficha existente --}}
@@ -392,7 +383,7 @@
         <span class="text-sm font-semibold text-amber-900">🥇 Destacar en banner "Recomendados" de la portada</span>
     </label>
     <div>
-        <label class="block text-xs font-semibold text-amber-800 mb-1">Vigente hasta</label>
+        <label class="block text-xs font-semibold text-amber-800 mb-1">Destacado hasta</label>
         <input type="date" name="destacado_hasta"
                value="{{ old('destacado_hasta', isset($recomendacion->destacado_hasta) ? $recomendacion->destacado_hasta?->format('Y-m-d') : '') }}"
                class="w-full sm:w-56 px-4 py-2 border border-amber-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-400 outline-none bg-white">

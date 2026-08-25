@@ -102,11 +102,6 @@
                                 {{ $planInfo['emoji'] }} {{ $planInfo['label'] }}
                             </span>
                             @endif
-                            @if($r->vigente_hasta)
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {{ $r->estaVencida() ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-700' }}">
-                                {{ $r->estaVencida() ? '⏰ Venció' : '⏳ Vence' }} {{ $r->vigente_hasta->format('d/m/Y') }}
-                            </span>
-                            @endif
                             @if($r->publicado)
                             <span class="text-[10px] font-bold bg-green-50 text-green-700 px-2 py-0.5 rounded-full">● Publicada</span>
                             @else
