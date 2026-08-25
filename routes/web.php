@@ -153,7 +153,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     
     // Gestión de Usuarios
     Route::get('/usuarios', [AdminController::class, 'usuarios'])->name('usuarios');
-    
+    Route::delete('/usuarios/{usuario}', [AdminController::class, 'destroyUser'])->name('usuarios.destroy');
+
     // Puntos de Interés General (Creados por Admin)
     Route::get('/puntos/crear', [AdminController::class, 'createPunto'])->name('puntos.create');
     Route::post('/puntos/guardar', [AdminController::class, 'storePunto'])->name('puntos.store');

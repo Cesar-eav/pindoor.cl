@@ -102,6 +102,48 @@ class AdminController extends Controller
         return view('admin.usuarios', compact('usuarios'));
     }
 
+    public function destroyUser(User $usuario)
+    {
+        if ($usuario->type === 'admin') {
+            return back()->with('error', 'No se pueden eliminar cuentas de administrador.');
+        }
+
+        if ($usuario->es_sistema) {
+            return back()->with('error', 'No se puede eliminar la cuenta de sistema.');
+        }
+
+        if ($usuario->imagen_logo) {
+            \Storage::disk('public')->delete($usuario->imagen_logo);
+        }
+
+        foreach ($usuario->puntoInteres as $punto) {
+            if ($punto->imagen_perfil) {
+                \Storage::disk('public')->delete($punto->imagen_perfil);
+            }
+            foreach ($punto->imagenes as $img) {
+                \Storage::disk('public')->delete($img->ruta);
+            }
+        }
+
+        foreach (Artista::where('user_id', $usuario->id)->get() as $artista) {
+            if ($artista->imagen_perfil) {
+                \Storage::disk('public')->delete($artista->imagen_perfil);
+            }
+            foreach ($artista->imagenes as $img) {
+                \Storage::disk('public')->delete($img->ruta);
+            }
+        }
+
+        if ($usuario->operador && $usuario->operador->imagen_perfil) {
+            \Storage::disk('public')->delete($usuario->operador->imagen_perfil);
+        }
+
+        $nombre = $usuario->name;
+        $usuario->delete();
+
+        return back()->with('success', "Usuario \"{$nombre}\" eliminado.");
+    }
+
     public function createPunto(Request $request)
     {
         $categorias = Categoria::orderBy('nombre')->get();
