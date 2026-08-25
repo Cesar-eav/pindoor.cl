@@ -28,7 +28,7 @@ class ReclamoActivacionController extends Controller
             $reclamo->completar(auth()->user());
 
             return redirect()->route('cliente.perfil.editar', $reclamo->punto)
-                ->with('success', '¡Tu perfil fue activado! Ya puedes editarlo.');
+                ->with('success', '¡Tu perfil fue activado! Ya tiene la ficha básica cargada (título, descripción, ubicación...) — puedes actualizarla cuando quieras.');
         }
 
         $existe = User::where('email', $reclamo->email)->exists();
@@ -49,10 +49,11 @@ class ReclamoActivacionController extends Controller
         ]);
 
         $user = User::create([
-            'name'     => $data['name'],
-            'email'    => $reclamo->email,
-            'password' => Hash::make($data['password']),
-            'type'     => 'cliente',
+            'name'              => $data['name'],
+            'email'             => $reclamo->email,
+            'password'          => Hash::make($data['password']),
+            'type'              => 'cliente',
+            'email_verified_at' => now(),
         ]);
 
         event(new Registered($user));
@@ -61,6 +62,6 @@ class ReclamoActivacionController extends Controller
         $reclamo->completar($user);
 
         return redirect()->route('cliente.perfil.editar', $reclamo->punto)
-            ->with('success', '¡Tu perfil fue activado! Ya puedes editarlo.');
+            ->with('success', '¡Tu perfil fue activado! Ya tiene la ficha básica cargada (título, descripción, ubicación...) — puedes actualizarla cuando quieras.');
     }
 }
