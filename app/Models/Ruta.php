@@ -56,7 +56,9 @@ class Ruta extends Model
 
     public function operadores()
     {
-        return $this->belongsToMany(OperadorTuristico::class, 'ruta_operador_turistico');
+        return $this->belongsToMany(OperadorTuristico::class, 'ruta_operador_turistico')
+            ->using(RutaOperador::class)
+            ->withPivot(['id', 'ticketing_activo', 'precio_individual', 'precio_grupo_adulto', 'precio_nino', 'edad_maxima_nino']);
     }
 
     public function guias()

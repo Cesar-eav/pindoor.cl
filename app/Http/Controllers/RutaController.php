@@ -16,7 +16,12 @@ class RutaController extends Controller
     {
         $ruta = Ruta::where('slug', $slug)
                     ->where('publicado', true)
-                    ->with(['puntos.categoria', 'puntos.imagenPrincipal', 'operadores', 'guias' => fn ($q) => $q->where('publicado', true)])
+                    ->with([
+                        'puntos.categoria',
+                        'puntos.imagenPrincipal',
+                        'operadores' => fn ($q) => $q->where('activo', true),
+                        'guias' => fn ($q) => $q->where('publicado', true),
+                    ])
                     ->firstOrFail();
 
         return view('rutas.show', compact('ruta'));
