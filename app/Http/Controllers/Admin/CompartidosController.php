@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Compartido;
+use App\Models\PuntoInteres;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -115,6 +116,43 @@ class CompartidosController extends Controller
             ->values();
         $maxCategoria = $porCategoria->max('total') ?: 1;
 
+        // Cruza las URLs /lugar/{slug} compartidas con los PuntoInteres marcados
+        // es_cliente=true, para ver cuánto se comparten específicamente los negocios
+        // (a diferencia de "Desde dónde se comparte", que agrupa por sección genérica).
+        $slugsLugar = $compartidos
+            ->filter(fn ($fila) => $fila->seccion['label'] === 'Atractivo' && $fila->seccion['slug'])
+            ->map(fn ($fila) => $fila->seccion['slug'])
+            ->unique()
+            ->values();
+
+        $puntosClientes = PuntoInteres::clientes()
+            ->where('eliminado', false)
+            ->whereIn('slug', $slugsLugar)
+            ->get()
+            ->keyBy('slug');
+
+        $porCliente = $compartidos
+            ->filter(fn ($fila) => $fila->seccion['label'] === 'Atractivo' && $puntosClientes->has($fila->seccion['slug']))
+            ->groupBy(fn ($fila) => $fila->seccion['slug'])
+            ->map(function ($filas, $slug) use ($puntosClientes) {
+                $porCanal = collect();
+                foreach ($filas as $fila) {
+                    foreach ($fila->por_canal as $canal => $cantidad) {
+                        $porCanal[$canal] = ($porCanal[$canal] ?? 0) + $cantidad;
+                    }
+                }
+
+                return (object) [
+                    'title'     => $puntosClientes->get($slug)->title,
+                    'slug'      => $slug,
+                    'total'     => $filas->sum('total'),
+                    'por_canal' => $porCanal,
+                ];
+            })
+            ->sortByDesc('total')
+            ->values();
+        $maxCliente = $porCliente->max('total') ?: 1;
+
         $porDiaCanalRaw = (clone $base)
             ->selectRaw('DATE(created_at) as fecha, canal, count(*) as total')
             ->groupBy('fecha', 'canal')
@@ -154,6 +192,7 @@ class CompartidosController extends Controller
 
         return view('admin.compartidos.index', compact(
             'compartidosPagina', 'porCategoria', 'maxCategoria', 'totalGeneral',
+            'porCliente', 'maxCliente',
             'dias', 'maxDia', 'porCanalTotal', 'maxCanal', 'recientes', 'desde', 'hasta',
             'rangoActivo', 'paginaCategoria'
         ));
@@ -166,17 +205,17 @@ class CompartidosController extends Controller
         $segmentos = array_values(array_filter(explode('/', parse_url($url, PHP_URL_PATH) ?? '')));
 
         if (empty($segmentos)) {
-            return ['emoji' => '🏠', 'label' => 'Inicio', 'detalle' => null];
+            return ['emoji' => '🏠', 'label' => 'Inicio', 'detalle' => null, 'slug' => null];
         }
 
         // /panoramas/revival/{slug} es una subsección propia, no un panorama normal
         if ($segmentos[0] === 'panoramas' && ($segmentos[1] ?? null) === 'revival') {
-            return ['emoji' => '🎞️', 'label' => 'Re-vival', 'detalle' => $this->slugLegible($segmentos[2] ?? null)];
+            return ['emoji' => '🎞️', 'label' => 'Re-vival', 'detalle' => $this->slugLegible($segmentos[2] ?? null), 'slug' => $segmentos[2] ?? null];
         }
 
         $info = self::SECCIONES[$segmentos[0]] ?? ['emoji' => '🔗', 'label' => ucfirst($segmentos[0])];
 
-        return ['emoji' => $info['emoji'], 'label' => $info['label'], 'detalle' => $this->slugLegible($segmentos[1] ?? null)];
+        return ['emoji' => $info['emoji'], 'label' => $info['label'], 'detalle' => $this->slugLegible($segmentos[1] ?? null), 'slug' => $segmentos[1] ?? null];
     }
 
     private function slugLegible(?string $slug): ?string
