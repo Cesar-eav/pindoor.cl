@@ -88,6 +88,40 @@
             </div>
             @endif
 
+            {{-- Destacados del home: curación + orden --}}
+            @if($clientesDestacables->isNotEmpty())
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="font-bold text-gray-700 mb-1">Destacados del home</h3>
+                <p class="text-xs text-gray-400 mb-4">
+                    Marca qué negocios aparecen en la sección "Destacados" de la portada y arrastra para
+                    definir el orden en que se muestran.
+                </p>
+
+                <form action="{{ route('admin.clientes.destacados') }}" method="POST">
+                    @csrf
+                    <div id="destacados-grid" class="divide-y divide-gray-50 border border-gray-100 rounded-xl">
+                        @foreach($clientesDestacables as $punto)
+                        <div draggable="true" data-tile data-id="{{ $punto->id }}"
+                             class="flex items-center gap-3 px-4 py-3 cursor-move bg-white select-none">
+                            <span class="text-gray-300">⠿</span>
+                            <label class="flex items-center gap-3 flex-1 min-w-0 cursor-pointer">
+                                <input type="checkbox" data-checkbox value="1" @checked($punto->destacado_home)
+                                       class="rounded border-gray-300 text-[#fc5648] focus:ring-[#fc5648]">
+                                <span class="font-medium text-gray-800 text-sm truncate">{{ $punto->title }}</span>
+                                <span class="text-xs text-gray-400 shrink-0">{{ $punto->categoria?->nombre }}</span>
+                            </label>
+                        </div>
+                        @endforeach
+                    </div>
+
+                    <button type="submit"
+                            class="mt-5 bg-[#fc5648] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#d94439] transition">
+                        Guardar destacados
+                    </button>
+                </form>
+            </div>
+            @endif
+
             {{-- Tabla de clientes activos --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="p-6 border-b border-gray-100 flex items-center justify-between">
@@ -191,4 +225,68 @@
 
         </div>
     </div>
+
+    <script>
+        // Destacados del home: arrastrar filas reordena el DOM; el checkbox marca si el
+        // negocio se destaca. Al enviar, se arman orden[] (todas las filas, en su posición
+        // final) y destacados[] (solo las marcadas) como inputs hidden.
+        (function() {
+            var grid = document.getElementById('destacados-grid');
+            if (!grid) return;
+            var dragged = null;
+
+            grid.addEventListener('dragstart', function(e) {
+                var tile = e.target.closest('[data-tile]');
+                if (!tile) return;
+                dragged = tile;
+                e.dataTransfer.effectAllowed = 'move';
+                setTimeout(function() { tile.classList.add('opacity-30'); }, 0);
+            });
+
+            grid.addEventListener('dragend', function() {
+                if (dragged) dragged.classList.remove('opacity-30');
+                dragged = null;
+            });
+
+            grid.addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+
+            grid.addEventListener('drop', function(e) {
+                e.preventDefault();
+                var target = e.target.closest('[data-tile]');
+                if (!target || !dragged || target === dragged) return;
+                var tiles = Array.prototype.slice.call(grid.children);
+                var draggedIdx = tiles.indexOf(dragged);
+                var targetIdx  = tiles.indexOf(target);
+                if (draggedIdx < targetIdx) {
+                    target.after(dragged);
+                } else {
+                    target.before(dragged);
+                }
+            });
+
+            grid.closest('form').addEventListener('submit', function(e) {
+                var form = e.target;
+                Array.prototype.slice.call(grid.children).forEach(function(tile) {
+                    var id = tile.dataset.id;
+                    var checked = tile.querySelector('[data-checkbox]').checked;
+
+                    var ordenInput = document.createElement('input');
+                    ordenInput.type = 'hidden';
+                    ordenInput.name = 'orden[]';
+                    ordenInput.value = id;
+                    form.appendChild(ordenInput);
+
+                    if (checked) {
+                        var destacadoInput = document.createElement('input');
+                        destacadoInput.type = 'hidden';
+                        destacadoInput.name = 'destacados[]';
+                        destacadoInput.value = id;
+                        form.appendChild(destacadoInput);
+                    }
+                });
+            });
+        })();
+    </script>
 </x-admin-layout>

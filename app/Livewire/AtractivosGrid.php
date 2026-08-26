@@ -10,10 +10,9 @@ use App\Models\Experiencia;
 use App\Models\ModuloItem;
 use App\Models\OperadorTuristico;
 use App\Models\Panorama;
-use App\Models\Post;
 use App\Models\PuntoInteres;
 use App\Models\Recomendacion;
-use App\Models\Ruta;
+use App\Services\HomeSeccionesService;
 use Carbon\Carbon;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -170,23 +169,21 @@ class AtractivosGrid extends Component
             ->take(30)
             ->values();
 
-        $ultimosPosts = $hayFiltros ? collect() : Post::publicados()->take(10)->get();
+        $ultimosPosts = $hayFiltros ? collect() : HomeSeccionesService::guias();
 
-        $ultimasRutas = $hayFiltros ? collect() : Ruta::publicadas()->with('puntos')->take(10)->get();
+        $ultimasRutas = $hayFiltros ? collect() : HomeSeccionesService::rutas();
 
         $ultimasExperiencias = $hayFiltros ? collect() : Experiencia::activas()->take(10)->get();
 
         $recomendaciones = $hayFiltros ? collect() : Recomendacion::publicadas()->destacadasEnPortada()->orderBy('orden')->take(10)->get();
 
-        $negociosDestacados = $hayFiltros ? collect() : PuntoInteres::publico()->clientes()
-            ->with(['categoria', 'imagenPrincipal'])
-            ->latest('updated_at')
-            ->take(10)
-            ->get();
+        $negociosDestacados = $hayFiltros ? collect() : HomeSeccionesService::destacados();
+
+        $ordenSecciones = $hayFiltros ? [] : HomeSeccionesService::ordenSecciones();
 
         return view('livewire.atractivos-grid', compact(
             'atractivos', 'categorias', 'categoriasConPuntos', 'hayFiltros', 'panoramas',
-            'proximosPanoramas', 'ultimosPosts', 'ultimasRutas', 'ultimasExperiencias', 'artistas', 'operadores', 'recomendaciones', 'negociosDestacados'
+            'proximosPanoramas', 'ultimosPosts', 'ultimasRutas', 'ultimasExperiencias', 'artistas', 'operadores', 'recomendaciones', 'negociosDestacados', 'ordenSecciones'
         ));
     }
 }

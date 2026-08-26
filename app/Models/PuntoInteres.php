@@ -20,6 +20,7 @@ class PuntoInteres extends Model
         'oferta_expira_at'   => 'datetime',
         'oferta_activa'      => 'boolean',
         'fuera_de_servicio'  => 'boolean',
+        'destacado_home'     => 'boolean',
     ];
 
     /**
@@ -64,6 +65,8 @@ class PuntoInteres extends Model
         'imagen_perfil',
         'fuera_de_servicio',
         'fuera_de_servicio_motivo',
+        'destacado_home',
+        'orden_destacado',
     ];
 
     /**
@@ -499,6 +502,11 @@ class PuntoInteres extends Model
     public function scopeClientes($query)
     {
         return $query->where('es_cliente', true);
+    }
+
+    public function scopeDestacadosHome($query)
+    {
+        return $query->clientes()->where('destacado_home', true)->orderBy('orden_destacado');
     }
 
     public function scopeAtractivos($query)

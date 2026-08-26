@@ -24,9 +24,14 @@
             <p class="text-sm mt-1">Crea la primera con el botón de arriba.</p>
         </div>
         @else
-        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden divide-y divide-gray-50">
+        <div class="flex justify-end mb-3">
+            <button type="button" id="btn-guardar-orden-rutas" class="text-xs font-bold text-[#fc5648] hover:underline">Guardar orden</button>
+        </div>
+        <div id="rutas-grid" class="bg-white rounded-2xl border border-gray-100 overflow-hidden divide-y divide-gray-50">
             @foreach($rutas as $ruta)
-            <div class="flex items-center gap-4 px-6 py-4">
+            <div class="flex items-center gap-4 px-6 py-4" draggable="true" data-tile data-id="{{ $ruta->id }}">
+
+                <span class="text-gray-300 cursor-move shrink-0">⠿</span>
 
                 {{-- Portada miniatura --}}
                 <div class="shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-gray-100 border border-gray-100">
@@ -75,4 +80,59 @@
         </div>
         @endif
     </div>
+
+    <script>
+        (function() {
+            var grid = document.getElementById('rutas-grid');
+            if (!grid) return;
+            var dragged = null;
+
+            grid.addEventListener('dragstart', function(e) {
+                var tile = e.target.closest('[data-tile]');
+                if (!tile) return;
+                dragged = tile;
+                e.dataTransfer.effectAllowed = 'move';
+                setTimeout(function() { tile.classList.add('opacity-30'); }, 0);
+            });
+
+            grid.addEventListener('dragend', function() {
+                if (dragged) dragged.classList.remove('opacity-30');
+                dragged = null;
+            });
+
+            grid.addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+
+            grid.addEventListener('drop', function(e) {
+                e.preventDefault();
+                var target = e.target.closest('[data-tile]');
+                if (!target || !dragged || target === dragged) return;
+                var tiles = Array.prototype.slice.call(grid.children);
+                var draggedIdx = tiles.indexOf(dragged);
+                var targetIdx  = tiles.indexOf(target);
+                if (draggedIdx < targetIdx) {
+                    target.after(dragged);
+                } else {
+                    target.before(dragged);
+                }
+            });
+
+            document.getElementById('btn-guardar-orden-rutas')?.addEventListener('click', function() {
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ route('admin.rutas.reordenar') }}';
+                form.innerHTML = '@csrf';
+                Array.prototype.slice.call(grid.children).forEach(function(tile) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'orden[]';
+                    input.value = tile.dataset.id;
+                    form.appendChild(input);
+                });
+                document.body.appendChild(form);
+                form.submit();
+            });
+        })();
+    </script>
 </x-admin-layout>

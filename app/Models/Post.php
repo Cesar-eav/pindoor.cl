@@ -28,6 +28,7 @@ class Post extends Model
         'imagen_portada',
         'publicado',
         'publicado_en',
+        'orden_home',
     ];
 
     protected $casts = [
@@ -43,6 +44,15 @@ class Post extends Model
     public function scopePublicados($query)
     {
         return $query->where('publicado', true)->orderByDesc('publicado_en');
+    }
+
+    /**
+     * Orden manual solo para la vista previa del home — /blog sigue usando
+     * scopePublicados() (por fecha) sin tocar.
+     */
+    public function scopeOrdenHome($query)
+    {
+        return $query->publicados()->reorder()->orderBy('orden_home')->orderByDesc('publicado_en');
     }
 
     public function previewEstaVivo(): bool

@@ -175,10 +175,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Blog
     Route::post('/blog/imagen', [PostController::class, 'uploadImagen'])->name('blog.imagen');
+    Route::post('/blog/reordenar', [PostController::class, 'reordenar'])->name('blog.reordenar');
     Route::get('/blog/{blog}/preview', [PostController::class, 'preview'])->name('blog.preview');
     Route::resource('blog', PostController::class)->except(['show']);
 
     // Rutas Pindoor
+    Route::post('/rutas/reordenar', [AdminRutaController::class, 'reordenar'])->name('rutas.reordenar');
     Route::get('/rutas/{ruta}/preview', [AdminRutaController::class, 'preview'])->name('rutas.preview');
     Route::resource('rutas', AdminRutaController::class)->except(['show']);
 
@@ -251,6 +253,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Gestión de Clientes (negocios)
     Route::get('/clientes', [AdminController::class, 'clientes'])->name('clientes');
+    Route::post('/clientes/destacados', [AdminController::class, 'actualizarDestacados'])->name('clientes.destacados');
     Route::get('/puntos/{punto}/activar-cliente', [AdminController::class, 'mostrarActivarCliente'])->name('clientes.activar.form');
     Route::post('/puntos/{punto}/activar-cliente', [AdminController::class, 'activarCliente'])->name('clientes.activar');
     Route::patch('/puntos/{punto}/desactivar-cliente', [AdminController::class, 'desactivarCliente'])->name('clientes.desactivar');
@@ -270,6 +273,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('/configuracion/excluidos', [ConfiguracionController::class, 'actualizarExcluidos'])->name('configuracion.excluidos');
     Route::post('/configuracion/ascensores', [ConfiguracionController::class, 'actualizarAscensores'])->name('configuracion.ascensores');
     Route::post('/configuracion/home-por-categoria', [ConfiguracionController::class, 'actualizarHomePorCategoria'])->name('configuracion.home-por-categoria');
+    Route::post('/configuracion/orden-secciones', [ConfiguracionController::class, 'actualizarOrdenSecciones'])->name('configuracion.orden-secciones');
 });
 
 /* --- RUTAS CLIENTES (NEGOCIOS) --- */

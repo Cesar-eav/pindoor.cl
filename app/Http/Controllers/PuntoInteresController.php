@@ -6,17 +6,16 @@ use App\Models\Configuracion;
 use App\Models\PuntoInteres;
 use App\Models\ModuloItem;
 use App\Models\Panorama;
-use App\Models\Post;
 use App\Models\Experiencia;
 use App\Models\Categoria;
 use App\Models\PuntoProducto;
 use App\Models\Artista;
 use App\Models\OperadorTuristico;
-use App\Models\Ruta;
 use App\Models\Recomendacion;
 use App\Models\ReclamoNegocio;
 use App\Mail\NuevaExperienciaPropuesta;
 use App\Notifications\NuevoReclamoNotification;
+use App\Services\HomeSeccionesService;
 use App\Services\ImagenComprimida;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -180,27 +179,25 @@ class PuntoInteresController extends Controller
                 ->take(30)
                 ->values();
 
-            $ultimosPosts = Post::publicados()->take(10)->get();
-            $ultimasRutas = Ruta::publicadas()->with('puntos')->take(10)->get();
+            $ultimosPosts = HomeSeccionesService::guias();
+            $ultimasRutas = HomeSeccionesService::rutas();
             $recomendaciones = Recomendacion::publicadas()->destacadasEnPortada()->orderBy('orden')->take(10)->get();
-            $negociosDestacados = PuntoInteres::publico()->clientes()
-                ->with(['categoria', 'imagenPrincipal'])
-                ->latest('updated_at')
-                ->take(10)
-                ->get();
+            $negociosDestacados = HomeSeccionesService::destacados();
+            $ordenSecciones = HomeSeccionesService::ordenSecciones();
         } else {
             $proximosPanoramas = collect();
             $ultimosPosts = collect();
             $ultimasRutas = collect();
             $recomendaciones = collect();
             $negociosDestacados = collect();
+            $ordenSecciones = [];
         }
 
         $ultimoPost = $ultimosPosts->first();
 
         $ultimasExperiencias = Experiencia::activas()->latest()->take(10)->get();
 
-        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'categoriasConPuntos', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts', 'ultimasRutas', 'ultimasExperiencias', 'artistas', 'operadores', 'recomendaciones', 'negociosDestacados'));
+        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'categoriasConPuntos', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts', 'ultimasRutas', 'ultimasExperiencias', 'artistas', 'operadores', 'recomendaciones', 'negociosDestacados', 'ordenSecciones'));
 
     } catch (\Exception $e) {
         \Log::error('Error en index: ' . $e->getMessage());
