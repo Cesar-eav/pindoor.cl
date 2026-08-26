@@ -205,6 +205,50 @@
                 </div>
             </div>
 
+            {{-- Compartidos de clientes --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-5 py-3 border-b border-gray-100 text-sm font-medium text-gray-500 uppercase">
+                    Compartidos de clientes
+                </div>
+                <div class="overflow-x-auto overflow-y-auto max-h-120">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 text-gray-500 uppercase text-xs sticky top-0 z-10">
+                        <tr>
+                            <th class="px-5 py-3 text-left whitespace-nowrap">Negocio</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">Total</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">🟢 WhatsApp</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">📤 Nativo</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">🔗 Copiado</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">📅 Calendario</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse($porCliente as $fila)
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-5 py-3">
+                                <a href="{{ route('puntos.show', $fila->slug) }}" target="_blank" rel="noopener"
+                                   class="font-bold text-gray-800 hover:underline hover:text-[#fc5648]">
+                                    {{ $fila->title }}
+                                </a>
+                            </td>
+                            <td class="px-5 py-3 text-right font-bold text-gray-900">{{ $fila->total }}</td>
+                            <td class="px-5 py-3 text-right text-gray-500">{{ $fila->por_canal['whatsapp'] ?? 0 }}</td>
+                            <td class="px-5 py-3 text-right text-gray-500">{{ $fila->por_canal['nativo'] ?? 0 }}</td>
+                            <td class="px-5 py-3 text-right text-gray-500">{{ $fila->por_canal['copiar'] ?? 0 }}</td>
+                            <td class="px-5 py-3 text-right text-gray-500">{{ $fila->por_canal['calendario'] ?? 0 }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="px-5 py-10 text-center text-gray-400 italic">
+                                Ningún negocio cliente ha sido compartido en este rango.
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+                </div>
+            </div>
+
             {{-- Por página y canal --}}
             <div id="que-se-comparte" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden scroll-mt-6">
                 <div class="px-5 py-3 border-b border-gray-100 text-sm font-medium text-gray-500 uppercase">
