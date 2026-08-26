@@ -8,17 +8,24 @@
     </div>
     <div class="relative"
          x-data="{
+             dragging: false, moved: false,
+             dragStartX: 0, dragScrollLeft: 0,
              canScrollRight: false, canScrollLeft: false,
              check() {
                  this.canScrollRight = this.$refs.scroller.scrollLeft + this.$refs.scroller.clientWidth < this.$refs.scroller.scrollWidth - 4;
                  this.canScrollLeft = this.$refs.scroller.scrollLeft > 4;
              },
-         }"
-         x-init="check()">
+             init() { this.check(); }
+         }">
         <div x-ref="scroller"
              class="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2"
-             style="scrollbar-width:none"
-             @scroll="check()">
+             style="scrollbar-width:none;cursor:grab"
+             @scroll="check()"
+             @mouseleave="dragging = false; $el.style.cursor = 'grab'"
+             @mousedown.prevent="dragging = true; moved = false; dragStartX = $event.pageX - $el.offsetLeft; dragScrollLeft = $el.scrollLeft; $el.style.cursor = 'grabbing'"
+             @mouseup="dragging = false; $el.style.cursor = 'grab'"
+             @mousemove="if (dragging) { const dx = $event.pageX - $el.offsetLeft - dragStartX; if (Math.abs(dx) > 5) moved = true; $el.scrollLeft = dragScrollLeft - dx * 1.5 }"
+             @click.capture="if (moved) { $event.preventDefault(); $event.stopPropagation(); moved = false }">
             @foreach($ultimosPosts as $post)
             <a href="{{ route('blog.show', $post->slug) }}"
                class="group relative shrink-0 w-72 rounded-2xl overflow-hidden shadow-sm h-52 snap-start">

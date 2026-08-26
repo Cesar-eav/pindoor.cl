@@ -6,7 +6,11 @@
         <span class="text-md font-bold text-gray-900 tracking-tight">Pindoor Recomienda</span>
         <span class="flex-1 h-px bg-gray-200"></span>
     </div>
-    <div class="overflow-x-auto pb-1 scrollbar-hide" style="scrollbar-width:none">
+    <div class="overflow-x-auto pb-1 scrollbar-hide" style="scrollbar-width:none"
+         x-data="{ touchStartX: 0, touchMoved: false }"
+         @touchstart="touchStartX = $event.touches[0].clientX; touchMoved = false"
+         @touchmove="if (Math.abs($event.touches[0].clientX - touchStartX) > 10) touchMoved = true"
+         @click.capture="if (touchMoved) { $event.preventDefault(); $event.stopPropagation(); touchMoved = false }">
         <div class="flex gap-2">
         @foreach($recomendaciones as $r)
         <a href="{{ route('recomienda.show', $r->slug) }}"
