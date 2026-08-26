@@ -99,7 +99,13 @@ Route::get('/experiencias/{experiencia}', [PuntoInteresController::class, 'showE
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/rutas', [RutaController::class, 'index'])->name('rutas.index');
+Route::get('/rutas/{rutaSlug}/reservar/{operadorSlug}', [\App\Http\Controllers\ReservaController::class, 'show'])->name('rutas.reservar');
+Route::get('/rutas/{rutaSlug}/reservar/{operadorSlug}/disponibilidad', [\App\Http\Controllers\ReservaController::class, 'disponibilidad'])->name('rutas.reservar.disponibilidad');
+Route::post('/rutas/{rutaSlug}/reservar/{operadorSlug}', [\App\Http\Controllers\ReservaController::class, 'store'])->name('rutas.reservar.store');
 Route::get('/rutas/{slug}', [RutaController::class, 'show'])->name('rutas.show');
+
+Route::post('/pagos/flow/confirmacion', [\App\Http\Controllers\Pagos\FlowWebhookController::class, 'confirmar'])->name('flow.confirmacion');
+Route::match(['get', 'post'], '/pagos/flow/retorno/{codigo}', [\App\Http\Controllers\Pagos\FlowRetornoController::class, 'show'])->name('flow.retorno');
 Route::get('/recomienda/{slug}', [RecomiendaController::class, 'show'])->name('recomienda.show');
 
 // Vista previa compartible por token (Revival / Guías / Recomienda) — sin sesión de
@@ -241,10 +247,31 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::patch('/artistas/{artista}/toggle', [\App\Http\Controllers\AdminController::class, 'toggleArtista'])->name('artistas.toggle');
     Route::delete('/artistas/{artista}', [\App\Http\Controllers\AdminController::class, 'destroyArtista'])->name('artistas.destroy');
 
+    // Reservas de ticketera (rutas con operador)
+    Route::get('/reservas', [\App\Http\Controllers\Admin\ReservaController::class, 'index'])->name('reservas.index');
+    Route::patch('/reservas/{reserva}', [\App\Http\Controllers\Admin\ReservaController::class, 'update'])->name('reservas.update');
+
+    // Prueba de pagos Flow (sandbox) — reserva de mentira, mismo flujo que una real
+    Route::get('/pagos/prueba', [\App\Http\Controllers\Admin\PagoPruebaController::class, 'show'])->name('pagos.prueba');
+    Route::post('/pagos/prueba', [\App\Http\Controllers\Admin\PagoPruebaController::class, 'store'])->name('pagos.prueba.store');
+
     // Operadores turísticos
-    Route::get('/operadores', [\App\Http\Controllers\AdminController::class, 'operadores'])->name('operadores');
-    Route::patch('/operadores/{operador}/toggle', [\App\Http\Controllers\AdminController::class, 'toggleOperador'])->name('operadores.toggle');
-    Route::delete('/operadores/{operador}', [\App\Http\Controllers\AdminController::class, 'destroyOperador'])->name('operadores.destroy');
+    Route::prefix('operadores')->name('operadores.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\OperadorController::class, 'index'])->name('index');
+        Route::get('/crear', [\App\Http\Controllers\Admin\OperadorController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Admin\OperadorController::class, 'store'])->name('store');
+        Route::get('/{operador}/editar', [\App\Http\Controllers\Admin\OperadorController::class, 'edit'])->name('edit');
+        Route::put('/{operador}', [\App\Http\Controllers\Admin\OperadorController::class, 'update'])->name('update');
+        Route::patch('/{operador}/toggle', [\App\Http\Controllers\Admin\OperadorController::class, 'toggle'])->name('toggle');
+        Route::delete('/{operador}', [\App\Http\Controllers\Admin\OperadorController::class, 'destroy'])->name('destroy');
+
+        // Ticketera: rutas asignadas a este operador, precios y horarios
+        Route::get('/{operador}/rutas', [\App\Http\Controllers\Admin\OperadorRutaController::class, 'index'])->name('rutas.index');
+        Route::post('/{operador}/rutas', [\App\Http\Controllers\Admin\OperadorRutaController::class, 'store'])->name('rutas.store');
+        Route::get('/{operador}/rutas/{rutaOperador}/editar', [\App\Http\Controllers\Admin\OperadorRutaController::class, 'edit'])->name('rutas.edit');
+        Route::put('/{operador}/rutas/{rutaOperador}', [\App\Http\Controllers\Admin\OperadorRutaController::class, 'update'])->name('rutas.update');
+        Route::delete('/{operador}/rutas/{rutaOperador}', [\App\Http\Controllers\Admin\OperadorRutaController::class, 'destroy'])->name('rutas.destroy');
+    });
 
     // Leads de Publicita
     Route::get('/leads', [AdminController::class, 'leads'])->name('leads');

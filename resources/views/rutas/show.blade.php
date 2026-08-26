@@ -149,23 +149,30 @@
             @if($ruta->operadores->isNotEmpty())
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 @foreach($ruta->operadores as $operador)
-                <a href="{{ route('operador.show', $operador->slug) }}"
-                   class="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all p-3">
-                    <div class="w-14 h-14 rounded-full overflow-hidden bg-gray-100 shrink-0">
-                        @if($operador->imagen_perfil)
-                            <img src="{{ asset('storage/' . $operador->imagen_perfil) }}" alt="{{ $operador->nombre }}"
-                                 class="w-full h-full object-cover">
-                        @else
-                            <div class="w-full h-full flex items-center justify-center text-xl text-gray-300">🧭</div>
-                        @endif
-                    </div>
-                    <div class="min-w-0">
-                        <p class="font-bold text-gray-800 text-sm truncate">{{ $operador->nombre }}</p>
-                        @if($operador->ciudad)
-                        <p class="text-xs text-gray-400 truncate">{{ $operador->ciudad }}</p>
-                        @endif
-                    </div>
-                </a>
+                <div class="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all p-3">
+                    <a href="{{ route('operador.show', $operador->slug) }}" class="flex items-center gap-3 min-w-0 flex-1">
+                        <div class="w-14 h-14 rounded-full overflow-hidden bg-gray-100 shrink-0">
+                            @if($operador->imagen_perfil)
+                                <img src="{{ asset('storage/' . $operador->imagen_perfil) }}" alt="{{ $operador->nombre }}"
+                                     class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center text-xl text-gray-300">🧭</div>
+                            @endif
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-bold text-gray-800 text-sm truncate">{{ $operador->nombre }}</p>
+                            @if($operador->ciudad)
+                            <p class="text-xs text-gray-400 truncate">{{ $operador->ciudad }}</p>
+                            @endif
+                        </div>
+                    </a>
+                    @if($operador->pivot->ticketing_activo)
+                    <a href="{{ route('rutas.reservar', [$ruta->slug, $operador->slug]) }}"
+                       class="shrink-0 bg-[#fc5648] hover:bg-[#e64536] text-white text-xs font-bold px-3 py-2 rounded-xl transition">
+                        Reservar desde ${{ number_format($operador->pivot->precio_individual, 0, ',', '.') }}
+                    </a>
+                    @endif
+                </div>
                 @endforeach
             </div>
             @else

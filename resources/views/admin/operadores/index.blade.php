@@ -1,8 +1,11 @@
 <x-admin-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Operadores turísticos registrados</h2>
-            <span class="text-sm text-gray-400">{{ $operadores->total() }} en total</span>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Operadores turísticos</h2>
+            <a href="{{ route('admin.operadores.create') }}"
+               class="bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold px-4 py-2 rounded-xl transition">
+                + Nuevo operador
+            </a>
         </div>
     </x-slot>
 
@@ -12,6 +15,11 @@
             @if(session('success'))
                 <div class="mb-6 bg-green-50 border border-green-200 text-green-800 text-sm rounded-xl px-5 py-3">
                     {{ session('success') }}
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="mb-6 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-5 py-3">
+                    {{ session('error') }}
                 </div>
             @endif
 
@@ -36,17 +44,13 @@
                             <tbody class="divide-y divide-gray-100">
                                 @foreach($operadores as $operador)
                                 <tr class="hover:bg-gray-50 transition">
-
-                                    {{-- Operador --}}
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
                                             @if($operador->imagen_perfil)
                                                 <img src="{{ asset('storage/' . $operador->imagen_perfil) }}"
                                                      class="w-10 h-10 rounded-full object-cover shrink-0" alt="">
                                             @else
-                                                <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-lg shrink-0">
-                                                    🧭
-                                                </div>
+                                                <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-lg shrink-0">🧭</div>
                                             @endif
                                             <div>
                                                 <div class="font-semibold text-gray-900">{{ $operador->nombre }}</div>
@@ -54,13 +58,7 @@
                                             </div>
                                         </div>
                                     </td>
-
-                                    {{-- Ciudad --}}
-                                    <td class="px-6 py-4 text-gray-500">
-                                        {{ $operador->ciudad ?: '—' }}
-                                    </td>
-
-                                    {{-- Cuenta --}}
+                                    <td class="px-6 py-4 text-gray-500">{{ $operador->ciudad ?: '—' }}</td>
                                     <td class="px-6 py-4">
                                         @if($operador->usuario)
                                             <div class="font-medium text-gray-800">{{ $operador->usuario->name }}</div>
@@ -69,23 +67,22 @@
                                             <span class="text-gray-400 text-xs">Sin cuenta</span>
                                         @endif
                                     </td>
-
-                                    {{-- Estado --}}
                                     <td class="px-6 py-4">
                                         <span class="px-2 py-1 rounded-full text-xs font-bold
                                             {{ $operador->activo ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
                                             {{ $operador->activo ? 'Activo' : 'Pausado' }}
                                         </span>
                                     </td>
-
-                                    {{-- Acciones --}}
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-end gap-4">
-                                            <a href="{{ route('operador.show', $operador->slug) }}" target="_blank"
-                                               class="text-xs text-teal-600 hover:text-teal-800 font-medium">
-                                                Ver perfil
+                                            <a href="{{ route('admin.operadores.rutas.index', $operador) }}"
+                                               class="text-xs text-[#fc5648] hover:underline font-bold">
+                                                🎟️ Ticketera
                                             </a>
-
+                                            <a href="{{ route('admin.operadores.edit', $operador) }}"
+                                               class="text-xs text-gray-500 hover:text-gray-800 font-medium">
+                                                Editar
+                                            </a>
                                             <form method="POST" action="{{ route('admin.operadores.toggle', $operador) }}">
                                                 @csrf @method('PATCH')
                                                 <button type="submit"
@@ -93,7 +90,6 @@
                                                     {{ $operador->activo ? 'Pausar' : 'Activar' }}
                                                 </button>
                                             </form>
-
                                             <form method="POST" action="{{ route('admin.operadores.destroy', $operador) }}"
                                                   onsubmit="return confirm('¿Eliminar el perfil de {{ addslashes($operador->nombre) }}? Esta acción no se puede deshacer.')">
                                                 @csrf @method('DELETE')

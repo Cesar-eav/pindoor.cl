@@ -110,7 +110,8 @@
                             <a href="{{ route('admin.revival.index') }}" title="Re-vival" class="sidebar-link {{ request()->routeIs('admin.revival*') ? 'active' : '' }}" style="padding-left:1.75rem">🎬 <span x-show="!collapsed" x-cloak>Re-vival</span></a>
                             <a href="{{ route('admin.experiencias.index') }}" title="Experiencias" class="sidebar-link {{ request()->routeIs('admin.experiencias.*') ? 'active' : '' }}">✨ <span x-show="!collapsed" x-cloak>Experiencias</span></a>
                             <a href="{{ route('admin.artistas') }}" title="Artistas" class="sidebar-link {{ request()->routeIs('admin.artistas*') ? 'active' : '' }}">🎨 <span x-show="!collapsed" x-cloak>Artistas</span></a>
-                            <a href="{{ route('admin.operadores') }}" title="Operadores" class="sidebar-link {{ request()->routeIs('admin.operadores*') ? 'active' : '' }}">🧭 <span x-show="!collapsed" x-cloak>Operadores</span></a>
+                            <a href="{{ route('admin.operadores.index') }}" title="Operadores" class="sidebar-link {{ request()->routeIs('admin.operadores*') ? 'active' : '' }}">🧭 <span x-show="!collapsed" x-cloak>Operadores</span></a>
+                            <a href="{{ route('admin.reservas.index') }}" title="Reservas" class="sidebar-link {{ request()->routeIs('admin.reservas*') ? 'active' : '' }}">🎟️ <span x-show="!collapsed" x-cloak>Reservas</span></a>
                             <a href="{{ route('admin.blog.index') }}" title="Guías" class="sidebar-link {{ request()->routeIs('admin.blog*') ? 'active' : '' }}">📰 <span x-show="!collapsed" x-cloak>Guías</span></a>
                             <a href="{{ route('admin.rutas.index') }}" title="Rutas" class="sidebar-link {{ request()->routeIs('admin.rutas*') ? 'active' : '' }}">🗺️ <span x-show="!collapsed" x-cloak>Rutas</span></a>
                             <a href="{{ route('admin.recomendaciones.index') }}" title="Recomienda" class="sidebar-link {{ request()->routeIs('admin.recomendaciones*') ? 'active' : '' }}">⭐ <span x-show="!collapsed" x-cloak>Recomienda</span></a>
@@ -175,7 +176,8 @@
                             <a href="{{ route('admin.revival.index') }}" class="sidebar-link {{ request()->routeIs('admin.revival*') ? 'active' : '' }}" style="padding-left:1.75rem">🎬 Re-vival</a>
                             <a href="{{ route('admin.experiencias.index') }}" class="sidebar-link {{ request()->routeIs('admin.experiencias.*') ? 'active' : '' }}">✨ Experiencias</a>
                             <a href="{{ route('admin.artistas') }}" class="sidebar-link {{ request()->routeIs('admin.artistas*') ? 'active' : '' }}">🎨 Artistas</a>
-                            <a href="{{ route('admin.operadores') }}" class="sidebar-link {{ request()->routeIs('admin.operadores*') ? 'active' : '' }}">🧭 Operadores</a>
+                            <a href="{{ route('admin.operadores.index') }}" class="sidebar-link {{ request()->routeIs('admin.operadores*') ? 'active' : '' }}">🧭 Operadores</a>
+                            <a href="{{ route('admin.reservas.index') }}" class="sidebar-link {{ request()->routeIs('admin.reservas*') ? 'active' : '' }}">🎟️ Reservas</a>
                             <a href="{{ route('admin.blog.index') }}" class="sidebar-link {{ request()->routeIs('admin.blog*') ? 'active' : '' }}">📰 Guías</a>
                             <a href="{{ route('admin.rutas.index') }}" class="sidebar-link {{ request()->routeIs('admin.rutas*') ? 'active' : '' }}">🗺️ Rutas</a>
                             <a href="{{ route('admin.recomendaciones.index') }}" class="sidebar-link {{ request()->routeIs('admin.recomendaciones*') ? 'active' : '' }}">⭐ Recomienda</a>

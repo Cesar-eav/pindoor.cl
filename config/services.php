@@ -51,4 +51,10 @@ return [
         'chat_id' => env('TELEGRAM_CHAT_ID'),
     ],
 
+    'flow' => [
+        'api_key'    => env('FLOW_API_KEY'),
+        'secret_key' => env('FLOW_SECRET_KEY'),
+        'sandbox'    => env('FLOW_SANDBOX', true),
+    ],
+
 ];
