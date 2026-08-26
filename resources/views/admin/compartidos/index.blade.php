@@ -9,26 +9,32 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             {{-- Filtro de fechas --}}
-            <form method="GET" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-wrap items-end gap-4">
-                <div>
-                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Desde</label>
-                    <input type="date" name="desde" value="{{ $desde->format('Y-m-d') }}"
-                           class="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
+                <div class="flex flex-wrap gap-2">
+                    @foreach(['hoy' => 'Hoy', 'semana' => 'Semana', 'mes' => 'Mes', '30dias' => 'Últimos 30 días'] as $valor => $label)
+                    <a href="{{ route('admin.compartidos.index', ['rango' => $valor]) }}"
+                       class="px-4 py-2 rounded-xl text-sm font-bold transition {{ $rangoActivo === $valor ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                        {{ $label }}
+                    </a>
+                    @endforeach
                 </div>
-                <div>
-                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Hasta</label>
-                    <input type="date" name="hasta" value="{{ $hasta->format('Y-m-d') }}"
-                           class="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
-                </div>
-                <button type="submit"
-                        class="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-black transition">
-                    Filtrar
-                </button>
-                <a href="{{ route('admin.compartidos.index') }}"
-                   class="text-sm font-bold text-gray-400 hover:text-gray-600 transition">
-                    Últimos 30 días
-                </a>
-            </form>
+                <form method="GET" class="flex flex-wrap items-end gap-4">
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Desde</label>
+                        <input type="date" name="desde" value="{{ $desde->format('Y-m-d') }}"
+                               class="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Hasta</label>
+                        <input type="date" name="hasta" value="{{ $hasta->format('Y-m-d') }}"
+                               class="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                    </div>
+                    <button type="submit"
+                            class="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-black transition">
+                        Filtrar
+                    </button>
+                </form>
+            </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <div class="text-sm font-medium text-gray-500 uppercase">Total de veces compartido</div>
@@ -161,22 +167,23 @@
                 <div class="px-5 py-3 border-b border-gray-100 text-sm font-medium text-gray-500 uppercase">
                     Desde dónde se comparte
                 </div>
+                <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
                         <tr>
-                            <th class="px-5 py-3 text-left">Categoría</th>
-                            <th class="px-5 py-3 text-right">Total</th>
-                            <th class="px-5 py-3 text-right">🟢 WhatsApp</th>
-                            <th class="px-5 py-3 text-right">📤 Nativo</th>
-                            <th class="px-5 py-3 text-right">🔗 Copiado</th>
-                            <th class="px-5 py-3 text-right">📅 Calendario</th>
+                            <th class="px-5 py-3 text-left whitespace-nowrap">Categoría</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">Total</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">🟢 WhatsApp</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">📤 Nativo</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">🔗 Copiado</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">📅 Calendario</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse($porCategoria as $fila)
                         <tr class="hover:bg-gray-50">
                             <td class="px-5 py-3">
-                                <span class="inline-flex items-center gap-2 font-bold text-gray-800">
+                                <span class="inline-flex items-center gap-2 font-bold text-gray-800 whitespace-nowrap">
                                     {{ $fila->emoji }} {{ $fila->label }}
                                 </span>
                             </td>
@@ -195,26 +202,42 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
 
             {{-- Por página y canal --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div id="que-se-comparte" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden scroll-mt-6">
                 <div class="px-5 py-3 border-b border-gray-100 text-sm font-medium text-gray-500 uppercase">
                     Qué se comparte
                 </div>
+                @if($porCategoria->isNotEmpty())
+                <div class="px-5 py-3 border-b border-gray-100 flex flex-wrap gap-2">
+                    <a href="{{ route('admin.compartidos.index', request()->except('pagina_categoria')) }}#que-se-comparte"
+                       class="px-3 py-1.5 rounded-full text-xs font-bold transition {{ !$paginaCategoria ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                        Todas
+                    </a>
+                    @foreach($porCategoria as $cat)
+                    <a href="{{ route('admin.compartidos.index', array_merge(request()->except('pagina_categoria'), ['pagina_categoria' => $cat->label])) }}#que-se-comparte"
+                       class="px-3 py-1.5 rounded-full text-xs font-bold transition {{ $paginaCategoria === $cat->label ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                        {{ $cat->emoji }} {{ $cat->label }}
+                    </a>
+                    @endforeach
+                </div>
+                @endif
+                <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
                         <tr>
-                            <th class="px-5 py-3 text-left">Página</th>
-                            <th class="px-5 py-3 text-right">Total</th>
-                            <th class="px-5 py-3 text-right">🟢 WhatsApp</th>
-                            <th class="px-5 py-3 text-right">📤 Nativo</th>
-                            <th class="px-5 py-3 text-right">🔗 Copiado</th>
-                            <th class="px-5 py-3 text-right">📅 Calendario</th>
+                            <th class="px-5 py-3 text-left whitespace-nowrap">Página</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">Total</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">🟢 WhatsApp</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">📤 Nativo</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">🔗 Copiado</th>
+                            <th class="px-5 py-3 text-right whitespace-nowrap">📅 Calendario</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        @forelse($compartidos as $fila)
+                        @forelse($compartidosPagina as $fila)
                         <tr class="hover:bg-gray-50">
                             <td class="px-5 py-3">
                                 <a href="{{ $fila->url }}" target="_blank" rel="noopener" title="{{ $fila->url }}"
@@ -242,6 +265,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
 
             {{-- Actividad reciente --}}
@@ -250,12 +274,13 @@
                     Actividad reciente
                     <span class="normal-case font-normal text-gray-400">— últimos {{ $recientes->count() }} envíos</span>
                 </div>
+                <div class="overflow-x-auto overflow-y-auto max-h-120">
                 <table class="w-full text-sm">
-                    <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+                    <thead class="bg-gray-50 text-gray-500 uppercase text-xs sticky top-0 z-10">
                         <tr>
-                            <th class="px-5 py-3 text-left">Cuándo</th>
-                            <th class="px-5 py-3 text-left">Canal</th>
-                            <th class="px-5 py-3 text-left">Página compartida</th>
+                            <th class="px-5 py-3 text-left whitespace-nowrap">Cuándo</th>
+                            <th class="px-5 py-3 text-left whitespace-nowrap">Canal</th>
+                            <th class="px-5 py-3 text-left whitespace-nowrap">Página compartida</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -284,6 +309,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
 
         </div>
