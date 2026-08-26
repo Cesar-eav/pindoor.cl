@@ -395,6 +395,11 @@ class PuntoInteresController extends Controller
         $categorias = \App\Models\CategoriaEvento::catalogo();
         $catActiva  = $request->input('categoria');
 
+        $revivals = \App\Models\Revival::publicados()
+            ->whereNotNull('imagen_portada')
+            ->take(8)
+            ->get();
+
         // Eventos de agenda de clientes → convertir a instancias Panorama para reutilizar la vista
         $eventosCliente = ModuloItem::where('modulo', 'eventos')
             ->where('activo', true)
@@ -535,7 +540,7 @@ class PuntoInteresController extends Controller
         return view('panoramas.index', compact(
             'panoramas', 'limite', 'categorias', 'catActiva',
             'porDia', 'diasMeta', 'allImages', 'startIndexMap', 'indicesPorDia',
-            'exposiciones', 'mesesMeta', 'mesPorDia'
+            'exposiciones', 'mesesMeta', 'mesPorDia', 'revivals'
         ));
     }
 

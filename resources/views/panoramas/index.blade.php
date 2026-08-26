@@ -104,6 +104,30 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
         </div>
         @endif --}}
 
+        {{-- Re-vival autorotante --}}
+        @if($revivals->isNotEmpty())
+        <a href="{{ route('revival.index') }}"
+           x-data="{
+               items: {{ Js::from($revivals->map(fn($r) => ['titulo' => $r->titulo, 'imagen' => $r->imagen_portada_url])->values()) }},
+               i: 0,
+               init() { if (this.items.length > 1) setInterval(() => this.i = (this.i + 1) % this.items.length, 4000) }
+           }"
+           class="block relative self-stretch my-1 w-20 sm:w-36 shrink-0 rounded-xl overflow-hidden bg-gray-800 ring-1 ring-white/10 hover:ring-[#fc5648]/60 transition">
+            <template x-for="(item, idx) in items" :key="idx">
+                <img :src="item.imagen" x-show="i === idx"
+                     x-transition:enter="transition duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                     class="absolute inset-0 w-full h-full object-cover">
+            </template>
+            <span class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
+                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+            </span>
+            <div class="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/85 via-black/40 to-transparent px-2 pt-5 pb-1.5">
+                <span class="block text-[8px] font-black uppercase tracking-wide text-[#fc5648]">🎬 Re-vival</span>
+                <span class="block text-[11px] font-bold text-white truncate" x-text="items[i]?.titulo"></span>
+            </div>
+        </a>
+        @endif
+
     </div>
 </div>
 
@@ -123,10 +147,6 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
             @endif
         </div>
     </div>
-    <a href="{{ route('revival.index') }}"
-       class="inline-flex items-center gap-1.5 bg-white border border-gray-200 hover:border-[#fc5648] hover:text-[#fc5648] text-slate-600 text-xs font-bold px-4 py-2 rounded-full transition shrink-0">
-        🎬 Re-vival — revive los panoramas pasados
-    </a>
 </div>
 
     {{-- Filtro de categorías --}}
