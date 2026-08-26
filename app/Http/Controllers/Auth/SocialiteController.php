@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Configuracion;
 use App\Models\ReclamoNegocio;
 use App\Models\User;
 use App\Notifications\AdminNewArtistaNotification;
@@ -58,10 +59,10 @@ class SocialiteController extends Controller
             ]);
 
             if ($user->type === 'operador') {
-                Notification::route('mail', ['cesar.eav@gmail.com', 'cesarandrade@pindoor.cl'])
+                Notification::route('mail', Configuracion::emailsNotificacion())
                     ->notify(new AdminNewOperadorNotification($user));
             } elseif ($user->type === 'artista') {
-                Notification::route('mail', ['cesar.eav@gmail.com', 'cesarandrade@pindoor.cl'])
+                Notification::route('mail', Configuracion::emailsNotificacion())
                     ->notify(new AdminNewArtistaNotification($user));
             }
         }

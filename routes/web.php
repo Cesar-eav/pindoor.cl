@@ -274,6 +274,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('/configuracion/ascensores', [ConfiguracionController::class, 'actualizarAscensores'])->name('configuracion.ascensores');
     Route::post('/configuracion/home-por-categoria', [ConfiguracionController::class, 'actualizarHomePorCategoria'])->name('configuracion.home-por-categoria');
     Route::post('/configuracion/orden-secciones', [ConfiguracionController::class, 'actualizarOrdenSecciones'])->name('configuracion.orden-secciones');
+    Route::post('/configuracion/notificaciones', [ConfiguracionController::class, 'actualizarNotificaciones'])->name('configuracion.notificaciones');
 });
 
 /* --- RUTAS CLIENTES (NEGOCIOS) --- */

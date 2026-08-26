@@ -314,10 +314,7 @@ class ClienteController extends Controller
 
         if ($requiereAprobacion) {
             $mensaje = 'Registramos tu espacio. El equipo de Pindoor te va a contactar a ' . $data['contacto_whatsapp'] . ' para confirmar los datos antes de publicarlo.';
-            $admins = User::where('type', 'admin')->pluck('email');
-            if ($admins->isNotEmpty()) {
-                Notification::route('mail', $admins->all())->notify(new NegocioPendienteAprobacion($punto));
-            }
+            Notification::route('mail', Configuracion::emailsNotificacion())->notify(new NegocioPendienteAprobacion($punto));
         }
 
         Log::info('[onboarding] fin', ['user_id' => $userId, 'punto_id' => $punto->id, 'activo' => $punto->fresh()->activo]);

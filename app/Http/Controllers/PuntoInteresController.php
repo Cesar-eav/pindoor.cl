@@ -610,7 +610,7 @@ class PuntoInteresController extends Controller
             'status'   => 'pending',
         ]);
 
-        Notification::route('mail', ['soporte@pindoor.cl', 'cesar.eav@gmail.com'])
+        Notification::route('mail', Configuracion::emailsNotificacion())
             ->notify(new NuevoReclamoNotification($reclamo));
 
         return back()->with('success', 'Tu solicitud fue enviada. Te avisaremos por correo cuando sea aprobada.');
@@ -712,7 +712,7 @@ class PuntoInteresController extends Controller
 
         $experiencia = Experiencia::create($data);
 
-        Mail::to(['cesar.eav@gmail.com', 'danielapazcabrera89@gmail.com'])
+        Mail::to(Configuracion::emailsNotificacion())
             ->send(new NuevaExperienciaPropuesta($experiencia));
 
         return redirect()->route('experiencias.proponer')

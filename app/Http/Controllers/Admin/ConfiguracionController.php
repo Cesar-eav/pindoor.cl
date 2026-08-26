@@ -25,6 +25,9 @@ class ConfiguracionController extends Controller
         $ordenSecciones = HomeSeccionesService::ordenSecciones();
         $etiquetasSecciones = self::ETIQUETAS_SECCIONES;
 
+        $notificacionesEmails = implode(', ', Configuracion::emailsNotificacion());
+        $notificacionesTelegramChatId = Configuracion::telegramChatId();
+
         $idsExcluidos = PuntoInteres::idsExcluidos();
 
         $puntosData = PuntoInteres::where('eliminado', false)
@@ -48,7 +51,7 @@ class ConfiguracionController extends Controller
 
         return view('admin.configuracion.index', compact(
             'aprobacionActiva', 'homePorCategoria', 'idsExcluidos', 'puntosData', 'categoriasDisponibles', 'ascensores',
-            'ordenSecciones', 'etiquetasSecciones'
+            'ordenSecciones', 'etiquetasSecciones', 'notificacionesEmails', 'notificacionesTelegramChatId'
         ));
     }
 
@@ -77,6 +80,27 @@ class ConfiguracionController extends Controller
         Configuracion::set('home_puntos_por_categoria', (string) $data['home_puntos_por_categoria']);
 
         return back()->with('success', 'Configuración guardada.');
+    }
+
+    public function actualizarNotificaciones(Request $request)
+    {
+        $data = $request->validate([
+            'notificaciones_emails'            => 'required|string',
+            'notificaciones_telegram_chat_id'  => 'nullable|string|max:50',
+        ]);
+
+        $emails = collect(explode(',', str_replace(["\n", "\r"], ',', $data['notificaciones_emails'])))
+            ->map(fn ($email) => trim($email))
+            ->filter();
+
+        if ($emails->isEmpty() || $emails->contains(fn ($email) => ! filter_var($email, FILTER_VALIDATE_EMAIL))) {
+            return back()->withErrors(['notificaciones_emails' => 'Ingresa uno o más correos válidos, separados por coma.'])->withInput();
+        }
+
+        Configuracion::set('notificaciones_emails', $emails->implode(','));
+        Configuracion::set('notificaciones_telegram_chat_id', trim((string) ($data['notificaciones_telegram_chat_id'] ?? '')));
+
+        return back()->with('success', 'Notificaciones guardadas.');
     }
 
     public function actualizarExcluidos(Request $request)
