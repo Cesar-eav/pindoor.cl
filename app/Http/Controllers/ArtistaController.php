@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Artista;
 use App\Models\ArtistaEvento;
 use App\Models\ArtistaImagen;
+use App\Models\Configuracion;
 use App\Models\User;
 use App\Notifications\AdminNewArtistaNotification;
 use App\Services\ImagenComprimida;
@@ -62,7 +63,7 @@ class ArtistaController extends Controller
 
         event(new Registered($user));
 
-        Notification::route('mail', ['cesar.eav@gmail.com', 'cesarandrade@pindoor.cl'])
+        Notification::route('mail', Configuracion::emailsNotificacion())
             ->notify(new AdminNewArtistaNotification($user));
 
         Auth::login($user);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;
+use App\Models\Configuracion;
 use App\Models\OperadorTuristico;
 use App\Models\PuntoInteres;
 use App\Models\User;
@@ -46,7 +47,7 @@ class OperadorController extends Controller
 
         event(new Registered($user));
 
-        Notification::route('mail', ['cesar.eav@gmail.com', 'cesarandrade@pindoor.cl'])
+        Notification::route('mail', Configuracion::emailsNotificacion())
             ->notify(new AdminNewOperadorNotification($user));
 
         Auth::login($user);

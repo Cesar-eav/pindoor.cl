@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\NuevoContacto;
+use App\Models\Configuracion;
 use App\Models\LeadContacto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -32,7 +33,7 @@ class ContactoController extends Controller
             'mensaje'  => $request->mensaje,
         ]);
 
-        Mail::to(['soporte@pindoor.cl', 'cesar.eav@gmail.com'])->send(new NuevoContacto($lead));
+        Mail::to(Configuracion::emailsNotificacion())->send(new NuevoContacto($lead));
 
         $this->avisarTelegram($lead);
 
@@ -42,7 +43,7 @@ class ContactoController extends Controller
     private function avisarTelegram(LeadContacto $lead): void
     {
         $token = config('services.telegram.token');
-        $chatId = config('services.telegram.chat_id');
+        $chatId = Configuracion::telegramChatId();
 
         if (! $token || ! $chatId) {
             return;

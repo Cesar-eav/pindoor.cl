@@ -21,4 +21,20 @@ class Configuracion extends Model
     {
         static::updateOrCreate(['clave' => $clave], ['valor' => $valor]);
     }
+
+    public static function emailsNotificacion(): array
+    {
+        $default = 'cesar.eav@gmail.com,danielapazcabrera89@gmail.com,soporte@pindoor.cl,cesarandrade@pindoor.cl';
+
+        return collect(explode(',', static::get('notificaciones_emails', $default)))
+            ->map(fn ($email) => trim($email))
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    public static function telegramChatId(): ?string
+    {
+        return static::get('notificaciones_telegram_chat_id') ?: config('services.telegram.chat_id');
+    }
 }

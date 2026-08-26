@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Configuracion;
 use App\Models\User;
 use App\Notifications\AdminNewClientNotification;
 use App\Providers\RouteServiceProvider;
@@ -50,8 +51,7 @@ class RegisteredUserController extends Controller
         ]);
 
         event(new Registered($user));
-        // 'soporte@pindoor.cl' ,'danielapazcabrera89@gmail.com' 
-        Notification::route('mail', ['cesar.eav@gmail.com'])
+        Notification::route('mail', Configuracion::emailsNotificacion())
             ->notify(new AdminNewClientNotification($user));
 
         Auth::login($user);

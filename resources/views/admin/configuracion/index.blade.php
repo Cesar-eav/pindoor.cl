@@ -175,6 +175,45 @@
                 </form>
             </div>
 
+            {{-- Correos y Telegram de notificaciones --}}
+            <form action="{{ route('admin.configuracion.notificaciones') }}" method="POST" class="mt-6">
+                @csrf
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <p class="font-bold text-gray-900">Notificaciones de registro y actividad</p>
+                    <p class="text-xs text-gray-500 mt-1 mb-4">
+                        A quién le llegan los avisos de nuevos registros (cliente, artista, operador), negocios
+                        pendientes de aprobación, solicitudes de activación de perfil, mensajes de contacto y
+                        experiencias propuestas.
+                    </p>
+
+                    <label for="notificaciones_emails" class="text-sm font-semibold text-gray-700 block mb-1">
+                        Correos (separados por coma)
+                    </label>
+                    <textarea id="notificaciones_emails" name="notificaciones_emails" rows="2"
+                              class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none"
+                    >{{ old('notificaciones_emails', $notificacionesEmails) }}</textarea>
+                    @error('notificaciones_emails') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+
+                    <label for="notificaciones_telegram_chat_id" class="text-sm font-semibold text-gray-700 block mt-4 mb-1">
+                        Chat ID de Telegram
+                    </label>
+                    <input type="text" id="notificaciones_telegram_chat_id" name="notificaciones_telegram_chat_id"
+                           value="{{ old('notificaciones_telegram_chat_id', $notificacionesTelegramChatId) }}"
+                           placeholder="Ej: 8800864722"
+                           class="w-full sm:w-64 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                    <p class="text-xs text-gray-400 mt-1">
+                        El chat (o grupo) de Telegram al que llegan los mismos avisos. Déjalo vacío para usar el
+                        configurado por defecto en el servidor.
+                    </p>
+                    @error('notificaciones_telegram_chat_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <button type="submit"
+                        class="mt-5 bg-[#fc5648] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#d94439] transition">
+                    Guardar
+                </button>
+            </form>
+
             {{-- Ascensores fuera de servicio --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
                 <p class="font-bold text-gray-900">Ascensores fuera de servicio</p>

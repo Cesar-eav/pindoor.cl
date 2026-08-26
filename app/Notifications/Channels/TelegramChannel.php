@@ -2,6 +2,7 @@
 
 namespace App\Notifications\Channels;
 
+use App\Models\Configuracion;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -15,7 +16,7 @@ class TelegramChannel
         }
 
         $token = config('services.telegram.token');
-        $chatId = $notifiable->routeNotificationFor('telegram', $notification) ?? config('services.telegram.chat_id');
+        $chatId = $notifiable->routeNotificationFor('telegram', $notification) ?? Configuracion::telegramChatId();
 
         if (! $token || ! $chatId) {
             return;
