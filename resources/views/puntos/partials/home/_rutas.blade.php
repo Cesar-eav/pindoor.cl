@@ -8,7 +8,11 @@
         <a href="{{ route('rutas.index') }}" class="text-[11px] font-semibold text-[#fc5648] shrink-0">{{ __('ui.home.ver_todos') }}</a>
     </div>
 
-    <div class="flex gap-3 overflow-x-auto pb-2 px-3" style="-ms-overflow-style:none;scrollbar-width:none;">
+    <div class="flex gap-3 overflow-x-auto pb-2 px-3" style="-ms-overflow-style:none;scrollbar-width:none;"
+         x-data="{ touchStartX: 0, touchMoved: false }"
+         @touchstart="touchStartX = $event.touches[0].clientX; touchMoved = false"
+         @touchmove="if (Math.abs($event.touches[0].clientX - touchStartX) > 10) touchMoved = true"
+         @click.capture="if (touchMoved) { $event.preventDefault(); $event.stopPropagation(); touchMoved = false }">
         @foreach($ultimasRutas as $ruta)
         <a href="{{ route('rutas.show', $ruta->slug) }}"
            class="relative shrink-0 rounded-2xl overflow-hidden shadow-sm"
