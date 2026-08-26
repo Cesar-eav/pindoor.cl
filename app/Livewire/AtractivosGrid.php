@@ -178,9 +178,15 @@ class AtractivosGrid extends Component
 
         $recomendaciones = $hayFiltros ? collect() : Recomendacion::publicadas()->destacadasEnPortada()->orderBy('orden')->take(10)->get();
 
+        $negociosDestacados = $hayFiltros ? collect() : PuntoInteres::publico()->clientes()
+            ->with(['categoria', 'imagenPrincipal'])
+            ->latest('updated_at')
+            ->take(10)
+            ->get();
+
         return view('livewire.atractivos-grid', compact(
             'atractivos', 'categorias', 'categoriasConPuntos', 'hayFiltros', 'panoramas',
-            'proximosPanoramas', 'ultimosPosts', 'ultimasRutas', 'ultimasExperiencias', 'artistas', 'operadores', 'recomendaciones'
+            'proximosPanoramas', 'ultimosPosts', 'ultimasRutas', 'ultimasExperiencias', 'artistas', 'operadores', 'recomendaciones', 'negociosDestacados'
         ));
     }
 }

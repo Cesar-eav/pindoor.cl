@@ -183,18 +183,24 @@ class PuntoInteresController extends Controller
             $ultimosPosts = Post::publicados()->take(10)->get();
             $ultimasRutas = Ruta::publicadas()->with('puntos')->take(10)->get();
             $recomendaciones = Recomendacion::publicadas()->destacadasEnPortada()->orderBy('orden')->take(10)->get();
+            $negociosDestacados = PuntoInteres::publico()->clientes()
+                ->with(['categoria', 'imagenPrincipal'])
+                ->latest('updated_at')
+                ->take(10)
+                ->get();
         } else {
             $proximosPanoramas = collect();
             $ultimosPosts = collect();
             $ultimasRutas = collect();
             $recomendaciones = collect();
+            $negociosDestacados = collect();
         }
 
         $ultimoPost = $ultimosPosts->first();
 
         $ultimasExperiencias = Experiencia::activas()->latest()->take(10)->get();
 
-        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'categoriasConPuntos', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts', 'ultimasRutas', 'ultimasExperiencias', 'artistas', 'operadores', 'recomendaciones'));
+        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'categoriasConPuntos', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts', 'ultimasRutas', 'ultimasExperiencias', 'artistas', 'operadores', 'recomendaciones', 'negociosDestacados'));
 
     } catch (\Exception $e) {
         \Log::error('Error en index: ' . $e->getMessage());
