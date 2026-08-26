@@ -14,8 +14,17 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = Post::orderByDesc('created_at')->get();
+        $posts = Post::orderBy('orden_home')->orderByDesc('created_at')->get();
         return view('admin.blog.index', compact('posts'));
+    }
+
+    public function reordenar(Request $request)
+    {
+        collect($request->input('orden', []))->values()->each(
+            fn ($id, $i) => Post::where('id', $id)->update(['orden_home' => $i])
+        );
+
+        return back()->with('success', 'Orden actualizado.');
     }
 
     public function create()

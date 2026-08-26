@@ -5,14 +5,25 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Configuracion;
 use App\Models\PuntoInteres;
+use App\Services\HomeSeccionesService;
 use Illuminate\Http\Request;
 
 class ConfiguracionController extends Controller
 {
+    const ETIQUETAS_SECCIONES = [
+        'panoramas'  => 'Panoramas',
+        'destacados' => 'Destacados',
+        'recomienda' => 'Pindoor Recomienda',
+        'guias'      => 'Guías',
+        'rutas'      => 'Rutas Pindoor',
+    ];
+
     public function index()
     {
         $aprobacionActiva = (bool) Configuracion::get('aprobacion_negocios_activa', false);
         $homePorCategoria = (int) Configuracion::get('home_puntos_por_categoria', \App\Http\Controllers\PuntoInteresController::PUNTOS_POR_CATEGORIA_DEFAULT);
+        $ordenSecciones = HomeSeccionesService::ordenSecciones();
+        $etiquetasSecciones = self::ETIQUETAS_SECCIONES;
 
         $idsExcluidos = PuntoInteres::idsExcluidos();
 
@@ -36,7 +47,8 @@ class ConfiguracionController extends Controller
             ->get(['id', 'title', 'sector', 'fuera_de_servicio', 'fuera_de_servicio_motivo']);
 
         return view('admin.configuracion.index', compact(
-            'aprobacionActiva', 'homePorCategoria', 'idsExcluidos', 'puntosData', 'categoriasDisponibles', 'ascensores'
+            'aprobacionActiva', 'homePorCategoria', 'idsExcluidos', 'puntosData', 'categoriasDisponibles', 'ascensores',
+            'ordenSecciones', 'etiquetasSecciones'
         ));
     }
 
@@ -45,6 +57,15 @@ class ConfiguracionController extends Controller
         Configuracion::set('aprobacion_negocios_activa', $request->boolean('aprobacion_negocios_activa') ? '1' : '0');
 
         return back()->with('success', 'Configuración guardada.');
+    }
+
+    public function actualizarOrdenSecciones(Request $request)
+    {
+        $data = $request->validate(['orden' => 'required|string']);
+
+        Configuracion::set('home_orden_secciones', $data['orden']);
+
+        return back()->with('success', 'Orden de las secciones guardado.');
     }
 
     public function actualizarHomePorCategoria(Request $request)

@@ -62,6 +62,33 @@
                 </button>
             </form>
 
+            {{-- Orden de las secciones del home --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
+                <p class="font-bold text-gray-900">Orden de las secciones del home</p>
+                <p class="text-xs text-gray-500 mt-1 mb-4">
+                    Arrastra para cambiar el orden en que aparecen los bloques en la portada.
+                </p>
+
+                <form action="{{ route('admin.configuracion.orden-secciones') }}" method="POST">
+                    @csrf
+                    <div id="orden-secciones-grid" class="divide-y divide-gray-50 border border-gray-100 rounded-xl">
+                        @foreach($ordenSecciones as $clave)
+                        <div draggable="true" data-tile data-clave="{{ $clave }}"
+                             class="flex items-center gap-3 px-4 py-3 cursor-move bg-white select-none">
+                            <span class="text-gray-300">⠿</span>
+                            <span class="font-medium text-gray-800 text-sm">{{ $etiquetasSecciones[$clave] ?? $clave }}</span>
+                        </div>
+                        @endforeach
+                    </div>
+                    <input type="hidden" name="orden" id="orden-secciones-input">
+
+                    <button type="submit"
+                            class="mt-5 bg-[#fc5648] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#d94439] transition">
+                        Guardar orden
+                    </button>
+                </form>
+            </div>
+
             {{-- Puntos de ejemplo / demo --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
                 <p class="font-bold text-gray-900">Puntos de ejemplo (no son negocios reales)</p>
@@ -194,4 +221,51 @@
 
         </div>
     </div>
+
+    <script>
+        // Orden de las secciones del home: arrastrar filas reordena el DOM; al enviar,
+        // se arma el CSV final leyendo data-clave en el orden resultante.
+        (function() {
+            var grid = document.getElementById('orden-secciones-grid');
+            if (!grid) return;
+            var dragged = null;
+
+            grid.addEventListener('dragstart', function(e) {
+                var tile = e.target.closest('[data-tile]');
+                if (!tile) return;
+                dragged = tile;
+                e.dataTransfer.effectAllowed = 'move';
+                setTimeout(function() { tile.classList.add('opacity-30'); }, 0);
+            });
+
+            grid.addEventListener('dragend', function() {
+                if (dragged) dragged.classList.remove('opacity-30');
+                dragged = null;
+            });
+
+            grid.addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+
+            grid.addEventListener('drop', function(e) {
+                e.preventDefault();
+                var target = e.target.closest('[data-tile]');
+                if (!target || !dragged || target === dragged) return;
+                var tiles = Array.prototype.slice.call(grid.children);
+                var draggedIdx = tiles.indexOf(dragged);
+                var targetIdx  = tiles.indexOf(target);
+                if (draggedIdx < targetIdx) {
+                    target.after(dragged);
+                } else {
+                    target.before(dragged);
+                }
+            });
+
+            grid.closest('form').addEventListener('submit', function() {
+                var orden = Array.prototype.slice.call(grid.children)
+                    .map(function(tile) { return tile.dataset.clave; });
+                document.getElementById('orden-secciones-input').value = orden.join(',');
+            });
+        })();
+    </script>
 </x-admin-layout>

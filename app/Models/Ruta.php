@@ -25,6 +25,7 @@ class Ruta extends Model
         'imagen_portada',
         'publicado',
         'publicado_en',
+        'orden_home',
     ];
 
     protected $casts = [
@@ -35,6 +36,15 @@ class Ruta extends Model
     public function scopePublicadas($query)
     {
         return $query->where('publicado', true)->orderByDesc('publicado_en');
+    }
+
+    /**
+     * Orden manual solo para la vista previa del home — /rutas sigue usando
+     * scopePublicadas() (por fecha) sin tocar.
+     */
+    public function scopeOrdenHome($query)
+    {
+        return $query->publicadas()->reorder()->orderBy('orden_home')->orderByDesc('publicado_en');
     }
 
     public function puntos()

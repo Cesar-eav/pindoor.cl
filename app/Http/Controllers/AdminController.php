@@ -311,7 +311,28 @@ class AdminController extends Controller
             ->latest()
             ->get();
 
-        return view('admin.clientes', compact('clientes', 'puntosDisponibles', 'pendientes'));
+        $clientesDestacables = PuntoInteres::clientes()
+            ->where('eliminado', false)
+            ->with('categoria:id,nombre,icono')
+            ->orderBy('orden_destacado')
+            ->get(['id', 'title', 'sector', 'categoria_id', 'destacado_home', 'orden_destacado']);
+
+        return view('admin.clientes', compact('clientes', 'puntosDisponibles', 'pendientes', 'clientesDestacables'));
+    }
+
+    public function actualizarDestacados(Request $request)
+    {
+        $orden = collect($request->input('orden', []))->map(fn ($id) => (int) $id);
+        $destacados = collect($request->input('destacados', []))->map(fn ($id) => (int) $id);
+
+        $orden->values()->each(function ($id, $i) use ($destacados) {
+            PuntoInteres::where('id', $id)->update([
+                'orden_destacado' => $i,
+                'destacado_home'  => $destacados->contains($id),
+            ]);
+        });
+
+        return back()->with('success', 'Destacados del home actualizados.');
     }
 
     public function mostrarActivarCliente(PuntoInteres $punto)
