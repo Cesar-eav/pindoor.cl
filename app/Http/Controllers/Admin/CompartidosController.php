@@ -32,15 +32,47 @@ class CompartidosController extends Controller
         'calendario' => ['emoji' => '📅', 'label' => 'Calendario', 'color' => '#eb6834'],
     ];
 
+    // Rangos rápidos disponibles como botones de filtro (además del selector de fechas manual).
+    private const RANGOS = ['hoy', 'semana', 'mes', '30dias'];
+
     public function index(Request $request)
     {
-        $desde = $request->filled('desde')
-            ? Carbon::parse($request->desde)->startOfDay()
-            : now()->subDays(29)->startOfDay();
+        $rangoActivo = null;
 
-        $hasta = $request->filled('hasta')
-            ? Carbon::parse($request->hasta)->endOfDay()
-            : now()->endOfDay();
+        if ($request->filled('rango') && !$request->filled('desde') && !$request->filled('hasta')) {
+            $rangoActivo = in_array($request->rango, self::RANGOS) ? $request->rango : '30dias';
+
+            switch ($rangoActivo) {
+                case 'hoy':
+                    $desde = now()->startOfDay();
+                    $hasta = now()->endOfDay();
+                    break;
+                case 'semana':
+                    $desde = now()->startOfWeek();
+                    $hasta = now()->endOfWeek();
+                    break;
+                case 'mes':
+                    $desde = now()->startOfMonth();
+                    $hasta = now()->endOfMonth();
+                    break;
+                default:
+                    $desde = now()->subDays(29)->startOfDay();
+                    $hasta = now()->endOfDay();
+                    break;
+            }
+        } else {
+            $desde = $request->filled('desde')
+                ? Carbon::parse($request->desde)->startOfDay()
+                : now()->subDays(29)->startOfDay();
+
+            $hasta = $request->filled('hasta')
+                ? Carbon::parse($request->hasta)->endOfDay()
+                : now()->endOfDay();
+
+            if (!$request->filled('desde') && !$request->filled('hasta')) {
+                $rangoActivo = '30dias';
+            }
+        }
 
         $base = Compartido::whereBetween('created_at', [$desde, $hasta]);
 
@@ -113,9 +145,17 @@ class CompartidosController extends Controller
             ->limit(50)
             ->get();
 
+        // "Qué se comparte" se puede filtrar por categoría sin afectar el resto de
+        // las secciones (que siguen mostrando el total del rango de fechas).
+        $paginaCategoria = $request->input('pagina_categoria');
+        $compartidosPagina = $paginaCategoria
+            ? $compartidos->filter(fn ($fila) => $fila->seccion['label'] === $paginaCategoria)->values()
+            : $compartidos;
+
         return view('admin.compartidos.index', compact(
-            'compartidos', 'porCategoria', 'maxCategoria', 'totalGeneral',
-            'dias', 'maxDia', 'porCanalTotal', 'maxCanal', 'recientes', 'desde', 'hasta'
+            'compartidosPagina', 'porCategoria', 'maxCategoria', 'totalGeneral',
+            'dias', 'maxDia', 'porCanalTotal', 'maxCanal', 'recientes', 'desde', 'hasta',
+            'rangoActivo', 'paginaCategoria'
         ));
     }
 
