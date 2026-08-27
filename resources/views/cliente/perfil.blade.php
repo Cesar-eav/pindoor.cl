@@ -47,7 +47,7 @@
     $campoTab = [
         'description' => 'perfil', 'horario' => 'perfil', 'enlace' => 'perfil', 'video_url' => 'perfil',
         'tags' => 'perfil', 'descripcion_busqueda' => 'perfil', 'imagen_perfil' => 'perfil', 'categoria_id' => 'perfil',
-        'carta' => 'contenido', 'carta_pdf' => 'contenido',
+        'carta' => 'contenido', 'carta_pdf' => 'contenido', 'carta_url' => 'contenido',
         'precio_desde' => 'contenido', 'check_in' => 'contenido', 'check_out' => 'contenido',
         'habitaciones' => 'contenido', 'servicios_incluidos' => 'contenido', 'politicas' => 'contenido',
     ];
@@ -611,6 +611,13 @@
                                         <x-input-label for="carta-texto" value="Descripción de la carta" />
                                         <div id="carta-editor" class="mt-1 bg-white border border-gray-200 rounded-xl text-sm min-h-44"></div>
                                         <textarea id="carta-texto" name="carta" class="hidden">{!! old('carta', $datoCarta['texto'] ?? '') !!}</textarea>
+                                    </div>
+                                    <div>
+                                        <x-input-label for="carta_url" value="Enlace a la carta (opcional)" />
+                                        <x-text-input id="carta_url" name="carta_url" type="url" class="block mt-1 w-full"
+                                                      value="{{ old('carta_url', $datoCarta['url'] ?? '') }}"
+                                                      placeholder="https://..." />
+                                        <p class="text-xs text-gray-400 mt-1">Si tienes tu carta en un enlace externo (web, PDF en línea, etc.).</p>
                                     </div>
                                     <div>
                                         <x-input-label for="carta_pdf" value="Carta en PDF (opcional)" />
