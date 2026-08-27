@@ -81,6 +81,23 @@ class PanoramaController extends Controller
         ));
     }
 
+    /** Vista de pantalla completa con los próximos panoramas en scroll automático, pensada para grabar un reel. */
+    public function reel()
+    {
+        $limiteDias = (int) Configuracion::get('panoramas_limite_dias', 15);
+        $hoy   = Carbon::today();
+        $hasta = $hoy->copy()->addDays($limiteDias);
+
+        $panoramas = Panorama::activos($limiteDias)->orderBy('fecha')->orderBy('hora')->get()
+            ->concat($this->eventosDeClientes(null, null))
+            ->filter(fn ($p) => $p->activo && $p->fecha && $p->fecha->lte($hasta)
+                && (($p->fecha_fin === null && $p->fecha->gte($hoy)) || ($p->fecha_fin && $p->fecha_fin->gte($hoy))))
+            ->sortBy(fn ($p) => $p->fecha->format('Y-m-d') . ($p->hora ?? '99:99'))
+            ->values();
+
+        return view('admin.panoramas-reel', compact('panoramas'));
+    }
+
     /**
      * Agenda de eventos que cada cliente gestiona desde su propio panel (punto_modulo_items,
      * modulo 'eventos'). No viven en la tabla panoramas: se arman acá como Panorama de solo

@@ -192,6 +192,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Panoramas — La Brújula
     Route::get('/panoramas/ubicaciones', [PanoramaController::class, 'ubicaciones'])->name('panoramas.ubicaciones');
+    Route::get('/panoramas/reel', [PanoramaController::class, 'reel'])->name('panoramas.reel');
     Route::resource('panoramas', PanoramaController::class)->except(['show']);
     Route::patch('/panoramas/{panorama}/toggle', [PanoramaController::class, 'toggle'])->name('panoramas.toggle');
     Route::patch('/panoramas/{panorama}/categoria', [PanoramaController::class, 'actualizarCategoria'])->name('panoramas.categoria');
