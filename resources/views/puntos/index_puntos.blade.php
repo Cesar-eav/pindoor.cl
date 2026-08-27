@@ -149,6 +149,8 @@
 
         {{-- Vista Mapa --}}
         <div id="vista-mapa" class="{{ request('vista') === 'mapa' ? '' : 'hidden' }} mb-8">
+            @include('puntos.partials._pills')
+
             <div id="mapa-principal"></div>
 
             <p class="text-xs text-gray-400 text-center mt-2">
