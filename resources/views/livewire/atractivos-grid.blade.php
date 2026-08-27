@@ -212,6 +212,38 @@
         </div>
         @endif
 
+        @if($revivals->isNotEmpty())
+        <div class="mt-10">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-bold text-[#fc5648]">
+                    🎬 Re-vival con "{{ $search }}"
+                </h2>
+                <a href="{{ route('revival.index') }}" class="text-xs text-[#fc5648] font-semibold hover:underline">
+                    {{ __('ui.home.ver_todos') }}
+                </a>
+            </div>
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                @foreach($revivals as $revival)
+                <a href="{{ route('revival.show', $revival->slug) }}"
+                   class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition overflow-hidden group">
+                    @if($revival->imagen_portada_url)
+                        <img src="{{ $revival->imagen_portada_url }}" alt="{{ $revival->titulo }}"
+                             class="w-full h-36 object-cover group-hover:scale-105 transition duration-300">
+                    @else
+                        <div class="w-full h-36 bg-linear-to-br from-[#fff0ef] to-[#ffe4e1] flex items-center justify-center text-3xl">🎬</div>
+                    @endif
+                    <div class="p-3">
+                        <p class="font-bold text-gray-900 text-sm leading-snug line-clamp-2">{{ $revival->titulo }}</p>
+                        @if($revival->publicado_en)
+                            <p class="text-xs text-[#fc5648] font-semibold mt-1">{{ $revival->publicado_en->locale('es')->isoFormat('D MMM') }}</p>
+                        @endif
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         @if($artistas->isNotEmpty())
         <div class="mt-10">
             <div class="flex items-center justify-between mb-4">

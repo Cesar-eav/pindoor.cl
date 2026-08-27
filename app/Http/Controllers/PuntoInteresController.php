@@ -13,6 +13,7 @@ use App\Models\Artista;
 use App\Models\OperadorTuristico;
 use App\Models\Recomendacion;
 use App\Models\ReclamoNegocio;
+use App\Models\Revival;
 use App\Mail\NuevaExperienciaPropuesta;
 use App\Notifications\NuevoReclamoNotification;
 use App\Services\HomeSeccionesService;
@@ -110,6 +111,7 @@ class PuntoInteresController extends Controller
         $panoramas = collect();
         $artistas  = collect();
         $operadores = collect();
+        $revivals  = collect();
         if ($request->filled('search')) {
             $s = $request->search;
             $sLower = mb_strtolower($s);
@@ -134,6 +136,11 @@ class PuntoInteresController extends Controller
                 ->where(fn($q) => $q->where('nombre', 'like', "%{$s}%")
                                     ->orWhere('descripcion', 'like', "%{$s}%")
                                     ->orWhere('ciudad', 'like', "%{$s}%"))
+                ->limit(6)
+                ->get();
+
+            $revivals = Revival::publicados()
+                ->where(fn($q) => $q->whereRaw('LOWER(titulo) LIKE ?', ["%{$sLower}%"]))
                 ->limit(6)
                 ->get();
         }
@@ -197,7 +204,7 @@ class PuntoInteresController extends Controller
 
         $ultimasExperiencias = Experiencia::activas()->latest()->take(10)->get();
 
-        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'categoriasConPuntos', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts', 'ultimasRutas', 'ultimasExperiencias', 'artistas', 'operadores', 'recomendaciones', 'negociosDestacados', 'ordenSecciones'));
+        return view('puntos.index_puntos', compact('atractivos', 'categorias', 'categoriasConPuntos', 'puntosMapData', 'panoramas', 'proximosPanoramas', 'ultimoPost', 'ultimosPosts', 'ultimasRutas', 'ultimasExperiencias', 'artistas', 'operadores', 'revivals', 'recomendaciones', 'negociosDestacados', 'ordenSecciones'));
 
     } catch (\Exception $e) {
         \Log::error('Error en index: ' . $e->getMessage());

@@ -190,6 +190,36 @@
     </div>
     @endif
 
+    {{-- Re-vival en búsqueda --}}
+    @if(isset($revivals) && $revivals->isNotEmpty())
+    <div class="mt-8">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-sm font-bold text-[#fc5648]">🎬 Re-vival</h2>
+            <a href="{{ route('revival.index') }}" class="text-xs text-[#fc5648] font-semibold">{{ __('ui.home.ver_todos') }}</a>
+        </div>
+        <div class="flex flex-col gap-3">
+            @foreach($revivals as $revival)
+            <a href="{{ route('revival.show', $revival->slug) }}"
+               class="flex gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm p-3 items-center">
+                @if($revival->imagen_portada_url)
+                    <img src="{{ $revival->imagen_portada_url }}"
+                         alt="{{ $revival->titulo }}"
+                         class="w-16 h-16 rounded-xl object-cover shrink-0">
+                @else
+                    <div class="w-16 h-16 rounded-xl bg-[#fff0ef] flex items-center justify-center text-2xl shrink-0">🎬</div>
+                @endif
+                <div class="min-w-0">
+                    <p class="font-bold text-gray-900 text-sm leading-snug line-clamp-2">{{ $revival->titulo }}</p>
+                    @if($revival->publicado_en)
+                        <p class="text-xs text-[#fc5648] font-semibold mt-0.5">{{ $revival->publicado_en->locale('es')->isoFormat('D MMM') }}</p>
+                    @endif
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     {{-- Artistas en búsqueda --}}
     @if(isset($artistas) && $artistas->isNotEmpty())
     <div class="mt-8">

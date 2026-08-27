@@ -12,6 +12,7 @@ use App\Models\OperadorTuristico;
 use App\Models\Panorama;
 use App\Models\PuntoInteres;
 use App\Models\Recomendacion;
+use App\Models\Revival;
 use App\Services\HomeSeccionesService;
 use Carbon\Carbon;
 use Livewire\Attributes\On;
@@ -105,6 +106,7 @@ class AtractivosGrid extends Component
         $panoramas = collect();
         $artistas  = collect();
         $operadores = collect();
+        $revivals  = collect();
         if ($this->search) {
             $s = $this->search;
             $sLower = mb_strtolower($s);
@@ -133,6 +135,11 @@ class AtractivosGrid extends Component
                     ->orWhere('descripcion', 'like', "%{$s}%")
                     ->orWhere('ciudad', 'like', "%{$s}%")
                 )
+                ->limit(6)
+                ->get();
+
+            $revivals = Revival::publicados()
+                ->where(fn($q) => $q->whereRaw('LOWER(titulo) LIKE ?', ["%{$sLower}%"]))
                 ->limit(6)
                 ->get();
         }
@@ -183,7 +190,7 @@ class AtractivosGrid extends Component
 
         return view('livewire.atractivos-grid', compact(
             'atractivos', 'categorias', 'categoriasConPuntos', 'hayFiltros', 'panoramas',
-            'proximosPanoramas', 'ultimosPosts', 'ultimasRutas', 'ultimasExperiencias', 'artistas', 'operadores', 'recomendaciones', 'negociosDestacados', 'ordenSecciones'
+            'proximosPanoramas', 'ultimosPosts', 'ultimasRutas', 'ultimasExperiencias', 'artistas', 'operadores', 'revivals', 'recomendaciones', 'negociosDestacados', 'ordenSecciones'
         ));
     }
 }
