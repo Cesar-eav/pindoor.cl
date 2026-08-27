@@ -8,10 +8,16 @@
     ?: $recomendacion->titulo . ' — ' . $recomendacion->negocio)
 @section('bodyClass', 'bg-gray-100 text-gray-900')
 
-@section('head')
+@section('og_type', 'article')
+@section('og_url', route('recomienda.show', $recomendacion->slug))
+@section('og_title', $recomendacion->titulo . ' — Pindoor Recomienda')
+@section('og_description', \Illuminate\Support\Str::limit($recomendacion->resumen ?: strip_tags($recomendacion->contenido ?? ''), 160)
+    ?: $recomendacion->titulo . ' — ' . $recomendacion->negocio)
 @if($recomendacion->imagen_portada)
-<meta property="og:image" content="{{ asset('storage/' . $recomendacion->imagen_portada) }}" />
+    @section('og_image', asset('storage/' . $recomendacion->imagen_portada))
 @endif
+
+@section('head')
 <style>
     .resenatext { font-size: 1rem; line-height: 1.85; color: #374151; }
     .resenatext p    { margin: 1.1rem 0; }

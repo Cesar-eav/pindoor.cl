@@ -15,6 +15,7 @@
                  : (($origenTipo ?? 'punto') === 'artista'
                      ? route('artista.evento', ['slug' => $puntoRelacionado->slug, 'item' => $panorama->modulo_item_id])
                      : route('puntos.evento', ['slug' => $puntoRelacionado->slug, 'item' => $panorama->modulo_item_id]));
+    $imgUrl = $panorama->imagen ? asset('storage/' . $panorama->imagen) : null;
 @endphp
 
 @extends('layouts.pindoor')
@@ -23,6 +24,14 @@
 @section('description', $seoDesc)
 @section('canonical', $panoramaUrl)
 @section('bodyClass', 'bg-gray-100 text-gray-900')
+
+@section('og_type', 'article')
+@section('og_url', $panoramaUrl)
+@section('og_title', $seoTitle)
+@section('og_description', $seoDesc)
+@if($imgUrl)
+    @section('og_image', $imgUrl)
+@endif
 
 @section('content')
 @php
