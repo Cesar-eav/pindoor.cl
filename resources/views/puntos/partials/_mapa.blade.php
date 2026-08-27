@@ -128,9 +128,10 @@ const EMOJI_CAT = {
 
 function crearIcono(p) {
     const border = p.es_cliente ? '#fc5648' : '#9ca3af';
-    // Negocios registrados con logo: el logo reemplaza el ícono de categoría.
-    const contenido = (p.es_cliente && p.logo)
-        ? `<img src="${p.logo}" style="width:100%;height:100%;object-fit:cover;">`
+    // Logo del negocio, o imagen principal del punto, reemplazan el ícono de categoría.
+    const imgSrc = (p.es_cliente && p.logo) ? p.logo : p.imagen;
+    const contenido = imgSrc
+        ? `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;">`
         : `<span style="font-size:17px;line-height:1;">${EMOJI_CAT[p.categoria_id] || (p.es_cliente ? '🏪' : '📍')}</span>`;
     return L.divIcon({
         className: '',
@@ -339,7 +340,7 @@ function iniciarMapa(containerId) {
     // (pan, zoom, rotación) la activaría y desencajaría visualmente el punto.
 
     // Aplicar filtro activo al iniciar el mapa si hay categoría seleccionada
-    const activePill = document.querySelector('.overflow-x-auto.no-scrollbar a.bg-gray-900[data-slug]');
+    const activePill = document.querySelector('#pills-mapa-desktop a.bg-gray-900[data-slug]');
     filtrarMapa(activePill?.dataset.slug ?? null);
 }
 
@@ -441,7 +442,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // AJAX category pill filter — no page reload
-    const pillsScroll = document.querySelector('.overflow-x-auto.no-scrollbar');
+    const pillsScroll = document.getElementById('pills-mapa-desktop');
     if (pillsScroll) {
         pillsScroll.querySelectorAll('a').forEach(pill => {
             pill.addEventListener('click', async (e) => {
@@ -461,6 +462,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Filtrar marcadores del mapa si ya está iniciado
                 filtrarMapa(slug);
+
+                // Mantener sincronizada la vista Listado (Livewire) al volver del mapa
+                if (window.Livewire) {
+                    Livewire.dispatch('category-updated', { slug: slug });
+                }
 
                 // Actualizar listado mobile en background
                 try {

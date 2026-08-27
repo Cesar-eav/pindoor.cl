@@ -1,4 +1,4 @@
-<div class="overflow-x-auto no-scrollbar bg-white border-b border-gray-100 px-4 py-3 sticky top-15 z-30 shadow-sm">
+<div id="pills-mapa-desktop" class="overflow-x-auto no-scrollbar bg-white border-b border-gray-100 px-4 py-3 sticky top-15 z-30 shadow-sm">
     <div class="flex gap-2 w-max">
         <a href="{{ route('puntos.index', array_filter(['search' => request('search')])) }}"
            class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap
