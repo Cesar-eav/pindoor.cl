@@ -393,6 +393,7 @@ class ClienteController extends Controller
             // Alimentación
             'carta'               => 'nullable|string',
             'carta_pdf'           => 'nullable|file|mimes:pdf|max:30720',
+            'carta_url'           => 'nullable|url|max:255',
             // Alojamiento
             'precio_desde'        => 'nullable|string|max:100',
             'check_in'            => 'nullable|string|max:20',
@@ -440,13 +441,17 @@ class ClienteController extends Controller
 
         // ── Módulo: carta ────────────────────────────────────────────────────
         if (in_array('carta', $modulos) &&
-            ($request->has('carta') || $request->hasFile('carta_pdf') || $request->boolean('eliminar_carta_pdf'))) {
+            ($request->has('carta') || $request->has('carta_url') || $request->hasFile('carta_pdf') || $request->boolean('eliminar_carta_pdf'))) {
 
             $registro   = $punto->moduloDatos()->firstOrNew(['modulo' => 'carta']);
             $datosCarta = $registro->datos ?? [];
 
             if ($request->has('carta')) {
                 $datosCarta['texto'] = $request->carta;
+            }
+
+            if ($request->has('carta_url')) {
+                $datosCarta['url'] = $request->carta_url;
             }
 
             if ($request->boolean('eliminar_carta_pdf') && !empty($datosCarta['pdf_ruta'])) {

@@ -411,7 +411,7 @@ class PuntoInteres extends Model
         $carta = $this->dato('carta');
         return $this->es_cliente
             && $this->moduloActivo('carta')
-            && (!empty($carta['texto']) || !empty($carta['pdf_ruta']));
+            && (!empty($carta['texto']) || !empty($carta['pdf_ruta']) || !empty($carta['url']));
     }
 
     public function tieneMenu(): bool
