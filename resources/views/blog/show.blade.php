@@ -13,21 +13,16 @@
 @section('description', $seoDesc)
 @section('bodyClass', 'bg-[#f9fafb] text-gray-900')
 
+@section('og_type', 'article')
+@section('og_url', route('blog.show', $post->slug))
+@section('og_title', $seoTitle)
+@section('og_description', $seoDesc)
+@if($post->imagen_portada_url)
+    @section('og_image', $post->imagen_portada_url)
+@endif
+
 @section('head')
     @php $canonicalUrl = route('blog.show', $post->slug); @endphp
-    <meta property="og:type"        content="article" />
-    <meta property="og:url"         content="{{ $canonicalUrl }}" />
-    <meta property="og:title"       content="{{ $seoTitle }}" />
-    <meta property="og:description" content="{{ $seoDesc }}" />
-    @if($post->imagen_portada_url)
-    <meta property="og:image"       content="{{ $post->imagen_portada_url }}" />
-    @endif
-    <meta name="twitter:card"        content="summary_large_image" />
-    <meta name="twitter:title"       content="{{ $seoTitle }}" />
-    <meta name="twitter:description" content="{{ $seoDesc }}" />
-    @if($post->imagen_portada_url)
-    <meta name="twitter:image"       content="{{ $post->imagen_portada_url }}" />
-    @endif
 
     <script type="application/ld+json">
     {

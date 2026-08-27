@@ -7,11 +7,15 @@
     : $experiencia->titulo . ($experiencia->proveedor ? ' por ' . $experiencia->proveedor : '') . ' en Valparaíso.')
 @section('bodyClass', 'bg-gray-100 text-gray-900')
 
-@section('head')
+@section('og_type', 'website')
+@section('og_url', route('experiencias.show', $experiencia))
+@section('og_title', $experiencia->titulo . ' — Experiencias Pindoor')
+@section('og_description', $experiencia->descripcion
+    ? \Illuminate\Support\Str::limit($experiencia->descripcion, 160)
+    : $experiencia->titulo . ($experiencia->proveedor ? ' por ' . $experiencia->proveedor : '') . ' en Valparaíso.')
 @if($experiencia->imagen)
-<meta property="og:image" content="{{ asset('storage/' . $experiencia->imagen) }}" />
+    @section('og_image', asset('storage/' . $experiencia->imagen))
 @endif
-@endsection
 
 @section('content')
 <div class="max-w-2xl mx-auto px-4 py-8">

@@ -12,23 +12,19 @@
 
 @section('bodyClass', 'bg-[#f9fafb] text-gray-900 leading-relaxed')
 
+@section('og_type', 'product')
+@section('og_url', route('puntos.producto', [$punto->slug ?? $punto->id, $producto->id]))
+@section('og_title', $producto->nombre . ' — ' . $punto->title)
+@section('og_description', $producto->descripcion ?? 'Producto de ' . $punto->title)
+@if($producto->imagen_url)
+    @section('og_image', $producto->imagen_url)
+@endif
+
 @section('head')
     @php
         $canonicalUrl = route('puntos.producto', [$punto->slug ?? $punto->id, $producto->id]);
         $catalogoUrl  = route('puntos.show', $punto->slug ?? $punto->id) . '#catalogo';
     @endphp
-    <meta property="og:type"        content="product" />
-    <meta property="og:url"         content="{{ $canonicalUrl }}" />
-    <meta property="og:title"       content="{{ $producto->nombre }} — {{ $punto->title }}" />
-    <meta property="og:description" content="{{ $producto->descripcion ?? 'Producto de ' . $punto->title }}" />
-    @if($producto->imagen_url)
-    <meta property="og:image"       content="{{ $producto->imagen_url }}" />
-    <meta property="og:image:alt"   content="{{ $producto->nombre }}" />
-    @endif
-    <meta name="twitter:card"        content="summary_large_image" />
-    <meta name="twitter:title"       content="{{ $producto->nombre }} — {{ $punto->title }}" />
-    <meta name="twitter:description" content="{{ $producto->descripcion ?? 'Producto de ' . $punto->title }}" />
-    @if($producto->imagen_url)<meta name="twitter:image" content="{{ $producto->imagen_url }}" />@endif
 
     <script type="application/ld+json">
     {

@@ -11,7 +11,16 @@
     $esTemporal = $tipo === 'temporal';
     $fechaInicio = $item->datos['fecha_inicio'] ?? null;
     $fechaFin    = $item->datos['fecha_fin'] ?? null;
+    $imgUrl      = $item->imagen ? asset('storage/' . $item->imagen) : null;
 @endphp
+
+@section('og_type', 'article')
+@section('og_url', route('puntos.exposicion', [$punto->slug ?? $punto->id, $item->id]))
+@section('og_title', ($item->datos['titulo'] ?? 'Exposición') . ' · ' . $punto->title)
+@section('og_description', Str::limit(strip_tags($item->datos['descripcion'] ?? ''), 160))
+@if($imgUrl)
+    @section('og_image', $imgUrl)
+@endif
 
 @section('content')
 <div class="max-w-2xl mx-auto px-4 pt-5 pb-16">
@@ -27,7 +36,6 @@
 
     {{-- Afiche / imagen principal --}}
     @if($item->imagen)
-    @php $imgUrl = asset('storage/' . $item->imagen); @endphp
     <div x-data="{ zoom: false }">
 
         {{-- Contenedor adaptativo --}}
