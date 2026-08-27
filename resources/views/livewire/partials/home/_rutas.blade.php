@@ -30,15 +30,17 @@
             <a href="{{ route('rutas.show', $ruta->slug) }}"
                class="group relative shrink-0 w-72 rounded-2xl overflow-hidden shadow-sm h-52 snap-start">
                 @if($ruta->imagen_portada)
-                    <img src="{{ asset('storage/' . $ruta->imagen_portada) }}" alt="{{ $ruta->titulo }}"
-                         class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 bg-gray-900">
+                        <img src="{{ asset('storage/' . $ruta->imagen_portada) }}" alt="{{ $ruta->titulo }}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    </div>
                 @else
                     <div class="absolute inset-0 bg-gray-800 flex items-center justify-center text-4xl">🗺️</div>
                 @endif
-                <div class="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent"></div>
-                <div class="relative z-10 h-full flex flex-col justify-end p-4">
-                    <p class="text-[11px] font-bold text-white/70 mb-1">{{ $ruta->puntos->count() }} {{ $ruta->puntos->count() === 1 ? 'parada' : 'paradas' }}</p>
-                    <h3 class="text-sm font-extrabold text-white leading-snug line-clamp-3">{{ $ruta->titulo }}</h3>
+                <div class="absolute inset-0 "></div>
+                <div class="relative z-10 h-full flex flex-col justify-end p-4 text-center">
+                    <p class="text-[11px] font-bold text-white/90 mb-1">{{ $ruta->puntos->count() }} {{ $ruta->puntos->count() === 1 ? 'parada' : 'paradas' }}</p>
+                    {{-- <h3 class="text-sm font-extrabold text-white leading-snug line-clamp-3">{{ $ruta->titulo }}</h3> --}}
                 </div>
             </a>
             @endforeach
