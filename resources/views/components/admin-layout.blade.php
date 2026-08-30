@@ -197,6 +197,11 @@
 
             {{-- ══════════════ Contenido ══════════════ --}}
             <main class="flex-1 min-w-0">
+                @if(config('services.flow.sandbox'))
+                    <div class="bg-amber-400 text-amber-950 text-center text-xs font-bold py-1.5 px-4">
+                        ⚠️ FLOW EN SANDBOX — los pagos de Ticketera no son reales. Cambiar FLOW_SANDBOX antes de vender.
+                    </div>
+                @endif
                 @isset($header)
                     <header class="bg-white shadow">
                         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">

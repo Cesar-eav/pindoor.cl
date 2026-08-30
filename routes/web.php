@@ -104,7 +104,7 @@ Route::get('/rutas/{rutaSlug}/reservar/{operadorSlug}/disponibilidad', [\App\Htt
 Route::post('/rutas/{rutaSlug}/reservar/{operadorSlug}', [\App\Http\Controllers\ReservaController::class, 'store'])->name('rutas.reservar.store');
 Route::get('/rutas/{slug}', [RutaController::class, 'show'])->name('rutas.show');
 
-Route::post('/pagos/flow/confirmacion', [\App\Http\Controllers\Pagos\FlowWebhookController::class, 'confirmar'])->name('flow.confirmacion');
+Route::post('/pagos/flow/confirmacion', [\App\Http\Controllers\Pagos\FlowWebhookController::class, 'confirmar'])->name('flow.confirmacion')->middleware('throttle:30,1');
 Route::match(['get', 'post'], '/pagos/flow/retorno/{codigo}', [\App\Http\Controllers\Pagos\FlowRetornoController::class, 'show'])->name('flow.retorno');
 Route::get('/recomienda/{slug}', [RecomiendaController::class, 'show'])->name('recomienda.show');
 
@@ -251,6 +251,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     // Reservas de ticketera (rutas con operador)
     Route::get('/reservas', [\App\Http\Controllers\Admin\ReservaController::class, 'index'])->name('reservas.index');
     Route::patch('/reservas/{reserva}', [\App\Http\Controllers\Admin\ReservaController::class, 'update'])->name('reservas.update');
+    Route::get('/reservas/{reserva:codigo_reserva}/checkin', [\App\Http\Controllers\Admin\ReservaController::class, 'checkinShow'])->name('reservas.checkin.show');
+    Route::post('/reservas/{reserva:codigo_reserva}/checkin', [\App\Http\Controllers\Admin\ReservaController::class, 'checkinStore'])->name('reservas.checkin.store');
 
     // Prueba de pagos Flow (sandbox) — reserva de mentira, mismo flujo que una real
     Route::get('/pagos/prueba', [\App\Http\Controllers\Admin\PagoPruebaController::class, 'show'])->name('pagos.prueba');

@@ -26,6 +26,13 @@ class FlowService
             : 'https://www.flow.cl/api';
     }
 
+    private function assertCredenciales(): void
+    {
+        if (!$this->apiKey() || !$this->secretKey()) {
+            throw new FlowPaymentException('Credenciales de Flow no configuradas (FLOW_API_KEY / FLOW_SECRET_KEY).');
+        }
+    }
+
     public function firmar(array $params): string
     {
         ksort($params);
@@ -40,6 +47,8 @@ class FlowService
 
     public function crearOrdenPago(ReservaRuta $reserva): array
     {
+        $this->assertCredenciales();
+
         $params = [
             'apiKey'          => $this->apiKey(),
             'commerceOrder'   => $reserva->commerce_order,
@@ -78,6 +87,8 @@ class FlowService
 
     public function obtenerEstadoPago(string $token): array
     {
+        $this->assertCredenciales();
+
         $params = [
             'apiKey' => $this->apiKey(),
             'token'  => $token,
