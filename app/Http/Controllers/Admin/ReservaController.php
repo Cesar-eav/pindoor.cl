@@ -60,4 +60,25 @@ class ReservaController extends Controller
 
         return back()->with('success', "Reserva {$reserva->codigo_reserva} actualizada.");
     }
+
+    public function checkinShow(ReservaRuta $reserva)
+    {
+        return view('admin.reservas.checkin', compact('reserva'));
+    }
+
+    public function checkinStore(ReservaRuta $reserva)
+    {
+        if ($reserva->estado !== 'pagada') {
+            return back()->withErrors(['checkin' => 'Esta reserva no está pagada, no se puede marcar el ingreso.']);
+        }
+
+        if (!$reserva->checkin_at) {
+            $reserva->update([
+                'checkin_at' => now(),
+                'checkin_by' => auth()->id(),
+            ]);
+        }
+
+        return redirect()->route('admin.reservas.checkin.show', $reserva)->with('success', 'Ingreso registrado.');
+    }
 }

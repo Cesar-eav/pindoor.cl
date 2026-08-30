@@ -133,6 +133,11 @@
                                     @if($reserva->pagado_en)
                                         · Pagada: {{ $reserva->pagado_en->format('d/m/Y H:i') }}
                                     @endif
+                                    @if($reserva->estado === 'pagada')
+                                        · <a href="{{ route('admin.reservas.checkin.show', $reserva) }}" class="font-bold text-[#fc5648] hover:underline">
+                                            {{ $reserva->checkin_at ? '✅ Check-in '.$reserva->checkin_at->format('d/m H:i') : 'Marcar check-in' }}
+                                        </a>
+                                    @endif
                                 </div>
                                 <form action="{{ route('admin.reservas.update', $reserva) }}" method="POST" class="flex flex-col sm:flex-row gap-3 items-start">
                                     @csrf

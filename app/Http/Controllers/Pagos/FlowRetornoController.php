@@ -10,13 +10,6 @@ use Illuminate\Support\Facades\Log;
 
 class FlowRetornoController extends Controller
 {
-    private const MAPA_ESTADOS = [
-        1 => 'pendiente',
-        2 => 'pagada',
-        3 => 'rechazada',
-        4 => 'anulada',
-    ];
-
     public function show(Request $request, FlowService $flow, string $codigo)
     {
         $reserva = ReservaRuta::with('rutaOperador.ruta', 'horario')
@@ -28,18 +21,8 @@ class FlowRetornoController extends Controller
         if ($token && $reserva->estado === 'pendiente') {
             try {
                 $estadoFlow = $flow->obtenerEstadoPago($token);
-                $estado = self::MAPA_ESTADOS[$estadoFlow['status'] ?? null] ?? $reserva->estado;
-                $yaEstabaPagada = $reserva->estado === 'pagada';
-
-                $reserva->update([
-                    'estado'       => $estado,
-                    'payload_flow' => $estadoFlow,
-                    'pagado_en'    => $estado === 'pagada' ? ($reserva->pagado_en ?? now()) : $reserva->pagado_en,
-                ]);
-
-                if ($estado === 'pagada' && !$yaEstabaPagada) {
-                    $reserva->notificarPagada();
-                }
+                ReservaRuta::aplicarEstadoFlow($reserva->id, $estadoFlow);
+                $reserva->refresh();
             } catch (\Throwable $e) {
                 // El webhook es la fuente de verdad; si esta consulta de respaldo falla,
                 // se muestra igual la página con el último estado conocido en BD, pero

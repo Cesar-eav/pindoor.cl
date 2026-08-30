@@ -10,14 +10,6 @@ use Illuminate\Support\Facades\Log;
 
 class FlowWebhookController extends Controller
 {
-    // Estados de Flow: 1 pendiente, 2 pagada, 3 rechazada, 4 anulada.
-    private const MAPA_ESTADOS = [
-        1 => 'pendiente',
-        2 => 'pagada',
-        3 => 'rechazada',
-        4 => 'anulada',
-    ];
-
     public function confirmar(Request $request, FlowService $flow)
     {
         $token = $request->input('token');
@@ -40,18 +32,7 @@ class FlowWebhookController extends Controller
             return response('', 500);
         }
 
-        $estado = self::MAPA_ESTADOS[$estadoFlow['status'] ?? null] ?? $reserva->estado;
-        $yaEstabaPagada = $reserva->estado === 'pagada';
-
-        $reserva->update([
-            'estado'       => $estado,
-            'payload_flow' => $estadoFlow,
-            'pagado_en'    => $estado === 'pagada' ? ($reserva->pagado_en ?? now()) : $reserva->pagado_en,
-        ]);
-
-        if ($estado === 'pagada' && !$yaEstabaPagada) {
-            $reserva->notificarPagada();
-        }
+        ReservaRuta::aplicarEstadoFlow($reserva->id, $estadoFlow);
 
         return response('', 200);
     }
