@@ -51,6 +51,7 @@ class RutaController extends Controller
 
         $ruta = new Ruta();
         $ruta->slug            = $data['slug'];
+        $ruta->duracion        = $data['duracion'] ?? null;
         $ruta->imagen_portada  = $data['imagen_portada'] ?? null;
         $ruta->publicado       = $publicado;
         $ruta->publicado_en    = $data['publicado_en'];
@@ -102,6 +103,7 @@ class RutaController extends Controller
         }
 
         $ruta->slug      = $data['slug'];
+        $ruta->duracion  = $data['duracion'] ?? null;
         $ruta->publicado = $publicado;
         $ruta->setTranslation('titulo', 'es', $data['titulo_es'])
              ->setTranslation('titulo', 'en', $data['titulo_en'] ?? '')
@@ -150,6 +152,7 @@ class RutaController extends Controller
             'descripcion_es' => 'nullable|string|max:2000',
             'descripcion_en' => 'nullable|string|max:2000',
             'descripcion_fr' => 'nullable|string|max:2000',
+            'duracion'       => 'nullable|string|max:100',
             'imagen_portada' => 'nullable|image|max:25600',
             'publicado'      => 'nullable|boolean',
         ]);
