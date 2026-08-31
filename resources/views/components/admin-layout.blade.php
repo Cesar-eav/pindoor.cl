@@ -197,9 +197,10 @@
 
             {{-- ══════════════ Contenido ══════════════ --}}
             <main class="flex-1 min-w-0">
-                @if(config('services.flow.sandbox'))
+                @if(app(\App\Services\FlowService::class)->modo() === 'sandbox')
                     <div class="bg-amber-400 text-amber-950 text-center text-xs font-bold py-1.5 px-4">
-                        ⚠️ FLOW EN SANDBOX — los pagos de Ticketera no son reales. Cambiar FLOW_SANDBOX antes de vender.
+                        ⚠️ FLOW EN SANDBOX — los pagos de Ticketera no son reales.
+                        <a href="{{ route('admin.configuracion.index') }}" class="underline">Cambiar a Producción antes de vender.</a>
                     </div>
                 @endif
                 @isset($header)

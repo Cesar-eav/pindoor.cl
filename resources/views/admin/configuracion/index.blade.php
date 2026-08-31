@@ -214,6 +214,75 @@
                 </button>
             </form>
 
+            {{-- Credenciales de pago Flow --}}
+            <form action="{{ route('admin.configuracion.flow') }}" method="POST" class="mt-6"
+                  x-data="{ modo: '{{ old('flow_modo', $flowModo) }}' }">
+                @csrf
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <p class="font-bold text-gray-900">Credenciales de pago Flow</p>
+                    <p class="text-xs text-gray-500 mt-1 mb-4">
+                        Modo activo y llaves de API/Secret para Sandbox (pruebas) y Producción (pagos reales).
+                        Deja una llave Secret en blanco para no modificarla.
+                    </p>
+
+                    <label class="text-sm font-semibold text-gray-700 block mb-1">Modo activo</label>
+                    <div class="flex gap-2 mb-5">
+                        <label class="flex-1 flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2.5 cursor-pointer"
+                               :class="modo === 'sandbox' ? 'border-[#fc5648] bg-[#fff0ef]' : ''">
+                            <input type="radio" name="flow_modo" value="sandbox" x-model="modo"
+                                   class="text-[#fc5648] focus:ring-[#fc5648]">
+                            <span class="text-sm font-medium">Sandbox (pruebas)</span>
+                        </label>
+                        <label class="flex-1 flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2.5 cursor-pointer"
+                               :class="modo === 'produccion' ? 'border-[#fc5648] bg-[#fff0ef]' : ''">
+                            <input type="radio" name="flow_modo" value="produccion" x-model="modo"
+                                   class="text-[#fc5648] focus:ring-[#fc5648]">
+                            <span class="text-sm font-medium">Producción (real)</span>
+                        </label>
+                    </div>
+                    @error('flow_modo') <p class="text-xs text-red-500 -mt-3 mb-4">{{ $message }}</p> @enderror
+
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Sandbox</p>
+                            <label for="flow_sandbox_api_key" class="text-sm font-semibold text-gray-700 block mb-1">API Key</label>
+                            <input type="text" id="flow_sandbox_api_key" name="flow_sandbox_api_key"
+                                   value="{{ old('flow_sandbox_api_key', $flowSandboxApiKey) }}"
+                                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                            @error('flow_sandbox_api_key') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+
+                            <label for="flow_sandbox_secret_key" class="text-sm font-semibold text-gray-700 block mt-3 mb-1">Secret Key</label>
+                            <input type="password" id="flow_sandbox_secret_key" name="flow_sandbox_secret_key"
+                                   placeholder="{{ $flowSandboxSecretConfigurado ? '•••••••••••••• (configurada — deja en blanco para no cambiarla)' : 'No configurada' }}"
+                                   autocomplete="new-password"
+                                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                            @error('flow_sandbox_secret_key') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="pt-4 border-t border-gray-100">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Producción</p>
+                            <label for="flow_produccion_api_key" class="text-sm font-semibold text-gray-700 block mb-1">API Key</label>
+                            <input type="text" id="flow_produccion_api_key" name="flow_produccion_api_key"
+                                   value="{{ old('flow_produccion_api_key', $flowProduccionApiKey) }}"
+                                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                            @error('flow_produccion_api_key') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+
+                            <label for="flow_produccion_secret_key" class="text-sm font-semibold text-gray-700 block mt-3 mb-1">Secret Key</label>
+                            <input type="password" id="flow_produccion_secret_key" name="flow_produccion_secret_key"
+                                   placeholder="{{ $flowProduccionSecretConfigurado ? '•••••••••••••• (configurada — deja en blanco para no cambiarla)' : 'No configurada' }}"
+                                   autocomplete="new-password"
+                                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                            @error('flow_produccion_secret_key') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit"
+                        class="mt-5 bg-[#fc5648] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#d94439] transition">
+                    Guardar
+                </button>
+            </form>
+
             {{-- Ascensores fuera de servicio --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
                 <p class="font-bold text-gray-900">Ascensores fuera de servicio</p>
