@@ -57,6 +57,7 @@
                 'green'  => 'bg-green-100 text-green-700',
                 'red'    => 'bg-red-100 text-red-700',
                 'gray'   => 'bg-gray-100 text-gray-700',
+                'purple' => 'bg-purple-100 text-purple-700',
             ];
             @endphp
 
@@ -139,6 +140,22 @@
                                         </a>
                                     @endif
                                 </div>
+
+                                @if($reserva->payload_flow || $reserva->flow_order)
+                                <div class="text-xs text-gray-500 mb-3 pb-3 border-b border-gray-200">
+                                    <span class="font-bold text-gray-400 uppercase text-[10px]">Pago Flow</span>
+                                    @if($reserva->flow_order) · Orden Flow: #{{ $reserva->flow_order }} @endif
+                                    @if($reserva->payer_email) · Pagador: {{ $reserva->payer_email }} @endif
+                                    @if($reserva->medio_pago) · Medio: {{ $reserva->medio_pago }} @endif
+                                    @if($reserva->monto_pagado) · Monto: ${{ number_format($reserva->monto_pagado, 0, ',', '.') }} @endif
+                                    @if($reserva->fecha_pago_flow) · Fecha: {{ $reserva->fecha_pago_flow->format('d/m/Y H:i') }} @endif
+
+                                    @if($reserva->notaFlow())
+                                        <div class="mt-1 text-amber-600 font-semibold">⚠️ {{ $reserva->notaFlow() }}</div>
+                                    @endif
+                                </div>
+                                @endif
+
                                 <form action="{{ route('admin.reservas.update', $reserva) }}" method="POST" class="flex flex-col sm:flex-row gap-3 items-start">
                                     @csrf
                                     @method('PATCH')
@@ -159,6 +176,67 @@
                                         Guardar
                                     </button>
                                 </form>
+
+                                @if(in_array($reserva->estado, ['pagada', 'pendiente'], true))
+                                <div class="flex flex-col sm:flex-row gap-3 mt-3 pt-3 border-t border-gray-200">
+                                    @if($reserva->estado === 'pagada')
+                                    <form action="{{ route('admin.reservas.reembolsar', $reserva) }}" method="POST" class="flex-1 flex flex-col sm:flex-row gap-2 items-start"
+                                          onsubmit="return confirm('¿Confirmas marcar esta reserva como reembolsada? Se liberará el cupo.');">
+                                        @csrf
+                                        <input type="text" name="motivo" placeholder="Motivo del reembolso (opcional)"
+                                               class="flex-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-400 outline-none">
+                                        <button type="submit"
+                                                class="shrink-0 bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-purple-700 transition">
+                                            Reembolsar y liberar cupo
+                                        </button>
+                                    </form>
+                                    @endif
+
+                                    <form action="{{ route('admin.reservas.reagendar', $reserva) }}" method="POST" class="flex-1 flex flex-wrap gap-2 items-start"
+                                          onsubmit="return confirm('¿Confirmas reagendar esta reserva al nuevo horario/fecha?');">
+                                        @csrf
+                                        <select name="nuevo_horario_id" required
+                                                class="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-400 outline-none">
+                                            <option value="">Horario…</option>
+                                            @foreach($reserva->rutaOperador->horarios->where('activo', true) as $h)
+                                                <option value="{{ $h->id }}" {{ $h->id === $reserva->ruta_operador_horario_id ? 'selected' : '' }}>
+                                                    {{ $h->resumenTexto() }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <input type="date" name="nueva_fecha" required value="{{ $reserva->fecha_visita->format('Y-m-d') }}"
+                                               class="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-400 outline-none">
+                                        <input type="text" name="motivo" placeholder="Motivo (opcional)"
+                                               class="flex-1 min-w-35 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-400 outline-none">
+                                        <button type="submit"
+                                                class="shrink-0 bg-gray-900 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-black transition">
+                                            Reagendar
+                                        </button>
+                                    </form>
+                                </div>
+                                @endif
+
+                                @if($reserva->gestiones->isNotEmpty())
+                                <div class="mt-3 pt-3 border-t border-gray-200">
+                                    <span class="font-bold text-gray-400 uppercase text-[10px]">Historial de gestión</span>
+                                    <ul class="mt-1 space-y-1 text-xs text-gray-600">
+                                        @foreach($reserva->gestiones as $g)
+                                        <li>
+                                            {{ \App\Models\ReservaGestion::TIPOS_INFO[$g->tipo]['icon'] }}
+                                            <span class="font-semibold">{{ \App\Models\ReservaGestion::TIPOS_INFO[$g->tipo]['label'] }}</span>
+                                            @if($g->tipo === 'reembolso')
+                                                ({{ $g->estado_anterior }} → {{ $g->estado_nuevo }})
+                                            @elseif($g->tipo === 'reagendamiento')
+                                                (de {{ $g->fecha_anterior?->format('d/m/Y') }} {{ $g->horarioAnterior?->resumenTexto() }}
+                                                 a {{ $g->fecha_nueva?->format('d/m/Y') }} {{ $g->horarioNuevo?->resumenTexto() }})
+                                            @endif
+                                            @if($g->motivo) — {{ $g->motivo }} @endif
+                                            <span class="text-gray-400">· {{ $g->admin?->name ?? 'Sistema' }}, {{ $g->created_at->format('d/m/Y H:i') }}</span>
+                                        </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                                @endif
                             </td>
                         </tr>
                         @empty

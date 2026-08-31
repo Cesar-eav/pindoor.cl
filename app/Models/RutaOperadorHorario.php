@@ -64,4 +64,18 @@ class RutaOperadorHorario extends Model
     {
         return max(0, $this->cupo_maximo - $this->cupoOcupado($fecha));
     }
+
+    public function resumenTexto(): string
+    {
+        $hora = substr($this->hora, 0, 5);
+
+        if ($this->tipo === 'fecha') {
+            return $this->fecha->translatedFormat('d \d\e F, Y') . " · {$hora} hrs";
+        }
+
+        $nombres = [1 => 'Lun', 2 => 'Mar', 3 => 'Mié', 4 => 'Jue', 5 => 'Vie', 6 => 'Sáb', 7 => 'Dom'];
+        $dias = collect($this->dias_semana ?? [])->sort()->map(fn ($d) => $nombres[$d] ?? '')->implode(', ');
+
+        return "{$dias} · {$hora} hrs";
+    }
 }

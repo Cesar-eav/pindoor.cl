@@ -49,6 +49,12 @@ class ReservaController extends Controller
 
         $fecha = Carbon::parse($request->input('fecha'))->startOfDay();
 
+        $rutaOperador->load('bloqueos');
+
+        if ($rutaOperador->fechaBloqueada($fecha)) {
+            return response()->json(['horarios' => []]);
+        }
+
         $horarios = $rutaOperador->horariosActivos()->get()
             ->filter(fn (RutaOperadorHorario $h) => $h->aplicaEnFecha($fecha))
             ->map(fn (RutaOperadorHorario $h) => [
@@ -60,6 +66,45 @@ class ReservaController extends Controller
             ->values();
 
         return response()->json(['horarios' => $horarios]);
+    }
+
+    public function disponibilidadMes(Request $request, string $rutaSlug, string $operadorSlug)
+    {
+        [, , $rutaOperador] = $this->rutaOperadorTicketing($rutaSlug, $operadorSlug);
+
+        $request->validate(['mes' => 'required|date_format:Y-m']);
+
+        $inicioMes = Carbon::parse($request->input('mes') . '-01')->startOfDay();
+        $finMes = $inicioMes->copy()->endOfMonth();
+        $hoy = now()->startOfDay();
+        $inicio = $inicioMes->lt($hoy) ? $hoy->copy() : $inicioMes->copy();
+
+        $rutaOperador->load('bloqueos');
+        $horarios = $rutaOperador->horariosActivos()->get();
+
+        $dias = [];
+
+        for ($fecha = $inicio->copy(); $fecha->lte($finMes); $fecha->addDay()) {
+            $clave = $fecha->format('Y-m-d');
+
+            if ($rutaOperador->fechaBloqueada($fecha)) {
+                $dias[$clave] = 'no_disponible';
+                continue;
+            }
+
+            $aplican = $horarios->filter(fn (RutaOperadorHorario $h) => $h->aplicaEnFecha($fecha));
+
+            if ($aplican->isEmpty()) {
+                $dias[$clave] = 'no_disponible';
+                continue;
+            }
+
+            $dias[$clave] = $aplican->contains(fn (RutaOperadorHorario $h) => $h->cupoDisponible($fecha) > 0)
+                ? 'disponible'
+                : 'agotado';
+        }
+
+        return response()->json(['dias' => $dias]);
     }
 
     public function store(Request $request, string $rutaSlug, string $operadorSlug, FlowService $flow)
@@ -83,6 +128,12 @@ class ReservaController extends Controller
 
         if (!$horario || !$horario->aplicaEnFecha($fecha)) {
             return back()->withInput()->withErrors(['horario_id' => 'Ese horario ya no está disponible para la fecha elegida.']);
+        }
+
+        $rutaOperador->load('bloqueos');
+
+        if ($rutaOperador->fechaBloqueada($fecha)) {
+            return back()->withInput()->withErrors(['fecha_visita' => 'Esa fecha no está disponible.']);
         }
 
         try {

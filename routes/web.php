@@ -101,6 +101,7 @@ Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/rutas', [RutaController::class, 'index'])->name('rutas.index');
 Route::get('/rutas/{rutaSlug}/reservar/{operadorSlug}', [\App\Http\Controllers\ReservaController::class, 'show'])->name('rutas.reservar');
 Route::get('/rutas/{rutaSlug}/reservar/{operadorSlug}/disponibilidad', [\App\Http\Controllers\ReservaController::class, 'disponibilidad'])->name('rutas.reservar.disponibilidad');
+Route::get('/rutas/{rutaSlug}/reservar/{operadorSlug}/disponibilidad-mes', [\App\Http\Controllers\ReservaController::class, 'disponibilidadMes'])->name('rutas.reservar.mes');
 Route::post('/rutas/{rutaSlug}/reservar/{operadorSlug}', [\App\Http\Controllers\ReservaController::class, 'store'])->name('rutas.reservar.store');
 Route::get('/rutas/{slug}', [RutaController::class, 'show'])->name('rutas.show');
 
@@ -253,6 +254,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::patch('/reservas/{reserva}', [\App\Http\Controllers\Admin\ReservaController::class, 'update'])->name('reservas.update');
     Route::get('/reservas/{reserva:codigo_reserva}/checkin', [\App\Http\Controllers\Admin\ReservaController::class, 'checkinShow'])->name('reservas.checkin.show');
     Route::post('/reservas/{reserva:codigo_reserva}/checkin', [\App\Http\Controllers\Admin\ReservaController::class, 'checkinStore'])->name('reservas.checkin.store');
+    Route::post('/reservas/{reserva}/reembolsar', [\App\Http\Controllers\Admin\ReservaController::class, 'reembolsar'])->name('reservas.reembolsar');
+    Route::post('/reservas/{reserva}/reagendar', [\App\Http\Controllers\Admin\ReservaController::class, 'reagendar'])->name('reservas.reagendar');
 
     // Prueba de pagos Flow (sandbox) — reserva de mentira, mismo flujo que una real
     Route::get('/pagos/prueba', [\App\Http\Controllers\Admin\PagoPruebaController::class, 'show'])->name('pagos.prueba');

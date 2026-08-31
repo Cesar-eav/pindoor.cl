@@ -3,15 +3,19 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ReservaGestion;
 use App\Models\ReservaRuta;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ReservaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = ReservaRuta::with(['rutaOperador.ruta', 'rutaOperador.operador', 'horario'])
-            ->latest();
+        $query = ReservaRuta::with([
+            'rutaOperador.ruta', 'rutaOperador.operador', 'rutaOperador.horarios',
+            'horario', 'gestiones.admin', 'gestiones.horarioAnterior', 'gestiones.horarioNuevo',
+        ])->latest();
 
         if ($request->filled('estado')) {
             $query->where('estado', $request->estado);
@@ -53,12 +57,56 @@ class ReservaController extends Controller
             'notas_admin' => 'nullable|string|max:2000',
         ]);
 
+        $notaNueva = $data['notas_admin'] ?? null;
+
+        if ($notaNueva && $notaNueva !== $reserva->notas_admin) {
+            ReservaGestion::create([
+                'ticketera_reserva_id' => $reserva->id,
+                'tipo'                 => 'nota',
+                'motivo'               => $notaNueva,
+                'admin_id'             => auth()->id(),
+            ]);
+        }
+
         $reserva->update([
             'contactado'  => $request->boolean('contactado'),
-            'notas_admin' => $data['notas_admin'] ?? null,
+            'notas_admin' => $notaNueva,
         ]);
 
         return back()->with('success', "Reserva {$reserva->codigo_reserva} actualizada.");
+    }
+
+    public function reembolsar(Request $request, ReservaRuta $reserva)
+    {
+        $data = $request->validate(['motivo' => 'nullable|string|max:1000']);
+
+        $ok = ReservaRuta::reembolsar($reserva->id, $data['motivo'] ?? null, auth()->id());
+
+        if (!$ok) {
+            return back()->withErrors(['reembolso' => 'Solo se pueden reembolsar reservas que estén pagadas.']);
+        }
+
+        return back()->with('success', "Reserva {$reserva->codigo_reserva} marcada como reembolsada. El cupo quedó liberado.");
+    }
+
+    public function reagendar(Request $request, ReservaRuta $reserva)
+    {
+        $data = $request->validate([
+            'nuevo_horario_id' => ['required', 'integer', Rule::exists('ruta_operador_horarios', 'id')
+                ->where('ruta_operador_turistico_id', $reserva->ruta_operador_turistico_id)],
+            'nueva_fecha' => ['required', 'date'],
+            'motivo'      => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $resultado = ReservaRuta::reagendar(
+            $reserva->id, $data['nuevo_horario_id'], $data['nueva_fecha'], $data['motivo'] ?? null, auth()->id()
+        );
+
+        if (!$resultado['ok']) {
+            return back()->withErrors(['reagendar' => $resultado['error']]);
+        }
+
+        return back()->with('success', "Reserva {$reserva->codigo_reserva} reagendada correctamente.");
     }
 
     public function checkinShow(ReservaRuta $reserva)
