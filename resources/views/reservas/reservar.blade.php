@@ -113,7 +113,12 @@
                 <li>Niño (hasta {{ $rutaOperador->edad_maxima_nino }} años): <span class="font-bold text-gray-800">${{ number_format($rutaOperador->precio_nino, 0, ',', '.') }}</span> por persona</li>
                 <li>1 persona sola: <span class="font-bold text-gray-800">${{ number_format($rutaOperador->precio_individual, 0, ',', '.') }}</span> (tarifa individual)</li>
             </ul>
-            <p class="text-sm text-red-600 mt-4 pt-3 border-t border-gray-100">* Tour disponible solo en español 🇪🇸</p>
+            <div class="text-xs text-gray-500 mt-4 pt-3 border-t border-gray-100 space-y-1">
+                @if($ruta->duracion)
+                <p>Duración: <span class="font-bold text-gray-700">{{ $ruta->duracion }}</span></p>
+                @endif
+                <p class="text-red-600 text-sm">* Tour disponible solo en español 🇪🇸</p>
+            </div>
         </div>
 
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">

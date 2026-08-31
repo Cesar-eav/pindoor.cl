@@ -155,6 +155,14 @@
                 </div>
             </div>
 
+            {{-- Duración --}}
+            <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Duración</label>
+                <input type="text" name="duracion" maxlength="100" placeholder="Ej: 3 horas aprox."
+                       value="{{ old('duracion', $ruta?->duracion) }}"
+                       class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+            </div>
+
             {{-- Imagen portada --}}
             <div>
                 <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Imagen de portada</label>

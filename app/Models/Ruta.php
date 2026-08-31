@@ -22,6 +22,7 @@ class Ruta extends Model
         'titulo',
         'slug',
         'descripcion',
+        'duracion',
         'imagen_portada',
         'publicado',
         'publicado_en',
