@@ -107,6 +107,16 @@
         </div>
 
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <h2 class="text-sm font-bold text-gray-700 mb-3">Precios</h2>
+            <ul class="space-y-1.5 text-sm text-gray-600">
+                <li>Adulto (2 o más personas): <span class="font-bold text-gray-800">${{ number_format($rutaOperador->precio_grupo_adulto, 0, ',', '.') }}</span> por persona</li>
+                <li>Niño (hasta {{ $rutaOperador->edad_maxima_nino }} años): <span class="font-bold text-gray-800">${{ number_format($rutaOperador->precio_nino, 0, ',', '.') }}</span> por persona</li>
+                <li>1 persona sola: <span class="font-bold text-gray-800">${{ number_format($rutaOperador->precio_individual, 0, ',', '.') }}</span> (tarifa individual)</li>
+            </ul>
+            <p class="text-sm text-red-600 mt-4 pt-3 border-t border-gray-100">* Tour disponible solo en español 🇪🇸</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <label class="block text-sm font-bold text-gray-700 mb-3">¿Cuántos van?</label>
             <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -115,7 +125,7 @@
                            class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none disabled:bg-gray-50 disabled:text-gray-400">
                 </div>
                 <div>
-                    <label class="block text-xs text-gray-500 mb-1">Niños</label>
+                    <label class="block text-xs text-gray-500 mb-1">Niños (hasta {{ $rutaOperador->edad_maxima_nino }} años)</label>
                     <input type="number" name="cantidad_ninos" x-model.number="ninos" min="0" :max="cupoMaximo()" :disabled="!horarioId"
                            class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none disabled:bg-gray-50 disabled:text-gray-400">
                 </div>
