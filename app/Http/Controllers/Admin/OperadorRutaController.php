@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\OperadorTuristico;
 use App\Models\Ruta;
 use App\Models\RutaOperador;
+use App\Models\RutaOperadorBloqueo;
 use App\Models\RutaOperadorHorario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +44,7 @@ class OperadorRutaController extends Controller
     {
         abort_unless($rutaOperador->operador_turistico_id === $operador->id, 404);
 
-        $rutaOperador->load('ruta', 'horarios');
+        $rutaOperador->load('ruta', 'horarios', 'bloqueos');
 
         return view('admin.operadores.rutas.edit', compact('operador', 'rutaOperador'));
     }
@@ -67,6 +68,9 @@ class OperadorRutaController extends Controller
             'horarios.*.fecha'      => 'nullable|date',
             'horarios.*.hora'       => 'required_with:horarios|date_format:H:i',
             'horarios.*.cupo_maximo' => 'required_with:horarios|integer|min:1',
+            'bloqueos'              => 'nullable|array',
+            'bloqueos.*.fecha'      => 'required_with:bloqueos|date',
+            'bloqueos.*.motivo'     => 'nullable|string|max:255',
         ]);
 
         $data['ticketing_activo'] = $request->boolean('ticketing_activo');
@@ -121,6 +125,18 @@ class OperadorRutaController extends Controller
                         $horario->delete();
                     }
                 });
+
+            $fechasBloqueadasEnviadas = [];
+
+            foreach ($data['bloqueos'] ?? [] as $fila) {
+                RutaOperadorBloqueo::updateOrCreate(
+                    ['ruta_operador_turistico_id' => $rutaOperador->id, 'fecha' => $fila['fecha']],
+                    ['motivo' => $fila['motivo'] ?? null]
+                );
+                $fechasBloqueadasEnviadas[] = $fila['fecha'];
+            }
+
+            $rutaOperador->bloqueos()->whereNotIn('fecha', $fechasBloqueadasEnviadas)->delete();
         });
 
         return redirect()->route('admin.operadores.rutas.edit', [$operador, $rutaOperador])

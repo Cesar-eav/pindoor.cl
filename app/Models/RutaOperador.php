@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class RutaOperador extends Pivot
@@ -58,6 +59,16 @@ class RutaOperador extends Pivot
             'ruta_operador_turistico_id',
             'ruta_operador_horario_id'
         );
+    }
+
+    public function bloqueos()
+    {
+        return $this->hasMany(RutaOperadorBloqueo::class, 'ruta_operador_turistico_id');
+    }
+
+    public function fechaBloqueada(Carbon $fecha): bool
+    {
+        return $this->bloqueos->contains(fn (RutaOperadorBloqueo $b) => $b->fecha->isSameDay($fecha));
     }
 
     public function calcularPrecio(int $adultos, int $ninos): int

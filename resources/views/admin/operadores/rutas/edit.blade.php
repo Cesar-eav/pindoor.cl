@@ -8,6 +8,11 @@
         'hora'        => substr($h->hora, 0, 5),
         'cupo_maximo' => $h->cupo_maximo,
     ])->values();
+    $bloqueosData = $rutaOperador->bloqueos->map(fn($b) => [
+        '_key'   => 'b' . $b->id,
+        'fecha'  => $b->fecha->format('Y-m-d'),
+        'motivo' => $b->motivo ?? '',
+    ])->values();
 @endphp
 <x-admin-layout>
     <x-slot name="header">
@@ -21,7 +26,7 @@
         </div>
     </x-slot>
 
-    <div class="py-12" x-data="ticketeraForm(@js($horariosData))">
+    <div class="py-12" x-data="ticketeraForm(@js($horariosData), @js($bloqueosData))">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
 
             @if(session('success'))
@@ -153,6 +158,39 @@
                     </button>
                 </div>
 
+                {{-- Fechas bloqueadas --}}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                    <h3 class="text-sm font-bold text-gray-700 mb-1">Fechas bloqueadas</h3>
+                    <p class="text-xs text-gray-400 mb-4">Cierra fechas puntuales (feriados, mantenciones) para todos los horarios de esta ruta.</p>
+
+                    <template x-for="(b, index) in bloqueos" :key="b._key">
+                        <div class="flex flex-wrap items-end gap-3 border border-gray-100 rounded-xl p-4 mb-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 mb-1">Fecha</label>
+                                <input type="date" :name="`bloqueos[${index}][fecha]`" x-model="b.fecha" required
+                                       class="px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                            </div>
+
+                            <div class="flex-1 min-w-48">
+                                <label class="block text-[11px] font-semibold text-gray-500 mb-1">Motivo (opcional)</label>
+                                <input type="text" :name="`bloqueos[${index}][motivo]`" x-model="b.motivo"
+                                       placeholder="Ej: Feriado, mantención"
+                                       class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                            </div>
+
+                            <button type="button" @click="quitarBloqueo(index)"
+                                    class="text-xs text-red-400 hover:text-red-600 font-bold px-2 py-2">
+                                Quitar
+                            </button>
+                        </div>
+                    </template>
+
+                    <button type="button" @click="agregarBloqueo()"
+                            class="text-sm font-bold text-[#fc5648] hover:underline">
+                        + Bloquear fecha
+                    </button>
+                </div>
+
                 <div class="flex justify-end">
                     <button type="submit"
                             class="bg-[#fc5648] hover:bg-[#e64536] text-white font-bold px-6 py-2.5 rounded-xl text-sm transition">
@@ -164,7 +202,7 @@
     </div>
 
     <script>
-    function ticketeraForm(horariosIniciales) {
+    function ticketeraForm(horariosIniciales, bloqueosIniciales) {
         return {
             diasSemana: [
                 { valor: 1, nombre: 'Lun' }, { valor: 2, nombre: 'Mar' }, { valor: 3, nombre: 'Mié' },
@@ -172,6 +210,7 @@
                 { valor: 7, nombre: 'Dom' },
             ],
             horarios: horariosIniciales,
+            bloqueos: bloqueosIniciales,
             agregar() {
                 this.horarios.push({
                     _key: 'nuevo' + Date.now() + Math.random(),
@@ -187,6 +226,15 @@
                 } else if (!marcado) {
                     h.dias_semana = h.dias_semana.filter(d => d !== valor);
                 }
+            },
+            agregarBloqueo() {
+                this.bloqueos.push({
+                    _key: 'nuevo' + Date.now() + Math.random(),
+                    fecha: '', motivo: '',
+                });
+            },
+            quitarBloqueo(index) {
+                this.bloqueos.splice(index, 1);
             },
         };
     }
