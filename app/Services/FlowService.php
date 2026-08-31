@@ -3,25 +3,31 @@
 namespace App\Services;
 
 use App\Exceptions\FlowPaymentException;
+use App\Models\Configuracion;
 use App\Models\ReservaRuta;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class FlowService
 {
+    public function modo(): string
+    {
+        return Configuracion::get('flow_modo') ?: (config('services.flow.sandbox') ? 'sandbox' : 'produccion');
+    }
+
     private function apiKey(): string
     {
-        return (string) config('services.flow.api_key');
+        return (string) (Configuracion::get("flow_{$this->modo()}_api_key") ?: config('services.flow.api_key'));
     }
 
     private function secretKey(): string
     {
-        return (string) config('services.flow.secret_key');
+        return (string) (Configuracion::get("flow_{$this->modo()}_secret_key") ?: config('services.flow.secret_key'));
     }
 
     private function baseUrl(): string
     {
-        return config('services.flow.sandbox')
+        return $this->modo() === 'sandbox'
             ? 'https://sandbox.flow.cl/api'
             : 'https://www.flow.cl/api';
     }

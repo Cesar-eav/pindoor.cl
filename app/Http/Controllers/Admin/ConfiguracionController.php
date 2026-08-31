@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Configuracion;
 use App\Models\PuntoInteres;
+use App\Services\FlowService;
 use App\Services\HomeSeccionesService;
 use Illuminate\Http\Request;
 
@@ -49,9 +50,16 @@ class ConfiguracionController extends Controller
             ->orderBy('title')
             ->get(['id', 'title', 'sector', 'fuera_de_servicio', 'fuera_de_servicio_motivo']);
 
+        $flowModo = (new FlowService())->modo();
+        $flowSandboxApiKey = Configuracion::get('flow_sandbox_api_key');
+        $flowProduccionApiKey = Configuracion::get('flow_produccion_api_key');
+        $flowSandboxSecretConfigurado = filled(Configuracion::get('flow_sandbox_secret_key'));
+        $flowProduccionSecretConfigurado = filled(Configuracion::get('flow_produccion_secret_key'));
+
         return view('admin.configuracion.index', compact(
             'aprobacionActiva', 'homePorCategoria', 'idsExcluidos', 'puntosData', 'categoriasDisponibles', 'ascensores',
-            'ordenSecciones', 'etiquetasSecciones', 'notificacionesEmails', 'notificacionesTelegramChatId'
+            'ordenSecciones', 'etiquetasSecciones', 'notificacionesEmails', 'notificacionesTelegramChatId',
+            'flowModo', 'flowSandboxApiKey', 'flowProduccionApiKey', 'flowSandboxSecretConfigurado', 'flowProduccionSecretConfigurado'
         ));
     }
 
@@ -112,6 +120,27 @@ class ConfiguracionController extends Controller
         Configuracion::set('puntos_demo_excluidos', $ids->implode(','));
 
         return back()->with('success', 'Puntos de ejemplo actualizados.');
+    }
+
+    public function actualizarFlow(Request $request)
+    {
+        $data = $request->validate([
+            'flow_modo'                  => 'required|in:sandbox,produccion',
+            'flow_sandbox_api_key'       => 'nullable|string|max:100',
+            'flow_sandbox_secret_key'    => 'nullable|string|max:100',
+            'flow_produccion_api_key'    => 'nullable|string|max:100',
+            'flow_produccion_secret_key' => 'nullable|string|max:100',
+        ]);
+
+        Configuracion::set('flow_modo', $data['flow_modo']);
+
+        foreach (['flow_sandbox_api_key', 'flow_sandbox_secret_key', 'flow_produccion_api_key', 'flow_produccion_secret_key'] as $campo) {
+            if (filled($data[$campo] ?? null)) {
+                Configuracion::set($campo, trim($data[$campo]));
+            }
+        }
+
+        return back()->with('success', 'Credenciales de Flow guardadas.');
     }
 
     public function actualizarAscensores(Request $request)
