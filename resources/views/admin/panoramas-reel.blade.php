@@ -153,7 +153,7 @@
                  :class="orientation === 'horizontal' ? 'overflow-x-auto overflow-y-hidden' : 'overflow-y-auto overflow-x-hidden'"
                  style="scrollbar-width:none"
                  @click="paused = !paused">
-                <div :class="orientation === 'horizontal' ? 'flex gap-4 px-4 h-full items-center' : 'flex flex-col gap-4 py-4 items-center'"
+                <div :class="orientation === 'horizontal' ? 'flex gap-4 px-4 h-full items-center' : 'flex flex-col gap-4 py-4 items-center object-cover'"
                      :style="orientation === 'horizontal' ? 'width: max-content' : 'height: max-content'">
                     @for($vuelta = 0; $vuelta < 2; $vuelta++)
                         @foreach($panoramas as $panorama)
@@ -161,7 +161,7 @@
                         {{-- La 2ª vuelta solo existe para el loop sin cortes; si "repetir" está
                              desactivado se oculta y el scroll se detiene tras el único pase real. --}}
                         <div x-show="{{ $vuelta === 0 ? 'true' : 'repetir' }}"
-                             :class="orientation === 'horizontal' ? 'w-56 h-80' : 'w-72 h-[60dvh] max-h-130'"
+                             :class="orientation === 'horizontal' ? 'w-56 h-80' : 'aspect-4/5 h-[60dvh] max-h-130 w-auto'"
                              class="relative shrink-0 rounded-3xl overflow-hidden shadow-2xl border border-white/10">
                             @if($panorama->imagen)
                                 <img src="{{ asset('storage/' . $panorama->imagen) }}" alt="{{ $panorama->titulo }}"
