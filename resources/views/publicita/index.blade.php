@@ -21,9 +21,9 @@
                 Sé parte de la <span class="text-[#fc5648]">red</span> de Valparaíso
             </h1>
             <p class="text-white/60 text-base md:text-lg mb-6">
-                Elige cómo quieres aparecer en la guía turística y cultural más completa de la ciudad. Es gratis.
+                Elige cómo quieres aparecer en la guía turística y cultural más completa de la ciudad. 
             </p>
-            <p class="text-white text-sm">
+            <p class="text-white text-lg bg-blue-900">
                 ¿Ya tienes cuenta?
                 <a href="{{ route('login') }}" class="font-bold text-white underline underline-offset-2 hover:text-white/80 transition">Inicia sesión</a>
             </p>
