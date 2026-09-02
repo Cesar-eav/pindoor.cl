@@ -286,6 +286,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Gestión de Clientes (negocios)
     Route::get('/clientes', [AdminController::class, 'clientes'])->name('clientes');
+    Route::get('/clientes/dashboard', [AdminController::class, 'dashboardClientes'])->name('clientes.dashboard');
     Route::post('/clientes/destacados', [AdminController::class, 'actualizarDestacados'])->name('clientes.destacados');
     Route::get('/puntos/{punto}/activar-cliente', [AdminController::class, 'mostrarActivarCliente'])->name('clientes.activar.form');
     Route::post('/puntos/{punto}/activar-cliente', [AdminController::class, 'activarCliente'])->name('clientes.activar');
@@ -294,6 +295,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::patch('/puntos/{punto}/rechazar-cliente', [AdminController::class, 'rechazarCliente'])->name('clientes.rechazar');
     Route::get('/puntos/{punto}/modulos', [AdminController::class, 'editarModulos'])->name('clientes.modulos.form');
     Route::put('/puntos/{punto}/modulos', [AdminController::class, 'actualizarModulos'])->name('clientes.modulos');
+    Route::get('/puntos/{punto}/actividad', [AdminController::class, 'actividadCliente'])->name('clientes.actividad');
 
     // Reclamos de perfil
     Route::get('/reclamos', [ReclamoController::class, 'index'])->name('reclamos.index');

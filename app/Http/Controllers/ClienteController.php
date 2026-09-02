@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActividadCliente;
 use App\Models\Categoria;
 use App\Models\Configuracion;
 use App\Models\ImagenPunto;
@@ -282,6 +283,8 @@ class ClienteController extends Controller
             'modulos_habilitados'=> PuntoInteres::modulosDefecto($data['categoria_id']),
         ]);
 
+        ActividadCliente::registrar($punto, 'negocio_creado', $punto->title);
+
         Log::info('[onboarding] punto creado', ['user_id' => $userId, 'punto_id' => $punto->id, 'slug' => $slug, 'requiere_aprobacion' => $requiereAprobacion]);
 
         $mensaje = 'Guardamos tu espacio. Sube al menos una foto desde tu panel para que sea visible en Pindoor.';
@@ -438,6 +441,7 @@ class ClienteController extends Controller
         }
 
         $punto->update($datosPunto);
+        ActividadCliente::registrar($punto, 'perfil_actualizado');
 
         // ── Módulo: carta ────────────────────────────────────────────────────
         if (in_array('carta', $modulos) &&
@@ -508,6 +512,7 @@ class ClienteController extends Controller
                 'actualizado_en'=> $request->filled('menu_del_dia') ? now() : null,
             ]
         );
+        ActividadCliente::registrar($punto, 'menu_actualizado');
 
         return redirect()->route('cliente.perfil.ver', $punto)
             ->with('success', 'Menú del día actualizado.');
@@ -525,6 +530,7 @@ class ClienteController extends Controller
                 'actualizado_en' => $request->filled('aviso') ? now() : null,
             ]
         );
+        ActividadCliente::registrar($punto, 'aviso_actualizado');
 
         return redirect()->route('cliente.perfil.ver', $punto)
             ->with('success', 'Aviso actualizado.');
@@ -542,6 +548,7 @@ class ClienteController extends Controller
                 'actualizado_en' => $request->filled('promocion') ? now() : null,
             ]
         );
+        ActividadCliente::registrar($punto, 'promocion_actualizada');
 
         return redirect()->route('cliente.perfil.ver', $punto)
             ->with('success', 'Promoción actualizada.');
@@ -613,6 +620,10 @@ class ClienteController extends Controller
             $msg = '¡Tu ficha ya es visible en Pindoor! ' . $msg;
         }
 
+        if ($subidas > 0) {
+            ActividadCliente::registrar($punto, 'imagen_subida', "{$subidas} foto(s)");
+        }
+
         return back()->with('success', $msg);
     }
 
@@ -628,6 +639,8 @@ class ClienteController extends Controller
         if ($wasPrincipal) {
             $punto->imagenes()->orderBy('orden')->first()?->update(['es_principal' => true]);
         }
+
+        ActividadCliente::registrar($punto, 'imagen_eliminada');
 
         return back()->with('success', 'Foto eliminada.');
     }
@@ -656,6 +669,7 @@ class ClienteController extends Controller
             'oferta_activa'    => $activa,
             'oferta_expira_at' => $activa ? $expira : null,
         ]);
+        ActividadCliente::registrar($punto, 'oferta_actualizada');
 
         return redirect()->route('cliente.perfil.ver', $punto)
             ->with('success', $activa ? 'Oferta activada.' : 'Oferta desactivada.');

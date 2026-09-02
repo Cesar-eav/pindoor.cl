@@ -22,6 +22,7 @@
     "dependencies": {
         "@geoman-io/leaflet-geoman-free": "^2.20.0",
         "alpine": "^0.2.1",
+        "chart.js": "^4.5.1",
         "leaflet": "^1.9.4",
         "leaflet-rotate": "^0.2.8",
         "quill": "^2.0.3",

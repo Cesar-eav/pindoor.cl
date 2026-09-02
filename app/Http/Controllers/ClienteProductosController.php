@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActividadCliente;
 use App\Models\PuntoProducto;
 use App\Services\ImagenComprimida;
 use Illuminate\Http\Request;
@@ -35,13 +36,15 @@ class ClienteProductosController extends Controller
         $data['orden'] = $punto->productos()->max('orden') + 1;
 
         PuntoProducto::create($data);
+        ActividadCliente::registrar($punto, 'producto_creado', $data['nombre']);
 
         return back()->with('success', 'Producto agregado.');
     }
 
     public function update(Request $request, PuntoProducto $producto)
     {
-        abort_if($producto->punto_interes_id !== $this->puntoAutorizado()->id, 403);
+        $punto = $this->puntoAutorizado();
+        abort_if($producto->punto_interes_id !== $punto->id, 403);
 
         $data = $request->validate([
             'nombre'      => 'required|string|max:150',
@@ -56,14 +59,18 @@ class ClienteProductosController extends Controller
         }
 
         $producto->update($data);
+        ActividadCliente::registrar($punto, 'producto_actualizado', $data['nombre']);
 
         return back()->with('success', 'Producto actualizado.');
     }
 
     public function destroy(PuntoProducto $producto)
     {
-        abort_if($producto->punto_interes_id !== $this->puntoAutorizado()->id, 403);
+        $punto = $this->puntoAutorizado();
+        abort_if($producto->punto_interes_id !== $punto->id, 403);
+        $nombre = $producto->nombre;
         $producto->delete();
+        ActividadCliente::registrar($punto, 'producto_eliminado', $nombre);
         return back()->with('success', 'Producto eliminado.');
     }
 }

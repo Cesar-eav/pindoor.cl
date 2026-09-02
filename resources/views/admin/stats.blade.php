@@ -72,6 +72,32 @@
                 </a>
             </div>
 
+            {{-- Actividad de clientes --}}
+            <div class="bg-white shadow-sm sm:rounded-2xl p-6 border-l-4 border-blue-400">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <div class="text-sm font-medium text-gray-500 uppercase">Actividad de clientes</div>
+                        <div class="text-3xl font-bold text-gray-900">{{ $actividadUltimos30Dias }}</div>
+                        <div class="text-xs text-gray-400 mt-1">Acciones en los últimos 30 días</div>
+                    </div>
+                    <a href="{{ route('admin.clientes') }}"
+                       class="text-sm font-bold text-blue-500 hover:underline shrink-0">
+                        Ver clientes →
+                    </a>
+                </div>
+                @if($clientesMasActivos->isNotEmpty())
+                    <div class="border-t border-gray-100 pt-3 space-y-1.5">
+                        <div class="text-[10px] text-gray-400 uppercase font-bold mb-1">Negocios más activos</div>
+                        @foreach($clientesMasActivos as $fila)
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-700 truncate">{{ $fila->puntoInteres?->title ?? '—' }}</span>
+                                <span class="text-gray-400 text-xs font-bold shrink-0 ml-2">{{ $fila->total }} acciones</span>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
