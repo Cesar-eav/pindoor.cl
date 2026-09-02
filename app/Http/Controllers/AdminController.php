@@ -340,7 +340,9 @@ class AdminController extends Controller
             ->latest()
             ->paginate(30);
 
-        return view('admin.clientes.actividad', compact('punto', 'actividades'));
+        $historico = $punto->actividadHistorica();
+
+        return view('admin.clientes.actividad', compact('punto', 'actividades', 'historico'));
     }
 
     public function dashboardClientes()
