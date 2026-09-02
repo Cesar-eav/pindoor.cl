@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActividadCliente;
 use App\Models\ModuloItem;
 use App\Models\PuntoInteres;
 use App\Services\ImagenComprimida;
@@ -50,6 +51,8 @@ class ClienteMuseoController extends Controller
                 'orden'  => $orden,
             ]);
         }
+
+        ActividadCliente::registrar($punto, 'entradas_actualizadas');
 
         return redirect()->route('cliente.perfil.ver', $punto)
             ->with('success', 'Tarifas de entrada actualizadas.');
@@ -103,6 +106,7 @@ class ClienteMuseoController extends Controller
                 $item->imagen = $rutaImagen;
             }
             $item->save();
+            ActividadCliente::registrar($punto, 'exposicion_actualizada', $request->titulo);
         } else {
             $ordenSiguiente = ModuloItem::where('punto_interes_id', $punto->id)
                 ->where('modulo', 'exposiciones')
@@ -116,6 +120,7 @@ class ClienteMuseoController extends Controller
                 'activo'           => true,
                 'orden'            => $ordenSiguiente,
             ]);
+            ActividadCliente::registrar($punto, 'exposicion_creada', $request->titulo);
         }
 
         return redirect()->route('cliente.perfil.ver', $punto)
@@ -133,7 +138,10 @@ class ClienteMuseoController extends Controller
             Storage::disk('public')->delete($exposicion->imagen);
         }
 
+        $titulo = $exposicion->datos['titulo'] ?? null;
         $exposicion->delete();
+
+        ActividadCliente::registrar($punto, 'exposicion_eliminada', $titulo);
 
         return redirect()->route('cliente.perfil.ver', $punto)
             ->with('success', 'Exposición eliminada.');

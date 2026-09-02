@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\PuntoInteres;
+use App\Models\ActividadCliente;
 use App\Models\Artista;
 use App\Models\Categoria;
 use App\Models\Compartido;
 use App\Models\LeadContacto;
+use App\Models\LoginCliente;
 use App\Models\Panorama;
 use App\Models\User;
 use App\Services\ImagenComprimida;
@@ -47,6 +49,16 @@ class AdminController extends Controller
         $compartidosSemana = Compartido::where('created_at', '>=', now()->startOfWeek())->count();
         $compartidosMes = Compartido::where('created_at', '>=', now()->startOfMonth())->count();
 
+        // 4. Actividad de clientes en su panel (últimos 30 días)
+        $actividadUltimos30Dias = ActividadCliente::where('created_at', '>=', now()->subDays(30))->count();
+        $clientesMasActivos = ActividadCliente::selectRaw('punto_interes_id, count(*) as total')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupBy('punto_interes_id')
+            ->orderByDesc('total')
+            ->take(5)
+            ->with('puntoInteres:id,title')
+            ->get();
+
         return view('admin.stats', compact(
             'totalPuntos',
             'totalClientes',
@@ -57,7 +69,9 @@ class AdminController extends Controller
             'leadsNuevos',
             'compartidosHoy',
             'compartidosSemana',
-            'compartidosMes'
+            'compartidosMes',
+            'actividadUltimos30Dias',
+            'clientesMasActivos'
         ));
     }
 
@@ -293,7 +307,7 @@ class AdminController extends Controller
     {
         $clientes = PuntoInteres::clientes()
             ->where('eliminado', false)
-            ->with(['user', 'categoria'])
+            ->with(['user', 'categoria', 'actividades' => fn ($q) => $q->latest()->limit(1)])
             ->latest()
             ->paginate(15);
 
@@ -317,6 +331,91 @@ class AdminController extends Controller
             ->get(['id', 'title', 'sector', 'categoria_id', 'destacado_home', 'orden_destacado']);
 
         return view('admin.clientes', compact('clientes', 'puntosDisponibles', 'pendientes', 'clientesDestacables'));
+    }
+
+    public function actividadCliente(PuntoInteres $punto)
+    {
+        $actividades = ActividadCliente::where('punto_interes_id', $punto->id)
+            ->with('user')
+            ->latest()
+            ->paginate(30);
+
+        return view('admin.clientes.actividad', compact('punto', 'actividades'));
+    }
+
+    public function dashboardClientes()
+    {
+        // 1. Números: logins y acciones hoy/semana/mes
+        $loginsHoy    = LoginCliente::whereDate('created_at', today())->count();
+        $loginsSemana = LoginCliente::where('created_at', '>=', now()->startOfWeek())->count();
+        $loginsMes    = LoginCliente::where('created_at', '>=', now()->startOfMonth())->count();
+
+        $accionesHoy    = ActividadCliente::whereDate('created_at', today())->count();
+        $accionesSemana = ActividadCliente::where('created_at', '>=', now()->startOfWeek())->count();
+        $accionesMes    = ActividadCliente::where('created_at', '>=', now()->startOfMonth())->count();
+
+        $clientesActivos30d = User::where('type', 'cliente')
+            ->where('last_login_at', '>=', now()->subDays(30))
+            ->count();
+        $clientesNuncaConectados = User::where('type', 'cliente')->whereNull('last_login_at')->count();
+
+        // 2. Logins por día, últimos 30 días (rellenando los días sin logins con 0)
+        $loginsPorDiaRaw = LoginCliente::where('created_at', '>=', now()->subDays(29)->startOfDay())
+            ->selectRaw('DATE(created_at) as fecha, count(*) as total')
+            ->groupBy('fecha')
+            ->pluck('total', 'fecha');
+
+        $loginsPorDia = collect(range(0, 29))->map(function ($i) use ($loginsPorDiaRaw) {
+            $fecha = now()->subDays(29 - $i)->toDateString();
+            return ['fecha' => $fecha, 'total' => $loginsPorDiaRaw[$fecha] ?? 0];
+        });
+
+        // 3. Acciones por tipo, últimos 30 días
+        $accionesPorTipo = ActividadCliente::where('created_at', '>=', now()->subDays(30))
+            ->selectRaw('tipo, count(*) as total')
+            ->groupBy('tipo')
+            ->orderByDesc('total')
+            ->get();
+
+        // 4. Tabla resumen por cliente (sin N+1: todo agrupado en 4 consultas)
+        $puntosClientes = PuntoInteres::clientes()
+            ->where('eliminado', false)
+            ->with('user')
+            ->get();
+
+        $userIds  = $puntosClientes->pluck('user_id')->filter()->all();
+        $puntoIds = $puntosClientes->pluck('id')->all();
+
+        $loginsSemanaPorUsuario = LoginCliente::whereIn('user_id', $userIds)
+            ->where('created_at', '>=', now()->startOfWeek())
+            ->selectRaw('user_id, count(*) as total')->groupBy('user_id')->pluck('total', 'user_id');
+
+        $loginsMesPorUsuario = LoginCliente::whereIn('user_id', $userIds)
+            ->where('created_at', '>=', now()->startOfMonth())
+            ->selectRaw('user_id, count(*) as total')->groupBy('user_id')->pluck('total', 'user_id');
+
+        $accionesSemanaPorPunto = ActividadCliente::whereIn('punto_interes_id', $puntoIds)
+            ->where('created_at', '>=', now()->startOfWeek())
+            ->selectRaw('punto_interes_id, count(*) as total')->groupBy('punto_interes_id')->pluck('total', 'punto_interes_id');
+
+        $accionesMesPorPunto = ActividadCliente::whereIn('punto_interes_id', $puntoIds)
+            ->where('created_at', '>=', now()->startOfMonth())
+            ->selectRaw('punto_interes_id, count(*) as total')->groupBy('punto_interes_id')->pluck('total', 'punto_interes_id');
+
+        $resumenClientes = $puntosClientes->map(fn ($punto) => (object) [
+            'punto'           => $punto,
+            'logins_semana'   => $loginsSemanaPorUsuario[$punto->user_id] ?? 0,
+            'logins_mes'      => $loginsMesPorUsuario[$punto->user_id] ?? 0,
+            'acciones_semana' => $accionesSemanaPorPunto[$punto->id] ?? 0,
+            'acciones_mes'    => $accionesMesPorPunto[$punto->id] ?? 0,
+        ])->sortByDesc('acciones_mes')->values();
+
+        return view('admin.clientes.dashboard', compact(
+            'loginsHoy', 'loginsSemana', 'loginsMes',
+            'accionesHoy', 'accionesSemana', 'accionesMes',
+            'clientesActivos30d', 'clientesNuncaConectados',
+            'loginsPorDia', 'accionesPorTipo', 'resumenClientes'
+        ));
     }
 
     public function actualizarDestacados(Request $request)

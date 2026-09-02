@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\ActividadCliente;
 use App\Models\CategoriaEvento;
 use App\Models\ModuloItem;
 use App\Models\PuntoInteres;
@@ -135,6 +136,7 @@ class ClienteEventos extends Component
             $item->fecha     = $this->fecha;
             $item->destacado = $this->destacado;
             $item->save();
+            ActividadCliente::registrar($this->punto, 'evento_actualizado', $this->titulo);
         } else {
             ModuloItem::create([
                 'punto_interes_id' => $this->punto->id,
@@ -145,6 +147,7 @@ class ClienteEventos extends Component
                 'destacado'        => $this->destacado,
                 'fecha'            => $this->fecha,
             ]);
+            ActividadCliente::registrar($this->punto, 'evento_creado', $this->titulo);
         }
 
         $this->resetForm();
@@ -162,7 +165,10 @@ class ClienteEventos extends Component
         if ($evento->imagen) {
             Storage::disk('public')->delete($evento->imagen);
         }
+        $titulo = $evento->datos['titulo'] ?? null;
         $evento->delete();
+
+        ActividadCliente::registrar($this->punto, 'evento_eliminado', $titulo);
 
         $this->mensaje = 'Evento eliminado.';
     }

@@ -296,6 +296,11 @@ class PuntoInteres extends Model
         return $this->hasMany(Recomendacion::class, 'punto_interes_id');
     }
 
+    public function actividades()
+    {
+        return $this->hasMany(ActividadCliente::class, 'punto_interes_id');
+    }
+
     /** Reseña publicada de Pindoor Recomienda asociada a este lugar, si existe. */
     public function recomendacionPublicada(): ?Recomendacion
     {

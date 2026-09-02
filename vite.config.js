@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/js/quill-editor.js', 'resources/js/leaflet.js', 'resources/js/distrito-editor.js'],
+            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/js/quill-editor.js', 'resources/js/leaflet.js', 'resources/js/distrito-editor.js', 'resources/js/admin-clientes-dashboard.js'],
             refresh: true,
         }),
         vue({

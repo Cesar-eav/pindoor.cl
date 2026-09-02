@@ -1,8 +1,14 @@
 <x-admin-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Gestión de Clientes (Negocios)
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                Gestión de Clientes (Negocios)
+            </h2>
+            <a href="{{ route('admin.clientes.dashboard') }}"
+               class="inline-flex items-center gap-2 bg-[#fc5648] text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-[#d94439] transition">
+                📊 Ver dashboard
+            </a>
+        </div>
     </x-slot>
 
     <div class="py-12">
@@ -142,6 +148,7 @@
                                     <th class="px-6 py-4">Categoría</th>
                                     <th class="px-6 py-4">Sector</th>
                                     <th class="px-6 py-4">Usuario vinculado</th>
+                                    <th class="px-6 py-4">Última actividad</th>
                                     <th class="px-6 py-4">Estado</th>
                                     <th class="px-6 py-4 text-right">Acciones</th>
                                 </tr>
@@ -179,6 +186,18 @@
                                             </a>
                                         @endif
                                     </td>
+                                    <td class="px-6 py-4 text-gray-500">
+                                        @if($punto->actividades->isNotEmpty())
+                                            {{ $punto->actividades->first()->created_at->diffForHumans() }}
+                                        @else
+                                            <span class="text-gray-300 italic">Sin actividad</span>
+                                        @endif
+                                        @if($punto->user?->last_login_at)
+                                            <div class="text-xs text-gray-400">Último login: {{ $punto->user->last_login_at->diffForHumans() }}</div>
+                                        @elseif($punto->user)
+                                            <div class="text-xs text-amber-500">Nunca ha ingresado</div>
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4">
                                         <span class="px-2 py-1 rounded-full text-xs font-bold {{ $punto->activo ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
                                             {{ $punto->activo ? 'Activo' : 'Pausado' }}
@@ -195,6 +214,10 @@
                                     </td>
                                     <td class="px-6 py-4 text-right">
                                         <div class="flex justify-end gap-3">
+                                            <a href="{{ route('admin.clientes.actividad', $punto) }}"
+                                               class="text-xs text-blue-500 hover:text-blue-700 font-medium">
+                                                Actividad
+                                            </a>
                                             <a href="{{ route('admin.clientes.modulos.form', $punto) }}"
                                                class="text-xs text-indigo-500 hover:text-indigo-700 font-medium">
                                                 Módulos
