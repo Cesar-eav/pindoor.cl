@@ -357,6 +357,49 @@ class PuntoInteres extends Model
     }
 
     /**
+     * Reconstruye una línea de tiempo aproximada de actividad previa a la existencia
+     * de ActividadCliente, a partir de las fechas de creación/edición de lo que ya
+     * existe (fotos, ítems de módulos, datos de módulos, productos). No es un log
+     * exacto: no sabe cuántas veces se editó algo ni qué se llegó a borrar.
+     */
+    public function actividadHistorica()
+    {
+        $this->loadMissing(['imagenes', 'moduloItems', 'moduloDatos', 'productos']);
+
+        $historico = collect();
+
+        $historico->push((object) ['tipo' => 'negocio_creado', 'detalle' => $this->title, 'fecha' => $this->created_at]);
+        if ($this->updated_at->gt($this->created_at)) {
+            $historico->push((object) ['tipo' => 'perfil_actualizado', 'detalle' => null, 'fecha' => $this->updated_at]);
+        }
+
+        foreach ($this->imagenes as $imagen) {
+            $historico->push((object) ['tipo' => 'imagen_subida', 'detalle' => null, 'fecha' => $imagen->created_at]);
+        }
+
+        foreach ($this->moduloItems as $item) {
+            $titulo = $item->datos['titulo'] ?? $item->datos['etiqueta'] ?? null;
+            $historico->push((object) ['tipo' => "{$item->modulo}_creado", 'detalle' => $titulo, 'fecha' => $item->created_at]);
+            if ($item->updated_at->gt($item->created_at)) {
+                $historico->push((object) ['tipo' => "{$item->modulo}_actualizado", 'detalle' => $titulo, 'fecha' => $item->updated_at]);
+            }
+        }
+
+        foreach ($this->moduloDatos as $dato) {
+            $historico->push((object) ['tipo' => "{$dato->modulo}_actualizado", 'detalle' => null, 'fecha' => $dato->updated_at]);
+        }
+
+        foreach ($this->productos as $producto) {
+            $historico->push((object) ['tipo' => 'producto_creado', 'detalle' => $producto->nombre, 'fecha' => $producto->created_at]);
+            if ($producto->updated_at->gt($producto->created_at)) {
+                $historico->push((object) ['tipo' => 'producto_actualizado', 'detalle' => $producto->nombre, 'fecha' => $producto->updated_at]);
+            }
+        }
+
+        return $historico->sortByDesc('fecha')->values();
+    }
+
+    /**
      * Devuelve los ítems de 'eventos' con fecha futura, ordenados por fecha y hora.
      */
     public function eventosProximos()
