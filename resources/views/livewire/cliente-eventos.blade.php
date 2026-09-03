@@ -183,9 +183,16 @@
             <div class="space-y-3 mb-6">
                 <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Próximos</p>
                 @foreach($proximos as $evento)
-                @php $tipoInfo = $evento->tipoEvento(); @endphp
-                <div class="flex items-start gap-4 border border-gray-100 rounded-xl p-4
+                @php
+                    $tipoInfo = $evento->tipoEvento();
+                    $ventaActiva = $evento->datos['entradas_flow_activo'] ?? false;
+                    $pagadas = $ventaActiva ? $evento->entradas->where('estado', 'pagada') : collect();
+                    $totalVendidas = $pagadas->sum('cantidad_entradas');
+                    $totalRecaudado = $pagadas->sum('monto_total');
+                @endphp
+                <div class="border border-gray-100 rounded-xl p-4
                     {{ $evento->destacado ? 'border-blue-200 bg-blue-50/30' : '' }}">
+                <div class="flex items-start gap-4">
                     @if($evento->imagen)
                         <img src="{{ asset('storage/' . $evento->imagen) }}" alt="{{ $evento->datos['titulo'] ?? '' }}"
                              class="w-16 h-16 rounded-xl object-cover border border-gray-100 shrink-0">
@@ -219,6 +226,61 @@
                                 class="text-xs text-red-500 font-bold hover:underline">Eliminar</button>
                     </div>
                 </div>
+
+                @if($ventaActiva)
+                <div class="mt-3 pt-3 border-t border-gray-100">
+                    <p class="text-xs text-gray-600">
+                        🎟️ {{ $totalVendidas }} entrada(s) vendida(s) · ${{ number_format($totalRecaudado, 0, ',', '.') }}
+                    </p>
+                    @if($evento->entradas->isNotEmpty())
+                    <details class="mt-2">
+                        <summary class="text-xs font-bold text-blue-600 cursor-pointer hover:underline">
+                            Ver compradores ({{ $evento->entradas->count() }})
+                        </summary>
+                        @php
+                            $badgeClasses = [
+                                'amber' => 'bg-amber-100 text-amber-700',
+                                'green' => 'bg-green-100 text-green-700',
+                                'red'   => 'bg-red-100 text-red-700',
+                                'gray'  => 'bg-gray-100 text-gray-700',
+                            ];
+                        @endphp
+                        <div class="mt-2 overflow-x-auto">
+                            <table class="w-full text-xs">
+                                <thead>
+                                    <tr class="text-left text-gray-400 uppercase text-[10px] tracking-wide">
+                                        <th class="py-1 pr-3">Cliente</th>
+                                        <th class="py-1 pr-3">Contacto</th>
+                                        <th class="py-1 pr-3">Cant.</th>
+                                        <th class="py-1 pr-3">Monto</th>
+                                        <th class="py-1 pr-3">Estado</th>
+                                        <th class="py-1 pr-3">Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($evento->entradas->sortByDesc('created_at') as $entrada)
+                                    @php $estadoInfo = $entrada->estadoInfo(); @endphp
+                                    <tr class="border-t border-gray-50">
+                                        <td class="py-1.5 pr-3 font-medium text-gray-700">{{ $entrada->nombre_cliente }}</td>
+                                        <td class="py-1.5 pr-3 text-gray-500">{{ $entrada->email_cliente }}<br>{{ $entrada->telefono_cliente }}</td>
+                                        <td class="py-1.5 pr-3 text-gray-700">{{ $entrada->cantidad_entradas }}</td>
+                                        <td class="py-1.5 pr-3 text-gray-700">${{ number_format($entrada->monto_total, 0, ',', '.') }}</td>
+                                        <td class="py-1.5 pr-3">
+                                            <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full {{ $badgeClasses[$estadoInfo['color']] ?? $badgeClasses['gray'] }}">
+                                                {{ $estadoInfo['label'] }}
+                                            </span>
+                                        </td>
+                                        <td class="py-1.5 pr-3 text-gray-400">{{ $entrada->created_at->format('d/m/Y H:i') }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                    @endif
+                </div>
+                @endif
+                </div>
                 @endforeach
             </div>
             @endif
@@ -231,10 +293,19 @@
                 </summary>
                 <div class="space-y-2 mt-3">
                     @foreach($pasados as $evento)
+                    @php
+                        $ventaActivaPasado = $evento->datos['entradas_flow_activo'] ?? false;
+                        $pagadasPasado = $ventaActivaPasado ? $evento->entradas->where('estado', 'pagada') : collect();
+                    @endphp
                     <div class="flex items-center justify-between border border-gray-100 rounded-xl p-3 opacity-60">
                         <div>
                             <p class="text-sm font-medium text-gray-700">{{ $evento->datos['titulo'] ?? '' }}</p>
                             <p class="text-xs text-gray-400">{{ $evento->fecha->translatedFormat('d M Y') }}</p>
+                            @if($ventaActivaPasado)
+                            <p class="text-xs text-gray-400">
+                                🎟️ {{ $pagadasPasado->sum('cantidad_entradas') }} vendida(s) · ${{ number_format($pagadasPasado->sum('monto_total'), 0, ',', '.') }}
+                            </p>
+                            @endif
                         </div>
                         <button type="button" wire:click="eliminar({{ $evento->id }})"
                                 wire:confirm="¿Eliminar?"

@@ -317,6 +317,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('/configuracion/orden-secciones', [ConfiguracionController::class, 'actualizarOrdenSecciones'])->name('configuracion.orden-secciones');
     Route::post('/configuracion/notificaciones', [ConfiguracionController::class, 'actualizarNotificaciones'])->name('configuracion.notificaciones');
     Route::post('/configuracion/flow', [ConfiguracionController::class, 'actualizarFlow'])->name('configuracion.flow');
+    Route::post('/configuracion/entradas-eventos', [ConfiguracionController::class, 'actualizarEntradasEventos'])->name('configuracion.entradas-eventos');
 });
 
 /* --- RUTAS CLIENTES (NEGOCIOS) --- */

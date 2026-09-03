@@ -37,4 +37,9 @@ class Configuracion extends Model
     {
         return static::get('notificaciones_telegram_chat_id') ?: config('services.telegram.chat_id');
     }
+
+    public static function ventaEntradasActiva(): bool
+    {
+        return (bool) static::get('entradas_eventos_activa', false);
+    }
 }
