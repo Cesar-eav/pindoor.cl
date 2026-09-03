@@ -29,6 +29,8 @@ class ClienteEventos extends Component
     public ?float $precio = null;
     public string $precio_texto = '';
     public string $url_entradas = '';
+    public bool $entradas_flow_activo = false;
+    public ?int $cupo_maximo = null;
     public bool $destacado = false;
     public $imagen = null;
     public ?string $imagenActualUrl = null;
@@ -52,6 +54,8 @@ class ClienteEventos extends Component
             'precio'       => 'nullable|numeric|min:0',
             'precio_texto' => 'nullable|string|max:100',
             'url_entradas' => 'nullable|url|max:255',
+            'entradas_flow_activo' => 'boolean',
+            'cupo_maximo'  => 'nullable|integer|min:1',
             'imagen'       => 'nullable|image|max:20480',
         ];
     }
@@ -79,6 +83,8 @@ class ClienteEventos extends Component
         $this->precio          = $evento->datos['precio'] ?? null;
         $this->precio_texto    = $evento->datos['precio_texto'] ?? '';
         $this->url_entradas    = $evento->datos['url_entradas'] ?? '';
+        $this->entradas_flow_activo = (bool) ($evento->datos['entradas_flow_activo'] ?? false);
+        $this->cupo_maximo     = $evento->cupo_maximo;
         $this->destacado       = (bool) $evento->destacado;
         $this->imagenActualUrl = $evento->imagen ? asset('storage/' . $evento->imagen) : null;
         $this->imagen          = null;
@@ -95,7 +101,8 @@ class ClienteEventos extends Component
     {
         $this->reset([
             'editandoId', 'titulo', 'descripcion', 'tipo', 'fecha', 'hora', 'hora_fin',
-            'precio', 'precio_texto', 'url_entradas', 'destacado', 'imagen', 'imagenActualUrl',
+            'precio', 'precio_texto', 'url_entradas', 'entradas_flow_activo', 'cupo_maximo',
+            'destacado', 'imagen', 'imagenActualUrl',
         ]);
         $this->resetErrorBag();
     }
@@ -113,6 +120,7 @@ class ClienteEventos extends Component
             'precio'       => $this->precio,
             'precio_texto' => $this->precio_texto ?: null,
             'url_entradas' => $this->url_entradas ?: null,
+            'entradas_flow_activo' => $this->entradas_flow_activo,
         ];
 
         $rutaImagen = null;
@@ -132,9 +140,10 @@ class ClienteEventos extends Component
                 }
                 $item->imagen = $rutaImagen;
             }
-            $item->datos     = $datos;
-            $item->fecha     = $this->fecha;
-            $item->destacado = $this->destacado;
+            $item->datos       = $datos;
+            $item->fecha       = $this->fecha;
+            $item->destacado   = $this->destacado;
+            $item->cupo_maximo = $this->entradas_flow_activo ? $this->cupo_maximo : null;
             $item->save();
             ActividadCliente::registrar($this->punto, 'evento_actualizado', $this->titulo);
         } else {
@@ -146,6 +155,7 @@ class ClienteEventos extends Component
                 'activo'           => true,
                 'destacado'        => $this->destacado,
                 'fecha'            => $this->fecha,
+                'cupo_maximo'      => $this->entradas_flow_activo ? $this->cupo_maximo : null,
             ]);
             ActividadCliente::registrar($this->punto, 'evento_creado', $this->titulo);
         }

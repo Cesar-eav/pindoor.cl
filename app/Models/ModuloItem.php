@@ -23,6 +23,7 @@ class ModuloItem extends Model
         'orden',
         'destacado',
         'fecha',
+        'cupo_maximo',
     ];
 
     protected $casts = [
@@ -37,6 +38,36 @@ class ModuloItem extends Model
     public function punto()
     {
         return $this->belongsTo(PuntoInteres::class, 'punto_interes_id');
+    }
+
+    public function entradas()
+    {
+        return $this->hasMany(EventoEntrada::class, 'punto_modulo_item_id');
+    }
+
+    // ─── Cupo de entradas (módulo 'eventos') ───────────────────────────────────
+
+    /** Suma de entradas vendidas o en proceso de pago (pagadas, o pendientes sin vencer). */
+    public function entradasVendidas(): int
+    {
+        return (int) $this->entradas()
+            ->where(function ($q) {
+                $q->where('estado', 'pagada')
+                  ->orWhere(function ($q2) {
+                      $q2->where('estado', 'pendiente')->where('expira_en', '>', now());
+                  });
+            })
+            ->sum('cantidad_entradas');
+    }
+
+    /** Null si el evento no tiene límite de cupo configurado. */
+    public function cupoDisponible(): ?int
+    {
+        if ($this->cupo_maximo === null) {
+            return null;
+        }
+
+        return max(0, $this->cupo_maximo - $this->entradasVendidas());
     }
 
     // ─── Helpers de presentación ───────────────────────────────────────────────

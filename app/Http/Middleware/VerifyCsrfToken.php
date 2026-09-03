@@ -14,5 +14,7 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         'pagos/flow/confirmacion',
         'pagos/flow/retorno/*',
+        'pagos/flow/entrada/confirmacion',
+        'pagos/flow/entrada/retorno/*',
     ];
 }
