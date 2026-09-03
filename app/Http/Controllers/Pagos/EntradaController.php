@@ -102,6 +102,8 @@ class EntradaController extends Controller
             throw $e;
         }
 
+        $entrada->notificarIniciada();
+
         try {
             $pago = $flow->crearOrdenPagoEntrada($entrada);
         } catch (FlowPaymentException $e) {

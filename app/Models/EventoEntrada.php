@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Mail\EntradaConfirmada;
+use App\Notifications\EntradaIniciada;
 use App\Notifications\EntradaPagada;
 use App\Notifications\EntradaRechazada;
 use Illuminate\Database\Eloquent\Model;
@@ -155,6 +156,19 @@ class EventoEntrada extends Model
                 $entrada->notificarRechazada();
             }
         });
+    }
+
+    public function notificarIniciada(): void
+    {
+        try {
+            Notification::route('telegram', Configuracion::telegramChatId())
+                ->notify(new EntradaIniciada($this));
+        } catch (\Throwable $e) {
+            Log::error('EventoEntrada::notificarIniciada — falló el aviso Telegram', [
+                'entrada' => $this->codigo_entrada,
+                'error'   => $e->getMessage(),
+            ]);
+        }
     }
 
     public function notificarPagada(): void
