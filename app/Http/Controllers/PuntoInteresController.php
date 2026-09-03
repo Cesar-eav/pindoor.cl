@@ -386,7 +386,7 @@ class PuntoInteresController extends Controller
         $panorama = $item->comoPanorama();
         $puntoRelacionado = $punto;
         $panoramasRelacionados = \App\Models\Panorama::relacionados($panorama->categoria);
-        $moduloItemEntradas = $item;
+        $moduloItemEntradas = Configuracion::ventaEntradasActiva() ? $item : null;
 
         return view('panoramas.show', compact('panorama', 'puntoRelacionado', 'panoramasRelacionados', 'moduloItemEntradas'));
     }

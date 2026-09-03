@@ -389,6 +389,30 @@
                     Guardar
                 </button>
             </form>
+
+            {{-- Venta de entradas de eventos (independiente de la ticketera de rutas) --}}
+            <form action="{{ route('admin.configuracion.entradas-eventos') }}" method="POST" class="mt-6">
+                @csrf
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <label class="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" name="entradas_eventos_activa" value="1"
+                               @checked($entradasEventosActiva)
+                               class="mt-1 rounded border-gray-300 text-[#fc5648] focus:ring-[#fc5648]">
+                        <div>
+                            <p class="font-bold text-gray-900">Permitir venta de entradas a eventos</p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                Activa globalmente el botón "Comprar entradas" (pago con Flow) en los eventos de agenda de los clientes.
+                                Mientras esté apagado, el botón no aparece para ningún usuario y la compra directa por URL también se bloquea.
+                                No afecta a la ticketera de rutas de operadores turísticos, que es un sistema aparte.
+                            </p>
+                        </div>
+                    </label>
+                </div>
+                <button type="submit"
+                        class="mt-5 bg-[#fc5648] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#d94439] transition">
+                    Guardar
+                </button>
+            </form>
             </section>
 
         </div>

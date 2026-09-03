@@ -187,6 +187,7 @@ class ClienteEventos extends Component
     {
         $eventos = ModuloItem::where('punto_interes_id', $this->punto->id)
             ->where('modulo', 'eventos')
+            ->with('entradas')
             ->get();
 
         return view('livewire.cliente-eventos', [

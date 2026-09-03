@@ -57,11 +57,13 @@ class ConfiguracionController extends Controller
         $flowProduccionApiKey = Configuracion::get('flow_produccion_api_key');
         $flowSandboxSecretConfigurado = filled(Configuracion::get('flow_sandbox_secret_key'));
         $flowProduccionSecretConfigurado = filled(Configuracion::get('flow_produccion_secret_key'));
+        $entradasEventosActiva = Configuracion::ventaEntradasActiva();
 
         return view('admin.configuracion.index', compact(
             'aprobacionActiva', 'homePorCategoria', 'newsletterPopupDias', 'newsletterPopupCadaRecarga', 'idsExcluidos', 'puntosData', 'categoriasDisponibles', 'ascensores',
             'ordenSecciones', 'etiquetasSecciones', 'notificacionesEmails', 'notificacionesTelegramChatId',
-            'flowModo', 'flowSandboxApiKey', 'flowProduccionApiKey', 'flowSandboxSecretConfigurado', 'flowProduccionSecretConfigurado'
+            'flowModo', 'flowSandboxApiKey', 'flowProduccionApiKey', 'flowSandboxSecretConfigurado', 'flowProduccionSecretConfigurado',
+            'entradasEventosActiva'
         ));
     }
 
@@ -155,6 +157,13 @@ class ConfiguracionController extends Controller
         }
 
         return back()->with('success', 'Credenciales de Flow guardadas.');
+    }
+
+    public function actualizarEntradasEventos(Request $request)
+    {
+        Configuracion::set('entradas_eventos_activa', $request->boolean('entradas_eventos_activa') ? '1' : '0');
+
+        return back()->with('success', 'Configuración guardada.');
     }
 
     public function actualizarAscensores(Request $request)

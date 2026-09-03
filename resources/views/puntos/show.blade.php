@@ -1149,11 +1149,16 @@
                             </div>
                         </div>
 
+                        @php
+                            $ticketeraEventosActiva = \App\Models\Configuracion::ventaEntradasActiva();
+                        @endphp
                         <div class="space-y-4">
                             @foreach($eventosProximos as $evento)
                             @php
                                 $tipoInfo   = $evento->tipoEvento();
                                 $descripcion = $evento->datos['descripcion'] ?? '';
+                                $entradasActivas = $ticketeraEventosActiva && ($evento->datos['entradas_flow_activo'] ?? false);
+                                $cupoDisponible  = $entradasActivas ? $evento->cupoDisponible() : null;
                                 $eventoJson  = json_encode([
                                     'titulo'      => $evento->datos['titulo']      ?? '',
                                     'descripcion' => $descripcion,
@@ -1162,6 +1167,9 @@
                                     'precio'      => $evento->precioEvento(),
                                     'precio_gratis' => ($evento->datos['precio'] ?? 1) == 0,
                                     'url_entradas'=> $evento->datos['url_entradas'] ?? null,
+                                    'entradas_activas' => $entradasActivas,
+                                    'cupo_disponible'  => $cupoDisponible,
+                                    'url_comprar' => $entradasActivas ? route('entradas.comprar.show', $evento->id) : null,
                                     'imagen'      => $evento->imagen ? asset('storage/' . $evento->imagen) : null,
                                     'tipo_emoji'  => $tipoInfo['emoji'],
                                     'tipo_label'  => $tipoInfo['label'],
@@ -1211,12 +1219,21 @@
                                                 {{ $evento->precioEvento() }}
                                             </span>
                                         </div>
-                                        @if($evento->datos['url_entradas'] ?? null)
-
-                                        {{-- CAMBIAR CUANDO DECIDAMOS COMO COMPRAR ENTRADAS
-                                        inline-flex  --}}
+                                        @if($entradasActivas && $cupoDisponible === 0)
+                                        <div class="inline-flex mt-2 items-center gap-1 bg-gray-50 border border-gray-200 text-gray-500 rounded-lg px-3 py-1.5 text-xs font-bold">
+                                            🎟️ Entradas agotadas
+                                        </div>
+                                        @elseif($entradasActivas)
+                                        <a href="{{ route('entradas.comprar.show', $evento->id) }}"
+                                           class="inline-flex mt-2 items-center gap-1 text-xs font-bold text-white bg-[#fc5648] hover:bg-[#e04035] px-3 py-1.5 rounded-lg transition">
+                                            🎟️ {{ __('ui.lugar.comprar_entradas') }}
+                                            @if($cupoDisponible !== null)
+                                                <span class="font-normal opacity-80">· quedan {{ $cupoDisponible }}</span>
+                                            @endif
+                                        </a>
+                                        @elseif($evento->datos['url_entradas'] ?? null)
                                         <a href="{{ $evento->datos['url_entradas'] }}" target="_blank" rel="noopener"
-                                           class="hidden mt-2 items-center gap-1 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition">
+                                           class="inline-flex mt-2 items-center gap-1 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition">
                                             {{ __('ui.lugar.comprar_entradas') }}
                                         </a>
                                         @endif
@@ -1289,11 +1306,22 @@
 
                                     {{-- Botones --}}
                                     <div class="flex gap-3 mt-5">
-                                        <template x-if="evento.url_entradas" class="hidden">
-                                            {{-- <a :href="evento.url_entradas" target="_blank" rel="noopener"
+                                        <template x-if="evento.cupo_disponible === 0">
+                                            <div class="flex-1 text-center text-sm font-bold text-gray-500 bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-xl">
+                                                🎟️ Entradas agotadas
+                                            </div>
+                                        </template>
+                                        <template x-if="evento.entradas_activas && evento.cupo_disponible !== 0">
+                                            <a :href="evento.url_comprar"
+                                               class="flex-1 text-center text-sm font-bold text-white bg-[#fc5648] hover:bg-[#e04035] px-4 py-2.5 rounded-xl transition">
+                                                🎟️ {{ __('ui.lugar.comprar_entradas') }}
+                                            </a>
+                                        </template>
+                                        <template x-if="!evento.entradas_activas && evento.url_entradas">
+                                            <a :href="evento.url_entradas" target="_blank" rel="noopener"
                                                class="flex-1 text-center text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-xl transition">
                                                 {{ __('ui.lugar.comprar_entradas') }}
-                                            </a> --}}
+                                            </a>
                                         </template>
                                         <button type="button"
                                                 @click="modalOpen = false"

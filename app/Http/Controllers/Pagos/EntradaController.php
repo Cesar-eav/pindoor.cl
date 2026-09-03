@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pagos;
 
 use App\Exceptions\FlowPaymentException;
 use App\Http\Controllers\Controller;
+use App\Models\Configuracion;
 use App\Models\EventoEntrada;
 use App\Models\ModuloItem;
 use App\Services\FlowService;
@@ -14,6 +15,8 @@ class EntradaController extends Controller
 {
     private function eventoConVentaActiva(int $itemId): ModuloItem
     {
+        abort_unless(Configuracion::ventaEntradasActiva(), 404);
+
         $item = ModuloItem::where('id', $itemId)
             ->where('modulo', 'eventos')
             ->where('activo', true)
