@@ -123,6 +123,8 @@ class PuntoInteresController extends Controller
                 ->orderBy('fecha')
                 ->limit(6)
                 ->get();
+            $panoramas = $panoramas->concat(ModuloItem::buscarComoPanorama($s, 6))
+                ->sortBy('fecha')->take(6)->values();
 
             $artistas = Artista::where('activo', true)
                 ->where(fn($q) => $q->where('nombre', 'like', "%{$s}%")
@@ -795,10 +797,16 @@ class PuntoInteresController extends Controller
             ->orderBy('fecha')
             ->take(4)
             ->get()
+            ->concat(ModuloItem::buscarComoPanorama($q, 4))
+            ->sortBy('fecha')
+            ->take(4)
+            ->values()
             ->map(fn($p) => [
                 'tipo'     => 'panorama',
                 'title'    => $p->titulo,
-                'url'      => route('panoramas.show', $p),
+                'url'      => $p->slug
+                    ? route('panoramas.show', $p)
+                    : route('puntos.evento', ['slug' => $p->punto_slug, 'item' => $p->modulo_item_id]),
                 'subtitle' => collect([\Carbon\Carbon::parse($p->fecha)->locale('es')->isoFormat('D MMM'), $p->ubicacion])->filter()->implode(' · '),
             ]);
 

@@ -186,7 +186,10 @@
             </div>
             <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach($panoramas as $panorama)
-                <a href="{{ route('panoramas.show', $panorama) }}"
+                @php $hrefPanorama = $panorama->slug
+                    ? route('panoramas.show', $panorama)
+                    : route('puntos.evento', ['slug' => $panorama->punto_slug, 'item' => $panorama->modulo_item_id]); @endphp
+                <a href="{{ $hrefPanorama }}"
                    class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition overflow-hidden group">
                     @if($panorama->imagen)
                         <img src="{{ asset('storage/' . $panorama->imagen) }}" alt="{{ $panorama->titulo }}"

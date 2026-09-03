@@ -158,4 +158,29 @@ class ModuloItem extends Model
 
         return $fake;
     }
+
+    /**
+     * Eventos de agenda de cliente (módulo 'eventos') cuyo título coincide con $termino,
+     * activos, de negocios públicos y con fecha vigente — ya convertidos a instancias
+     * Panorama fake vía comoPanorama() para mostrarse mezclados con panoramas reales en
+     * los resultados de búsqueda.
+     */
+    public static function buscarComoPanorama(string $termino, int $limite = 6): \Illuminate\Support\Collection
+    {
+        $termino = trim($termino);
+        if ($termino === '') {
+            return collect();
+        }
+
+        return static::where('modulo', 'eventos')
+            ->where('activo', true)
+            ->where('fecha', '>=', now()->toDateString())
+            ->where('datos->titulo', 'like', "%{$termino}%")
+            ->whereHas('punto', fn($q) => $q->publico())
+            ->with('punto')
+            ->orderBy('fecha')
+            ->limit($limite)
+            ->get()
+            ->map(fn (ModuloItem $item) => $item->comoPanorama());
+    }
 }

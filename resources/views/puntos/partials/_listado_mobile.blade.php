@@ -163,7 +163,10 @@
         </div>
         <div class="flex flex-col gap-3">
             @foreach($panoramas as $panorama)
-            <a href="{{ route('panoramas.show', $panorama) }}"
+            @php $hrefPanorama = $panorama->slug
+                ? route('panoramas.show', $panorama)
+                : route('puntos.evento', ['slug' => $panorama->punto_slug, 'item' => $panorama->modulo_item_id]); @endphp
+            <a href="{{ $hrefPanorama }}"
                class="flex gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm p-3 items-center">
                 @if($panorama->imagen)
                     <img src="{{ asset('storage/' . $panorama->imagen) }}"
