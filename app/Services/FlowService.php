@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\FlowPaymentException;
 use App\Models\Configuracion;
+use App\Models\EventoEntrada;
 use App\Models\ReservaRuta;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -53,34 +54,56 @@ class FlowService
 
     public function crearOrdenPago(ReservaRuta $reserva): array
     {
+        return $this->crearOrdenPagoGenerico(
+            commerceOrder: $reserva->commerce_order,
+            subject: 'Reserva Pindoor ' . $reserva->codigo_reserva,
+            monto: $reserva->precio_total,
+            email: $reserva->email_cliente,
+            urlRetorno: route('flow.retorno', ['codigo' => $reserva->codigo_reserva]),
+        );
+    }
+
+    public function crearOrdenPagoEntrada(EventoEntrada $entrada): array
+    {
+        return $this->crearOrdenPagoGenerico(
+            commerceOrder: $entrada->commerce_order,
+            subject: 'Entrada Pindoor ' . $entrada->codigo_entrada,
+            monto: $entrada->monto_total,
+            email: $entrada->email_cliente,
+            urlRetorno: route('flow.entrada.retorno', ['codigo' => $entrada->codigo_entrada]),
+        );
+    }
+
+    private function crearOrdenPagoGenerico(string $commerceOrder, string $subject, int $monto, string $email, string $urlRetorno): array
+    {
         $this->assertCredenciales();
 
         $params = [
             'apiKey'          => $this->apiKey(),
-            'commerceOrder'   => $reserva->commerce_order,
-            'subject'         => 'Reserva Pindoor ' . $reserva->codigo_reserva,
+            'commerceOrder'   => $commerceOrder,
+            'subject'         => $subject,
             'currency'        => 'CLP',
-            'amount'          => $reserva->precio_total,
-            'email'           => $reserva->email_cliente,
+            'amount'          => $monto,
+            'email'           => $email,
             'urlConfirmation' => route('flow.confirmacion'),
-            'urlReturn'       => route('flow.retorno', ['codigo' => $reserva->codigo_reserva]),
+            'urlReturn'       => $urlRetorno,
         ];
 
         $params['s'] = $this->firmar($params);
 
-        Log::info('FlowService::crearOrdenPago request', ['commerceOrder' => $reserva->commerce_order]);
+        Log::info('FlowService::crearOrdenPagoGenerico request', ['commerceOrder' => $commerceOrder]);
 
         $response = Http::asForm()->timeout(15)->post("{$this->baseUrl()}/payment/create", $params);
 
         if (!$response->successful()) {
-            Log::error('FlowService::crearOrdenPago fallo', ['body' => $response->body()]);
+            Log::error('FlowService::crearOrdenPagoGenerico fallo', ['body' => $response->body()]);
             throw new FlowPaymentException('Flow rechazó la creación del pago: ' . $response->body());
         }
 
         $json = $response->json();
 
         if (empty($json['url']) || empty($json['token'])) {
-            Log::error('FlowService::crearOrdenPago respuesta inesperada', ['body' => $json]);
+            Log::error('FlowService::crearOrdenPagoGenerico respuesta inesperada', ['body' => $json]);
             throw new FlowPaymentException('Respuesta inesperada de Flow al crear el pago.');
         }
 

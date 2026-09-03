@@ -227,6 +227,26 @@
             </a>
             @endif
 
+            {{-- Compra de entradas por Pindoor (Flow) --}}
+            @isset($moduloItemEntradas)
+                @if($moduloItemEntradas->datos['entradas_flow_activo'] ?? false)
+                @php $cupoDisponible = $moduloItemEntradas->cupoDisponible(); @endphp
+                @if($cupoDisponible === 0)
+                    <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 text-gray-500 rounded-xl px-4 py-3 text-sm font-semibold mb-4">
+                        🎟️ Entradas agotadas
+                    </div>
+                @else
+                    <a href="{{ route('entradas.comprar.show', $moduloItemEntradas->id) }}"
+                       class="inline-flex items-center gap-2 w-full justify-center bg-[#fc5648] hover:bg-[#e04035] text-white font-bold text-sm px-5 py-3 rounded-xl transition mb-4">
+                        🎟️ Comprar entradas
+                        @if($cupoDisponible !== null)
+                            <span class="font-normal opacity-80">· quedan {{ $cupoDisponible }}</span>
+                        @endif
+                    </a>
+                @endif
+                @endif
+            @endisset
+
             {{-- Agenda del negocio cliente o del artista --}}
             @if($puntoRelacionado)
             <a href="{{ ($origenTipo ?? 'punto') === 'artista' ? route('artista.show', $puntoRelacionado->slug) : route('puntos.show', $puntoRelacionado->slug) . '#agenda' }}"

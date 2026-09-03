@@ -107,6 +107,11 @@ Route::get('/rutas/{slug}', [RutaController::class, 'show'])->name('rutas.show')
 
 Route::post('/pagos/flow/confirmacion', [\App\Http\Controllers\Pagos\FlowWebhookController::class, 'confirmar'])->name('flow.confirmacion')->middleware('throttle:30,1');
 Route::match(['get', 'post'], '/pagos/flow/retorno/{codigo}', [\App\Http\Controllers\Pagos\FlowRetornoController::class, 'show'])->name('flow.retorno');
+
+Route::get('/entradas/{item}/comprar', [\App\Http\Controllers\Pagos\EntradaController::class, 'show'])->name('entradas.comprar.show');
+Route::post('/entradas/{item}/comprar', [\App\Http\Controllers\Pagos\EntradaController::class, 'store'])->name('entradas.comprar');
+Route::post('/pagos/flow/entrada/confirmacion', [\App\Http\Controllers\Pagos\EntradaFlowWebhookController::class, 'confirmar'])->name('flow.entrada.confirmacion')->middleware('throttle:30,1');
+Route::match(['get', 'post'], '/pagos/flow/entrada/retorno/{codigo}', [\App\Http\Controllers\Pagos\EntradaFlowRetornoController::class, 'show'])->name('flow.entrada.retorno');
 Route::get('/recomienda/{slug}', [RecomiendaController::class, 'show'])->name('recomienda.show');
 
 // Vista previa compartible por token (Revival / Guías / Recomienda) — sin sesión de

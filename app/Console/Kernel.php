@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('panoramas:importar-passline')->dailyAt('07:00');
         $schedule->command('panoramas:importar-portaldisc')->dailyAt('07:15');
         $schedule->command('reservas:expirar-pendientes')->everyFiveMinutes();
+        $schedule->command('entradas:expirar-pendientes')->everyFiveMinutes();
     }
 
     /**

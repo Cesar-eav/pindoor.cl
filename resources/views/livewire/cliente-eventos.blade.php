@@ -94,6 +94,24 @@
                                placeholder="https://..."
                                class="w-full border-gray-300 rounded-xl text-sm shadow-sm focus:ring-blue-400">
                         @error('url_entradas') <p class="text-xs text-red-500 font-semibold mt-1">{{ $message }}</p> @enderror
+                        <p class="text-[11px] text-gray-400 mt-1">Se ignora si activas la venta de entradas por Pindoor abajo.</p>
+                    </div>
+
+                    <div class="md:col-span-2 border border-gray-100 rounded-xl p-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" wire:model="entradas_flow_activo"
+                                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-400">
+                            <span class="text-sm text-gray-700 font-medium">Vender entradas por Pindoor (pago online con Flow)</span>
+                        </label>
+                        @if($entradas_flow_activo)
+                        <div class="mt-3">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Cupo máximo de entradas</label>
+                            <input type="number" wire:model="cupo_maximo" min="1" step="1"
+                                   placeholder="Vacío = sin límite"
+                                   class="w-full max-w-xs border-gray-300 rounded-xl text-sm shadow-sm focus:ring-blue-400">
+                            @error('cupo_maximo') <p class="text-xs text-red-500 font-semibold mt-1">{{ $message }}</p> @enderror
+                        </div>
+                        @endif
                     </div>
 
                     <div>
