@@ -350,7 +350,7 @@
         @if($post->rutas->isNotEmpty())
         <div class="mt-14 pt-8 border-t border-gray-100">
             <h3 class="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
-                🗺️ Rutas relacionadas
+                🗺️ ¿Quieres caminar por los lugares mencionados en esta guía?
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 @foreach($post->rutas as $ruta)
