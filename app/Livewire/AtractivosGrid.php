@@ -119,6 +119,8 @@ class AtractivosGrid extends Component
                 ->orderBy('fecha')
                 ->limit(6)
                 ->get();
+            $panoramas = $panoramas->concat(ModuloItem::buscarComoPanorama($s, 6))
+                ->sortBy('fecha')->take(6)->values();
 
             $artistas = Artista::where('activo', true)
                 ->where(fn($q) => $q
