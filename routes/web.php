@@ -313,6 +313,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('/configuracion/excluidos', [ConfiguracionController::class, 'actualizarExcluidos'])->name('configuracion.excluidos');
     Route::post('/configuracion/ascensores', [ConfiguracionController::class, 'actualizarAscensores'])->name('configuracion.ascensores');
     Route::post('/configuracion/home-por-categoria', [ConfiguracionController::class, 'actualizarHomePorCategoria'])->name('configuracion.home-por-categoria');
+    Route::post('/configuracion/newsletter-popup', [ConfiguracionController::class, 'actualizarNewsletterPopup'])->name('configuracion.newsletter-popup');
     Route::post('/configuracion/orden-secciones', [ConfiguracionController::class, 'actualizarOrdenSecciones'])->name('configuracion.orden-secciones');
     Route::post('/configuracion/notificaciones', [ConfiguracionController::class, 'actualizarNotificaciones'])->name('configuracion.notificaciones');
     Route::post('/configuracion/flow', [ConfiguracionController::class, 'actualizarFlow'])->name('configuracion.flow');

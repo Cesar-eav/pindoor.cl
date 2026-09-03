@@ -62,6 +62,42 @@
                 </button>
             </form>
 
+            {{-- Reaparición del popup de boletín (panoramas) --}}
+            <form action="{{ route('admin.configuracion.newsletter-popup') }}" method="POST" class="mt-6">
+                @csrf
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <label for="newsletter_popup_dias_reaparicion" class="font-bold text-gray-900 block">
+                        Reaparición del popup de boletín
+                    </label>
+                    <p class="text-xs text-gray-500 mt-1 mb-3">
+                        Días que deben pasar para volver a mostrarle el popup de "Panoramas" a alguien que lo cerró
+                        sin suscribirse. Quien sí se suscribe no vuelve a verlo.
+                    </p>
+                    <input type="number" id="newsletter_popup_dias_reaparicion" name="newsletter_popup_dias_reaparicion"
+                           min="1" max="365" value="{{ old('newsletter_popup_dias_reaparicion', $newsletterPopupDias) }}"
+                           class="w-32 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                    @error('newsletter_popup_dias_reaparicion') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+
+                    <label class="flex items-start gap-3 cursor-pointer mt-4 pt-4 border-t border-gray-100">
+                        <input type="checkbox" name="newsletter_popup_cada_recarga" value="1"
+                               @checked(old('newsletter_popup_cada_recarga', $newsletterPopupCadaRecarga))
+                               class="mt-1 rounded border-gray-300 text-[#fc5648] focus:ring-[#fc5648]">
+                        <div>
+                            <p class="font-bold text-gray-900 text-sm">Mostrar en cada recarga</p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                Ignora los días configurados y muestra el popup cada vez que alguien recarga la página,
+                                incluso si lo cerró antes. Quien ya se suscribió nunca lo vuelve a ver.
+                            </p>
+                        </div>
+                    </label>
+                </div>
+
+                <button type="submit"
+                        class="mt-5 bg-[#fc5648] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#d94439] transition">
+                    Guardar
+                </button>
+            </form>
+
             {{-- Orden de las secciones del home --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
                 <p class="font-bold text-gray-900">Orden de las secciones del home</p>

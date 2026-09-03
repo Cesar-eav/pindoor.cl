@@ -23,6 +23,8 @@ class ConfiguracionController extends Controller
     {
         $aprobacionActiva = (bool) Configuracion::get('aprobacion_negocios_activa', false);
         $homePorCategoria = (int) Configuracion::get('home_puntos_por_categoria', \App\Http\Controllers\PuntoInteresController::PUNTOS_POR_CATEGORIA_DEFAULT);
+        $newsletterPopupDias = (int) Configuracion::get('newsletter_popup_dias_reaparicion', 14);
+        $newsletterPopupCadaRecarga = (bool) Configuracion::get('newsletter_popup_cada_recarga', false);
         $ordenSecciones = HomeSeccionesService::ordenSecciones();
         $etiquetasSecciones = self::ETIQUETAS_SECCIONES;
 
@@ -57,7 +59,7 @@ class ConfiguracionController extends Controller
         $flowProduccionSecretConfigurado = filled(Configuracion::get('flow_produccion_secret_key'));
 
         return view('admin.configuracion.index', compact(
-            'aprobacionActiva', 'homePorCategoria', 'idsExcluidos', 'puntosData', 'categoriasDisponibles', 'ascensores',
+            'aprobacionActiva', 'homePorCategoria', 'newsletterPopupDias', 'newsletterPopupCadaRecarga', 'idsExcluidos', 'puntosData', 'categoriasDisponibles', 'ascensores',
             'ordenSecciones', 'etiquetasSecciones', 'notificacionesEmails', 'notificacionesTelegramChatId',
             'flowModo', 'flowSandboxApiKey', 'flowProduccionApiKey', 'flowSandboxSecretConfigurado', 'flowProduccionSecretConfigurado'
         ));
@@ -86,6 +88,18 @@ class ConfiguracionController extends Controller
         ]);
 
         Configuracion::set('home_puntos_por_categoria', (string) $data['home_puntos_por_categoria']);
+
+        return back()->with('success', 'Configuración guardada.');
+    }
+
+    public function actualizarNewsletterPopup(Request $request)
+    {
+        $data = $request->validate([
+            'newsletter_popup_dias_reaparicion' => 'required|integer|min:1|max:365',
+        ]);
+
+        Configuracion::set('newsletter_popup_dias_reaparicion', (string) $data['newsletter_popup_dias_reaparicion']);
+        Configuracion::set('newsletter_popup_cada_recarga', $request->boolean('newsletter_popup_cada_recarga') ? '1' : '0');
 
         return back()->with('success', 'Configuración guardada.');
     }

@@ -607,13 +607,18 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
 {{-- Popup boletín de panoramas — sencillo, cerrable, no invasivo --}}
 <div x-data="{
         visible: false, email: '', enviando: false, enviado: false, error: '',
+        diasReaparicion: {{ $newsletterPopupDias }},
+        cadaRecarga: {{ $newsletterPopupCadaRecarga ? 'true' : 'false' }},
         init() {
-            if (localStorage.getItem('newsletter_panoramas_cerrado')) return;
+            const cerradoHasta = localStorage.getItem('newsletter_panoramas_cerrado_hasta');
+            if (cerradoHasta === 'siempre') return;
+            if (!this.cadaRecarga && cerradoHasta && Date.now() < parseInt(cerradoHasta, 10)) return;
             setTimeout(() => { this.visible = true; }, 4000);
         },
         cerrar() {
             this.visible = false;
-            localStorage.setItem('newsletter_panoramas_cerrado', '1');
+            const expiracion = Date.now() + this.diasReaparicion * 24 * 60 * 60 * 1000;
+            localStorage.setItem('newsletter_panoramas_cerrado_hasta', String(expiracion));
         },
         enviar() {
             if (this.enviando) return;
@@ -628,51 +633,51 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
                 body: JSON.stringify({ email: this.email, origen: 'panoramas' }),
             })
             .then(r => { if (!r.ok) throw new Error(); return r.json(); })
-            .then(() => { this.enviado = true; localStorage.setItem('newsletter_panoramas_cerrado', '1'); })
+            .then(() => { this.enviado = true; localStorage.setItem('newsletter_panoramas_cerrado_hasta', 'siempre'); })
             .catch(() => { this.error = 'No pudimos suscribirte. Revisa el correo e intenta de nuevo.'; })
             .finally(() => { this.enviando = false; });
         }
      }"
      x-show="visible"
      @keydown.escape.window="cerrar()"
-     class="fixed inset-0 z-999 flex items-end sm:items-center justify-center p-4"
+     class="fixed inset-0 z-999 flex items-center justify-center p-4"
      style="display:none">
 
     <div x-show="visible"
          x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
          x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
          @click="cerrar()"
-         class="absolute inset-0 bg-black/30"></div>
+         class="absolute inset-0 bg-black/60"></div>
 
     <div x-show="visible"
          x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-4 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100"
          x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-         class="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6">
+         class="relative bg-black border border-white/10 rounded-3xl shadow-2xl w-full max-w-sm p-6">
 
         <button @click="cerrar()" aria-label="Cerrar"
-                class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition">
+                class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full text-gray-500 hover:bg-white/10 hover:text-white transition">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
         </button>
 
         <template x-if="!enviado">
-            <div>
-                <p class="text-3xl mb-2">📬</p>
-                <p class="font-extrabold text-gray-900 text-lg leading-snug">No te pierdas los próximos panoramas</p>
-                <p class="text-sm text-gray-400 mt-1.5 leading-relaxed">
-                    Déjanos tu correo y te avisamos cuando publiquemos novedades.                </p>
-                <form @submit.prevent="enviar()" class="mt-4 space-y-2">
+            <div class="text-center">
+                <p class="font-extrabold text-white text-2xl leading-snug" style="font-family:'Lora',serif;">Pindoor Newsletter</p>
+                <p class="text-sm text-gray-400 mt-2 leading-relaxed" style="font-family:'Lora',serif; font-style:italic;">
+                    Déjanos tu correo y te avisamos cuando publiquemos novedades.
+                </p>
+                <form @submit.prevent="enviar()" class="mt-5 space-y-2">
                     <input type="email" x-model="email" required placeholder="tu@correo.com"
-                           class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                           class="w-full px-4 py-2.5 bg-white/5 border border-white/15 rounded-xl text-sm text-white placeholder-gray-500 focus:ring-2 focus:ring-[#fc5648] outline-none">
                     <button type="submit" :disabled="enviando"
                             class="w-full bg-[#fc5648] hover:bg-[#d94439] text-white text-sm font-bold px-5 py-2.5 rounded-xl transition disabled:opacity-50">
                         <span x-show="!enviando">Avísame</span>
                         <span x-show="enviando">Enviando…</span>
                     </button>
                 </form>
-                <p x-show="error" x-text="error" class="text-xs text-red-500 mt-2"></p>
-                <button @click="cerrar()" class="w-full text-center text-xs text-gray-400 hover:text-gray-600 mt-3 transition">
+                <p x-show="error" x-text="error" class="text-xs text-red-400 mt-2"></p>
+                <button @click="cerrar()" class="w-full text-center text-xs text-gray-500 hover:text-gray-300 mt-3 transition">
                     Ahora no
                 </button>
             </div>
@@ -680,7 +685,7 @@ $jsonLdJson = json_encode(['@context' => 'https://schema.org', '@type' => 'ItemL
         <template x-if="enviado">
             <div class="text-center py-2">
                 <p class="text-3xl mb-2">✓</p>
-                <p class="font-extrabold text-gray-900">¡Listo!</p>
+                <p class="font-extrabold text-white text-xl" style="font-family:'Lora',serif;">¡Listo!</p>
                 <p class="text-sm text-gray-400 mt-1">Te avisaremos por correo.</p>
             </div>
         </template>
