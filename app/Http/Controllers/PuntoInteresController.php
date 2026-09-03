@@ -545,10 +545,13 @@ class PuntoInteresController extends Controller
             }
         }
 
+        $newsletterPopupDias = (int) Configuracion::get('newsletter_popup_dias_reaparicion', 14);
+        $newsletterPopupCadaRecarga = (bool) Configuracion::get('newsletter_popup_cada_recarga', false);
+
         return view('panoramas.index', compact(
             'panoramas', 'limite', 'categorias', 'catActiva',
             'porDia', 'diasMeta', 'allImages', 'startIndexMap', 'indicesPorDia',
-            'exposiciones', 'mesesMeta', 'mesPorDia', 'revivals'
+            'exposiciones', 'mesesMeta', 'mesPorDia', 'revivals', 'newsletterPopupDias', 'newsletterPopupCadaRecarga'
         ));
     }
 
