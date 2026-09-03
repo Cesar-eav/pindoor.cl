@@ -116,7 +116,6 @@ class PuntoInteresController extends Controller
             $s = $request->search;
             $sLower = mb_strtolower($s);
             $panoramas = Panorama::where('activo', true)
-                ->whereNotNull('dias_semana')
                 ->where('fecha', '>=', now()->toDateString())
                 // titulo/ubicacion son JSON: el LIKE normal es case-sensitive
                 ->where(fn($q) => $q->whereRaw('LOWER(titulo) LIKE ?', ["%{$sLower}%"])
