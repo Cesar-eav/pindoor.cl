@@ -3,7 +3,21 @@
         <h2 class="font-extrabold text-xl text-gray-900">Configuración general</h2>
     </x-slot>
 
+    @push('head')
+        <style>html { scroll-behavior: smooth; }</style>
+    @endpush
+
     <div class="py-8">
+        <div class="sticky top-0 z-40 -mt-8 mb-6 bg-white/95 backdrop-blur border-b border-gray-100">
+            <nav id="config-nav" class="mx-auto px-4 sm:px-6 flex items-center gap-1.5 overflow-x-auto py-3" style="max-width:720px">
+                <a href="#grupo-general" data-target="grupo-general" class="config-nav-link shrink-0 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition bg-gray-900 text-white">General</a>
+                <a href="#grupo-home" data-target="grupo-home" class="config-nav-link shrink-0 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition bg-gray-100 text-gray-500 hover:bg-gray-200">Home</a>
+                <a href="#grupo-contenido" data-target="grupo-contenido" class="config-nav-link shrink-0 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition bg-gray-100 text-gray-500 hover:bg-gray-200">Contenido de ejemplo</a>
+                <a href="#grupo-notificaciones" data-target="grupo-notificaciones" class="config-nav-link shrink-0 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition bg-gray-100 text-gray-500 hover:bg-gray-200">Notificaciones</a>
+                <a href="#grupo-pagos" data-target="grupo-pagos" class="config-nav-link shrink-0 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition bg-gray-100 text-gray-500 hover:bg-gray-200">Pagos</a>
+            </nav>
+        </div>
+
         <div class="mx-auto px-4 sm:px-6" style="max-width:720px">
 
             @if(session('success'))
@@ -13,6 +27,7 @@
                 </div>
             @endif
 
+            <section id="grupo-general" class="scroll-mt-24">
             <form action="{{ route('admin.configuracion.actualizar') }}" method="POST">
                 @csrf
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -37,9 +52,12 @@
                     Guardar
                 </button>
             </form>
+            </section>
 
+            {{-- Home --}}
+            <section id="grupo-home" class="mt-6 scroll-mt-24">
             {{-- Atractivos por categoría en la home --}}
-            <form action="{{ route('admin.configuracion.home-por-categoria') }}" method="POST" class="mt-6">
+            <form action="{{ route('admin.configuracion.home-por-categoria') }}" method="POST">
                 @csrf
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <label for="home_puntos_por_categoria" class="font-bold text-gray-900 block">
@@ -124,9 +142,12 @@
                     </button>
                 </form>
             </div>
+            </section>
 
+            {{-- Contenido de ejemplo --}}
+            <section id="grupo-contenido" class="mt-6 scroll-mt-24">
             {{-- Puntos de ejemplo / demo --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <p class="font-bold text-gray-900">Puntos de ejemplo (no son negocios reales)</p>
                 <p class="text-xs text-gray-500 mt-1 mb-4">
                     Se crearon para mostrarle a un cliente prospecto cómo quedaría su local antes de registrarse.
@@ -211,8 +232,55 @@
                 </form>
             </div>
 
+            {{-- Ascensores fuera de servicio --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
+                <p class="font-bold text-gray-900">Ascensores fuera de servicio</p>
+                <p class="text-xs text-gray-500 mt-1 mb-4">
+                    Los ascensores de Valparaíso a veces cierran por mantención o fallas. Marca los que
+                    están fuera de servicio para que se muestre un aviso en su ficha y en la imagen de
+                    portada que ve el turista.
+                </p>
+
+                <form action="{{ route('admin.configuracion.ascensores') }}" method="POST">
+                    @csrf
+
+                    <div class="divide-y divide-gray-50 border border-gray-100 rounded-xl">
+                        @forelse($ascensores as $ascensor)
+                        <div class="p-4" x-data="{ fuera: {{ $ascensor->fuera_de_servicio ? 'true' : 'false' }} }">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" name="fuera_de_servicio[{{ $ascensor->id }}]" value="1"
+                                       x-model="fuera"
+                                       class="mt-1 rounded border-gray-300 text-[#fc5648] focus:ring-[#fc5648]">
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-semibold text-gray-800 text-sm">{{ $ascensor->title }}</p>
+                                    @if($ascensor->sector)
+                                    <p class="text-xs text-gray-400">{{ $ascensor->sector }}</p>
+                                    @endif
+                                </div>
+                            </label>
+                            <div x-show="fuera" class="mt-3 ml-7">
+                                <textarea name="motivo[{{ $ascensor->id }}]" rows="2"
+                                          placeholder="Describe el problema (ej: en mantención hasta nuevo aviso)"
+                                          class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none resize-none">{{ $ascensor->fuera_de_servicio_motivo }}</textarea>
+                            </div>
+                        </div>
+                        @empty
+                        <p class="px-4 py-3 text-xs text-gray-300 italic">No hay ascensores registrados.</p>
+                        @endforelse
+                    </div>
+
+                    <button type="submit"
+                            class="mt-5 bg-[#fc5648] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#d94439] transition">
+                        Guardar
+                    </button>
+                </form>
+            </div>
+            </section>
+
+            {{-- Notificaciones --}}
+            <section id="grupo-notificaciones" class="mt-6 scroll-mt-24">
             {{-- Correos y Telegram de notificaciones --}}
-            <form action="{{ route('admin.configuracion.notificaciones') }}" method="POST" class="mt-6">
+            <form action="{{ route('admin.configuracion.notificaciones') }}" method="POST">
                 @csrf
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <p class="font-bold text-gray-900">Notificaciones de registro y actividad</p>
@@ -249,9 +317,12 @@
                     Guardar
                 </button>
             </form>
+            </section>
 
+            {{-- Pagos --}}
+            <section id="grupo-pagos" class="mt-6 scroll-mt-24">
             {{-- Credenciales de pago Flow --}}
-            <form action="{{ route('admin.configuracion.flow') }}" method="POST" class="mt-6"
+            <form action="{{ route('admin.configuracion.flow') }}" method="POST"
                   x-data="{ modo: '{{ old('flow_modo', $flowModo) }}' }">
                 @csrf
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -318,50 +389,7 @@
                     Guardar
                 </button>
             </form>
-
-            {{-- Ascensores fuera de servicio --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
-                <p class="font-bold text-gray-900">Ascensores fuera de servicio</p>
-                <p class="text-xs text-gray-500 mt-1 mb-4">
-                    Los ascensores de Valparaíso a veces cierran por mantención o fallas. Marca los que
-                    están fuera de servicio para que se muestre un aviso en su ficha y en la imagen de
-                    portada que ve el turista.
-                </p>
-
-                <form action="{{ route('admin.configuracion.ascensores') }}" method="POST">
-                    @csrf
-
-                    <div class="divide-y divide-gray-50 border border-gray-100 rounded-xl">
-                        @forelse($ascensores as $ascensor)
-                        <div class="p-4" x-data="{ fuera: {{ $ascensor->fuera_de_servicio ? 'true' : 'false' }} }">
-                            <label class="flex items-start gap-3 cursor-pointer">
-                                <input type="checkbox" name="fuera_de_servicio[{{ $ascensor->id }}]" value="1"
-                                       x-model="fuera"
-                                       class="mt-1 rounded border-gray-300 text-[#fc5648] focus:ring-[#fc5648]">
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-semibold text-gray-800 text-sm">{{ $ascensor->title }}</p>
-                                    @if($ascensor->sector)
-                                    <p class="text-xs text-gray-400">{{ $ascensor->sector }}</p>
-                                    @endif
-                                </div>
-                            </label>
-                            <div x-show="fuera" class="mt-3 ml-7">
-                                <textarea name="motivo[{{ $ascensor->id }}]" rows="2"
-                                          placeholder="Describe el problema (ej: en mantención hasta nuevo aviso)"
-                                          class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none resize-none">{{ $ascensor->fuera_de_servicio_motivo }}</textarea>
-                            </div>
-                        </div>
-                        @empty
-                        <p class="px-4 py-3 text-xs text-gray-300 italic">No hay ascensores registrados.</p>
-                        @endforelse
-                    </div>
-
-                    <button type="submit"
-                            class="mt-5 bg-[#fc5648] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#d94439] transition">
-                        Guardar
-                    </button>
-                </form>
-            </div>
+            </section>
 
         </div>
     </div>
@@ -410,6 +438,37 @@
                     .map(function(tile) { return tile.dataset.clave; });
                 document.getElementById('orden-secciones-input').value = orden.join(',');
             });
+        })();
+    </script>
+
+    <script>
+        // Resalta en la barra de navegación el grupo que está actualmente visible.
+        (function() {
+            var nav = document.getElementById('config-nav');
+            if (!nav) return;
+            var links = Array.prototype.slice.call(nav.querySelectorAll('.config-nav-link'));
+            var activeClasses = ['bg-gray-900', 'text-white'];
+            var inactiveClasses = ['bg-gray-100', 'text-gray-500', 'hover:bg-gray-200'];
+
+            function setActive(id) {
+                links.forEach(function(link) {
+                    var isActive = link.dataset.target === id;
+                    link.classList.remove.apply(link.classList, isActive ? inactiveClasses : activeClasses);
+                    link.classList.add.apply(link.classList, isActive ? activeClasses : inactiveClasses);
+                });
+            }
+
+            var sections = links
+                .map(function(link) { return document.getElementById(link.dataset.target); })
+                .filter(Boolean);
+
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) setActive(entry.target.id);
+                });
+            }, { rootMargin: '-45% 0px -50% 0px' });
+
+            sections.forEach(function(section) { observer.observe(section); });
         })();
     </script>
 </x-admin-layout>
