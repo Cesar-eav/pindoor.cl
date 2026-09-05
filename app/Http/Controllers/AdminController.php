@@ -356,11 +356,6 @@ class AdminController extends Controller
         $accionesSemana = ActividadCliente::where('created_at', '>=', now()->startOfWeek())->count();
         $accionesMes    = ActividadCliente::where('created_at', '>=', now()->startOfMonth())->count();
 
-        $clientesActivos30d = User::where('type', 'cliente')
-            ->where('last_login_at', '>=', now()->subDays(30))
-            ->count();
-        $clientesNuncaConectados = User::where('type', 'cliente')->whereNull('last_login_at')->count();
-
         // 2. Logins por día, últimos 30 días (rellenando los días sin logins con 0)
         $loginsPorDiaRaw = LoginCliente::where('created_at', '>=', now()->subDays(29)->startOfDay())
             ->selectRaw('DATE(created_at) as fecha, count(*) as total')
@@ -379,9 +374,10 @@ class AdminController extends Controller
             ->orderByDesc('total')
             ->get();
 
-        // 4. Tabla resumen por cliente (sin N+1: todo agrupado en 4 consultas)
+        // 4. Tabla resumen por cliente (sin N+1: todo agrupado en consultas)
         $puntosClientes = PuntoInteres::clientes()
             ->where('eliminado', false)
+            ->sinExcluidos()
             ->with('user')
             ->get();
 
@@ -404,20 +400,65 @@ class AdminController extends Controller
             ->where('created_at', '>=', now()->startOfMonth())
             ->selectRaw('punto_interes_id, count(*) as total')->groupBy('punto_interes_id')->pluck('total', 'punto_interes_id');
 
-        $resumenClientes = $puntosClientes->map(fn ($punto) => (object) [
-            'punto'           => $punto,
-            'logins_semana'   => $loginsSemanaPorUsuario[$punto->user_id] ?? 0,
-            'logins_mes'      => $loginsMesPorUsuario[$punto->user_id] ?? 0,
-            'acciones_semana' => $accionesSemanaPorPunto[$punto->id] ?? 0,
-            'acciones_mes'    => $accionesMesPorPunto[$punto->id] ?? 0,
-        ])->sortByDesc('acciones_mes')->values();
+        $ultimaActividadPorPunto = ActividadCliente::whereIn('punto_interes_id', $puntoIds)
+            ->selectRaw('punto_interes_id, MAX(created_at) as ultima')
+            ->groupBy('punto_interes_id')
+            ->pluck('ultima', 'punto_interes_id');
+
+        $resumenClientes = $puntosClientes->map(function ($punto) use (
+            $loginsSemanaPorUsuario, $loginsMesPorUsuario,
+            $accionesSemanaPorPunto, $accionesMesPorPunto, $ultimaActividadPorPunto
+        ) {
+            $ultimaAccionRaw = $ultimaActividadPorPunto[$punto->id] ?? null;
+            $ultimaActividad = $ultimaAccionRaw ? Carbon::parse($ultimaAccionRaw) : $punto->updated_at;
+
+            return (object) [
+                'punto'            => $punto,
+                'logins_semana'    => $loginsSemanaPorUsuario[$punto->user_id] ?? 0,
+                'logins_mes'       => $loginsMesPorUsuario[$punto->user_id] ?? 0,
+                'acciones_semana'  => $accionesSemanaPorPunto[$punto->id] ?? 0,
+                'acciones_mes'     => $accionesMesPorPunto[$punto->id] ?? 0,
+                'ultima_actividad' => $ultimaActividad,
+                'segmento'         => self::segmentoCliente($punto->user, $ultimaActividad),
+            ];
+        })->sortByDesc('ultima_actividad')->values();
+
+        $segmentosResumen = [
+            'activo'        => $resumenClientes->where('segmento', 'activo')->count(),
+            'tibio'         => $resumenClientes->where('segmento', 'tibio')->count(),
+            'inactivo'      => $resumenClientes->where('segmento', 'inactivo')->count(),
+            'nunca_conecto' => $resumenClientes->where('segmento', 'nunca_conecto')->count(),
+        ];
 
         return view('admin.clientes.dashboard', compact(
             'loginsHoy', 'loginsSemana', 'loginsMes',
             'accionesHoy', 'accionesSemana', 'accionesMes',
-            'clientesActivos30d', 'clientesNuncaConectados',
-            'loginsPorDia', 'accionesPorTipo', 'resumenClientes'
+            'loginsPorDia', 'accionesPorTipo', 'resumenClientes', 'segmentosResumen'
         ));
+    }
+
+    /**
+     * Clasifica al cliente según recencia de actividad real, para no depender de
+     * que el admin interprete números manualmente. Nunca haber iniciado sesión
+     * pesa más que cualquier otra señal.
+     */
+    private static function segmentoCliente(?User $user, ?Carbon $ultimaActividad): string
+    {
+        if (!$user || !$user->last_login_at) {
+            return 'nunca_conecto';
+        }
+
+        if (!$ultimaActividad) {
+            return 'inactivo';
+        }
+
+        $dias = $ultimaActividad->diffInDays(now());
+
+        return match (true) {
+            $dias <= 7  => 'activo',
+            $dias <= 30 => 'tibio',
+            default     => 'inactivo',
+        };
     }
 
     public function actualizarDestacados(Request $request)
