@@ -561,4 +561,20 @@ class PuntoInteres extends Model
     {
         return $query->where('es_cliente', false);
     }
+
+    /**
+     * Categorías de negocio (no atractivos turísticos puros) — las únicas elegibles
+     * para activarse como cliente. Usado por el buscador de "Activar un espacio como
+     * cliente" en el panel admin.
+     *
+     * No usa Categoria.es_cliente porque ese flag hoy no coincide con este listado
+     * (incluye subcategorías nuevas 17-22 y excluye 12/13/14) — parece un campo en
+     * transición mientras se completan las subcategorías de Tiendas/Artesanía.
+     */
+    public const CATEGORIAS_NEGOCIO = [2, 5, 7, 8, 10, 11, 12, 13, 14];
+
+    public function scopeElegiblesParaCliente($query)
+    {
+        return $query->whereIn('categoria_id', self::CATEGORIAS_NEGOCIO);
+    }
 }

@@ -23,21 +23,9 @@
             {{-- Panel: activar un punto como cliente --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h3 class="font-bold text-gray-700 mb-1">Activar un espacio como cliente</h3>
-                <p class="text-xs text-gray-400 mb-4">Selecciona un punto de interés existente para convertirlo en cliente y crear sus credenciales de acceso.</p>
+                <p class="text-xs text-gray-400 mb-4">Busca un punto de interés existente para convertirlo en cliente y crear sus credenciales de acceso.</p>
 
-                @if($puntosDisponibles->isEmpty())
-                    <p class="text-sm text-gray-400 italic">Todos los puntos ya están activados como clientes.</p>
-                @else
-                    <div class="flex flex-wrap gap-3">
-                        @foreach($puntosDisponibles as $punto)
-                            <a href="{{ route('admin.clientes.activar.form', $punto) }}"
-                               class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-pindoor-accent hover:text-white text-gray-700 text-sm font-medium rounded-lg transition">
-                                {{ $punto->title }}
-                                <span class="text-xs opacity-60">{{ $punto->sector }}</span>
-                            </a>
-                        @endforeach
-                    </div>
-                @endif
+                <livewire:selector-espacio-cliente />
             </div>
 
             {{-- Pendientes de aprobación --}}
