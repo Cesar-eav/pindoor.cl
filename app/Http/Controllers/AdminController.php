@@ -311,13 +311,6 @@ class AdminController extends Controller
             ->latest()
             ->paginate(15);
 
-        // Puntos que aún no son clientes, solo categorías de negocios
-        $puntosDisponibles = PuntoInteres::where('es_cliente', false)
-            ->where('eliminado', false)
-            ->whereIn('categoria_id', [2, 5, 7, 8, 10, 11, 12, 13, 14])
-            ->orderBy('title')
-            ->get();
-
         $pendientes = PuntoInteres::where('estado_aprobacion', 'pendiente')
             ->where('eliminado', false)
             ->with(['user', 'categoria'])
@@ -330,7 +323,7 @@ class AdminController extends Controller
             ->orderBy('orden_destacado')
             ->get(['id', 'title', 'sector', 'categoria_id', 'destacado_home', 'orden_destacado']);
 
-        return view('admin.clientes', compact('clientes', 'puntosDisponibles', 'pendientes', 'clientesDestacables'));
+        return view('admin.clientes', compact('clientes', 'pendientes', 'clientesDestacables'));
     }
 
     public function actividadCliente(PuntoInteres $punto)
