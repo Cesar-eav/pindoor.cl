@@ -74,6 +74,12 @@
                        class="rounded text-teal-600 focus:ring-teal-500">
                 <label for="activo" class="text-sm font-semibold text-gray-700">Activo</label>
             </div>
+            <div class="flex items-center gap-2">
+                <input type="checkbox" name="es_pindoor" id="es_pindoor" value="1"
+                       @checked(old('es_pindoor', $operador?->es_pindoor ?? false))
+                       class="rounded text-teal-600 focus:ring-teal-500">
+                <label for="es_pindoor" class="text-sm font-semibold text-gray-700">Operador oficial Pindoor (destacar en rutas)</label>
+            </div>
         </div>
     </div>
 </div>

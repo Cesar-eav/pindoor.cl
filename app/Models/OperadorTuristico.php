@@ -24,11 +24,12 @@ class OperadorTuristico extends Model
         'imagen_perfil', 'ciudad',
         'email_contacto', 'telefono',
         'enlace_web', 'enlace_instagram', 'enlace_facebook', 'enlace_whatsapp',
-        'activo',
+        'activo', 'es_pindoor',
     ];
 
     protected $casts = [
         'activo' => 'boolean',
+        'es_pindoor' => 'boolean',
     ];
 
     public function usuario()

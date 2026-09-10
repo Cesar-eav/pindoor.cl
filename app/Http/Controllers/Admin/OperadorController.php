@@ -108,7 +108,8 @@ class OperadorController extends Controller
             'imagen'           => 'nullable|image|max:4096',
         ]);
 
-        $data['activo'] = $request->boolean('activo', true);
+        $data['activo']     = $request->boolean('activo', true);
+        $data['es_pindoor'] = $request->boolean('es_pindoor', false);
 
         return $data;
     }

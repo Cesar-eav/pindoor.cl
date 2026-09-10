@@ -4,6 +4,9 @@
     $seoDesc  = $ruta->descripcion
         ? Str::limit($ruta->descripcion, 155, '')
         : 'Ruta a pie por Valparaíso con ' . $ruta->puntos->count() . ' paradas, curada por Pindoor.';
+
+    $operadorPindoor = $ruta->operadores->first(fn ($o) => $o->es_pindoor && $o->pivot->ticketing_activo);
+    $otrosOperadores = $ruta->operadores->reject(fn ($o) => $o->es_pindoor);
 @endphp
 
 @extends('layouts.pindoor')
@@ -96,6 +99,32 @@
         </p>
         @endif
 
+        {{-- CTA destacado: reserva con Pindoor --}}
+        @if($operadorPindoor)
+        <a href="{{ route('rutas.reservar', [$ruta->slug, $operadorPindoor->slug]) }}"
+           class="group block bg-[#fc5648] hover:bg-[#e64536] rounded-3xl p-6 mb-10 shadow-lg shadow-[#fc5648]/20 transition">
+            <p class="text-[11px] font-black uppercase tracking-widest text-white/80 mb-2 bg-whi">
+                Ruta oficial de Pindoor
+            </p>
+            <div class="flex items-center justify-between gap-4 flex-wrap">
+                <div class="min-w-0">
+                    <p class="text-xl font-extrabold text-white leading-tight mb-1">
+                        Vive esta ruta con Pindoor
+                    </p>
+                    <p class="text-sm text-white/80">
+                        Desde ${{ number_format($operadorPindoor->pivot->precio_individual, 0, ',', '.') }} por persona
+                    </p>
+                </div>
+                <span class="shrink-0 inline-flex items-center gap-2 bg-white text-[#fc5648] font-black text-sm px-5 py-3 rounded-2xl group-hover:gap-3 transition-all">
+                    Reservar ahora
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.29 2.29c-.63.63-.18 1.71.71 1.71H17m-9 5a1 1 0 100-2 1 1 0 000 2zm9 0a1 1 0 100-2 1 1 0 000 2z"/>
+                    </svg>
+                </span>
+            </div>
+        </a>
+        @endif
+
         <hr class="border-gray-100 mb-10">
 
         {{-- Mapa del recorrido --}}
@@ -138,12 +167,24 @@
 
         {{-- Operadores que ofrecen esta ruta --}}
         <div class="mt-14 pt-8 border-t border-gray-100">
+            @if($operadorPindoor)
+            <a href="{{ route('rutas.reservar', [$ruta->slug, $operadorPindoor->slug]) }}"
+               class="group flex items-center justify-between gap-4 bg-[#fff0ef] border border-[#fc5648]/20 rounded-2xl p-4 mb-6 hover:border-[#fc5648]/40 transition">
+                <p class="text-sm font-bold text-gray-700">
+                    ¿Listo para vivirla? Desde ${{ number_format($operadorPindoor->pivot->precio_individual, 0, ',', '.') }}
+                </p>
+                <span class="shrink-0 inline-flex items-center gap-1 text-[#fc5648] font-black text-sm group-hover:gap-2 transition-all">
+                    Reservar →
+                </span>
+            </a>
+            @endif
+
+            @if($otrosOperadores->isNotEmpty())
             <h3 class="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
-                🧭 Disponible con
+                🧭 {{ $operadorPindoor ? 'También disponible con' : 'Disponible con' }}
             </h3>
-            @if($ruta->operadores->isNotEmpty())
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                @foreach($ruta->operadores as $operador)
+                @foreach($otrosOperadores as $operador)
                 <div class="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all p-3">
                     <a href="{{ route('operador.show', $operador->slug) }}" class="flex items-center gap-3 min-w-0 flex-1">
                         <div class="w-14 h-14 rounded-full overflow-hidden bg-gray-100 shrink-0">
@@ -170,7 +211,10 @@
                 </div>
                 @endforeach
             </div>
-            @else
+            @elseif(!$operadorPindoor)
+            <h3 class="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
+                🧭 Disponible con
+            </h3>
             <div class="flex items-center gap-3 bg-[#fff0ef] border border-[#fc5648]/20 rounded-2xl p-4">
                 <span class="text-2xl shrink-0">🧭</span>
                 <p class="text-sm text-gray-600">Pronto habrá una oferta de operadores turísticos para realizar esta ruta.</p>

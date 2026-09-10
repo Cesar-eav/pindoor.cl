@@ -56,8 +56,8 @@
                     <li>{{ $h->resumenTexto() }} <span class="text-xs text-gray-400">· cupo máx. {{ $h->cupo_maximo }}</span></li>
                 @endforeach
             </ul>
-            <p class="text-xs text-gray-500 mt-4 pt-3 border-t border-gray-100">
-                ¿Grupo grande? Para un tour exclusivo escríbenos por
+            <p class="text-sm text-gray-700 mt-4 pt-3 border-t border-gray-100">
+                <span class="font-bold">¿Grupo grande?</span> Para un tour exclusivo escríbenos por
                 <a href="https://wa.me/56930821653?text={{ rawurlencode('Hola, quiero cotizar un tour exclusivo para mi grupo en ' . $ruta->titulo) }}"
                    target="_blank" class="font-bold text-[#fc5648] hover:underline">WhatsApp</a>.
             </p>
