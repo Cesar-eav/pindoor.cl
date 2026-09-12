@@ -129,6 +129,16 @@
                                class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
                     </div>
                 </div>
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-1">
+                        Autor
+                        <span class="normal-case font-normal text-gray-400 ml-1">— aparece en los datos estructurados (SEO)</span>
+                    </label>
+                    <input type="text" name="autor"
+                           value="{{ old('autor', $post?->autor) }}"
+                           placeholder="Equipo Pindoor"
+                           class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#fc5648] outline-none">
+                </div>
             </div>
 
             {{-- Resumen --}}

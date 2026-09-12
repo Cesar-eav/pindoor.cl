@@ -6,3 +6,4 @@ Disallow: /dashboard
 Disallow: /profile
 
 Sitemap: https://pindoor.cl/sitemap.xml
+Sitemap: https://pindoor.cl/sitemap-news.xml

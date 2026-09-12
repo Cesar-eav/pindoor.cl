@@ -27,11 +27,12 @@
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
-        "@type": "BlogPosting",
+        "@type": "NewsArticle",
         "headline": "{{ addslashes($post->titulo) }}",
         "datePublished": "{{ $post->publicado_en?->toIso8601String() }}",
         "dateModified":  "{{ $post->updated_at->toIso8601String() }}",
         @if($post->imagen_portada_url)"image": "{{ $post->imagen_portada_url }}",@endif
+        "author": { "@type": "{{ $post->autor ? 'Person' : 'Organization' }}", "name": "{{ addslashes($post->autor ?: 'Pindoor') }}" },
         "publisher": { "@type": "Organization", "name": "Pindoor" },
         "mainEntityOfPage": "{{ $canonicalUrl }}"
         @if($post->lugares->isNotEmpty())

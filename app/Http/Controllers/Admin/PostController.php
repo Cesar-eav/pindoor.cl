@@ -45,6 +45,7 @@ class PostController extends Controller
             'titulo_fr'      => 'nullable|string|max:255',
             'slug'           => 'nullable|string|max:255',
             'dynamic_block_title' => 'nullable|string|max:255',
+            'autor'          => 'nullable|string|max:120',
             'resumen_es'     => 'nullable|string|max:600',
             'resumen_en'     => 'nullable|string|max:600',
             'resumen_fr'     => 'nullable|string|max:600',
@@ -66,6 +67,7 @@ class PostController extends Controller
         $post = new Post();
         $post->slug                 = $slug;
         $post->dynamic_block_title  = $data['dynamic_block_title'] ?? null;
+        $post->autor           = $data['autor'] ?? null;
         $post->imagen_portada = $portada ?? null;
         $post->publicado      = $publicado;
         $post->publicado_en   = $publicado ? now() : null;
@@ -110,6 +112,7 @@ class PostController extends Controller
             'titulo_fr'      => 'nullable|string|max:255',
             'slug'           => 'nullable|string|max:255',
             'dynamic_block_title' => 'nullable|string|max:255',
+            'autor'          => 'nullable|string|max:120',
             'resumen_es'     => 'nullable|string|max:600',
             'resumen_en'     => 'nullable|string|max:600',
             'resumen_fr'     => 'nullable|string|max:600',
@@ -122,6 +125,7 @@ class PostController extends Controller
 
         $blog->slug                = Post::generarSlug($data['slug'] ?: $data['titulo_es'], $blog->id);
         $blog->dynamic_block_title = $data['dynamic_block_title'] ?? null;
+        $blog->autor           = $data['autor'] ?? null;
 
         if ($request->hasFile('imagen_portada')) {
             if ($blog->imagen_portada) Storage::disk('public')->delete($blog->imagen_portada);

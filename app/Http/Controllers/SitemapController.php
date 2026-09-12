@@ -31,4 +31,16 @@ class SitemapController extends Controller
             ->view('sitemap', compact('puntos', 'categorias', 'posts', 'rutas', 'recomendaciones'))
             ->header('Content-Type', 'application/xml');
     }
+
+    public function news()
+    {
+        $posts = Post::publicados()
+            ->whereNotNull('slug')
+            ->where('publicado_en', '>=', now()->subHours(48))
+            ->get(['slug', 'titulo', 'publicado_en']);
+
+        return response()
+            ->view('sitemap-news', compact('posts'))
+            ->header('Content-Type', 'application/xml');
+    }
 }

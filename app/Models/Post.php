@@ -23,6 +23,7 @@ class Post extends Model
         'titulo',
         'slug',
         'dynamic_block_title',
+        'autor',
         'resumen',
         'contenido',
         'imagen_portada',

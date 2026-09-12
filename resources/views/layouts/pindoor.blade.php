@@ -20,8 +20,9 @@
     <meta name="robots" content="@yield('robots', 'index, follow')" />
     <title>@yield('title', 'Pindoor · Guía de lugares en Valparaíso')</title>
     <meta name="description" content="@yield('description', 'Descubre restaurantes, hoteles, museos, bares y atracciones turísticas en Valparaíso. La guía local completa de Pindoor.')">
-    @hasSection('canonical')
-        <link rel="canonical" href="@yield('canonical')" />
+    <link rel="canonical" href="@yield('canonical', url()->current())" />
+    @if(config('services.google.site_verification'))
+        <meta name="google-site-verification" content="{{ config('services.google.site_verification') }}" />
     @endif
     {{-- Open Graph / Twitter Card — páginas hijas pueden pisar con @section('og_*') --}}
     <meta property="og:site_name"        content="Pindoor" />
@@ -39,6 +40,16 @@
     <meta name="twitter:title"           content="@yield('og_title', 'Pindoor · Guía de lugares en Valparaíso')" />
     <meta name="twitter:description"     content="@yield('og_description', 'Descubre restaurantes, cafés, museos, miradores y atracciones turísticas en Valparaíso.')" />
     <meta name="twitter:image"           content="@yield('og_image', 'https://pindoor.cl/og.jpg')" />
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Pindoor",
+        "url": "https://pindoor.cl",
+        "logo": "https://pindoor.cl/favicon.png",
+        "sameAs": ["https://www.instagram.com/pindoor.cl/"]
+    }
+    </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     @yield('head')

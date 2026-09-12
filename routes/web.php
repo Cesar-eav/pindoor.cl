@@ -47,6 +47,7 @@ Route::get('/lang/{locale}', function (string $locale) {
 
 /* --- RUTAS PÚBLICAS (TURISTAS) --- */
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/sitemap-news.xml', [SitemapController::class, 'news'])->name('sitemap.news');
 Route::get('/offline', fn() => view('offline'))->name('offline');
 
 // En la app nativa (WebView carga desde 127.x.x.x en puerto no estándar) redirige via JS al sitio real
