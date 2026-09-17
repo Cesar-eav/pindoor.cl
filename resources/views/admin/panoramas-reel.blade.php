@@ -161,29 +161,35 @@
                         {{-- La 2ª vuelta solo existe para el loop sin cortes; si "repetir" está
                              desactivado se oculta y el scroll se detiene tras el único pase real. --}}
                         <div x-show="{{ $vuelta === 0 ? 'true' : 'repetir' }}"
-                             :class="orientation === 'horizontal' ? 'w-56 h-80' : 'aspect-4/5 h-[60dvh] max-h-130 w-auto'"
-                             class="relative shrink-0 rounded-3xl overflow-hidden shadow-2xl border border-white/10">
-                            @if($panorama->imagen)
-                                <img src="{{ asset('storage/' . $panorama->imagen) }}" alt="{{ $panorama->titulo }}"
-                                     class="absolute inset-0 w-full h-full object-cover">
-                            @else
-                                <div class="absolute inset-0 bg-gradient-to-br from-[#fc5648]/40 to-gray-900 flex items-center justify-center text-6xl">
-                                    {{ $catInfo['emoji'] }}
-                                </div>
-                            @endif
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-black/10"></div>
+                             :class="orientation === 'horizontal' ? 'w-56 h-96' : 'aspect-4/5 h-[68dvh] max-h-150 w-auto'"
+                             class="flex flex-col shrink-0 rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-black">
+                            <div class="relative flex-1 min-h-0">
+                                @if($panorama->imagen)
+                                    <img src="{{ asset('storage/' . $panorama->imagen) }}" alt="{{ $panorama->titulo }}"
+                                         class="absolute inset-0 w-full h-full object-cover">
+                                @else
+                                    <div class="absolute inset-0 bg-linear-to-br from-[#fc5648]/40 to-gray-900 flex items-center justify-center text-6xl">
+                                        {{ $catInfo['emoji'] }}
+                                    </div>
+                                @endif
+                                <div class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-black/10"></div>
 
-                            @if($panorama->es_gratuito)
-                            <span class="absolute top-3 left-3 text-[10px] font-black uppercase bg-[#fc5648] text-white px-2.5 py-1 rounded-full">🎟️ Gratis</span>
-                            @endif
+                                @if($panorama->es_gratuito)
+                                <span class="absolute top-3 left-3 text-[10px] font-black uppercase bg-[#fc5648] text-white px-2.5 py-1 rounded-full">🎟️ Gratis</span>
+                                @endif
 
-                            <div class="absolute inset-x-0 bottom-0 p-4">
-                                <span class="text-[10px] font-black uppercase bg-white/15 px-2 py-0.5 rounded-full">{{ $catInfo['emoji'] }} {{ $catInfo['label'] }}</span>
-                                <h3 class="text-lg font-extrabold leading-snug mt-2 line-clamp-3">{{ $panorama->titulo }}</h3>
+                                <span class="absolute bottom-3 left-3 text-[10px] font-black uppercase bg-white/15 px-2 py-0.5 rounded-full">{{ $catInfo['emoji'] }} {{ $catInfo['label'] }}</span>
+                            </div>
+
+                            <div class="shrink-0 p-4">
+                                <h3 class="text-lg font-extrabold leading-snug line-clamp-2">{{ $panorama->titulo }}</h3>
                                 <p class="text-sm font-bold text-[#ff8a80] mt-1.5">
                                     {{ $panorama->fecha->locale('es')->isoFormat('dddd D MMM') }}
                                     @if($panorama->hora) · {{ $panorama->hora }}@endif
                                 </p>
+                                @if($panorama->ubicacion)
+                                <p class="text-xs font-semibold text-white/50 mt-1 line-clamp-1">📍 {{ $panorama->ubicacion }}</p>
+                                @endif
                             </div>
                         </div>
                         @endforeach
