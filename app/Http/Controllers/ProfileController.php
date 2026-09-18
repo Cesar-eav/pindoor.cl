@@ -42,9 +42,13 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
+        // Usuarios creados solo por Google OAuth no tienen password (SocialiteController) —
+        // no se les puede pedir current_password porque nunca lo definieron.
+        if ($request->user()->password) {
+            $request->validateWithBag('userDeletion', [
+                'password' => ['required', 'current_password'],
+            ]);
+        }
 
         $user = $request->user();
 
