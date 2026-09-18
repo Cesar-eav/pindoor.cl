@@ -35,7 +35,7 @@
             <ul class="list-disc pl-5 space-y-2">
                 <li><strong>Datos de registro:</strong> si creas una cuenta (como negocio, artista o usando tu cuenta de Google), guardamos tu nombre y correo electrónico.</li>
                 <li><strong>Formularios de contacto:</strong> si nos escribes o postulas tu negocio, recopilamos el nombre, correo, teléfono y mensaje que nos entregas voluntariamente.</li>
-                <li><strong>Ubicación aproximada:</strong> si usas la función "cerca de ti", tu navegador comparte tu ubicación con nuestro servidor solo para ordenar los resultados por distancia en el momento — no la almacenamos ni la asociamos a tu cuenta.</li>
+                <li><strong>Ubicación precisa:</strong> si usas la función "cerca de ti" o el mapa, tu navegador comparte tu ubicación GPS con nuestro servidor solo para ordenar resultados por distancia o mostrar tu posición en el mapa en el momento — no la almacenamos ni la asociamos a tu cuenta.</li>
                 <li><strong>Fotos:</strong> si administras un negocio en Pindoor, las imágenes que subas (logo, galería, carta) se guardan para mostrarlas públicamente en tu ficha.</li>
                 <li><strong>Datos de uso y analítica:</strong> usamos Microsoft Clarity y Google Tag Manager para entender cómo se usa el sitio (páginas visitadas, interacciones). Puedes optar por no participar — ver sección 4.</li>
             </ul>
