@@ -176,6 +176,14 @@ GET  /admin/stats               admin.stats
 
 ### Compilar APK
 
+Si cambió algo del lado Laravel (PHP, `.env`, `config/`, Blade, rutas), usar `native:package` — es el único que regenera `nativephp/android/app/src/main/assets/laravel_bundle.zip` con el contenido actual (aplica `cleanup_env_keys`/`cleanup_exclude_files` de `config/nativephp.php`) y ya incluye el equivalente a `clean`:
+
+```bash
+cd /var/www/html/pindoor && npm run build && JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 php artisan native:package android
+```
+
+Si **solo** cambió código nativo Android/Kotlin (nada de Laravel), se puede usar el build directo de Gradle, que reempaqueta el bundle ya existente (puede estar desactualizado):
+
 ```bash
 cd /var/www/html/pindoor/nativephp/android && JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ./gradlew clean assembleRelease
 ```
@@ -185,4 +193,4 @@ El APK firmado queda en:
 nativephp/android/app/build/outputs/apk/release/app-release.apk
 ```
 
-> **Importante:** Usar siempre `clean` antes de `assembleRelease`. Sin él el APK puede no funcionar correctamente.
+> **Importante:** Usar siempre `clean` antes de `assembleRelease`. Sin él el APK puede no funcionar correctamente. El comando `gradlew` manual **no** regenera el bundle de Laravel — si hay cambios de PHP/`.env`/config pendientes, usar `native:package`.

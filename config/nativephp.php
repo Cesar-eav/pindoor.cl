@@ -170,6 +170,12 @@ return [
         'GOOGLE_CLIENT_ID',
         'GOOGLE_CLIENT_SECRET',
         'MAILGUN_*',
+        'TELEGRAM_*',
+        'DEEPL_*',
+        'FLOW_*',
+        'PASSLINE_*',
+        'ANDROID_KEYSTORE_*',
+        'ANDROID_KEY_*',
     ],
 
     /*
@@ -195,6 +201,9 @@ return [
         '.git',
         'tests',
         'nativephp/ios',
+        '*.sql',
+        '.claude',
+        'docs',
     ],
 
     /*
