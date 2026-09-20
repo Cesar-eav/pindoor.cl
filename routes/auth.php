@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 // Google OAuth
 Route::get('auth/google', [SocialiteController::class, 'redirect'])->name('auth.google');
 Route::get('auth/google/callback', [SocialiteController::class, 'callback'])->name('auth.google.callback');
+Route::get('auth/google/exchange', [SocialiteController::class, 'exchange'])->middleware('throttle:10,1')->name('auth.google.exchange');
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])

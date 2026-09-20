@@ -10,7 +10,9 @@ use App\Notifications\AdminNewArtistaNotification;
 use App\Notifications\AdminNewOperadorNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialiteController extends Controller
@@ -22,6 +24,11 @@ class SocialiteController extends Controller
 
         if ($request->filled('reclamo_token')) {
             session(['reclamo_token' => $request->query('reclamo_token')]);
+        }
+
+        $challenge = $request->query('challenge');
+        if ($request->boolean('app') && is_string($challenge) && preg_match('/^[a-f0-9]{64}$/', $challenge)) {
+            session(['google_app_challenge' => $challenge]);
         }
 
         return Socialite::driver('google')->redirect();
@@ -67,9 +74,53 @@ class SocialiteController extends Controller
             }
         }
 
+        $reclamoToken = session()->pull('reclamo_token');
+
+        // Google bloquea OAuth dentro del WebView, así que la app lo hace en un Custom Tab (otro cookie jar)
+        // y la sesión se transfiere al WebView con un token de un solo uso.
+        if ($challenge = session()->pull('google_app_challenge')) {
+            $token = Str::random(64);
+            Cache::put("google_app_login:{$token}", [
+                'user_id'       => $user->id,
+                'challenge'     => $challenge,
+                'reclamo_token' => $reclamoToken,
+            ], now()->addSeconds(120));
+
+            return response()->view('auth.google-app-return', [
+                'url' => 'pindoor://auth/google/exchange?t=' . $token,
+            ]);
+        }
+
         Auth::login($user, remember: true);
 
-        $reclamoToken = session()->pull('reclamo_token');
+        return $this->redirectAfterLogin($user, $reclamoToken);
+    }
+
+    public function exchange(Request $request)
+    {
+        $token    = (string) $request->query('t');
+        $verifier = (string) $request->query('v');
+
+        $payload = preg_match('/^[A-Za-z0-9]{64}$/', $token)
+            ? Cache::pull("google_app_login:{$token}")
+            : null;
+
+        if (! $payload || ! hash_equals($payload['challenge'], hash('sha256', $verifier))) {
+            return redirect()->route('login')->withErrors(['email' => 'No se pudo completar el inicio de sesión con Google. Intenta de nuevo.']);
+        }
+
+        $user = User::find($payload['user_id']);
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        Auth::login($user, remember: true);
+
+        return $this->redirectAfterLogin($user, $payload['reclamo_token']);
+    }
+
+    private function redirectAfterLogin(User $user, ?string $reclamoToken)
+    {
         if ($reclamoToken) {
             $reclamo = ReclamoNegocio::where('activation_token', $reclamoToken)->first();
 
