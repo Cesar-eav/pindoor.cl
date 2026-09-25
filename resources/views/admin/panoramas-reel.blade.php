@@ -161,7 +161,7 @@
                         {{-- La 2ª vuelta solo existe para el loop sin cortes; si "repetir" está
                              desactivado se oculta y el scroll se detiene tras el único pase real. --}}
                         <div x-show="{{ $vuelta === 0 ? 'true' : 'repetir' }}"
-                             :class="orientation === 'horizontal' ? 'w-56 h-96' : 'aspect-4/5 h-[68dvh] max-h-150 w-auto'"
+                             :class="orientation === 'horizontal' ? 'w-56 h-96' : 'aspect-4/5 h-[min(68dvh,calc((100vw-2rem)*1.25))] max-h-150 w-auto'"
                              class="flex flex-col shrink-0 rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-black">
                             <div class="relative flex-1 min-h-0">
                                 @if($panorama->imagen)
