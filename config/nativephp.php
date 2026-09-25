@@ -244,6 +244,8 @@ return [
         |
         */
 
+        'min_sdk' => env('NATIVEPHP_ANDROID_MIN_SDK', 26),
+
         /*
         |--------------------------------------------------------------------------
         | Status Bar Style
