@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ActividadCliente;
 use App\Models\Categoria;
-use App\Models\Compartido;
 use App\Models\Configuracion;
-use App\Models\EventoFicha;
 use App\Models\ImagenPunto;
 use App\Models\ModuloDato;
 use App\Models\PuntoInteres;
@@ -507,67 +505,7 @@ class ClienteController extends Controller
         $this->autorizarPunto($punto);
         abort_unless($punto->moduloActivo('estadisticas'), 404);
 
-        $eventosPorTipo = EventoFicha::where('punto_interes_id', $punto->id)
-            ->selectRaw('tipo, count(*) as total')
-            ->groupBy('tipo')
-            ->pluck('total', 'tipo');
-
-        $totales = [
-            'visitas'      => (int) ($eventosPorTipo['visita'] ?? 0),
-            'como_llegar'  => (int) ($eventosPorTipo['como_llegar'] ?? 0),
-            'whatsapp'     => (int) ($eventosPorTipo['whatsapp'] ?? 0),
-            'compartidos'  => Compartido::where('punto_interes_id', $punto->id)->count(),
-        ];
-
-        $porCanal = Compartido::where('punto_interes_id', $punto->id)
-            ->selectRaw('canal, count(*) as total')
-            ->groupBy('canal')
-            ->pluck('total', 'canal');
-
-        $visitasQuery = EventoFicha::where('punto_interes_id', $punto->id)->where('tipo', 'visita');
-        $visitasHoy    = (clone $visitasQuery)->whereDate('created_at', today())->count();
-        $visitasSemana = (clone $visitasQuery)->where('created_at', '>=', now()->startOfWeek())->count();
-        $visitasMes    = (clone $visitasQuery)->where('created_at', '>=', now()->startOfMonth())->count();
-
-        // Serie diaria de últimos 30 días para el gráfico de tendencia.
-        $desde = now()->subDays(29)->startOfDay();
-
-        $eventosPorDiaTipo = EventoFicha::where('punto_interes_id', $punto->id)
-            ->where('created_at', '>=', $desde)
-            ->selectRaw('DATE(created_at) as fecha, tipo, count(*) as total')
-            ->groupBy('fecha', 'tipo')
-            ->get()
-            ->groupBy('fecha');
-
-        $compartidosPorDia = Compartido::where('punto_interes_id', $punto->id)
-            ->where('created_at', '>=', $desde)
-            ->selectRaw('DATE(created_at) as fecha, count(*) as total')
-            ->groupBy('fecha')
-            ->pluck('total', 'fecha');
-
-        $dias = collect();
-        for ($d = $desde->copy(); $d->lte(now()); $d->addDay()) {
-            $key       = $d->format('Y-m-d');
-            $porTipo   = ($eventosPorDiaTipo->get($key) ?? collect())->pluck('total', 'tipo');
-
-            $dias->push([
-                'fecha'       => $d->format('d/m'),
-                'visitas'     => (int) ($porTipo['visita'] ?? 0),
-                'como_llegar' => (int) ($porTipo['como_llegar'] ?? 0),
-                'whatsapp'    => (int) ($porTipo['whatsapp'] ?? 0),
-                'compartidos' => (int) ($compartidosPorDia[$key] ?? 0),
-            ]);
-        }
-
-        return view('cliente.estadisticas', [
-            'punto'          => $punto,
-            'totales'        => $totales,
-            'porCanal'       => $porCanal,
-            'visitasHoy'     => $visitasHoy,
-            'visitasSemana'  => $visitasSemana,
-            'visitasMes'     => $visitasMes,
-            'dias'           => $dias,
-        ]);
+        return view('cliente.estadisticas', ['punto' => $punto] + $punto->estadisticasResumen());
     }
 
     // ─── Actualizaciones rápidas ───────────────────────────────────────────────

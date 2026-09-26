@@ -304,6 +304,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/puntos/{punto}/modulos', [AdminController::class, 'editarModulos'])->name('clientes.modulos.form');
     Route::put('/puntos/{punto}/modulos', [AdminController::class, 'actualizarModulos'])->name('clientes.modulos');
     Route::get('/puntos/{punto}/actividad', [AdminController::class, 'actividadCliente'])->name('clientes.actividad');
+    Route::get('/puntos/{punto}/estadisticas', [AdminController::class, 'estadisticasCliente'])->name('clientes.estadisticas');
 
     // Reclamos de perfil
     Route::get('/reclamos', [ReclamoController::class, 'index'])->name('reclamos.index');

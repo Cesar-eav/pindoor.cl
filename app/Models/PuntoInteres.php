@@ -332,6 +332,67 @@ class PuntoInteres extends Model
     }
 
     /**
+     * Resumen de estadísticas de visitas, clics y compartidos de la ficha pública.
+     * Usado tanto por el panel cliente (dueño del negocio) como por el panel admin.
+     */
+    public function estadisticasResumen(): array
+    {
+        $eventosPorTipo = EventoFicha::where('punto_interes_id', $this->id)
+            ->selectRaw('tipo, count(*) as total')
+            ->groupBy('tipo')
+            ->pluck('total', 'tipo');
+
+        $totales = [
+            'visitas'      => (int) ($eventosPorTipo['visita'] ?? 0),
+            'como_llegar'  => (int) ($eventosPorTipo['como_llegar'] ?? 0),
+            'whatsapp'     => (int) ($eventosPorTipo['whatsapp'] ?? 0),
+            'compartidos'  => Compartido::where('punto_interes_id', $this->id)->count(),
+        ];
+
+        $porCanal = Compartido::where('punto_interes_id', $this->id)
+            ->selectRaw('canal, count(*) as total')
+            ->groupBy('canal')
+            ->pluck('total', 'canal');
+
+        $visitasQuery = EventoFicha::where('punto_interes_id', $this->id)->where('tipo', 'visita');
+        $visitasHoy    = (clone $visitasQuery)->whereDate('created_at', today())->count();
+        $visitasSemana = (clone $visitasQuery)->where('created_at', '>=', now()->startOfWeek())->count();
+        $visitasMes    = (clone $visitasQuery)->where('created_at', '>=', now()->startOfMonth())->count();
+
+        // Serie diaria de últimos 30 días para el gráfico de tendencia.
+        $desde = now()->subDays(29)->startOfDay();
+
+        $eventosPorDiaTipo = EventoFicha::where('punto_interes_id', $this->id)
+            ->where('created_at', '>=', $desde)
+            ->selectRaw('DATE(created_at) as fecha, tipo, count(*) as total')
+            ->groupBy('fecha', 'tipo')
+            ->get()
+            ->groupBy('fecha');
+
+        $compartidosPorDia = Compartido::where('punto_interes_id', $this->id)
+            ->where('created_at', '>=', $desde)
+            ->selectRaw('DATE(created_at) as fecha, count(*) as total')
+            ->groupBy('fecha')
+            ->pluck('total', 'fecha');
+
+        $dias = collect();
+        for ($d = $desde->copy(); $d->lte(now()); $d->addDay()) {
+            $key       = $d->format('Y-m-d');
+            $porTipo   = ($eventosPorDiaTipo->get($key) ?? collect())->pluck('total', 'tipo');
+
+            $dias->push([
+                'fecha'       => $d->format('d/m'),
+                'visitas'     => (int) ($porTipo['visita'] ?? 0),
+                'como_llegar' => (int) ($porTipo['como_llegar'] ?? 0),
+                'whatsapp'    => (int) ($porTipo['whatsapp'] ?? 0),
+                'compartidos' => (int) ($compartidosPorDia[$key] ?? 0),
+            ]);
+        }
+
+        return compact('totales', 'porCanal', 'visitasHoy', 'visitasSemana', 'visitasMes', 'dias');
+    }
+
+    /**
      * Devuelve el array 'datos' del módulo singleton indicado.
      * Si la relación ya está cargada no hace consulta extra.
      */

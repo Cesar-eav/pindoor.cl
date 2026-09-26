@@ -206,6 +206,10 @@
                                                class="text-xs text-blue-500 hover:text-blue-700 font-medium">
                                                 Actividad
                                             </a>
+                                            <a href="{{ route('admin.clientes.estadisticas', $punto) }}"
+                                               class="text-xs text-emerald-600 hover:text-emerald-800 font-medium">
+                                                Estadísticas
+                                            </a>
                                             <a href="{{ route('admin.clientes.modulos.form', $punto) }}"
                                                class="text-xs text-indigo-500 hover:text-indigo-700 font-medium">
                                                 Módulos

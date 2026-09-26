@@ -507,6 +507,11 @@ class AdminController extends Controller
         return view('admin.clientes-modulos', compact('punto', 'catalogo'));
     }
 
+    public function estadisticasCliente(PuntoInteres $punto)
+    {
+        return view('admin.clientes.estadisticas', ['punto' => $punto] + $punto->estadisticasResumen());
+    }
+
     public function actualizarModulos(Request $request, PuntoInteres $punto)
     {
         $validos = array_keys(PuntoInteres::modulosDisponibles($punto->categoria_id));
