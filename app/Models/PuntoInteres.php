@@ -193,6 +193,7 @@ class PuntoInteres extends Model
             'avisos'         => ['label' => 'Avisos',                  'emoji' => '📢', 'desc' => 'Comunicados y avisos importantes',           'grupo' => 'Transversal'],
             'promociones'    => ['label' => 'Promociones',             'emoji' => '🎁', 'desc' => 'Descuentos y promociones especiales',        'grupo' => 'Transversal'],
             'agenda'         => ['label' => 'Agenda cultural',         'emoji' => '📅', 'desc' => 'Programación de eventos y espectáculos',     'grupo' => 'Transversal'],
+            'estadisticas'   => ['label' => 'Estadísticas',            'emoji' => '📊', 'desc' => 'Visitas, cómo llegar, WhatsApp y compartidos de tu ficha', 'grupo' => 'Transversal'],
             // Gastronomía — restaurantes, cafeterías, bares
             'menu_del_dia'   => ['label' => 'Menú del día',            'emoji' => '🥘', 'desc' => 'Menú de almuerzo o cena del día',            'grupo' => 'Gastronomía'],
             'carta'          => ['label' => 'Carta / Menú permanente', 'emoji' => '🍽️', 'desc' => 'Carta completa del local',                   'grupo' => 'Gastronomía'],

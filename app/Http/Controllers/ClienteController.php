@@ -505,6 +505,7 @@ class ClienteController extends Controller
     public function estadisticas(PuntoInteres $punto)
     {
         $this->autorizarPunto($punto);
+        abort_unless($punto->moduloActivo('estadisticas'), 404);
 
         $eventosPorTipo = EventoFicha::where('punto_interes_id', $punto->id)
             ->selectRaw('tipo, count(*) as total')

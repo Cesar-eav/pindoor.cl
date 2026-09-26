@@ -136,12 +136,14 @@
         </div>
         @endif
 
+        @if(in_array('estadisticas', $modulos))
         <div>
             <p class="sidebar-group-label" style="color: rgba(255,255,255,0.35)">Tu negocio</p>
             <div class="space-y-0.5">
                 <a href="{{ route('cliente.estadisticas', $punto) }}" class="sidebar-link {{ request()->routeIs('cliente.estadisticas') ? 'active' : '' }}">📊 Estadísticas</a>
             </div>
         </div>
+        @endif
 
         @if($tieneRecomienda)
         <div>
