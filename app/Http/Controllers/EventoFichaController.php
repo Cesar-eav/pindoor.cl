@@ -24,7 +24,10 @@ class EventoFichaController extends Controller
             return response()->json(['ok' => true]);
         }
 
-        $punto = PuntoInteres::publico()->where('slug', $data['slug'])->first();
+        // visibleFicha() deja pasar los puntos de ejemplo/demo mientras dure la sesión de
+        // /registro — así se puede probar el tracking completo en clientes de prueba antes
+        // de habilitarlo para clientes reales. Fuera de esa sesión se comporta igual que publico().
+        $punto = PuntoInteres::visibleFicha()->where('slug', $data['slug'])->first();
 
         if (!$punto) {
             return response()->json(['ok' => true]);
