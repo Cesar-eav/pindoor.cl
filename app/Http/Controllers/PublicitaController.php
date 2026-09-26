@@ -17,10 +17,6 @@ class PublicitaController extends Controller
         ->where('eliminado', false)
         ->get();
 
-        // Permite ver la ficha directa de estos puntos de ejemplo solo durante esta sesión,
-        // habiendo pasado por /registro — en cualquier otro lugar público siguen excluidos.
-        session(['demo_ficha_ok' => true]);
-
         return view('publicita.index', compact('atractivos'));
     }
 

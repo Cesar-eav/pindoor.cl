@@ -109,19 +109,15 @@ class PuntoInteres extends Model
     }
 
     /**
-     * Igual que scopePublico(), pero deja pasar los puntos de ejemplo/demo si la sesión
-     * viene de /contacto o /registro (ContactoController y PublicitaController marcan la
-     * sesión al cargar esas páginas). Solo la ficha directa (PuntoInteresController::show)
-     * usa esto — mapa, sitemap, listados y búsqueda deben seguir usando scopePublico() sin
-     * excepción.
+     * Igual que scopePublico(), pero deja pasar los puntos de ejemplo/demo por link directo
+     * (para que un prospecto pueda abrir su ficha de ejemplo sin pasar antes por /registro).
+     * Solo la ficha directa (PuntoInteresController::show) y el tracking de eventos
+     * (EventoFichaController::store) usan esto — mapa, sitemap, listados y búsqueda deben
+     * seguir usando scopePublico() para que los puntos demo no aparezcan ahí.
      */
     public function scopeVisibleFicha($query)
     {
-        if (session('demo_ficha_ok')) {
-            return $query->where('activo', true)->where('eliminado', false);
-        }
-
-        return $query->publico();
+        return $query->where('activo', true)->where('eliminado', false);
     }
 
     /**
