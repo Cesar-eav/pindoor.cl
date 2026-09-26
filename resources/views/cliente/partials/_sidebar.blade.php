@@ -136,6 +136,13 @@
         </div>
         @endif
 
+        <div>
+            <p class="sidebar-group-label" style="color: rgba(255,255,255,0.35)">Tu negocio</p>
+            <div class="space-y-0.5">
+                <a href="{{ route('cliente.estadisticas', $punto) }}" class="sidebar-link {{ request()->routeIs('cliente.estadisticas') ? 'active' : '' }}">📊 Estadísticas</a>
+            </div>
+        </div>
+
         @if($tieneRecomienda)
         <div>
             <p class="sidebar-group-label" style="color: #a855f7">Pindoor Recomienda</p>

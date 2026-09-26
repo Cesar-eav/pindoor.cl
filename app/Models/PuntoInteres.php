@@ -54,6 +54,7 @@ class PuntoInteres extends Model
         'activo',
         'estado_aprobacion',
         'contacto_whatsapp',
+        'whatsapp_publico',
         'eliminado',
         'es_cliente',
         'modulos_habilitados',
@@ -299,6 +300,16 @@ class PuntoInteres extends Model
     public function actividades()
     {
         return $this->hasMany(ActividadCliente::class, 'punto_interes_id');
+    }
+
+    public function eventos()
+    {
+        return $this->hasMany(EventoFicha::class, 'punto_interes_id');
+    }
+
+    public function compartidos()
+    {
+        return $this->hasMany(Compartido::class, 'punto_interes_id');
     }
 
     /** Reseña publicada de Pindoor Recomienda asociada a este lugar, si existe. */

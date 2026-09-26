@@ -25,6 +25,7 @@ use App\Http\Controllers\RevivalController;
 use App\Http\Controllers\Admin\RutaController as AdminRutaController;
 use App\Http\Controllers\Admin\RevivalController as AdminRevivalController;
 use App\Http\Controllers\CompartidoController;
+use App\Http\Controllers\EventoFichaController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\Admin\PostController;
@@ -129,6 +130,7 @@ Route::get('/contacto', [ContactoController::class, 'index'])->name('contacto.in
 Route::post('/contacto', [ContactoController::class, 'store'])->name('contacto.store');
 
 Route::post('/compartir', [CompartidoController::class, 'store'])->name('compartir.store')->middleware('throttle:30,1');
+Route::post('/evento-ficha', [EventoFichaController::class, 'store'])->name('evento.ficha.store')->middleware('throttle:30,1');
 Route::post('/newsletter', [NewsletterController::class, 'store'])->name('newsletter.store')->middleware('throttle:10,1');
 
 // Registro artista
@@ -337,6 +339,7 @@ Route::middleware(['auth', 'verified', 'role:cliente'])->prefix('cliente')->name
     Route::get('/perfil/{punto}', [ClienteController::class, 'verPerfil'])->name('perfil.ver');           // detalle de uno
     Route::get('/perfil/{punto}/editar', [ClienteController::class, 'editarPerfil'])->name('perfil.editar');
     Route::put('/perfil/{punto}/actualizar', [ClienteController::class, 'actualizarPerfil'])->name('perfil.actualizar');
+    Route::get('/perfil/{punto}/estadisticas', [ClienteController::class, 'estadisticas'])->name('estadisticas');
 
     // Galería de imágenes
     Route::post('/imagenes/{punto}',             [ClienteController::class, 'subirImagen'])->name('imagenes.subir');

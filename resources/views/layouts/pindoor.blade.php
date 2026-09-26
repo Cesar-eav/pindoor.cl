@@ -330,20 +330,34 @@
 // Registro de uso de compartir/calendario (fire-and-forget, no bloquea la acción).
 // Global para poder llamarse tanto desde sharePanel() como desde links sueltos
 // (ej. "Agregar calendario") que no viven dentro de ese componente Alpine.
-function registrarCompartido(url, canal) {
+function registrarCompartido(url, canal, puntoId) {
     fetch('{{ route('compartir.store') }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
         },
-        body: JSON.stringify({ url, canal }),
+        body: JSON.stringify({ url, canal, punto_interes_id: puntoId || null }),
+    }).catch(() => {});
+}
+
+// Registro de visitas/clics en la ficha pública (fire-and-forget). Se llama desde el
+// navegador a propósito: así los bots de previsualización de enlaces (WhatsApp,
+// Facebook, Telegram...), que no ejecutan JS, no inflan las estadísticas del cliente.
+function registrarEvento(slug, tipo) {
+    fetch('{{ route('evento.ficha.store') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        body: JSON.stringify({ slug, tipo }),
     }).catch(() => {});
 }
 
 function sharePanel() {
     return {
-        open: false, copiado: false, text: '', image: '', url: '', file: null, fetchingFile: false,
+        open: false, copiado: false, text: '', image: '', url: '', puntoId: null, file: null, fetchingFile: false,
         // Al hacer click en el ícono: si el navegador soporta compartir nativo, lo dispara
         // directo (el sheet del sistema ya prioriza las apps más usadas por la persona).
         // Si no lo soporta (desktop), abre el panel de fallback (WhatsApp / Copiar enlace).
@@ -366,7 +380,7 @@ function sharePanel() {
             }
             this.fetchingFile = false;
         },
-        registrar(canal) { registrarCompartido(this.url, canal); },
+        registrar(canal) { registrarCompartido(this.url, canal, this.puntoId); },
         nativo() {
             this.open = false;
             const conArchivo = this.file && navigator.canShare && navigator.canShare({ files: [this.file] });

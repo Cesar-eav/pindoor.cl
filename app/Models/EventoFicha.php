@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Compartido extends Model
+class EventoFicha extends Model
 {
+    protected $table = 'eventos_ficha';
+
     protected $fillable = [
-        'url',
-        'canal',
         'punto_interes_id',
+        'tipo',
     ];
 
     public function puntoInteres()

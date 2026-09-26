@@ -148,6 +148,17 @@
                                               placeholder="https://instagram.com/minegocio" />
                             </div>
                             <div>
+                                <x-input-label for="whatsapp_publico" value="WhatsApp para que te contacten tus clientes (opcional)" />
+                                <x-text-input id="whatsapp_publico" name="whatsapp_publico" type="text" class="block mt-1 w-full"
+                                              value="{{ old('whatsapp_publico', $punto->whatsapp_publico) }}"
+                                              placeholder="+56 9 1234 5678" />
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Este número aparece en tu ficha pública para que los visitantes te escriban directo.
+                                    Es distinto del WhatsApp de contacto que diste al registrarte ({{ $punto->contacto_whatsapp ?: 'no configurado' }}),
+                                    ese solo lo usa el equipo de Pindoor para coordinar contigo.
+                                </p>
+                            </div>
+                            <div>
                                 <x-input-label for="tags" value="Etiquetas (separadas por coma)" />
                                 <x-text-input id="tags" name="tags" class="block mt-1 w-full"
                                               value="{{ old('tags', is_array($punto->tags) ? implode(', ', $punto->tags) : '') }}"

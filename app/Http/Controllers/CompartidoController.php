@@ -10,8 +10,9 @@ class CompartidoController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'url'   => 'required|string|max:500',
-            'canal' => 'required|string|in:whatsapp,nativo,copiar,calendario',
+            'url'              => 'required|string|max:500',
+            'canal'            => 'required|string|in:whatsapp,nativo,copiar,calendario',
+            'punto_interes_id' => 'nullable|exists:puntosinteres,id',
         ]);
 
         // Solo registra URLs del propio sitio — evita usar el endpoint para loguear basura externa.
