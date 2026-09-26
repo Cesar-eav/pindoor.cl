@@ -4,9 +4,13 @@ namespace App\Livewire;
 
 use App\Models\ActividadCliente;
 use App\Models\CategoriaEvento;
+use App\Models\Configuracion;
 use App\Models\ModuloItem;
 use App\Models\PuntoInteres;
+use App\Notifications\PanoramaClienteCreado;
 use App\Services\ImagenComprimida;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -128,7 +132,9 @@ class ClienteEventos extends Component
             $rutaImagen = ImagenComprimida::guardar($this->imagen, 'eventos');
         }
 
-        if ($this->editandoId) {
+        $editando = (bool) $this->editandoId;
+
+        if ($editando) {
             $item = ModuloItem::where('id', $this->editandoId)
                 ->where('punto_interes_id', $this->punto->id)
                 ->where('modulo', 'eventos')
@@ -158,11 +164,18 @@ class ClienteEventos extends Component
                 'cupo_maximo'      => $this->entradas_flow_activo ? $this->cupo_maximo : null,
             ]);
             ActividadCliente::registrar($this->punto, 'evento_creado', $this->titulo);
+
+            try {
+                Notification::route('telegram', Configuracion::telegramChatId())
+                    ->notify(new PanoramaClienteCreado($this->punto, $this->titulo, $this->fecha));
+            } catch (\Throwable $e) {
+                Log::warning('ClienteEventos::guardar — falló el aviso Telegram', ['error' => $e->getMessage()]);
+            }
         }
 
         $this->resetForm();
         $this->mostrarForm = false;
-        $this->mensaje     = $this->editandoId ? 'Evento actualizado.' : 'Evento guardado en la agenda.';
+        $this->mensaje     = $editando ? 'Evento actualizado.' : 'Evento guardado en la agenda.';
     }
 
     public function eliminar(int $id): void

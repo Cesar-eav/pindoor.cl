@@ -2,10 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Configuracion;
 use App\Models\Panorama;
+use App\Notifications\PanoramasImportados;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class ImportarPassline extends Command
 {
@@ -145,6 +149,15 @@ class ImportarPassline extends Command
             );
 
             $panorama->wasRecentlyCreated ? $creados++ : $actualizados++;
+        }
+
+        if (!$dryRun) {
+            try {
+                Notification::route('telegram', Configuracion::telegramChatId())
+                    ->notify(new PanoramasImportados('passline', $creados, $actualizados, $omitidos));
+            } catch (\Throwable $e) {
+                Log::warning('ImportarPassline — falló el aviso Telegram', ['error' => $e->getMessage()]);
+            }
         }
 
         $this->newLine();

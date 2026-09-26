@@ -7,15 +7,19 @@ use App\Models\ActividadCliente;
 use App\Models\Artista;
 use App\Models\Categoria;
 use App\Models\Compartido;
+use App\Models\Configuracion;
 use App\Models\LeadContacto;
 use App\Models\LoginCliente;
 use App\Models\Panorama;
 use App\Models\User;
+use App\Notifications\PanoramasImportados;
 use App\Services\ImagenComprimida;
 use App\Services\PortaldiscImporter;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 
 class AdminController extends Controller
@@ -738,6 +742,13 @@ class AdminController extends Controller
             $panorama->wasRecentlyCreated ? ($creados[] = $item) : ($actualizados[] = $item);
         }
 
+        try {
+            Notification::route('telegram', Configuracion::telegramChatId())
+                ->notify(new PanoramasImportados('passline', count($creados), count($actualizados), count($omitidos)));
+        } catch (\Throwable $e) {
+            Log::warning('AdminController::passlineImportar — falló el aviso Telegram', ['error' => $e->getMessage()]);
+        }
+
         return response()->json([
             'creados'      => $creados,
             'actualizados' => $actualizados,
@@ -799,6 +810,20 @@ class AdminController extends Controller
 
     public function portaldiscImportar(PortaldiscImporter $importer)
     {
-        return response()->json($importer->importar());
+        $resultado = $importer->importar();
+
+        try {
+            Notification::route('telegram', Configuracion::telegramChatId())
+                ->notify(new PanoramasImportados(
+                    'portaldisc',
+                    count($resultado['creados']),
+                    count($resultado['actualizados']),
+                    count($resultado['omitidos'])
+                ));
+        } catch (\Throwable $e) {
+            Log::warning('AdminController::portaldiscImportar — falló el aviso Telegram', ['error' => $e->getMessage()]);
+        }
+
+        return response()->json($resultado);
     }
 }
