@@ -248,6 +248,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     // Compartidos (estadística del botón compartir)
     Route::get('/compartidos', [\App\Http\Controllers\Admin\CompartidosController::class, 'index'])->name('compartidos.index');
 
+    // Estadísticas globales de fichas (visitas, cómo llegar, whatsapp, compartidos — clientes y atractivos)
+    Route::get('/estadisticas-fichas', [\App\Http\Controllers\Admin\EstadisticasFichasController::class, 'index'])->name('estadisticas-fichas.index');
+
     // Boletín de panoramas
     Route::get('/newsletter', [\App\Http\Controllers\Admin\NewsletterController::class, 'index'])->name('newsletter.index');
     Route::delete('/newsletter/{suscriptor}', [\App\Http\Controllers\Admin\NewsletterController::class, 'destroy'])->name('newsletter.destroy');

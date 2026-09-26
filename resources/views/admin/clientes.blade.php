@@ -4,10 +4,16 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Gestión de Clientes (Negocios)
             </h2>
-            <a href="{{ route('admin.clientes.dashboard') }}"
-               class="inline-flex items-center gap-2 bg-[#fc5648] text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-[#d94439] transition">
-                📊 Ver dashboard
-            </a>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('admin.clientes.dashboard') }}"
+                   class="inline-flex items-center gap-2 bg-[#fc5648] text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-[#d94439] transition">
+                    📊 Ver dashboard
+                </a>
+                <a href="{{ route('admin.estadisticas-fichas.index') }}"
+                   class="inline-flex items-center gap-2 bg-[#2a78d6] text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-[#1e5ba8] transition">
+                    📈 Estadísticas de fichas
+                </a>
+            </div>
         </div>
     </x-slot>
 
